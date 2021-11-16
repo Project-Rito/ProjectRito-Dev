@@ -1,0 +1,14 @@
+﻿# Comments use # and will be ignored.
+# Label    - Translated Text
+
+SHOW_VISIBLE_ACTORS - Show Visible Actors
+SHOW_INVISIBLE_ACTORS - Show Invisible Actors
+SHOW_MAP_MODEL - Show Map Model
+SHOW_ACTOR_LINKS - Show Actor Links
+
+OBJ - Obj
+SOURCE_LINKS - Source Links
+DEST_LINKS - Dest Links
+
+OBJECTS - Objects
+RAIL_PATHS - Rail Paths

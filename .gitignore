@@ -1,0 +1,13 @@
+CafeLibrary/obj
+CafeLibrary/bin
+GLFrameworkEngine/obj
+GLFrameworkEngine/bin
+MapStudio/obj
+MapStudio/bin
+MapStudio.UI/obj
+MapStudio.UI/bin
+Plugins/UKingLibrary/obj
+Plugins/UKingLibrary/bin
+Toolbox.Core/obj
+Toolbox.Core/bin
+.vs
