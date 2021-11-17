@@ -40,9 +40,9 @@ namespace GLFrameworkEngine
         public void OnMouseMove(GLContext context, MouseEventInfo e)
         {
             //During selection mode, the user can freely create a box during a mouse down/move
-            if (IsSelectionMode && previouseMouseDown != Vector2.Zero && SelectionBox == null) {
+            if (IsSelectionMode && previousMouseDown != Vector2.Zero && SelectionBox == null) {
                 //Check for the mouse to actually move to create a selection box
-                var delta = previouseMouseDown - new Vector2(e.X, e.Y);
+                var delta = previousMouseDown - new Vector2(e.X, e.Y);
                 if (delta != Vector2.Zero)
                 {
                     SelectionBox = new SelectionBox();
@@ -58,12 +58,12 @@ namespace GLFrameworkEngine
                 SelectionCircle?.Apply(context, e.X, e.Y, false);
         }
 
-        private Vector2 previouseMouseDown;
+        private Vector2 previousMouseDown;
 
         public void OnMouseDown(GLContext context, MouseEventInfo e)
         {
             if (IsSelectionMode && e.LeftButton == OpenTK.Input.ButtonState.Pressed)
-                previouseMouseDown = new Vector2(e.X, e.Y);
+                previousMouseDown = new Vector2(e.X, e.Y);
 
             //Start deselection
             if (e.MiddleButton == OpenTK.Input.ButtonState.Pressed)
@@ -82,7 +82,7 @@ namespace GLFrameworkEngine
 
         public void OnMouseUp(GLContext context, MouseEventInfo e)
         {
-            previouseMouseDown = new Vector2(0, 0);
+            previousMouseDown = new Vector2(0, 0);
 
             //Apply then disable selection tools
             if (e.LeftButton == OpenTK.Input.ButtonState.Released)

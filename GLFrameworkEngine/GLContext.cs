@@ -256,7 +256,7 @@ namespace GLFrameworkEngine
             if (TransformTools.ActiveActions.Count > 0)
                 transformState = TransformTools.OnMouseMove(this, mouseInfo);
 
-            if (mouseDown)
+            if (mouseDown && mouseInfo.RightButton == ButtonState.Pressed)
             {
                 if (_firstClick)
                     _refPos = new OpenTK.Vector2(mouseInfo.FullPosition.X, mouseInfo.FullPosition.Y);

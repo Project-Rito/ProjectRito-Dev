@@ -16,7 +16,7 @@ namespace GLFrameworkEngine
         public int X => Position.X;
         public int Y => Position.Y;
 
-        public System.Drawing.Point Position { get; } // Setting does not affect OS mouse position because of some scaling differences between ImGui and OpenTK. Use FullPosition instead.
+        public System.Drawing.Point Position { get; set; } // Setting does not affect OS mouse position because of some scaling differences between ImGui and OpenTK. Use FullPosition instead.
 
         public System.Drawing.Point FullPosition { get; set; }
 

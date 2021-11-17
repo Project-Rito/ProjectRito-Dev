@@ -111,7 +111,7 @@ namespace UKingLibrary
 
             ProcessLoading.Instance.Update(70, 100, "Loading map objs");
 
-            foreach (var obj in     mubinRoot["Objs"])
+            foreach (var obj in     mubinRoot["Objs"]) // Your spacebar broken
             {
                 var mapObj = (IDictionary<string, dynamic>)obj;
                 if (mapObj.ContainsKey("UnitConfigName"))
@@ -191,6 +191,8 @@ namespace UKingLibrary
             //Load all the outliner nodes into the editor
             foreach (var node in nodeFolders.OrderBy(x => x.Key))
                 ObjectFolder.AddChild(node.Value);
+
+            // Todo - set camera position to map pos
 
             ProcessLoading.Instance.Update(100, 100, "Finished!");
         }

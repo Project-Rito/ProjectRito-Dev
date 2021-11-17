@@ -76,7 +76,7 @@ namespace MapStudio.UI
             pos = new System.Numerics.Vector2(pos.X - windowPos.X, pos.Y - windowPos.Y);
 
             if (ImGui.IsMousePosValid())
-                mouseInfo.FullPosition = new System.Drawing.Point((int)pos.X, (int)pos.Y);
+                mouseInfo.Position = new System.Drawing.Point((int)pos.X, (int)pos.Y);
             else
                 mouseInfo.HasValue = false;
 
