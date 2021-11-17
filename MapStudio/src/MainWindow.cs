@@ -536,7 +536,7 @@ namespace MapStudio
                     //Docked windows
                     if (Workspace.ActiveWorkspace != null) {
                         foreach (var window in Workspace.ActiveWorkspace.DockedWindows) {
-                            if (ImGui.MenuItem(window.Name, "", window.Opened)) {
+                            if (ImGui.MenuItem(TranslationSource.GetText(window.Name), "", window.Opened)) {
                                 window.Opened = window.Opened ? false : true;
                             }
                         }
