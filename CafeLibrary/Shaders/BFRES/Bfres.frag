@@ -61,6 +61,7 @@ layout(std140) uniform ub_MaterialParams {
 
 //Samplers
 uniform sampler2D u_TextureAlbedo0;   // _a0
+uniform sampler2D u_TextureAlpha;     // _ms0
 uniform sampler2D u_TextureSpecMask;  // _s0
 uniform sampler2D u_TextureNormal0;   // _n0
 uniform sampler2D u_TextureNormal1;   // _n1
@@ -72,6 +73,7 @@ uniform sampler2D u_TextureMultiB;    // _a2
 uniform sampler2D u_TextureIndirect;  // _a3
 
 #define enable_diffuse
+#define enable_alpha_map;
 #define enable_diffuse2
 #define enable_albedo
 #define enable_emission
@@ -91,6 +93,7 @@ uniform float alphaRefValue;
 
 //Toggles
 uniform int hasDiffuseMap;
+uniform int hasAlphaMap;
 
 //GL
 uniform mat4 mtxCam;
@@ -135,6 +138,12 @@ void main(){
     //Alpha test
     if (alphaTest)
     {
+        if (hasAlphaMap == 1) {
+            vec4 alphaMapColor = vec4(1);
+            alphaMapColor = texture(u_TextureAlpha, texCoord0);
+            fragOutput.a = alphaMapColor.r;
+        }
+
         switch (alphaFunc)
         {
             case 0: //gequal
