@@ -339,6 +339,9 @@ namespace CafeLibrary.Rendering
             GL.ActiveTexture(TextureUnit.Texture0 + 1);
             GL.BindTexture(TextureTarget.Texture2D, RenderTools.defaultTex.ID);
 
+            shader.SetBoolToInt("hasDiffuseMap", false);
+            shader.SetBoolToInt("hasAlphaMap", false);
+
             int id = 1;
             for (int i = 0; i < this.TextureMaps?.Count; i++)
             {
@@ -348,18 +351,30 @@ namespace CafeLibrary.Rendering
                 if (AnimatedSamplers.ContainsKey(sampler))
                     name = AnimatedSamplers[sampler];
 
-                string uniformName = GetUniformName(sampler);
-                if (sampler == "_a0")
-                {
-                    uniformName = "u_TextureAlbedo0";
-                    shader.SetBoolToInt("hasDiffuseMap", true);
-                }
 
+                string uniformName = GetUniformName(sampler);
                 if (uniformName == string.Empty)
                     continue;
 
                 var binded = BindTexture(shader, GetTextures(), TextureMaps[i], name, id);
-                shader.SetInt(uniformName, id++);
+                bool hasTexture = binded != null;
+
+               
+
+                if (sampler == "_a0")
+                {
+                    shader.SetBoolToInt("hasDiffuseMap", true);
+                }
+                else if (sampler == "_ms0")
+                {
+                    shader.SetBoolToInt("hasAlphaMap", hasTexture);
+                }
+
+                
+
+                
+                if (binded != null)
+                    shader.SetInt(uniformName, id++);
             }
 
             GL.ActiveTexture(TextureUnit.Texture0);
@@ -371,6 +386,7 @@ namespace CafeLibrary.Rendering
             switch (sampler)
             {
                 case "_a0": return "u_TextureAlbedo0";
+                case "_ms0": return "u_TextureAlpha";
                 case "_s0": return "u_TextureSpecMask";
                 case "_n0": return "u_TextureNormal0";
                 case "_n1": return "u_TextureNormal1";
