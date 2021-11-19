@@ -7,39 +7,37 @@ namespace MapStudio.UI
 {
     public partial class ImGuiHelper
     {
-        public static MouseEventInfo CreateMouseState()
+        public static void UpdateMouseState()
         {
-            var mouseInfo = new MouseEventInfo();
-
             //Prepare info
             if (ImGui.IsMouseDown(ImGuiMouseButton.Right))
-                mouseInfo.RightButton = ButtonState.Pressed;
+                MouseEventInfo.RightButton = ButtonState.Pressed;
             if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
-                mouseInfo.LeftButton = ButtonState.Pressed;
+                MouseEventInfo.LeftButton = ButtonState.Pressed;
 
             if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                mouseInfo.RightButton = ButtonState.Released;
+                MouseEventInfo.RightButton = ButtonState.Released;
             if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
-                mouseInfo.LeftButton = ButtonState.Released;
+                MouseEventInfo.LeftButton = ButtonState.Released;
+
+            if (ImGui.IsMouseDown(ImGuiMouseButton.Middle))
+                MouseEventInfo.MiddleButton = ButtonState.Pressed;
 
             MouseState mouseState = Mouse.GetState();
-            mouseInfo.WheelPrecise = mouseState.WheelPrecise;
+            MouseEventInfo.WheelPrecise = mouseState.WheelPrecise;
 
             //Construct relative position
-            //-22 for titlebar size
             var windowPos = ImGui.GetWindowPos();
 
             var pos = ImGui.GetIO().MousePos;
-            pos = new System.Numerics.Vector2(pos.X - windowPos.X, pos.Y - windowPos.Y - 22);
+            pos = new System.Numerics.Vector2(pos.X - windowPos.X, pos.Y - windowPos.Y);
 
             if (ImGui.IsMousePosValid())
-                mouseInfo.Position = new Point((int)pos.X, (int)pos.Y);
+                MouseEventInfo.Position = new System.Drawing.Point((int)pos.X, (int)pos.Y);
             else
-                mouseInfo.HasValue = false;
+                MouseEventInfo.HasValue = false;
 
-            mouseInfo.FullPosition = new System.Drawing.Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y);
-
-            return mouseInfo;
+            MouseEventInfo.FullPosition = new System.Drawing.Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y);
         }
     }
 }

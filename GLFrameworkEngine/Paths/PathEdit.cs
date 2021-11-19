@@ -13,9 +13,9 @@ namespace GLFrameworkEngine
 
         #region Input
 
-        public virtual void OnMouseDown(MouseEventInfo mouseInfo)
+        public virtual void OnMouseDown()
         {
-            if (mouseInfo.LeftButton != OpenTK.Input.ButtonState.Pressed)
+            if (MouseEventInfo.LeftButton != OpenTK.Input.ButtonState.Pressed)
                 return;
 
             if (EditToolMode == ToolMode.Connection)
@@ -26,32 +26,32 @@ namespace GLFrameworkEngine
                 StartEraseAction();
         }
 
-        public virtual void OnMouseUp(MouseEventInfo mouseInfo) 
+        public virtual void OnMouseUp() 
         {
             if (EditToolMode == ToolMode.Connection)
-                EndConnecion(mouseInfo.X, mouseInfo.Y);
+                EndConnecion(MouseEventInfo.X, MouseEventInfo.Y);
             else if (EditToolMode == ToolMode.Drawing)
                 EndDrawAction();
             else if (EditToolMode == ToolMode.Erase)
                 EndEraseAction();
         }
 
-        public virtual void OnMouseMove(MouseEventInfo mouseInfo)
+        public virtual void OnMouseMove()
         {
             if (!EditMode && !this.IsActive)
                 return;
 
             if (EditToolMode == ToolMode.Connection)
-                UpdateConnecion(mouseInfo.X, mouseInfo.Y);
+                UpdateConnecion(MouseEventInfo.X, MouseEventInfo.Y);
             else if (EditToolMode == ToolMode.Drawing)
-                UpdateDrawAction(mouseInfo.X, mouseInfo.Y);
+                UpdateDrawAction(MouseEventInfo.X, MouseEventInfo.Y);
             else if (EditToolMode == ToolMode.Erase)
                 UpdateEraseAction();
             else if (GLContext.ActiveContext.TransformTools.ActiveMode == TransformEngine.TransformActions.Translate)
                 this.ConnectToHoveredPoints();
         }
 
-        public virtual void OnKeyDown(KeyEventInfo keyInfo)
+        public virtual void OnKeyDown()
         {
             if (!EditMode)
                 return;
@@ -59,18 +59,18 @@ namespace GLFrameworkEngine
             bool hasSelection = this.GetSelectedPoints().Count > 0;
             bool isActive = this.IsActive;
 
-            if (keyInfo.IsKeyDown(InputSettings.INPUT.Scene.Extrude) && (hasSelection || isActive))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Extrude) && (hasSelection || isActive))
                 this.ExtrudePointsFromSelected();
-            if (keyInfo.IsKeyDown(InputSettings.INPUT.Scene.Create) && isActive)
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Create) && isActive)
                 this.ExtrudePointsFromSelected(true, true);
 
             if (hasSelection)
             {
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Scene.Fill))
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Fill))
                     this.FillSelectedPoints();
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Scene.Merge))
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Merge))
                     this.MergeSelectedPoints();
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Scene.Insert))
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Insert))
                     this.SubdivideSelectedPoints();
             }
         }

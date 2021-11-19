@@ -87,18 +87,18 @@ namespace MapStudio.UI
 
         private void OnEnter()
         {
-            var mouseInfo = ImGuiHelper.CreateMouseState();
-            originMouse = new System.Drawing.Point(mouseInfo.X, mouseInfo.Y);
-            mouseWheelPrevious = mouseInfo.WheelPrecise;
+            ImGuiHelper.UpdateMouseState();
+            originMouse = new System.Drawing.Point(MouseEventInfo.X, MouseEventInfo.Y);
+            mouseWheelPrevious = MouseEventInfo.WheelPrecise;
         }
 
         private void UpdateCamera()
         {
-            var mouseInfo = ImGuiHelper.CreateMouseState();
+            ImGuiHelper.UpdateMouseState();
 
             if (ImGui.IsAnyMouseDown() && !_mouseDown)
             {
-                OnMouseDown(mouseInfo);
+                OnMouseDown();
                 _mouseDown = true;
             }
 
@@ -106,14 +106,14 @@ namespace MapStudio.UI
                ImGui.IsMouseReleased(ImGuiMouseButton.Right) ||
                ImGui.IsMouseReleased(ImGuiMouseButton.Middle))
             {
-                OnMouseUp(mouseInfo);
+                OnMouseUp();
                 _mouseDown = false;
             }
 
             if (_mouseDown)
-                OnMouseMove(mouseInfo);
+                OnMouseMove();
 
-            OnMouseWheel(mouseInfo);
+            OnMouseWheel();
         }
 
         private void RenderEditor()
@@ -162,23 +162,23 @@ namespace MapStudio.UI
 
         }
 
-        public void OnMouseDown(MouseEventInfo e) {
-            originMouse = e.Position;
+        public void OnMouseDown() {
+            originMouse = MouseEventInfo.Position;
         }
 
-        public void OnMouseUp(MouseEventInfo e)
+        public void OnMouseUp()
         {
         }
 
-        public void OnMouseMove(MouseEventInfo e)
+        public void OnMouseMove()
         {
-            if (e.LeftButton == ButtonState.Pressed)
+            if (MouseEventInfo.LeftButton == ButtonState.Pressed)
             {
-                var pos = new Vector2(e.X - originMouse.X, e.Y - originMouse.Y);
+                var pos = new Vector2(MouseEventInfo.X - originMouse.X, MouseEventInfo.Y - originMouse.Y);
                 Camera.Position.X += pos.X;
                 Camera.Position.Y += pos.Y;
 
-                originMouse = e.Position;
+                originMouse = MouseEventInfo.Position;
             }
         }
 
@@ -187,11 +187,11 @@ namespace MapStudio.UI
         }
 
         private float mouseWheelPrevious = 0;
-        public void OnMouseWheel(MouseEventInfo e)
+        public void OnMouseWheel()
         {
-            float delta = -(e.WheelPrecise - mouseWheelPrevious);
+            float delta = -(MouseEventInfo.WheelPrecise - mouseWheelPrevious);
             Camera.Zoom = Math.Max(7.0f, Camera.Zoom - delta * 3.5f);
-            mouseWheelPrevious = e.WheelPrecise;
+            mouseWheelPrevious = MouseEventInfo.WheelPrecise;
         }
     }
 }

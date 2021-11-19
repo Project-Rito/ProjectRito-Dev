@@ -305,9 +305,9 @@ namespace MapStudio.UI
             _context.Camera.UpdateMatrices();
         }
 
-        public ITransformableObject GetPickedObject(MouseEventInfo e)
+        public ITransformableObject GetPickedObject()
         {
-            OpenTK.Vector2 position = new OpenTK.Vector2(e.Position.X, _context.Height - e.Position.Y);
+            OpenTK.Vector2 position = new OpenTK.Vector2(MouseEventInfo.Position.X, _context.Height - MouseEventInfo.Position.Y);
             return _context.Scene.FindPickableAtPosition(_context, position);
         }
 

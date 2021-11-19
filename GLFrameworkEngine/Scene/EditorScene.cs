@@ -17,25 +17,25 @@ namespace GLFrameworkEngine
             return objects;
         }
 
-        public void OnKeyDown(GLContext context, KeyEventInfo e)
+        public void OnKeyDown(GLContext context)
         {
-            if (e.IsKeyDown(InputSettings.INPUT.Scene.SelectAll))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.SelectAll))
                 SelectAll(context);
-            if (e.IsKeyDown(InputSettings.INPUT.Scene.Undo))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Undo))
                 Undo();
-            if (e.IsKeyDown(InputSettings.INPUT.Scene.Redo))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Redo))
                 Redo();
-            if (e.IsKeyDown(InputSettings.INPUT.Scene.EditMode))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.EditMode))
                 ToggleEditMode();
-            if (e.IsKeyDown(InputSettings.INPUT.Scene.Copy))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Copy))
                 CopySelected();
-            if (e.IsKeyDown(InputSettings.INPUT.Scene.Paste))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Paste))
                 PasteSelected();
-            if (e.IsKeyDown(InputSettings.INPUT.Scene.Delete))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Delete))
                 DeleteSelected();
 
             foreach (IDrawableInput ob in Objects.Where(x => x is IDrawableInput))
-                ob.OnKeyDown(e);
+                ob.OnKeyDown();
         }
 
         public void DeleteSelected() {

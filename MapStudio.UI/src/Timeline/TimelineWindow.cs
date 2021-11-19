@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ImGuiNET;
 using CurveEditorLibrary;
 using Toolbox.Core.Animations;
+using GLFrameworkEngine;
 
 namespace MapStudio.UI
 {
@@ -141,20 +142,20 @@ namespace MapStudio.UI
 
         private void UpdateCurveEvents()
         {
-            var mouseInfo = ImGuiHelper.CreateMouseState();
+            ImGuiHelper.UpdateMouseState();
 
             bool controlDown = ImGui.GetIO().KeyCtrl;
             bool shiftDown = ImGui.GetIO().KeyShift;
 
             if (onEnter)
             {
-                CurveEditor.ResetMouse(mouseInfo);
+                CurveEditor.ResetMouse();
                 onEnter = false;
             }
 
             if (ImGui.IsAnyMouseDown() && !_mouseDown)
             {
-                CurveEditor.OnMouseDown(mouseInfo);
+                CurveEditor.OnMouseDown();
                 previousMouseWheel = 0;
                 _mouseDown = true;
             }
@@ -163,19 +164,19 @@ namespace MapStudio.UI
                ImGui.IsMouseReleased(ImGuiMouseButton.Right) ||
                ImGui.IsMouseReleased(ImGuiMouseButton.Middle))
             {
-                CurveEditor.OnMouseUp(mouseInfo);
+                CurveEditor.OnMouseUp();
                 _mouseDown = false;
             }
 
             if (previousMouseWheel == 0)
-                previousMouseWheel = mouseInfo.WheelPrecise;
+                previousMouseWheel = MouseEventInfo.WheelPrecise;
 
-            mouseInfo.Delta = mouseInfo.WheelPrecise - previousMouseWheel;
-            previousMouseWheel = mouseInfo.WheelPrecise;
+            MouseEventInfo.Delta = MouseEventInfo.WheelPrecise - previousMouseWheel;
+            previousMouseWheel = MouseEventInfo.WheelPrecise;
 
             //  if (_mouseDown)
-            CurveEditor.OnMouseMove(mouseInfo);
-            CurveEditor.OnMouseWheel(mouseInfo, controlDown, shiftDown);
+            CurveEditor.OnMouseMove();
+            CurveEditor.OnMouseWheel(controlDown, shiftDown);
         }
     }
 }

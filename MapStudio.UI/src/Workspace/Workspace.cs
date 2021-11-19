@@ -517,8 +517,8 @@ namespace MapStudio.UI
 
         public void OnAssetViewportDrop()
         {
-            var state = InputState.CreateMouseState();
-            Vector2 screenPosition = new Vector2(state.Position.X, state.Position.Y);
+            InputState.UpdateMouseState();
+            Vector2 screenPosition = new Vector2(MouseEventInfo.Position.X, MouseEventInfo.Position.Y);
             var asset = AssetViewWindow.DraggedAsset;
             ActiveEditor.AssetViewportDrop(asset, screenPosition);
         }
@@ -531,17 +531,17 @@ namespace MapStudio.UI
         /// The key event for when a key has been pressed down.
         /// Used to perform editor shortcuts.
         /// </summary>
-        public void OnKeyDown(KeyEventInfo keyInfo, bool isRepeat)
+        public void OnKeyDown(bool isRepeat)
         {
             if (Outliner.IsFocused)
-                ViewportWindow.Pipeline._context.OnKeyDown(keyInfo, isRepeat);
+                ViewportWindow.Pipeline._context.OnKeyDown(isRepeat);
             else if (ViewportWindow.IsFocused)
             {
                 if (!isRepeat)
-                    ActiveEditor.OnKeyDown(keyInfo);
+                    ActiveEditor.OnKeyDown();
 
-                ViewportWindow.Pipeline._context.OnKeyDown(keyInfo, isRepeat);
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Scene.ShowAddContextMenu))
+                ViewportWindow.Pipeline._context.OnKeyDown(isRepeat);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.ShowAddContextMenu))
                     ViewportWindow.LoadAddContextMenu();
             }
         }
@@ -550,17 +550,17 @@ namespace MapStudio.UI
         /// The mouse down event for when the mouse has been pressed down.
         /// Used to perform editor shortcuts.
         /// </summary>
-        public void OnMouseDown(MouseEventInfo mouseInfo)
+        public void OnMouseDown()
         {
-            ActiveEditor.OnMouseDown(mouseInfo);
+            ActiveEditor.OnMouseDown();
         }
 
         /// <summary>
         /// The mouse move event for when the mouse has been moved around.
         /// </summary>
-        public void OnMouseMove(MouseEventInfo mouseInfo)
+        public void OnMouseMove()
         {
-            ActiveEditor.OnMouseMove(mouseInfo);
+            ActiveEditor.OnMouseMove();
         }
 
         private bool init = false;

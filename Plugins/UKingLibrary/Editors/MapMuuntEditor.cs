@@ -310,16 +310,16 @@ namespace UKingLibrary
             Workspace.ActiveWorkspace.ReloadOutliner();
         }
 
-        public void OnMouseMove(MouseEventInfo mouseInfo) { }
-        public void OnMouseDown(MouseEventInfo mouseInfo) { }
-        public void OnMouseUp(MouseEventInfo mouseInfo) { }
+        public void OnMouseMove() { }
+        public void OnMouseDown() { }
+        public void OnMouseUp() { }
         public void OnSave(ProjectResources resources) { }
 
-        public void OnKeyDown(KeyEventInfo keyEventInfo) {
+        public void OnKeyDown() {
             GLContext.ActiveContext.Scene.BeginUndoCollection();
 
             foreach (var rail in Rails.Values)
-                rail.OnKeyDown(keyEventInfo);
+                rail.OnKeyDown();
 
             GLContext.ActiveContext.Scene.EndUndoCollection();
         }

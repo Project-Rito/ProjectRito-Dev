@@ -240,49 +240,50 @@ namespace GLFrameworkEngine
         private bool _firstClick = true;
         private Vector2 _refPos;
 
-        public void OnMouseMove(MouseEventInfo mouseInfo, KeyEventInfo keyInfo, bool mouseDown, GameWindow parentWindow)
+        public void OnMouseMove( bool mouseDown)
         {
             UpdateViewport = true;
 
             //Set a saved mouse point to use in the application
-            CurrentMousePoint = new Vector2(mouseInfo.X, mouseInfo.Y);
+            CurrentMousePoint = new Vector2(MouseEventInfo.X, MouseEventInfo.Y);
 
-            SelectionTools.OnMouseMove(this, mouseInfo);
-            Scene.OnMouseMove(this, mouseInfo);
-            LinkingTools.OnMouseMove(this, mouseInfo);
+            SelectionTools.OnMouseMove(this);
+            Scene.OnMouseMove(this);
+            LinkingTools.OnMouseMove(this);
 
             int transformState = 0;
             //Transforming can occur on shortcut keys rather than just mouse down
             if (TransformTools.ActiveActions.Count > 0)
-                transformState = TransformTools.OnMouseMove(this, mouseInfo);
+                transformState = TransformTools.OnMouseMove(this);
 
-            if (mouseDown && mouseInfo.RightButton == ButtonState.Pressed)
+            if (mouseDown && MouseEventInfo.RightButton == ButtonState.Pressed)
             {
                 if (_firstClick)
-                    _refPos = new OpenTK.Vector2(mouseInfo.FullPosition.X, mouseInfo.FullPosition.Y);
+                    _refPos = new OpenTK.Vector2(MouseEventInfo.FullPosition.X, MouseEventInfo.FullPosition.Y);
                 _firstClick = false;
 
-                mouseInfo.CursorVisible = false;
+                MouseEventInfo.MouseCursor = MouseEventInfo.Cursor.None;
 
                 if (transformState != 0 || SelectionTools.IsActive || LinkingTools.IsActive || DisableCameraMovement)
                     return;
 
-                Camera.Controller.MouseMove(mouseInfo, keyInfo, _refPos);
-                mouseInfo.FullPosition = new System.Drawing.Point((int)_refPos.X, (int)_refPos.Y);
+                Camera.Controller.MouseMove(_refPos);
+                MouseEventInfo.FullPosition = new System.Drawing.Point((int)_refPos.X, (int)_refPos.Y);
 
-                ApplyMouseState(mouseInfo, parentWindow);
+                ApplyMouseState();
             }
             else
+            {
                 _firstClick = true;
+                MouseEventInfo.MouseCursor = MouseEventInfo.Cursor.Default;
+            }
 
-            PickingTools.OnMouseMove(this, mouseInfo);
+            PickingTools.OnMouseMove(this);
         }
 
-        private void ApplyMouseState(MouseEventInfo mouseInfo, GameWindow parentWindow)
+        private void ApplyMouseState()
         {
-            parentWindow.CursorVisible = mouseInfo.CursorVisible;
-
-            Mouse.SetPosition(mouseInfo.FullPosition.X, mouseInfo.FullPosition.Y);
+            Mouse.SetPosition(MouseEventInfo.FullPosition.X, MouseEventInfo.FullPosition.Y);
         }
 
         private float previousMouseWheel;
@@ -291,63 +292,63 @@ namespace GLFrameworkEngine
             previousMouseWheel = 0;
         }
 
-        public void OnMouseWheel(MouseEventInfo e, KeyEventInfo k)
+        public void OnMouseWheel()
         {
             UpdateViewport = true;
 
             if (previousMouseWheel == 0)
-                previousMouseWheel = e.WheelPrecise;
+                previousMouseWheel = MouseEventInfo.WheelPrecise;
 
-            e.Delta = e.WheelPrecise - previousMouseWheel;
+            MouseEventInfo.Delta = MouseEventInfo.WheelPrecise - previousMouseWheel;
 
             if (SelectionTools.IsActive) {
-                SelectionTools.OnMouseWheel(this, e);
+                SelectionTools.OnMouseWheel(this);
             }
             else
             {
-                Camera.Controller.MouseWheel(e, k);
+                Camera.Controller.MouseWheel();
             }
-            previousMouseWheel = e.WheelPrecise;
+            previousMouseWheel = MouseEventInfo.WheelPrecise;
         }
 
-        public void OnMouseUp(MouseEventInfo e)
+        public void OnMouseUp()
         {
             UpdateViewport = true;
 
-            TransformTools.OnMouseUp(this, e);
+            TransformTools.OnMouseUp(this);
 
-            SelectionTools.OnMouseUp(this, e);
-            Scene.OnMouseUp(this, e);
-            PickingTools.OnMouseUp(this, e);
-            LinkingTools.OnMouseUp(this, e);
+            SelectionTools.OnMouseUp(this);
+            Scene.OnMouseUp(this);
+            PickingTools.OnMouseUp(this);
+            LinkingTools.OnMouseUp(this);
         }
 
-        public void OnKeyDown(KeyEventInfo keyInfo, bool isRepeat)
+        public void OnKeyDown(bool isRepeat)
         {
-            SelectionTools.OnKeyDown(this, keyInfo);
-            TransformTools.OnKeyDown(this, keyInfo);
-            Scene.OnKeyDown(this, keyInfo);
+            SelectionTools.OnKeyDown(this);
+            TransformTools.OnKeyDown(this);
+            Scene.OnKeyDown(this);
 
             if (!isRepeat)
-                Camera.KeyPress(keyInfo);
+                Camera.KeyPress();
         }
 
-        public void OnMouseDown(MouseEventInfo e, KeyEventInfo k)
+        public void OnMouseDown()
         {
             UpdateViewport = true;
 
-            MouseOrigin = new Vector2(e.X, e.Y);
-            Scene.OnMouseDown(this, e);
+            MouseOrigin = new Vector2(MouseEventInfo.X, MouseEventInfo.Y);
+            Scene.OnMouseDown(this);
 
-            SelectionTools.OnMouseDown(this, e);
-            LinkingTools.OnMouseDown(this, e);
+            SelectionTools.OnMouseDown(this);
+            LinkingTools.OnMouseDown(this);
 
             if (!TransformTools.Enabled || SelectionTools.IsActive || LinkingTools.IsActive) //Skip picking, transforming and camera events for selection tools
                 return;
 
             if (TransformTools.ActiveActions.Count > 0 && Scene.GetSelected().Count > 0)
             {
-                var state = TransformTools.OnMouseDown(this, e);
+                var state = TransformTools.OnMouseDown(this);
                 if (state != 0) //Skip picking and camera events for transforming objects
                     return;
             }
@@ -358,9 +359,9 @@ namespace GLFrameworkEngine
                 return;
             }
 
-            PickingTools.OnMouseDown(this, e);
+            PickingTools.OnMouseDown(this);
 
-            Camera.Controller.MouseClick(e, k);
+            Camera.Controller.MouseClick();
         }
     }
 }

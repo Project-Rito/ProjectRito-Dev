@@ -209,7 +209,14 @@ namespace MapStudio
                 //Draw the cursor
                 ImGui.SetMouseCursor(ImGuiMouseCursor.None);
             }
-            else if (!this.CursorVisible)
+            else if (MouseEventInfo.MouseCursor == MouseEventInfo.Cursor.None)
+            {
+                // Hide cursor from SDL
+                this.CursorVisible = false;
+                // Make sure ImGui isn't doing anything
+                ImGui.GetIO().MouseDrawCursor = false;
+            }
+            else if (MouseEventInfo.MouseCursor == MouseEventInfo.Cursor.Default)
             {
                 //Enable the cursor and set back to defaults
                 this.CursorVisible = true;
@@ -729,8 +736,6 @@ namespace MapStudio
                 if (!initialized)
                     return;
 
-                GC.Collect();
-
                 Workspaces.Add(workspace);
             }
 
@@ -772,7 +777,7 @@ namespace MapStudio
                 }
             }
 
-            Workspace.ActiveWorkspace?.OnKeyDown(InputState.CreateKeyState(), e.IsRepeat);
+            Workspace.ActiveWorkspace?.OnKeyDown(e.IsRepeat);
         }
 
         protected override void OnFocusedChanged(EventArgs e)

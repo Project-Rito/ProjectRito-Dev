@@ -54,10 +54,10 @@ namespace MapStudio.UI
 
         void AssetViewportDrop(AssetItem item, Vector2 screenCoords);
 
-        void OnMouseMove(MouseEventInfo mouseInfo);
-        void OnMouseDown(MouseEventInfo mouseInfo);
-        void OnMouseUp(MouseEventInfo mouseInfo);
-        void OnKeyDown(KeyEventInfo keyEventInfo);
+        void OnMouseMove();
+        void OnMouseDown();
+        void OnMouseUp();
+        void OnKeyDown();
         void OnSave(ProjectResources resources);
     }
 }

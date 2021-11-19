@@ -751,17 +751,17 @@ namespace GLFrameworkEngine
             UpdateMode();
         }
 
-        public void KeyPress(KeyEventInfo e)
+        public void KeyPress()
         {
-            if (e.IsKeyDown(InputSettings.INPUT.Camera.CameraFront))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.CameraFront))
                 Direction = FaceDirection.Front;
-            if (e.IsKeyDown(InputSettings.INPUT.Camera.CameraLeft)) 
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.CameraLeft)) 
                 Direction = FaceDirection.Left;
-            if (e.IsKeyDown(InputSettings.INPUT.Camera.CameraRight))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.CameraRight))
                 Direction = FaceDirection.Right;
-            if (e.IsKeyDown(InputSettings.INPUT.Camera.CameraTop))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.CameraTop))
                 Direction = FaceDirection.Top;
-            if (e.IsKeyDown(InputSettings.INPUT.Camera.CameraOrtho))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.CameraOrtho))
                 IsOrthographic = !IsOrthographic;
         }
 
@@ -838,17 +838,17 @@ namespace GLFrameworkEngine
             _camera = camera;
         }
 
-        public void MouseClick(MouseEventInfo e, KeyEventInfo k) { }
+        public void MouseClick() { }
 
-        public void MouseMove(MouseEventInfo e, KeyEventInfo k, Vector2 previousLocation)
+        public void MouseMove(Vector2 previousLocation)
         {
-            var position = e.FullPosition;
+            var position = MouseEventInfo.FullPosition;
             var movement = new Vector2(position.X, position.Y) - previousLocation;
 
-            if ((e.LeftButton == ButtonState.Pressed ||
-                e.RightButton == ButtonState.Pressed) && !_camera.LockRotation)
+            if ((MouseEventInfo.LeftButton == ButtonState.Pressed ||
+                MouseEventInfo.RightButton == ButtonState.Pressed) && !_camera.LockRotation)
             {
-                if (k.KeyCtrl)
+                if (KeyEventInfo.KeyCtrl)
                 {
                     float delta = ((float)movement.Y * -5 * Math.Min(0.01f, _camera.Depth / 500f));
                     Vector3 vec;
@@ -860,9 +860,9 @@ namespace GLFrameworkEngine
                 }
                 else
                 {
-                    if (!k.IsKeyDown(InputSettings.INPUT.Camera.AxisY))
+                    if (!KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.AxisY))
                         _camera.RotationX += movement.Y * rotFactorX;
-                    if (!k.IsKeyDown(InputSettings.INPUT.Camera.AxisX))
+                    if (!KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.AxisX))
                         _camera.RotationY += movement.X * rotFactorY;
 
                     //Reset direction
@@ -871,20 +871,20 @@ namespace GLFrameworkEngine
             }
         }
 
-        public void MouseWheel(MouseEventInfo e, KeyEventInfo k)
+        public void MouseWheel()
         {
-            if (k.KeyShift)
+            if (KeyEventInfo.KeyShift)
             {
-                float amount = e.Delta * 0.1f;
+                float amount = MouseEventInfo.Delta * 0.1f;
                 _camera.KeyMoveSpeed += amount;
             }
             else
             {
-                float delta = e.Delta * (k.KeyShift ? 8 : 2) * _camera.ZoomSpeed;
+                float delta = MouseEventInfo.Delta * (KeyEventInfo.KeyShift ? 8 : 2) * _camera.ZoomSpeed;
 
                 Vector3 vec;
 
-                Vector2 normCoords = OpenGLHelper.NormMouseCoords(e.X, e.Y, _camera.Width, _camera.Height);
+                Vector2 normCoords = OpenGLHelper.NormMouseCoords(MouseEventInfo.X, MouseEventInfo.Y, _camera.Width, _camera.Height);
 
                 vec.X = (-normCoords.X * delta) * _camera.FactorX;
                 vec.Y = (normCoords.Y * delta) * _camera.FactorY;
@@ -894,29 +894,29 @@ namespace GLFrameworkEngine
             }
         }
 
-        public void KeyPress(KeyEventInfo e)
+        public void KeyPress()
         {
-            if (e.KeyCtrl)
+            if (KeyEventInfo.KeyCtrl)
                 return;
 
             float movement = 0.2f * _camera.KeyMoveSpeed;
             Vector3 vec = Vector3.Zero;
 
-            if (e.KeyShift)
+            if (KeyEventInfo.KeyShift)
                 movement *= 2;
 
-            if (e.IsKeyDown(InputSettings.INPUT.Camera.MoveForward))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.MoveForward))
                 vec.Z -= movement;
-            if (e.IsKeyDown(InputSettings.INPUT.Camera.MoveBack))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.MoveBack))
                 vec.Z += movement;
-            if (e.IsKeyDown(InputSettings.INPUT.Camera.MoveLeft))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.MoveLeft))
                 vec.X -= movement;
-            if (e.IsKeyDown(InputSettings.INPUT.Camera.MoveRight))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.MoveRight))
                 vec.X += movement;
 
-            if (e.IsKeyDown(InputSettings.INPUT.Camera.MoveDown))
+            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.MoveDown))
                 vec.Y -= movement;
-            else if (e.IsKeyDown(InputSettings.INPUT.Camera.MoveUp))
+            else if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.MoveUp))
                 vec.Y += movement;
 
             float UP = 0;
@@ -937,31 +937,31 @@ namespace GLFrameworkEngine
             _camera = camera;
         }
 
-        public void MouseClick(MouseEventInfo e, KeyEventInfo k) { }
+        public void MouseClick() { }
 
-        public void MouseMove(MouseEventInfo e, KeyEventInfo k, Vector2 previousLocation)
+        public void MouseMove(Vector2 previousLocation)
         {
-            var position = e.FullPosition;
+            var position = MouseEventInfo.FullPosition;
             var movement = new Vector2(position.X, position.Y) - previousLocation;
 
-            if (e.RightButton == ButtonState.Pressed && !_camera.LockRotation)
+            if (MouseEventInfo.RightButton == ButtonState.Pressed && !_camera.LockRotation)
             {
-                if (k.KeyCtrl)
+                if (KeyEventInfo.KeyCtrl)
                 {
                     _camera._targetDistance *= 1 - movement.Y * -5 * 0.001f;
                 }
                 else
                 {
-                    if (!k.IsKeyDown(InputSettings.INPUT.Camera.AxisY))
+                    if (!KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.AxisY))
                         _camera.RotationX += movement.Y * rotFactorX;
-                    if (!k.IsKeyDown(InputSettings.INPUT.Camera.AxisX))
+                    if (!KeyEventInfo.IsKeyDown(InputSettings.INPUT.Camera.AxisX))
                         _camera.RotationY += movement.X * rotFactorY;
 
                     //Reset direction
                     _camera.Direction = Camera.FaceDirection.Any;
                 }
             }
-            if (e.LeftButton == ButtonState.Pressed)
+            if (MouseEventInfo.LeftButton == ButtonState.Pressed)
             {
                 Pan(movement.X * _camera.PanSpeed, movement.Y * _camera.PanSpeed);
             }
@@ -969,15 +969,15 @@ namespace GLFrameworkEngine
             _camera.UpdateMatrices();
         }
 
-        public void MouseWheel(MouseEventInfo e, KeyEventInfo k)
+        public void MouseWheel()
         {
-            if (k.KeyCtrl)
+            if (KeyEventInfo.KeyCtrl)
             {
-                float delta = -e.Delta * Math.Min(0.1f, _camera.Depth / 500f);
+                float delta = -MouseEventInfo.Delta * Math.Min(0.1f, _camera.Depth / 500f);
 
                 delta *= _camera.TargetDistance;
 
-                Vector2 normCoords = OpenGLHelper.NormMouseCoords(e.X, e.Y, _camera.Width, _camera.Height);
+                Vector2 normCoords = OpenGLHelper.NormMouseCoords(MouseEventInfo.X, MouseEventInfo.Y, _camera.Width, _camera.Height);
 
                 Vector3 vec = _camera.InverseRotationMatrix.Row0 * -normCoords.X * delta * _camera.FactorX +
                               _camera.InverseRotationMatrix.Row1 * normCoords.Y * delta * _camera.FactorY +
@@ -987,11 +987,11 @@ namespace GLFrameworkEngine
             }
             else
             {
-                Zoom(e.Delta * 0.1f * _camera.ZoomSpeed, true);
+                Zoom(MouseEventInfo.Delta * 0.1f * _camera.ZoomSpeed, true);
             }
         }
 
-        public void KeyPress(KeyEventInfo e)
+        public void KeyPress()
         {
 
         }

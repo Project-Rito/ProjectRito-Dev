@@ -29,16 +29,16 @@ namespace GLFrameworkEngine
 
         ConnectionType ConnectionAction;
 
-        public void OnMouseDown(GLContext context, MouseEventInfo e)
+        public void OnMouseDown(GLContext context)
         {
             if (IsActive || !CanEdit)
                 return;
 
             //Create new connection
-            if (KeyEventInfo.State.KeyCtrl)
+            if (KeyEventInfo.KeyCtrl)
             {
                 //Check for a picked model during a linkable operation
-                Vector2 position = new Vector2(e.Position.X, context.Height - e.Position.Y);
+                Vector2 position = new Vector2(MouseEventInfo.Position.X, context.Height - MouseEventInfo.Position.Y);
                 var pickable = context.Scene.FindPickableAtPosition(context, position);
                 //No linking operation if no pickable is found
                 if (pickable == null)
@@ -50,17 +50,17 @@ namespace GLFrameworkEngine
             }
         }
 
-        public void OnMouseMove(GLContext context, MouseEventInfo e)
+        public void OnMouseMove(GLContext context)
         {
             if (!IsActive)
                 return;
 
             //Check for a picked model during a linkable operation
-            Vector2 position = new Vector2(e.Position.X, context.Height - e.Position.Y);
+            Vector2 position = new Vector2(MouseEventInfo.Position.X, context.Height - MouseEventInfo.Position.Y);
             ConnectingLink = context.Scene.FindPickableAtPosition(context, position) as IObjectLink;
         }
 
-        public void OnMouseUp(GLContext context, MouseEventInfo e)
+        public void OnMouseUp(GLContext context)
         {
             if (!IsActive)
                 return;

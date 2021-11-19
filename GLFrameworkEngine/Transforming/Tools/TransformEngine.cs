@@ -186,14 +186,14 @@ namespace GLFrameworkEngine
 
         private TransformActions ActionOnMouseUp = TransformActions.Translate;
 
-        public int OnMouseDown(GLContext context, MouseEventInfo e, bool onSelection = false)
+        public int OnMouseDown(GLContext context, bool onSelection = false)
         {
             //Don't apply during active transforming
             if (TransformSettings.ActiveAxis != Axis.None)
                 return 0;
 
             //Ignore right clicking to move camera
-            if (e.RightButton == OpenTK.Input.ButtonState.Pressed) {
+            if (MouseEventInfo.RightButton == OpenTK.Input.ButtonState.Pressed) {
                 return 0;
             }
 
@@ -203,7 +203,7 @@ namespace GLFrameworkEngine
             TransformSettings.HasTextInput = false;
 
             //Middle mouse can create a scale action
-            if (e.MiddleButton == OpenTK.Input.ButtonState.Pressed)
+            if (MouseEventInfo.MiddleButton == OpenTK.Input.ButtonState.Pressed)
             {
                 DragTransformAction(context, TransformActions.Scale);
                 return 1;
@@ -216,8 +216,8 @@ namespace GLFrameworkEngine
             else
             {
                 //Select the axis by left clicking.
-                if (TransformSettings.DisplayGizmo && e.LeftButton == OpenTK.Input.ButtonState.Pressed)
-                    TransformSettings.ActiveAxis = GetSelectedAxis(context, e);
+                if (TransformSettings.DisplayGizmo && MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
+                    TransformSettings.ActiveAxis = GetSelectedAxis(context);
 
                 //If no axis is selected, try picking the place again
                 //If a gizmo is displaying, make sure this is not activated on selection down to keep the gizmo displaying on click
@@ -225,7 +225,7 @@ namespace GLFrameworkEngine
                 {
                     //Check if any of the active objects can be picked for movement
                     var renders = context.Scene.GetSelectableObjects();
-                    var picked = context.Scene.FindPickableAtPosition(context, renders, new Vector2(e.X, context.Height - e.Y));
+                    var picked = context.Scene.FindPickableAtPosition(context, renders, new Vector2(MouseEventInfo.X, context.Height - MouseEventInfo.Y));
                     if (picked != null && ActiveTransforms.Contains(picked.Transform))
                     {
                         TransformSettings.ActiveAxis = Axis.All;
@@ -234,13 +234,13 @@ namespace GLFrameworkEngine
             }
 
             //Force update the mouse positon incase the mouse was off screen
-            context.CurrentMousePoint = new Vector2(e.X, e.Y);
+            context.CurrentMousePoint = new Vector2(MouseEventInfo.X, MouseEventInfo.Y);
             foreach (var action in ActiveActions)
                 action.ResetTransform(context, TransformSettings);
             return TransformSettings.ActiveAxis != Axis.None ? 1 : 0;
         }
 
-        private Axis GetSelectedAxis(GLContext context, MouseEventInfo e)
+        private Axis GetSelectedAxis(GLContext context)
         {
             Quaternion rotation = Quaternion.Identity;
             //Rotate the gizmo from the last selected transform
@@ -254,32 +254,32 @@ namespace GLFrameworkEngine
                 case TransformActions.Translate:
                     return TranslateRenderer.UpdateAxisSelection(context,
                         TransformSettings.Origin, rotation,
-                    new Vector2(e.X, e.Y),
+                    new Vector2(MouseEventInfo.X, MouseEventInfo.Y),
                     TransformSettings);
                 case TransformActions.Scale:
                     return ScaleRenderer.UpdateAxisSelection(context,
                         TransformSettings.Origin, rotation,
-                    new Vector2(e.X, e.Y),
+                    new Vector2(MouseEventInfo.X, MouseEventInfo.Y),
                     TransformSettings);
                 case TransformActions.Rotate:
                     return RotateRenderer.UpdateAxisSelection(context,
                         TransformSettings.Origin, rotation,
-                    new Vector2(e.X, e.Y),
+                    new Vector2(MouseEventInfo.X, MouseEventInfo.Y),
                     TransformSettings);
                 case TransformActions.RectangleScale:
                     return RectangleRenderer.UpdateAxisSelection(context,
                         TransformSettings.Origin, rotation,
-                    new Vector2(e.X, e.Y),
+                    new Vector2(MouseEventInfo.X, MouseEventInfo.Y),
                     TransformSettings);
             }
 
             return Axis.None;
         }
 
-        public int OnMouseMove(GLContext context, MouseEventInfo e)
+        public int OnMouseMove(GLContext context)
         {
             if (TransformSettings.ActiveAxis == Axis.None) {
-                HoveredAxis = GetSelectedAxis(context, e);
+                HoveredAxis = GetSelectedAxis(context);
 
                 //No axis selected so return
                 return 0;
@@ -288,7 +288,7 @@ namespace GLFrameworkEngine
             //Action is occuring
             foreach (var action in ActiveActions)
             {
-                int value = action.TransformChanged(context, e.X, e.Y, TransformSettings);
+                int value = action.TransformChanged(context, MouseEventInfo.X, MouseEventInfo.Y, TransformSettings);
                 if (value == 1 && !_transformChanged)
                 {
                     GLContext.ActiveContext.Scene.BeginUndoCollection();
@@ -349,7 +349,7 @@ namespace GLFrameworkEngine
             scene.AddToUndo(new TransformUndo(infos));
         }
 
-        public int OnMouseUp(GLContext context, MouseEventInfo e)
+        public int OnMouseUp(GLContext context)
         {
             if (ActiveActions.Count == 0)
                 return 0;
@@ -450,40 +450,40 @@ namespace GLFrameworkEngine
             return (min + max) * 0.5f;
         }
 
-        public void OnKeyDown(GLContext context, KeyEventInfo keyInfo)
+        public void OnKeyDown(GLContext context)
         {
-            bool multiAxis = keyInfo.KeyCtrl;
+            bool multiAxis = KeyEventInfo.KeyCtrl;
 
             //Axis set
             if (multiAxis)
             {
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisX)) UpdateAxis(context, Axis.YZ);
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisY)) UpdateAxis(context, Axis.XZ);
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisZ)) UpdateAxis(context, Axis.XY);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisX)) UpdateAxis(context, Axis.YZ);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisY)) UpdateAxis(context, Axis.XZ);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisZ)) UpdateAxis(context, Axis.XY);
             }
             else
             {
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisX)) UpdateAxis(context, Axis.X);
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisY)) UpdateAxis(context, Axis.Y);
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisZ)) UpdateAxis(context, Axis.Z);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisX)) UpdateAxis(context, Axis.X);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisY)) UpdateAxis(context, Axis.Y);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisZ)) UpdateAxis(context, Axis.Z);
             }
 
-            if (!keyInfo.KeyCtrl)
+            if (!KeyEventInfo.KeyCtrl)
             {
                 //SRT action set
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Transform.TranslateGizmo)) UpdateTransformMode(TransformActions.Translate);
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Transform.RotateGizmo)) UpdateTransformMode(TransformActions.Rotate);
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Transform.ScaleGizmo)) UpdateTransformMode(TransformActions.Scale);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.TranslateGizmo)) UpdateTransformMode(TransformActions.Translate);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.RotateGizmo)) UpdateTransformMode(TransformActions.Rotate);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.ScaleGizmo)) UpdateTransformMode(TransformActions.Scale);
 
                 //SRT action starting
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Transform.Scale)) DragTransformAction(context, TransformActions.Scale);
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Transform.Rotate)) DragTransformAction(context, TransformActions.Rotate);
-                if (keyInfo.IsKeyDown(InputSettings.INPUT.Transform.Translate)) DragTransformAction(context, TransformActions.Translate);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.Scale)) DragTransformAction(context, TransformActions.Scale);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.Rotate)) DragTransformAction(context, TransformActions.Rotate);
+                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.Translate)) DragTransformAction(context, TransformActions.Translate);
             }
 
-            if (ActiveActions.Count > 0 && !keyInfo.KeyCtrl)
+            if (ActiveActions.Count > 0 && !KeyEventInfo.KeyCtrl)
             {
-                TextInput(keyInfo);
+                TextInput();
                 if (!string.IsNullOrEmpty(textInput)) {
                     bool valid = float.TryParse(textInput, out TransformSettings.TextInput);
                     TransformSettings.HasTextInput = valid;
@@ -499,16 +499,16 @@ namespace GLFrameworkEngine
         private string textInput = "";
 
         //Allow numbers to be directly input into the transform
-        private void TextInput(KeyEventInfo k)
+        private void TextInput()
         {
             for (char i = '0'; i <= '9'; i++) {
-                if (k.IsKeyDown(i.ToString())) {
+                if (KeyEventInfo.IsKeyDown(i.ToString())) {
                     textInput += i.ToString();
                 }
             }
-            if (k.IsKeyDown($"backspace") && textInput.Length > 0)
+            if (KeyEventInfo.IsKeyDown($"backspace") && textInput.Length > 0)
                 textInput = textInput.Remove(textInput.Length - 1);
-            if (k.IsKeyDown($"period"))
+            if (KeyEventInfo.IsKeyDown($"period"))
                 textInput += ".";
         }
 
