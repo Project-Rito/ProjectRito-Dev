@@ -56,14 +56,16 @@ namespace Toolbox.Core.Collada
             public int Micro = 1;
         }
 
-        public static STGenericScene Read(System.IO.Stream stream, string fileName, DAE.ImportSettings settings = null) {
+        public static STGenericScene Read(System.IO.Stream stream, string fileName, DAE.ImportSettings settings = null)
+        {
             if (settings == null) settings = new ImportSettings();
             settings.FolderPath = Path.GetDirectoryName(fileName);
 
             return ColladaReader.Read(stream, settings);
         }
 
-        public static STGenericScene Read(string fileName, DAE.ImportSettings settings = null) {
+        public static STGenericScene Read(string fileName, DAE.ImportSettings settings = null)
+        {
             if (settings == null) settings = new ImportSettings();
             settings.FolderPath = Path.GetDirectoryName(fileName);
 
@@ -180,7 +182,8 @@ namespace Toolbox.Core.Collada
                         Material material = new Material();
                         material.Name = mat.Name;
 
-                        if (!MaterialRemapper.ContainsKey(mat.Name)) {
+                        if (!MaterialRemapper.ContainsKey(mat.Name))
+                        {
                             MaterialRemapper.Add(mat.Name, mat);
                         }
                         else
@@ -192,7 +195,7 @@ namespace Toolbox.Core.Collada
 
                         if (mat.DiffuseColor != null)
                             material.DiffuseColor = new float[4] {
-                                mat.DiffuseColor.R / 255.0F, 
+                                mat.DiffuseColor.R / 255.0F,
                                 mat.DiffuseColor.G / 255.0F,
                                 mat.DiffuseColor.B / 255.0F,
                                 mat.DiffuseColor.A / 255.0F };
@@ -267,7 +270,7 @@ namespace Toolbox.Core.Collada
                                 for (int j = 0; j < vertex.BoneIndices.Count; j++)
                                 {
                                     int id = -1;
-                                    if (skeleton.RemapTable!= null && skeleton.RemapTable.Count > vertex.BoneIndices[j])
+                                    if (skeleton.RemapTable != null && skeleton.RemapTable.Count > vertex.BoneIndices[j])
                                     {
                                         id = skeleton.RemapTable[vertex.BoneIndices[j]];
                                     }
@@ -332,11 +335,11 @@ namespace Toolbox.Core.Collada
 
                     writer.StartGeometry(mesh.Name);
 
-                   /* if (mesh.MaterialIndex != -1 && Materials.Count > mesh.MaterialIndex)
-                    {
-                        writer.CurrentMaterial = Materials[mesh.MaterialIndex].Text;
-                        Console.WriteLine($"MaterialIndex {mesh.MaterialIndex } {Materials[mesh.MaterialIndex].Text}");
-                    }*/
+                    /* if (mesh.MaterialIndex != -1 && Materials.Count > mesh.MaterialIndex)
+                     {
+                         writer.CurrentMaterial = Materials[mesh.MaterialIndex].Text;
+                         Console.WriteLine($"MaterialIndex {mesh.MaterialIndex } {Materials[mesh.MaterialIndex].Text}");
+                     }*/
 
                     if (settings.TransformColorUVs)
                     {
@@ -403,40 +406,6 @@ namespace Toolbox.Core.Collada
 
                     foreach (var vertex in mesh.Vertices)
                     {
-                        //Remove zero weights
-                        if (settings.OptmizeZeroWeights)
-                        {
-                            float MaxWeight = 1;
-                            for (int i = 0; i < 4; i++)
-                            {
-                                if (vertex.BoneWeights.Count <= i)
-                                    continue;
-
-                                if (vertex.BoneIndices.Count < i + 1)
-                                {
-                                    vertex.BoneWeights[i] = 0;
-                                    MaxWeight = 0;
-                                }
-                                else
-                                {
-                                    float weight = vertex.BoneWeights[i];
-                                    if (vertex.BoneWeights.Count == i + 1)
-                                        weight = MaxWeight;
-
-                                    if (weight >= MaxWeight)
-                                    {
-                                        weight = MaxWeight;
-                                        MaxWeight = 0;
-                                    }
-                                    else
-                                        MaxWeight -= weight;
-
-                                    vertex.BoneWeights[i] = weight;
-                                }
-                            }
-                        }
-
-
                         if (vertex.Normal != Vector3.Zero) HasNormals = true;
                         if (vertex.Colors.Length > 0 && settings.UseVertexColors) HasColors = true;
                         if (vertex.Colors.Length > 1 && settings.UseVertexColors) HasColors2 = true;
@@ -496,8 +465,14 @@ namespace Toolbox.Core.Collada
                             //Some models may only use indices (single bind, rigid skin)
                             if (vertex.BoneWeights.Count > b)
                                 bWeights.Add(vertex.BoneWeights[b]);
-                            else
-                                bWeights.Add(1);
+                            else //unweighed bone
+                                bWeights.Add(0);
+                        }
+
+                        //Make sure the bone weights are normalized
+                        if (bWeights.Sum(x => x) != 1.0f)
+                        {
+
                         }
 
                         if (bIndices.Count == 0 && mesh.BoneIndex != -1)
@@ -528,12 +503,12 @@ namespace Toolbox.Core.Collada
                             if (group.Material != null)
                                 material = group.Material;
 
-                           if (MaterialRemapper.Values.Any(x => x == material))
+                            if (MaterialRemapper.Values.Any(x => x == material))
                             {
                                 var key = MaterialRemapper.FirstOrDefault(x => x.Value == material).Key;
                                 triangleList.Material = key;
                             }
-                           else if (material.Name != string.Empty)
+                            else if (material.Name != string.Empty)
                                 triangleList.Material = material.Name;
 
                             List<uint> faces = new List<uint>();
