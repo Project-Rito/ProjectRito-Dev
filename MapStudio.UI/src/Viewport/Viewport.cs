@@ -161,8 +161,7 @@ namespace MapStudio.UI
             string text = $"{TranslationSource.GetText("SHADING")} : [{DebugShaderRender.DebugRendering}]";
 
             ImGui.PushItemWidth(150);
-            ImguiCustomWidgets.ComboScrollable<DebugShaderRender.DebugRender>($"##debugShading", text, ref DebugShaderRender.DebugRendering, 
-                Enum.GetValues(typeof(DebugShaderRender.DebugRender)).Cast<DebugShaderRender.DebugRender>(), () =>
+            ImguiCustomWidgets.ComboScrollable($"##debugShading", text, ref DebugShaderRender.DebugRendering, () =>
                 {
                     GLContext.ActiveContext.UpdateViewport = true;
                 }, ImGuiComboFlags.NoArrowButton);
@@ -173,23 +172,17 @@ namespace MapStudio.UI
         private void DrawGizmoMenu()
         {
             var settings = Pipeline._context.TransformTools.TransformSettings;
+            var mode = settings.TransformMode;
 
             ImGui.PushItemWidth(150);
-            if (ImGui.BeginCombo($"##transformSpace", $"{TranslationSource.GetText("MODE")} : [{settings.TransformMode}]", ImGuiComboFlags.NoArrowButton))
-            {
-                foreach (var mode in Enum.GetValues(typeof(TransformSettings.TransformSpace)))
-                {
-                    bool isSelected = (TransformSettings.TransformSpace)mode == settings.TransformMode;
-                    if (ImGui.Selectable(mode.ToString(), isSelected))
-                    {
-                        settings.TransformMode = (TransformSettings.TransformSpace)mode;
-                        Pipeline._context.UpdateViewport = true;
-                    }
-                    if (isSelected)
-                        ImGui.SetItemDefaultFocus();
-                }
-                ImGui.EndCombo();
-            }
+
+            ImguiCustomWidgets.ComboScrollable($"##transformSpace",
+                $"{TranslationSource.GetText("MODE")} : [{settings.TransformMode}]", ref mode, () =>
+           {
+               settings.TransformMode = mode;
+               GLContext.ActiveContext.UpdateViewport = true;
+           }, ImGuiComboFlags.NoArrowButton);
+
             ImGui.PopItemWidth();
         }
 

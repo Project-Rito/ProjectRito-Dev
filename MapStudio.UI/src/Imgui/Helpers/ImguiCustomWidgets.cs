@@ -15,6 +15,10 @@ namespace MapStudio.UI
     {
         static Dictionary<string, string> selectedTabMenus = new Dictionary<string, string>();
 
+        public static void ComboScrollable<T>(string key, string text, ref T selectedItem, Action propertyChanged = null, ImGuiComboFlags flags = ImGuiComboFlags.None) {
+            ComboScrollable(key, text, ref selectedItem, Enum.GetValues(typeof(T)).Cast<T>(), propertyChanged, flags);
+        }
+
         public static void ComboScrollable<T>(string key, string text, ref T selectedItem, IEnumerable<T> items, Action propertyChanged = null, ImGuiComboFlags flags = ImGuiComboFlags.None)
         {
             if (ImGui.BeginCombo(key, text, flags)) //Check for combo box popup and add items
