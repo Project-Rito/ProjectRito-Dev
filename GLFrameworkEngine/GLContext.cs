@@ -121,7 +121,13 @@ namespace GLFrameworkEngine
         /// <summary>
         /// The preview scale to scale up model displaying.
         /// </summary>
-        public static float PreviewScale { get; set; } = 1.0f;
+        public static float PreviewScale
+        {
+            get { return ActiveContext._previewScale; }
+            set { ActiveContext._previewScale = value; }
+        }
+
+        private float _previewScale = 1.0f;
 
         public bool UpdateViewport = false;
 
