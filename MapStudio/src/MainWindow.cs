@@ -142,6 +142,8 @@ namespace MapStudio
         bool renderingFrame = false;
         bool executingAction = false;
 
+
+        System.Numerics.Vector2 loadingCenter;
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             if (renderingFrame) return;
@@ -244,9 +246,8 @@ namespace MapStudio
 
             if (ProcessLoading.IsLoading)
             {
-                var center = ImGui.GetMainViewport().GetCenter();
-                ImGui.SetNextWindowPos(center);
 
+                ImGui.SetNextWindowPos(loadingCenter);
                 var flags = ImGuiWindowFlags.AlwaysAutoResize;
 
                 if (ImGui.Begin("Loading", ref ProcessLoading.IsLoading, flags))
@@ -256,6 +257,11 @@ namespace MapStudio
 
                     ImGuiHelper.DrawCenteredText($"{ProcessLoading.ProcessName}");
                 }
+
+                loadingCenter = ImGui.GetMainViewport().GetCenter();
+                loadingCenter.X -= ImGui.GetWindowWidth() / 2;
+                loadingCenter.Y -= ImGui.GetWindowHeight() / 2;
+                
                 ImGui.End();
             }
 
@@ -272,6 +278,7 @@ namespace MapStudio
 
             renderingFrame = false;
         }
+        
 
         private unsafe void LoadWorkspaces()
         {
