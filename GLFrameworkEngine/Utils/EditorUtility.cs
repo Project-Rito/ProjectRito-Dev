@@ -23,7 +23,7 @@ namespace GLFrameworkEngine
              {
                  int centerX = context.Width / 2;
                  int centerY = context.Width / 2;
-                 return context.CoordFor(centerX, centerY, 100);
+                 return context.ScreenToWorld(centerX, centerY, 100);
              }
 
             //By default show the object next to the camera
@@ -63,7 +63,7 @@ namespace GLFrameworkEngine
             {
                 int centerX = context.Width / 2;
                 int centerY = context.Height / 2;
-                transform.Position = context.CoordFor(centerX, centerY, 100);
+                transform.Position = context.ScreenToWorld(centerX, centerY, 100);
                 transform.UpdateMatrix(true);
                 return;
             }

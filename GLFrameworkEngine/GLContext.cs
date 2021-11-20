@@ -121,7 +121,13 @@ namespace GLFrameworkEngine
         /// <summary>
         /// The preview scale to scale up model displaying.
         /// </summary>
-        public static float PreviewScale { get; set; } = 1.0f;
+        public static float PreviewScale
+        {
+            get { return ActiveContext._previewScale; }
+            set { ActiveContext._previewScale = value; }
+        }
+
+        private float _previewScale = 1.0f;
 
         public bool UpdateViewport = false;
 
@@ -167,7 +173,7 @@ namespace GLFrameworkEngine
         /// <summary>
         /// Gets the x y screen coordinates from a 3D position.
         /// </summary>
-        public Vector2 ScreenCoordFor(Vector3 coord)
+        public Vector2 WorldToScreen(Vector3 coord)
         {
             Vector3 vec = Vector3.Project(coord, 0, 0, Width, Height, -1, 1, Camera.ViewMatrix * Camera.ProjectionMatrix);
             return new Vector2((int)vec.X, Height - (int)(vec.Y));
@@ -177,13 +183,13 @@ namespace GLFrameworkEngine
         /// Gets a 3D position of the current mouse coordinates given the depth.
         /// </summary>
         public Vector3 GetPointUnderMouse(float depth) {
-            return CoordFor(this.CurrentMousePoint.X, this.CurrentMousePoint.Y, depth);
+            return ScreenToWorld(this.CurrentMousePoint.X, this.CurrentMousePoint.Y, depth);
         }
 
         /// <summary>
         /// Gets a 3D position given the screen x y coordinates and depth.
         /// </summary>
-        public Vector3 CoordFor(float x, float y, float depth)
+        public Vector3 ScreenToWorld(float x, float y, float depth)
         {
             var ray = PointScreenRay((int)x, (int)y);
             return ray.Origin.Xyz + (ray.Direction * depth);

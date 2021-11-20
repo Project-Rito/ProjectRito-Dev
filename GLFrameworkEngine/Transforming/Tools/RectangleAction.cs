@@ -78,7 +78,7 @@ namespace GLFrameworkEngine
         {
             var axisVec = GetSelectedAxisVector3(Settings.ActiveAxis);
 
-            Vector2 centerPoint = context.ScreenCoordFor(GetOrigin(Settings.ActiveAxis));
+            Vector2 centerPoint = context.WorldToScreen(GetOrigin(Settings.ActiveAxis));
             Vector2 mousePos = new Vector2(x, y);
 
             int x1 = (int)(mousePos.X - centerPoint.X);

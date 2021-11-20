@@ -198,7 +198,7 @@ namespace GLFrameworkEngine
             var hovered = GetHoveredPoint();
             //Display screen coords if nothing is hovered
             if (hovered == null) {
-                this.ConnectionPoint = GLContext.ActiveContext.CoordFor(x, y, 40);
+                this.ConnectionPoint = GLContext.ActiveContext.ScreenToWorld(x, y, 40);
                 return;
             }
 

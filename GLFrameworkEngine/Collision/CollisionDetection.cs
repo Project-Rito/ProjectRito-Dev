@@ -14,7 +14,7 @@ namespace GLFrameworkEngine
         {
             if (collision == null) return position;
 
-            var toScreen = context.ScreenCoordFor(position);
+            var toScreen = context.WorldToScreen(position);
             var ray = context.PointScreenRay((int)toScreen.X, (int)toScreen.Y);
 
             var hit = collision.RayCast(ray.Origin.Xyz, ray.Direction);
@@ -29,7 +29,7 @@ namespace GLFrameworkEngine
         {
             if (collision == null) return;
 
-            var toScreen = context.ScreenCoordFor(position);
+            var toScreen = context.WorldToScreen(position);
             var ray = context.PointScreenRay((int)toScreen.X, (int)toScreen.Y);
 
             var hit = collision.RayCast(ray.Origin.Xyz, ray.Direction);

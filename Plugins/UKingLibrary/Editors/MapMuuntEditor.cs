@@ -296,7 +296,7 @@ namespace UKingLibrary
             //Set our transform
             Quaternion rotation = Quaternion.Identity;
             //Spawn by drag/drop coordinates in 3d space.
-            Vector3 position = context.CoordFor(screenCoords.X, screenCoords.Y, 100);
+            Vector3 position = context.ScreenToWorld(screenCoords.X, screenCoords.Y, 100);
             //Face the camera
             if (GlobalSettings.Current.Asset.FaceCameraAtSpawn)
                 rotation = Quaternion.FromEulerAngles(0, -context.Camera.RotationY, 0);
