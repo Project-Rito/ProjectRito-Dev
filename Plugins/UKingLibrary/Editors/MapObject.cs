@@ -313,7 +313,7 @@ namespace UKingLibrary
 
                 if (File.Exists(modelpath))
                 {
-                    render = new BfresRender(modelpath, parent);
+                    render = getActorSpecificBfresRender(actor, new BfresRender(modelpath, parent));
                     //Only load textures when the object is drawn in the scene to save on load times
                    // ((BfresRender)render).OnRenderInitialized += delegate {
                   //  };
@@ -326,14 +326,15 @@ namespace UKingLibrary
                 {
                     for (int i = 0; i < 30; i++)
                     {
-                        string modelPartpPath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}-{i.ToString("D2")}.sbfres");
-                        if (File.Exists(modelPartpPath))
+                        string modelPartPath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}-{i.ToString("D2")}.sbfres");
+                        if (File.Exists(modelPartPath))
                         {
-                            render = new BfresRender(modelPartpPath, parent);
-                            //Only load textures when the object is drawn in the scene to save on load times
-                           // ((BfresRender)render).OnRenderInitialized += delegate {
-                          //  };
+                            render = getActorSpecificBfresRender(actor, new BfresRender(modelPartPath, parent));
                             LoadTextures((BfresRender)render, actor["bfres"]);
+                            break;
+                            //Only load textures when the object is drawn in the scene to save on load times
+                            // ((BfresRender)render).OnRenderInitialized += delegate {
+                            //  };
                         }
                     }
                 }
@@ -347,6 +348,23 @@ namespace UKingLibrary
                     return FrustumCullObject((BfresRender)render);
                 };
 
+            return render;
+        }
+
+        private BfresRender getActorSpecificBfresRender(IDictionary<string, dynamic> actor, BfresRender render)
+        {
+            foreach (var model in render.Models)
+            {
+                if (actor.ContainsKey("mainModel"))
+                {
+                    if (model.Name != actor["mainModel"])
+                        model.IsVisible = false;
+                }
+                else
+                {
+                    StudioLogger.WriteWarning($"No mainModel specified for {actor["bfres"]}!");
+                }
+            }
             return render;
         }
 
