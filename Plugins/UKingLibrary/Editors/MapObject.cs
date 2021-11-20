@@ -310,31 +310,37 @@ namespace UKingLibrary
             {
                 string modelpath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}.sbfres");
                 string animpath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}_Animation.sbfres");
-
                 if (File.Exists(modelpath))
                 {
-                    render = getActorSpecificBfresRender(actor, new BfresRender(modelpath, parent));
-                    //Only load textures when the object is drawn in the scene to save on load times
-                   // ((BfresRender)render).OnRenderInitialized += delegate {
-                  //  };
-                    LoadTextures((BfresRender)render, actor["bfres"]);
+                    var renderCandidate = getActorSpecificBfresRender(actor, new BfresRender(modelpath, parent));
+                    if (renderCandidate != null)
+                    {
+                        render = renderCandidate;
+                        LoadTextures((BfresRender)render, actor["bfres"]);
 
-                    //  if (File.Exists(animpath))
-                    //    BfresLoader.LoadAnimations((BfresRender)render, animpath);
+                        //if (File.Exists(animpath))
+                        //    BfresLoader.LoadAnimations((BfresRender)render, animpath);
+                    }
                 }
                 else
                 {
                     for (int i = 0; i < 30; i++)
                     {
                         string modelPartPath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}-{i.ToString("D2")}.sbfres");
+                        
                         if (File.Exists(modelPartPath))
                         {
-                            render = getActorSpecificBfresRender(actor, new BfresRender(modelPartPath, parent));
-                            LoadTextures((BfresRender)render, actor["bfres"]);
-                            break;
-                            //Only load textures when the object is drawn in the scene to save on load times
-                            // ((BfresRender)render).OnRenderInitialized += delegate {
-                            //  };
+                            var renderCandidate = getActorSpecificBfresRender(actor, new BfresRender(modelPartPath, parent));
+                            if (renderCandidate != null)
+                            {
+                                render = renderCandidate;
+                                LoadTextures((BfresRender)render, actor["bfres"]);
+
+                                //if (File.Exists(animpath))
+                                //    BfresLoader.LoadAnimations((BfresRender)render, animpath);
+
+                                break;
+                            }
                         }
                     }
                 }
@@ -353,18 +359,21 @@ namespace UKingLibrary
 
         private BfresRender getActorSpecificBfresRender(IDictionary<string, dynamic> actor, BfresRender render)
         {
+            bool containsActorMainModel = false;
             foreach (var model in render.Models)
             {
                 if (actor.ContainsKey("mainModel"))
                 {
                     if (model.Name != actor["mainModel"])
                         model.IsVisible = false;
+                    else
+                        containsActorMainModel = true;
                 }
                 else
-                {
                     StudioLogger.WriteWarning($"No mainModel specified for {actor["bfres"]}!");
-                }
             }
+            if (!containsActorMainModel)
+                return null;
             return render;
         }
 

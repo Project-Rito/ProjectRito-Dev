@@ -43,7 +43,7 @@ namespace UKingLibrary
             RenderablePath.PointSize = 2;
 
             Properties = properties;
-            var translate = (IList<dynamic>)properties["Translate"]; //origin point
+            var translate = (IList<dynamic>)properties["Translate"]; // NOT the origin point - railpoints aren't relative.
 
             PathRender.UINode.ContextMenus.Add(new MenuItemModel("Remove", () =>
             {
@@ -77,9 +77,9 @@ namespace UKingLibrary
                 var pos = (IList<dynamic>)point["Translate"];
                 RenderablePathPoint pathPoint = new RenderablePathPoint(PathRender,
                     new OpenTK.Vector3(
-                    translate[0] + pos[0],
-                    translate[1] + pos[1],
-                    translate[2] + pos[2]) * GLContext.PreviewScale);
+                    pos[0],
+                    pos[1],
+                    pos[2]) * GLContext.PreviewScale);
 
                 pathPoint.UINode.Tag = point;
                 pathPoint.UINode.TagUI.UIDrawer += delegate

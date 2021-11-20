@@ -193,6 +193,13 @@ namespace UKingLibrary
                 ObjectFolder.AddChild(node.Value);
 
             // Todo - set camera position to map pos
+            if (mubinRoot.ContainsKey("LocationPosX") && mubinRoot.ContainsKey("LocationPosZ"))
+            {
+                float posX = mubinRoot["LocationPosX"];
+                float posY = 150;
+                float posZ = mubinRoot["LocationPosZ"];
+                GLContext.ActiveContext.Camera.TargetPosition = new OpenTK.Vector3(posX, posY, posZ) * GLContext.PreviewScale;
+            }
 
             ProcessLoading.Instance.Update(100, 100, "Finished!");
         }
