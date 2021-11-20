@@ -408,10 +408,29 @@ namespace UKingLibrary
             string texpathNX = PluginConfig.GetContentPath($"Model\\{bfres}.Tex.sbfres");
             string texpath1 = PluginConfig.GetContentPath($"Model\\{bfres}.Tex1.sbfres");
 
-            if (File.Exists(texpathNX) && render.Textures.Count == 0)
-                render.Textures = BfresLoader.GetTextures(texpathNX);
-            if (File.Exists(texpath1) && render.Textures.Count == 0)
-                render.Textures = BfresLoader.GetTextures(texpath1);
+            string titleBGPath = PluginConfig.GetContentPath($"Pack\\TitleBG.pack");
+
+            if (render.Textures.Count == 0)
+            {
+
+                var candidate = BfresLoader.GetTextures(texpathNX);
+                if (candidate != null)
+                    render.Textures = candidate;
+
+                candidate = BfresLoader.GetTextures(texpath1);
+                if (candidate != null)
+                    render.Textures = candidate;
+
+                // Try TitleBG - probably not gonna be there anyway, but whatever
+                candidate = BfresLoader.GetTextures(titleBGPath + "\\" + texpathNX);
+                if (candidate != null)
+                    render.Textures = candidate;
+
+                candidate = BfresLoader.GetTextures(titleBGPath + "\\" + texpath1);
+                if (candidate != null)
+                    render.Textures = candidate;
+
+            }
         }
 
         public class LinkInstance

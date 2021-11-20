@@ -125,8 +125,12 @@ namespace UKingLibrary.UI
                 var render = new BfresRender(modelpath);
                 ((BfresRender)render).OnRenderInitialized += delegate
                 {
-                    if (File.Exists(texpath) && ((BfresRender)render).Textures.Count == 0)
-                        ((BfresRender)render).Textures = BfresLoader.GetTextures(texpath);
+                    if (((BfresRender)render).Textures.Count == 0)
+                    {
+                        var candidate = BfresLoader.GetTextures(texpath);
+                        if (candidate != null)
+                            ((BfresRender)render).Textures = candidate;
+                    }
                 };
 
                 ImageSource = IconModelRenderer.CreateRender(context, new List<BfresRender>() { render }, size, size)[0];
