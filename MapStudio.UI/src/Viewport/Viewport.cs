@@ -661,15 +661,19 @@ namespace MapStudio.UI
 
         private bool onEnter = false;
         private bool _mouseDown = false;
+        private long _lastTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
         private void UpdateCamera(GLContext context)
         {
             InputState.UpdateMouseState();
             InputState.UpdateKeyState();
 
+            float frameTime = DateTimeOffset.Now.ToUnixTimeMilliseconds() - _lastTime; // Todo - change things so this is a long or something, not a float.
+            _lastTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
             if (ImGui.IsAnyMouseDown() && !_mouseDown)
             {
-                context.OnMouseDown();
+                context.OnMouseDown(frameTime);
                 _mouseDown = true;
             }
 
@@ -680,13 +684,13 @@ namespace MapStudio.UI
                 context.OnMouseUp();
                 _mouseDown = false;
             }
-
-            context.OnMouseMove(_mouseDown);
+            
+            context.OnMouseMove(_mouseDown, frameTime);
 
             if (ImGuiController.ApplicationHasFocus)
-                context.OnMouseWheel();
+                context.OnMouseWheel(frameTime);
 
-            context.Camera.Controller.KeyPress();
+            context.Camera.Controller.KeyPress(frameTime);
         }
     }
 }

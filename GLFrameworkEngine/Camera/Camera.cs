@@ -838,9 +838,9 @@ namespace GLFrameworkEngine
             _camera = camera;
         }
 
-        public void MouseClick() { }
+        public void MouseClick(float frameTime) { }
 
-        public void MouseMove(Vector2 previousLocation)
+        public void MouseMove(Vector2 previousLocation, float frameTime)
         {
             var position = MouseEventInfo.FullPosition;
             var movement = new Vector2(position.X, position.Y) - previousLocation;
@@ -871,7 +871,7 @@ namespace GLFrameworkEngine
             }
         }
 
-        public void MouseWheel()
+        public void MouseWheel(float frameTime)
         {
             if (KeyEventInfo.KeyShift)
             {
@@ -894,12 +894,12 @@ namespace GLFrameworkEngine
             }
         }
 
-        public void KeyPress()
+        public void KeyPress(float frameTime)
         {
             if (KeyEventInfo.KeyCtrl)
                 return;
 
-            float movement = 0.2f * _camera.KeyMoveSpeed;
+            float movement = 0.2f * (_camera.KeyMoveSpeed) * frameTime;
             Vector3 vec = Vector3.Zero;
 
             if (KeyEventInfo.KeyShift)
@@ -937,9 +937,9 @@ namespace GLFrameworkEngine
             _camera = camera;
         }
 
-        public void MouseClick() { }
+        public void MouseClick(float frameTime) { }
 
-        public void MouseMove(Vector2 previousLocation)
+        public void MouseMove(Vector2 previousLocation, float frameTime)
         {
             var position = MouseEventInfo.FullPosition;
             var movement = new Vector2(position.X, position.Y) - previousLocation;
@@ -969,7 +969,7 @@ namespace GLFrameworkEngine
             _camera.UpdateMatrices();
         }
 
-        public void MouseWheel()
+        public void MouseWheel(float frameTime)
         {
             if (KeyEventInfo.KeyCtrl)
             {
@@ -991,7 +991,7 @@ namespace GLFrameworkEngine
             }
         }
 
-        public void KeyPress()
+        public void KeyPress(float frameTime)
         {
 
         }

@@ -240,7 +240,7 @@ namespace GLFrameworkEngine
         private bool _firstClick = true;
         private Vector2 _refPos;
 
-        public void OnMouseMove( bool mouseDown)
+        public void OnMouseMove( bool mouseDown, float frameTime)
         {
             UpdateViewport = true;
 
@@ -267,7 +267,7 @@ namespace GLFrameworkEngine
                 if (transformState != 0 || SelectionTools.IsActive || LinkingTools.IsActive || DisableCameraMovement)
                     return;
 
-                Camera.Controller.MouseMove(_refPos);
+                Camera.Controller.MouseMove(_refPos, frameTime);
                 MouseEventInfo.FullPosition = new System.Drawing.Point((int)_refPos.X, (int)_refPos.Y);
 
                 ApplyMouseState();
@@ -292,7 +292,7 @@ namespace GLFrameworkEngine
             previousMouseWheel = 0;
         }
 
-        public void OnMouseWheel()
+        public void OnMouseWheel(float frameTime)
         {
             UpdateViewport = true;
 
@@ -306,7 +306,7 @@ namespace GLFrameworkEngine
             }
             else
             {
-                Camera.Controller.MouseWheel();
+                Camera.Controller.MouseWheel(frameTime);
             }
             previousMouseWheel = MouseEventInfo.WheelPrecise;
         }
@@ -333,7 +333,7 @@ namespace GLFrameworkEngine
                 Camera.KeyPress();
         }
 
-        public void OnMouseDown()
+        public void OnMouseDown(float frameTime)
         {
             UpdateViewport = true;
 
@@ -361,7 +361,7 @@ namespace GLFrameworkEngine
 
             PickingTools.OnMouseDown(this);
 
-            Camera.Controller.MouseClick();
+            Camera.Controller.MouseClick(frameTime);
         }
     }
 }
