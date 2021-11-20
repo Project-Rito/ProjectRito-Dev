@@ -308,18 +308,19 @@ namespace UKingLibrary
             //Bfres renderer
             if (actor.ContainsKey("bfres"))
             {
-                string modelpath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}.sbfres");
-                string animpath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}_Animation.sbfres");
-                if (File.Exists(modelpath))
+                string modelPath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}.sbfres");
+                string animPath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}_Animation.sbfres");
+                if (File.Exists(modelPath))
                 {
-                    var renderCandidate = getActorSpecificBfresRender(actor, new BfresRender(modelpath, parent));
+                    var renderCandidate = getActorSpecificBfresRender(actor, new BfresRender(modelPath, parent));
                     if (renderCandidate != null)
                     {
                         render = renderCandidate;
                         LoadTextures((BfresRender)render, actor["bfres"]);
 
-                        //if (File.Exists(animpath))
-                        //    BfresLoader.LoadAnimations((BfresRender)render, animpath);
+                        BfresLoader.LoadAnimations((BfresRender)render, modelPath);
+                        if (File.Exists(animPath))
+                            BfresLoader.LoadAnimations((BfresRender)render, animPath);
                     }
                 }
                 else
@@ -335,9 +336,9 @@ namespace UKingLibrary
                             {
                                 render = renderCandidate;
                                 LoadTextures((BfresRender)render, actor["bfres"]);
-
-                                //if (File.Exists(animpath))
-                                //    BfresLoader.LoadAnimations((BfresRender)render, animpath);
+                                BfresLoader.LoadAnimations((BfresRender)render, modelPartPath);
+                                if (File.Exists(animPath))
+                                    BfresLoader.LoadAnimations((BfresRender)render, animPath);
 
                                 break;
                             }
