@@ -146,7 +146,8 @@ namespace MapStudio
         {
             if (renderingFrame) return;
 
-            if (ExecutedMenuAction != null && !executingAction) {
+            if (ExecutedMenuAction != null && !executingAction)
+            {
                 executingAction = true;
                 ExecutedMenuAction.Invoke();
                 ExecutedMenuAction = null;
@@ -434,7 +435,8 @@ namespace MapStudio
                 if (ImGui.BeginMenu($"{TranslationSource.GetText("EDIT")}"))
                 {
                     var workspace = Workspace.ActiveWorkspace;
-                    if (workspace != null) {
+                    if (workspace != null)
+                    {
                         foreach (var menu in workspace.GetEditMenus())
                             ImGuiHelper.LoadMenuItem(menu);
                     }
@@ -529,6 +531,7 @@ namespace MapStudio
 #endif
                         ImGui.EndMenu();
                     }
+                    ImGui.Checkbox($"{TranslationSource.GetText("CREATE_NEW_WORKSPACE")}", ref createNewWorkspace);
                     if (updateSettings && GLContext.ActiveContext != null)
                     {
                         //Reload existing set values then save
@@ -541,15 +544,19 @@ namespace MapStudio
                 if (ImGui.BeginMenu(TranslationSource.GetText("WINDOWS")))
                 {
                     //Docked windows
-                    if (Workspace.ActiveWorkspace != null) {
-                        foreach (var window in Workspace.ActiveWorkspace.DockedWindows) {
-                            if (ImGui.MenuItem(TranslationSource.GetText(window.Name), "", window.Opened)) {
+                    if (Workspace.ActiveWorkspace != null)
+                    {
+                        foreach (var window in Workspace.ActiveWorkspace.DockedWindows)
+                        {
+                            if (ImGui.MenuItem(TranslationSource.GetText(window.Name), "", window.Opened))
+                            {
                                 window.Opened = window.Opened ? false : true;
                             }
                         }
                     }
 
-                    if (ImGui.MenuItem($"{TranslationSource.GetText("STYLE_EDITOR")}", "", showStyleEditor)) {
+                    if (ImGui.MenuItem($"{TranslationSource.GetText("STYLE_EDITOR")}", "", showStyleEditor))
+                    {
                         showStyleEditor = showStyleEditor ? false : true;
                     }
 
@@ -564,7 +571,8 @@ namespace MapStudio
                     {
                         foreach (var window in Workspace.ActiveWorkspace.Windows)
                         {
-                            if (ImGui.MenuItem(window.Name, "", window.Opened)) {
+                            if (ImGui.MenuItem(window.Name, "", window.Opened))
+                            {
                                 window.Opened = window.Opened ? false : true;
                             }
                         }
@@ -574,7 +582,8 @@ namespace MapStudio
                 }
                 if (ImGui.BeginMenu(TranslationSource.GetText("PLUGINS")))
                 {
-                    foreach (var plugin in PluginManager.LoadPlugins()) {
+                    foreach (var plugin in PluginManager.LoadPlugins())
+                    {
                         ImGui.Text(plugin.PluginHandler.Name);
                     }
                     ImGui.EndMenu();
@@ -662,7 +671,7 @@ namespace MapStudio
         private void OpenFileWithDialog()
         {
             ImguiFileDialog ofd = new ImguiFileDialog();
-            if (ofd.ShowDialog("OPEN_FILE"))
+            if (ofd.ShowDialog("OPEN_FILE", true))
             {
                 foreach (var file in ofd.FilePaths)
                     LoadFileFormat(file);
@@ -699,6 +708,7 @@ namespace MapStudio
             });
         }
 
+        bool createNewWorkspace = true;
         private void LoadFileFormat(string filePath)
         {
             this.ForceFocused = true;
@@ -711,8 +721,7 @@ namespace MapStudio
             //Load asset based format
             if (!isProject)
             {
-                bool createNew = true;
-                if (createNew)
+                if (createNewWorkspace)
                 {
                     Workspace workspace = new Workspace(this.GlobalSettings, Workspaces.Count, this);
                     workspace.Name = Path.GetFileName(filePath);
@@ -772,7 +781,8 @@ namespace MapStudio
             //Make sure the key cannot be repeated when held down
             if (!e.IsRepeat)
             {
-                if (Keyboard.GetState().IsKeyDown(Key.ControlLeft) && e.Key == Key.S && Workspace.ActiveWorkspace != null) {
+                if (Keyboard.GetState().IsKeyDown(Key.ControlLeft) && e.Key == Key.S && Workspace.ActiveWorkspace != null)
+                {
                     Workspace.ActiveWorkspace.SaveFileData();
                 }
             }

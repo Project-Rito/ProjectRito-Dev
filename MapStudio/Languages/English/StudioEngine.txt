@@ -178,6 +178,8 @@ SHADOWS - Shadows
 
 SHADING - Shading
 
+CREATE_NEW_WORKSPACE - File Load Creates New Workspace
+
 CAMERA - Camera
 DIRECTION - Direction
 MODE - Mode

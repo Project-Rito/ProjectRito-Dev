@@ -40,11 +40,6 @@ namespace MapStudio.UI
         /// </summary>
         public string FileName { get; set; }
 
-        /// <summary>
-        /// Determines to allow multi selection or not.
-        /// </summary>
-        public bool MultiSelect = false;
-
         string dialogKey;
 
         readonly List<FileFilter> filters = new List<FileFilter>();
@@ -52,14 +47,16 @@ namespace MapStudio.UI
         /// <summary>
         /// Adds a filter from a given extension and description.
         /// </summary>
-        public void AddFilter(string ext, string description) {
+        public void AddFilter(string ext, string description)
+        {
             filters.Add(new FileFilter(ext, description));
         }
 
         /// <summary>
         /// Adds a filter from a given FileFilter instance.
         /// </summary>
-        public void AddFilter(FileFilter filter) {
+        public void AddFilter(FileFilter filter)
+        {
             filters.Add(filter);
         }
 
@@ -67,7 +64,7 @@ namespace MapStudio.UI
         /// Shows the dialog and returns true if successfully selected a file.
         /// Can provide a unique key to determine what filter was previously used to select.
         /// </summary>
-        public bool ShowDialog(string key = "")
+        public bool ShowDialog(string key = "", bool multiSelect = false)
         {
             dialogKey = key;
 
@@ -85,7 +82,7 @@ namespace MapStudio.UI
             }
             else
             {
-                var ofd = TinyFileDialog.OpenFileDialog(filters, FileName, MultiSelect);
+                var ofd = TinyFileDialog.OpenFileDialog(filters, FileName, multiSelect);
                 if (!string.IsNullOrEmpty(ofd))
                 {
 
