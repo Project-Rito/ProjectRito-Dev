@@ -37,7 +37,7 @@ namespace GLFrameworkEngine
         /// Sets the cursor 3d position given the screen coordinates.
         /// </summary>
         public void SetCursor(GLContext context, int x, int y) {
-            Transform.Position = context.CoordFor(x, y, 20);
+            Transform.Position = context.ScreenToWorld(x, y, 20);
             Transform.UpdateMatrix(true);
         }
 

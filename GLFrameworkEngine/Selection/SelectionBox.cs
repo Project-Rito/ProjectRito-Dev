@@ -89,7 +89,7 @@ namespace GLFrameworkEngine
                 if (!objects[i].CanSelect)
                     continue;
 
-                var screenPoint = context.ScreenCoordFor(objects[i].Transform.Position);
+                var screenPoint = context.WorldToScreen(objects[i].Transform.Position);
                 if (screenPoint.X < MaxPoint.X && screenPoint.X > MinPoint.X &&
                     screenPoint.Y < MaxPoint.Y && screenPoint.Y > MinPoint.Y)
                 {

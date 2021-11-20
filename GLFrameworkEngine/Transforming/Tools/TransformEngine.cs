@@ -610,13 +610,13 @@ namespace GLFrameworkEngine
 
             GL.Disable(EnableCap.DepthTest);
 
-            var start = context.ScreenCoordFor(TransformSettings.Origin);
+            var start = context.WorldToScreen(TransformSettings.Origin);
             var end = new Vector2(context.CurrentMousePoint.X, context.CurrentMousePoint.Y);
 
             foreach (var action in ActiveActions)
             {
                 if (action is TranslateAction)
-                    start = context.ScreenCoordFor(((TranslateAction)action).OriginStart);
+                    start = context.WorldToScreen(((TranslateAction)action).OriginStart);
             }
 
             start = context.NormalizeMouseCoords(start);

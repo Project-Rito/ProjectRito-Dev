@@ -62,7 +62,7 @@ namespace GLFrameworkEngine
 
         public int TransformChanged(GLContext context, float x, float y, TransformSettings settings)
         {
-            Vector2 centerPoint = context.ScreenCoordFor(Settings.Origin);
+            Vector2 centerPoint = context.WorldToScreen(Settings.Origin);
             Vector2 mousePos = new Vector2(x, y);
 
             double angle = (Math.Atan2(mousePos.X - centerPoint.X, mousePos.Y - centerPoint.Y) -

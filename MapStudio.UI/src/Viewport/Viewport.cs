@@ -651,7 +651,7 @@ namespace MapStudio.UI
                 return;
 
             var origin = transformTools.TransformSettings.Origin;
-            var screenPoint = Pipeline._context.ScreenCoordFor(origin);
+            var screenPoint = Pipeline._context.WorldToScreen(origin);
 
             ImGui.SetCursorPos(new System.Numerics.Vector2(screenPoint.X, screenPoint.Y));
             foreach (var action in transformTools.ActiveActions)

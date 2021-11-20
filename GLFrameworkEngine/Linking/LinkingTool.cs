@@ -133,8 +133,8 @@ namespace GLFrameworkEngine
                         {
                             Vector3 positon1 = ((ITransformableObject)link).Transform.Position;
                             Vector3 positon2 = ((ITransformableObject)dest).Transform.Position;
-                            Vector2 srcPos1 = context.ScreenCoordFor(positon1);
-                            Vector2 destPos2 = context.ScreenCoordFor(positon2);
+                            Vector2 srcPos1 = context.WorldToScreen(positon1);
+                            Vector2 destPos2 = context.WorldToScreen(positon2);
 
                             DrawConnection(context, srcPos1, destPos2, true);
                         }
@@ -145,7 +145,7 @@ namespace GLFrameworkEngine
 
             //Object links are always transformable with a position. Get the world pos
             Vector3 positon = ((ITransformableObject)SourceObjectLink).Transform.Position;
-            Vector2 srcPos = context.ScreenCoordFor(positon);
+            Vector2 srcPos = context.WorldToScreen(positon);
 
             //Draw the current mouse placement
             DrawConnection(context, srcPos, new Vector2(x, y), ConnectingLink != null);

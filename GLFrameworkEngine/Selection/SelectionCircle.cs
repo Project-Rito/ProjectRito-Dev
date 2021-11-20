@@ -61,7 +61,7 @@ namespace GLFrameworkEngine
                 if (!objects[i].CanSelect)
                     continue;
 
-                var sceenCoord = context.ScreenCoordFor(objects[i].Transform.Position);
+                var sceenCoord = context.WorldToScreen(objects[i].Transform.Position);
                 //Use normalized coordinates for comparing the sphere size
                 if (PointInsideSphere(
                     context.NormalizeMouseCoords(sceenCoord),
