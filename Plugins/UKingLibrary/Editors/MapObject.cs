@@ -339,8 +339,6 @@ namespace UKingLibrary
                 }
                 if (!(render is BfresRender))
                     StudioLogger.WriteWarning($"missing bfres {actor["bfres"]} for actor {name}!");
-
-                GC.Collect();
             }
 
             if (render is BfresRender)

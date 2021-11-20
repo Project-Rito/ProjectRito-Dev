@@ -569,8 +569,8 @@ namespace MapStudio.UI
                 if (outlinerDrop.IsValid())
                 {
                     //Drag/drop things onto meshes
-                    var mouseInfo = InputState.CreateMouseState();
-                    var picked = Pipeline.GetPickedObject(mouseInfo) as IDragDropPicking;
+                    InputState.UpdateMouseState();
+                    var picked = Pipeline.GetPickedObject() as IDragDropPicking;
                     //Picking object changed.
                     if (DragDroppedModel != picked)
                     {
@@ -591,7 +591,7 @@ namespace MapStudio.UI
                         var node = Outliner.GetDragDropNode();
                         picked.DragDropped(node.Tag);
                     }
-                    if (mouseInfo.LeftButton == ButtonState.Released)
+                    if (MouseEventInfo.LeftButton == ButtonState.Released)
                         DragDroppedModel = null;
                 }
                 ImGui.EndDragDropTarget();
@@ -664,13 +664,12 @@ namespace MapStudio.UI
 
         private void UpdateCamera(GLContext context)
         {
-            var mouseInfo = InputState.CreateMouseState();
-            var keyInfo = InputState.CreateKeyState();
-            KeyEventInfo.State = keyInfo;
+            InputState.UpdateMouseState();
+            InputState.UpdateKeyState();
 
             if (ImGui.IsAnyMouseDown() && !_mouseDown)
             {
-                context.OnMouseDown(mouseInfo, keyInfo);
+                context.OnMouseDown();
                 _mouseDown = true;
             }
 
@@ -678,16 +677,16 @@ namespace MapStudio.UI
                ImGui.IsMouseReleased(ImGuiMouseButton.Right) ||
                ImGui.IsMouseReleased(ImGuiMouseButton.Middle))
             {
-                context.OnMouseUp(mouseInfo);
+                context.OnMouseUp();
                 _mouseDown = false;
             }
 
-            context.OnMouseMove(mouseInfo, keyInfo, _mouseDown, ParentWorkspace.ParentWindow);
+            context.OnMouseMove(_mouseDown);
 
             if (ImGuiController.ApplicationHasFocus)
-                context.OnMouseWheel(mouseInfo, keyInfo);
+                context.OnMouseWheel();
 
-            context.Camera.Controller.KeyPress(keyInfo);
+            context.Camera.Controller.KeyPress();
         }
     }
 }

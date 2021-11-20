@@ -360,7 +360,7 @@ namespace GLFrameworkEngine
             //Translate the current handle
             targetHandle.Transform.Position = translation;
             //Align the first control handle
-            if (KeyEventInfo.State.KeyCtrl)
+            if (KeyEventInfo.KeyCtrl)
                 nextHandle.Transform.Position = this.Transform.Position - handleAligned;
 
             UpdateMatrices();

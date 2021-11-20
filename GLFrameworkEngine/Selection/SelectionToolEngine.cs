@@ -14,15 +14,15 @@ namespace GLFrameworkEngine
         SelectionBox SelectionBox = null;
         SelectionCircle SelectionCircle = null;
 
-        public void OnKeyDown(GLContext context, KeyEventInfo e)
+        public void OnKeyDown(GLContext context)
         {
             if (IsActive)
                 return;
 
             //Shortcuts for selection tools
-            if (!e.KeyCtrl && e.IsKeyDown(InputSettings.INPUT.Scene.SelectionBox))
+            if (!KeyEventInfo.KeyCtrl && KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.SelectionBox))
                 SelectionBox = new SelectionBox();
-            if (!e.KeyCtrl && e.IsKeyDown(InputSettings.INPUT.Scene.SelectionCircle))
+            if (!KeyEventInfo.KeyCtrl && KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.SelectionCircle))
             {
                 SelectionCircle = new SelectionCircle();
                 SelectionCircle?.Start(context,
@@ -31,63 +31,63 @@ namespace GLFrameworkEngine
             }
         }
 
-        public void OnMouseWheel(GLContext context, MouseEventInfo e)
+        public void OnMouseWheel(GLContext context)
         {
             //Resize the selection tools
-            SelectionCircle?.Resize(e.Delta);
+            SelectionCircle?.Resize(MouseEventInfo.Delta);
         }
 
-        public void OnMouseMove(GLContext context, MouseEventInfo e)
+        public void OnMouseMove(GLContext context)
         {
             //During selection mode, the user can freely create a box during a mouse down/move
             if (IsSelectionMode && previousMouseDown != Vector2.Zero && SelectionBox == null) {
                 //Check for the mouse to actually move to create a selection box
-                var delta = previousMouseDown - new Vector2(e.X, e.Y);
+                var delta = previousMouseDown - new Vector2(MouseEventInfo.X, MouseEventInfo.Y);
                 if (delta != Vector2.Zero)
                 {
                     SelectionBox = new SelectionBox();
-                    SelectionBox.StartSelection(context, e.X, e.Y);
+                    SelectionBox.StartSelection(context, MouseEventInfo.X, MouseEventInfo.Y);
                 }
             }
 
             //Apply selection
-            if (e.LeftButton == OpenTK.Input.ButtonState.Pressed)
-                SelectionCircle?.Apply(context, e.X, e.Y, true);
+            if (MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
+                SelectionCircle?.Apply(context, MouseEventInfo.X, MouseEventInfo.Y, true);
             //Apply deselection
-            if (e.MiddleButton == OpenTK.Input.ButtonState.Pressed)
-                SelectionCircle?.Apply(context, e.X, e.Y, false);
+            if (MouseEventInfo.MiddleButton == OpenTK.Input.ButtonState.Pressed)
+                SelectionCircle?.Apply(context, MouseEventInfo.X, MouseEventInfo.Y, false);
         }
 
         private Vector2 previousMouseDown;
 
-        public void OnMouseDown(GLContext context, MouseEventInfo e)
+        public void OnMouseDown(GLContext context)
         {
-            if (IsSelectionMode && e.LeftButton == OpenTK.Input.ButtonState.Pressed)
-                previousMouseDown = new Vector2(e.X, e.Y);
+            if (IsSelectionMode && MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
+                previousMouseDown = new Vector2(MouseEventInfo.X, MouseEventInfo.Y);
 
             //Start deselection
-            if (e.MiddleButton == OpenTK.Input.ButtonState.Pressed)
-                SelectionBox?.StartDeselection(context, e.X, e.Y);
+            if (MouseEventInfo.MiddleButton == OpenTK.Input.ButtonState.Pressed)
+                SelectionBox?.StartDeselection(context, MouseEventInfo.X, MouseEventInfo.Y);
             //Start selection
-            if (e.LeftButton == OpenTK.Input.ButtonState.Pressed)
-                SelectionBox?.StartSelection(context, e.X, e.Y);
+            if (MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
+                SelectionBox?.StartSelection(context, MouseEventInfo.X, MouseEventInfo.Y);
 
             //Disable selection tools
-            if (e.RightButton == OpenTK.Input.ButtonState.Pressed)
+            if (MouseEventInfo.RightButton == OpenTK.Input.ButtonState.Pressed)
             {
                 SelectionBox = null;
                 SelectionCircle = null;
             }
         }
 
-        public void OnMouseUp(GLContext context, MouseEventInfo e)
+        public void OnMouseUp(GLContext context)
         {
             previousMouseDown = new Vector2(0, 0);
 
             //Apply then disable selection tools
-            if (e.LeftButton == OpenTK.Input.ButtonState.Released)
+            if (MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Released)
             {
-                SelectionBox?.Apply(context, e.X, e.Y);
+                SelectionBox?.Apply(context, MouseEventInfo.X, MouseEventInfo.Y);
             }
             SelectionBox = null;
         }

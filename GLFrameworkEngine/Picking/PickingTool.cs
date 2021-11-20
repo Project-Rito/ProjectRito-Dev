@@ -37,27 +37,27 @@ namespace GLFrameworkEngine
         private bool hoverSelection = false;
         private bool useEyeDropper = false;
 
-        public void OnMouseDown(GLContext context, MouseEventInfo e)
+        public void OnMouseDown(GLContext context)
         {
             //Use the eye dropper tool if enabled and skip the normal picking mode.
             if (UseEyeDropper) {
-                UseEyeDropPickerTool(context, e);
+                UseEyeDropPickerTool(context);
                 return;
             }
 
-            if (e.LeftButton == OpenTK.Input.ButtonState.Pressed)
-                PickScene(context, e, true);
+            if (MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
+                PickScene(context, true);
         }
 
-        public void OnMouseMove(GLContext context, MouseEventInfo e)
+        public void OnMouseMove(GLContext context)
         {
             if (hoverSelection)
-                PickScene(context, e, false);
+                PickScene(context, false);
         }
 
-        private void UseEyeDropPickerTool(GLContext context, MouseEventInfo e)
+        private void UseEyeDropPickerTool(GLContext context)
         {
-            Vector2 position = new Vector2(e.Position.X, context.Height - e.Position.Y);
+            Vector2 position = new Vector2(MouseEventInfo.Position.X, context.Height - MouseEventInfo.Position.Y);
             var pickable = context.Scene.FindPickableAtPosition(context, position);
             //When the eye picker tool is used, this event should be subscribed to use the tool.
             if (pickable != null)
@@ -66,9 +66,9 @@ namespace GLFrameworkEngine
             UseEyeDropper = false;
         }
 
-        public void OnMouseUp(GLContext context, MouseEventInfo e) { }
+        public void OnMouseUp(GLContext context) { }
 
-        public void PickScene(GLContext context, MouseEventInfo e, bool selectAction)
+        public void PickScene(GLContext context, bool selectAction)
         {
             //Don't pick during a selection tool or an active transformation
             if (context.SelectionTools.IsActive || context.TransformTools.IsActive || !this.Enabled)
@@ -88,7 +88,7 @@ namespace GLFrameworkEngine
             if (!context.ColorPicker.EnablePicking)
                 return;
 
-            Vector2 position = new Vector2(e.Position.X, context.Height - e.Position.Y);
+            Vector2 position = new Vector2(MouseEventInfo.Position.X, context.Height - MouseEventInfo.Position.Y);
             var pickable = (ITransformableObject)context.Scene.FindPickableAtPosition(context, position);
             if (pickable != null && pickable.CanSelect)
             {
@@ -106,7 +106,7 @@ namespace GLFrameworkEngine
 
                 //Update the transform handler 
                 if (context.TransformTools.ActiveActions.Count > 0)
-                    context.TransformTools.OnMouseDown(context, e, true);
+                    context.TransformTools.OnMouseDown(context, true);
             }
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);

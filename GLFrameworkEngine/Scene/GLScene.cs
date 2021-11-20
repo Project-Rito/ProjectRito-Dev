@@ -127,24 +127,24 @@ namespace GLFrameworkEngine
         }
 
 
-        public void OnMouseDown(GLContext context, MouseEventInfo e) {
-            if (KeyEventInfo.State.KeyAlt && e.LeftButton == OpenTK.Input.ButtonState.Pressed)
-                SetCursor(context, e.X, e.Y);
+        public void OnMouseDown(GLContext context) {
+            if (KeyEventInfo.KeyAlt && MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
+                SetCursor(context, MouseEventInfo.X, MouseEventInfo.Y);
 
             foreach (IDrawableInput ob in Objects.Where(x => x is IDrawableInput))
-                ob.OnMouseDown(e);
+                ob.OnMouseDown();
         }
 
-        public void OnMouseMove(GLContext context, MouseEventInfo e)
+        public void OnMouseMove(GLContext context)
         {
             foreach (IDrawableInput ob in Objects.Where(x => x is IDrawableInput))
-                ob.OnMouseMove(e);
+                ob.OnMouseMove();
         }
 
-        public void OnMouseUp(GLContext context, MouseEventInfo e)
+        public void OnMouseUp(GLContext context)
         {
             foreach (IDrawableInput ob in Objects.Where(x => x is IDrawableInput))
-                ob.OnMouseUp(e);
+                ob.OnMouseUp();
         }
 
         public ITransformableObject FindPickableAtPosition(GLContext context, Vector2 point) {

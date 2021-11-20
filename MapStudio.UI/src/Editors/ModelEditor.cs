@@ -127,10 +127,10 @@ namespace MapStudio.UI
 
         }
 
-        public void OnMouseMove(MouseEventInfo mouseInfo) { }
-        public void OnMouseDown(MouseEventInfo mouseInfo) { }
-        public void OnMouseUp(MouseEventInfo mouseInfo) { }
-        public void OnKeyDown(KeyEventInfo keyEventInfo) { }
+        public void OnMouseMove() { }
+        public void OnMouseDown() { }
+        public void OnMouseUp() { }
+        public void OnKeyDown() { }
 
         public void OnSave(ProjectResources resources)
         {

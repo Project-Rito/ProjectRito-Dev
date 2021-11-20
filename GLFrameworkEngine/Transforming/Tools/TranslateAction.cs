@@ -138,7 +138,7 @@ namespace GLFrameworkEngine
                 var rotation = previousTransforms[i].Rotation;
 
                 //Support automatic collision connection if enabled
-                if (settings.CollisionDetect && !KeyEventInfo.State.KeyAlt)
+                if (settings.CollisionDetect && !KeyEventInfo.KeyAlt)
                 {
                     CollisionDetection.SetObjectToCollision(context, rayCaster, ref newPosition, ref rotation);
                     targetTransform.Rotation = rotation;

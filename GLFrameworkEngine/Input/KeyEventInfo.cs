@@ -9,17 +9,15 @@ namespace GLFrameworkEngine
 {
     public class KeyEventInfo
     {
-        public static KeyEventInfo State = new KeyEventInfo();
+        public static List<string> KeyChars { get; set; } = new List<string>();
 
-        public List<string> KeyChars { get; set; } = new List<string>();
+        public static bool HasKeyDown() => KeyChars.Count > 0;
 
-        public bool HasKeyDown() => KeyChars.Count > 0;
+        public static bool KeyShift { get; set; }
+        public static bool KeyCtrl { get; set; }
+        public static bool KeyAlt { get; set; }
 
-        public bool KeyShift { get; set; }
-        public bool KeyCtrl { get; set; }
-        public bool KeyAlt { get; set; }
-
-        public bool IsKeyDown(string key) {
+        public static bool IsKeyDown(string key) {
             if (KeyCtrl && key.StartsWith("Ctrl+"))
                 return KeyChars.Contains(key.Split("+").Last());
             if (KeyShift && key.StartsWith("Shift+"))

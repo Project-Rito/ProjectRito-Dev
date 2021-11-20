@@ -10,23 +10,22 @@ namespace GLFrameworkEngine
 {
     public class MouseEventInfo
     {
-        public bool HasValue { get; set; } = true;
-        public bool CursorVisible { get; set; } = true;
+        public static bool HasValue { get; set; } = true;
 
-        public int X => Position.X;
-        public int Y => Position.Y;
+        public static int X => Position.X;
+        public static int Y => Position.Y;
 
-        public System.Drawing.Point Position { get; set; } // Setting does not affect OS mouse position because of some scaling differences between ImGui and OpenTK. Use FullPosition instead.
+        public static System.Drawing.Point Position { get; set; } // Setting does not affect OS mouse position because of some scaling differences between ImGui and OpenTK. Use FullPosition instead.
 
-        public System.Drawing.Point FullPosition { get; set; }
+        public static System.Drawing.Point FullPosition { get; set; }
 
-        public ButtonState RightButton { get; set; }
-        public ButtonState LeftButton { get; set; }
-        public ButtonState MiddleButton { get; set; }
+        public static ButtonState RightButton { get; set; }
+        public static ButtonState LeftButton { get; set; }
+        public static ButtonState MiddleButton { get; set; }
 
-        public float Delta { get; set; }
+        public static float Delta { get; set; }
 
-        public float WheelPrecise { get; set; }
+        public static float WheelPrecise { get; set; }
 
         public static Cursor MouseCursor = Cursor.Arrow;
 
@@ -35,6 +34,8 @@ namespace GLFrameworkEngine
             Arrow,
             Eraser,
             EyeDropper,
+            None,
+            Default,
         }
     }
 }

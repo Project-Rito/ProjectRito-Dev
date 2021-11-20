@@ -239,7 +239,8 @@ namespace MapStudio.UI
                         {
                             bool isSelected = inputValue == val;
                             string cblabel = val.ToString();
-                            if (IconManager.HasIcon(cblabel)) {
+                            if (IconManager.HasIcon(cblabel))
+                            {
                                 IconManager.DrawIcon(cblabel, 22); ImGui.SameLine();
                             }
 
@@ -323,9 +324,18 @@ namespace MapStudio.UI
             {
                 var inputValue = (OpenTK.Vector3)property.GetValue(obj);
                 var vec3 = new Vector3(inputValue.X, inputValue.Y, inputValue.Z);
+                //Apply preview scale for transform types
+                if (obj is GLFrameworkEngine.GLTransform && property.Name == "Position")
+                    vec3 /= GLFrameworkEngine.GLContext.PreviewScale;
+
                 if (ImGui.DragFloat3(label, ref vec3))
                 {
-                    propertyEdit.Value = new OpenTK.Vector3(vec3.X, vec3.Y, vec3.Z);
+                    var output = new OpenTK.Vector3(vec3.X, vec3.Y, vec3.Z);
+                    if (obj is GLFrameworkEngine.GLTransform && property.Name == "Position")
+                        output *= GLFrameworkEngine.GLContext.PreviewScale;
+
+                    propertyEdit.Value = output;
+
                 }
             }
             if (readOnly)
