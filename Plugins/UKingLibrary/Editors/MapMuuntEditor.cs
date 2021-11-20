@@ -88,7 +88,7 @@ namespace UKingLibrary
         public Dictionary<uint, MapObject> Objs = new Dictionary<uint, MapObject>();
         public Dictionary<uint, RailPathData> Rails = new Dictionary<uint, RailPathData>();
 
-        public void LoadFile(dynamic mubinRoot, string fileName, bool isStatic)
+        public void LoadFile(ref dynamic mubinRoot, string fileName, bool isStatic)
         {
             Dictionary<string, NodeBase> nodeFolders = new Dictionary<string, NodeBase>();
 
@@ -226,7 +226,7 @@ namespace UKingLibrary
             }
         }
 
-        public void SaveFile(dynamic mubinRoot, bool isStatic)
+        public void SaveFile(ref dynamic mubinRoot, bool isStatic)
         {
             List<dynamic> objs = new List<dynamic>();
             List<dynamic> rails = new List<dynamic>();

@@ -53,11 +53,12 @@ namespace UKingLibrary
         }
 
         public void Save(Stream stream) {
+            Workspace.ActiveWorkspace.ActiveEditor = Editor;
             //Save the editor data
             if (DungeonLoader != null)
                 DungeonLoader.Save(stream);
             else
-                FieldMapLoader.Save(stream);
+                FieldMapLoader.Save(stream, (MapMuuntEditor)Editor);
         }
 
         public void Dispose()

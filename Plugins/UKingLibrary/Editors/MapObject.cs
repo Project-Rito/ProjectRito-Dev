@@ -292,9 +292,9 @@ namespace UKingLibrary
             {
                 BymlHelper.SetValue(Properties, key, new List<float>()
                 {
-                    Render.Transform.Scale.X,
-                    Render.Transform.Scale.Y,
-                    Render.Transform.Scale.Z,
+                    value.X,
+                    value.Y,
+                    value.Z,
                 });
             }
         }

@@ -59,7 +59,7 @@ namespace UKingLibrary
 
             GlobalData.LoadActorDatabase();
 
-            editor.LoadFile(MapData.RootNode, plugin.FileInfo.FileName, true);
+            editor.LoadFile(ref MapData.RootNode, plugin.FileInfo.FileName, true);
             //LoadProdInfo(editor);
 
             Workspace.ActiveWorkspace.Windows.Add(new ActorLinkNodeUI());
@@ -86,10 +86,11 @@ namespace UKingLibrary
             }
         }
 
-        public void Save(Stream stream)
+        public void Save(Stream stream, MapMuuntEditor editor)
         {
             //Save the map data
-            ByamlFile.SaveN(stream, MapData.RootNode);
+            editor.SaveFile(ref MapData.RootNode, true);
+            ByamlFile.SaveN(stream, MapData);
         }
 
         private void CacheBackgroundFiles()
