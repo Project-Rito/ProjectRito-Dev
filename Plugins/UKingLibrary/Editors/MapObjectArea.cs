@@ -25,7 +25,8 @@ namespace UKingLibrary
         public AreaShapes Shape
         {
             get {
-                if (!Properties.ContainsKey("Shape"))
+
+                if (!Parameters.ContainsKey("Shape"))
                     return AreaShapes.Box;
 
                 return Enum.Parse(typeof(AreaShapes), Parameters["Shape"]); }

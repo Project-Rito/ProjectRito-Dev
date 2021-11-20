@@ -19,10 +19,8 @@ namespace UKingLibrary.Rendering
         public Vector4 Color = Vector4.One;
         public Vector4 FillColor = new Vector4(0.4f, 0.7f, 1.0f, 0.3f);
 
-        CubeCrossedRenderer CubeOutlineRender = null;
-        CubeRenderer CubeFilledRenderer = null;
-
-        SphereRender SphereRenderer = null;
+        RenderMesh<VertexPositionNormal> OutlineRenderer = null;
+        RenderMesh<VertexPositionNormal> FillRenderer = null;
 
         //Area boxes have an inital transform
         static Matrix4 InitalTransform => new Matrix4(
@@ -66,17 +64,7 @@ namespace UKingLibrary.Rendering
 
             //Thicker picking region
             GL.LineWidth(32);
-            switch (AreaShape)
-            {
-                case AreaShapes.Sphere:
-                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-                    SphereRenderer.DrawPicking(context, this, InitalTransform * Transform.TransformMatrix);
-                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-                    break;
-                default:
-                    CubeOutlineRender.DrawPicking(context, this, InitalTransform * Transform.TransformMatrix);
-                    break;
-            }
+            OutlineRenderer.DrawPicking(context, this, InitalTransform * Transform.TransformMatrix);
             GL.LineWidth(1);
         }
 
@@ -94,21 +82,15 @@ namespace UKingLibrary.Rendering
             {
                 GLMaterialBlendState.TranslucentAlphaOne.RenderBlendState();
                 GLMaterialBlendState.TranslucentAlphaOne.RenderDepthTest();
-                switch (AreaShape)
-                {
-                    case AreaShapes.Sphere:
-                        SphereRenderer.DrawSolid(context, InitalTransform * Transform.TransformMatrix, new Vector4(Color.Xyz, 0.1f));
-                        break;
-                    default:
-                        CubeFilledRenderer.DrawSolid(context, InitalTransform * Transform.TransformMatrix, new Vector4(Color.Xyz, 0.1f));
-                        break;
-                }
+                FillRenderer.DrawSolid(context, InitalTransform * Transform.TransformMatrix, new Vector4(Color.Xyz, 0.1f));
                 GLMaterialBlendState.Opaque.RenderBlendState();
                 GLMaterialBlendState.Opaque.RenderDepthTest();
             }
 
             //Draw lines of the region
             GL.LineWidth(1);
+            OutlineRenderer.DrawSolidWithSelection(context, InitalTransform * Transform.TransformMatrix, Color, IsSelected | IsHovered);
+            /*
             switch (AreaShape)
             {
                 case AreaShapes.Sphere:
@@ -117,34 +99,33 @@ namespace UKingLibrary.Rendering
                     GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
                     break;
                 default:
-                    CubeOutlineRender.DrawSolidWithSelection(context, InitalTransform * Transform.TransformMatrix, Color, IsSelected | IsHovered);
+                    OutlineRenderer.DrawSolidWithSelection(context, InitalTransform * Transform.TransformMatrix, Color, IsSelected | IsHovered);
                     break;
             }
+            */
             GL.Enable(EnableCap.CullFace);
         }
 
         private void Prepare()
         {
+            if (OutlineRenderer == null)
+                OutlineRenderer = new CubeCrossedRenderer(1, PrimitiveType.LineStrip);
             if (AreaShape == AreaShapes.Sphere)
             {
-                if (SphereRenderer == null)
-                    SphereRenderer = new SphereRender(1, 10, 10);
+                if (FillRenderer == null)
+                    FillRenderer = new SphereRender(1, 10, 10);
+                
             }
-            else
-            {
-                if (CubeOutlineRender == null)
-                    CubeOutlineRender = new CubeCrossedRenderer(1, PrimitiveType.LineStrip);
-                if (CubeFilledRenderer == null)
-                    CubeFilledRenderer = new CubeRenderer(1);
+            else {
+                if (FillRenderer == null)
+                    FillRenderer = new CubeRenderer(1);
             }
         }
 
         public override void Dispose()
         {
-            CubeOutlineRender?.Dispose();
-            CubeFilledRenderer?.Dispose();
-
-            SphereRenderer?.Dispose();
+            OutlineRenderer?.Dispose();
+            FillRenderer?.Dispose();
         }
 
         class CubeCrossedRenderer : RenderMesh<VertexPositionNormal>
