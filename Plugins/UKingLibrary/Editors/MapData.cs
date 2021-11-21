@@ -16,6 +16,9 @@ namespace UKingLibrary
 
         public List<NodeBase> Nodes = new List<NodeBase>();
 
+        public NodeBase ObjectFolder = new NodeBase(TranslationSource.GetText("OBJECTS"));
+        public NodeBase RailFolder = new NodeBase(TranslationSource.GetText("RAIL_PATHS"));
+
         BymlFileData Byaml;
 
         public MapData() { }
@@ -33,9 +36,6 @@ namespace UKingLibrary
             Byaml = byaml;
 
             Dictionary<string, NodeBase> nodeFolders = new Dictionary<string, NodeBase>();
-
-            NodeBase ObjectFolder = new NodeBase(TranslationSource.GetText("OBJECTS"));
-            NodeBase RailFolder = new NodeBase(TranslationSource.GetText("RAIL_PATHS"));
 
             NodeBase folder = new NodeBase(fileName);
             folder.AddChild(ObjectFolder);
