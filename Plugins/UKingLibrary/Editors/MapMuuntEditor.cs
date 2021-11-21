@@ -137,10 +137,10 @@ namespace UKingLibrary
             NodeBase parent = null;
             if (profile != null)
             {
-                var folder = Nodes.FirstOrDefault(x => x.Header == profile);
+                var folder = mapData.ObjectFolder.Children.FirstOrDefault(x => x.Header == profile);
                 if (folder == null) {
                     folder = new NodeBase(profile);
-                    Nodes.Add(folder);
+                    mapData.ObjectFolder.Children.Add(folder);
                 }
                 parent = folder;
             }
