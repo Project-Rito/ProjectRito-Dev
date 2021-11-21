@@ -66,9 +66,9 @@ namespace CafeLibrary.Rendering
         {
             var pos = GetClosestPosition(context);
 
-            if (!context.Camera.InRange(pos, 100000) && LODMeshes.Count > 1)
+            if (!context.Camera.InRange(pos, BfresRender.LOD_LEVEL_1_DISTANCE * GLContext.PreviewScale) && LODMeshes.Count > 1)
                 return 1;
-            if (!context.Camera.InRange(pos, 1000000) && LODMeshes.Count > 2)
+            if (!context.Camera.InRange(pos, BfresRender.LOD_LEVEL_2_DISTANCE * GLContext.PreviewScale) && LODMeshes.Count > 2)
                 return 2;
             return 0;
         }
