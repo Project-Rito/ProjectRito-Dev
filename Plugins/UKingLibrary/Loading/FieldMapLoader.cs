@@ -15,7 +15,7 @@ namespace UKingLibrary
     {
         public MuuntByamlPlugin MubinPlugin;
 
-        public BymlFileData MapData;
+        public List<MapData> MapFiles = new List<MapData>();
         public SARC TitleBG;
         public Terrain Terrain;
 
@@ -55,11 +55,13 @@ namespace UKingLibrary
             }
 
             ProcessLoading.Instance.Update(60, 100, "Loading map units");
-            MapData = ByamlFile.LoadN(stream);
 
             GlobalData.LoadActorDatabase();
 
-            editor.LoadFile(ref MapData.RootNode, plugin.FileInfo.FileName, true);
+            var mapData = new MapData(stream, plugin.FileInfo.FileName);
+            MapFiles.Add(mapData);
+
+            editor.Load(MapFiles);
             //LoadProdInfo(editor);
 
             Workspace.ActiveWorkspace.Windows.Add(new ActorLinkNodeUI());
@@ -86,11 +88,11 @@ namespace UKingLibrary
             }
         }
 
-        public void Save(Stream stream, MapMuuntEditor editor)
+        public void Save(Stream stream)
         {
             //Save the map data
-            editor.SaveFile(ref MapData.RootNode, true);
-            ByamlFile.SaveN(stream, MapData);
+           // foreach (var map in MapFiles)
+              //  map.Save();
         }
 
         private void CacheBackgroundFiles()

@@ -15,8 +15,8 @@ namespace UKingLibrary
     {
         public MuuntByamlPlugin MubinPlugin;
 
-        public BymlFileData MapStaticData;
-        public BymlFileData MapDynamicData;
+        List<MapData> MapFiles = new List<MapData>();
+
         public SARC DungeonData;
 
         public ProdInfo ClusteringInstances;
@@ -39,10 +39,6 @@ namespace UKingLibrary
 
             //Load mubin data from sarc
             ProcessLoading.Instance.Update(20, 100, "Loading map units");
-            //Static and dynamic actors
-            MapStaticData = ByamlFile.LoadN(new MemoryStream(GetMubin("Static")));
-            MapDynamicData = ByamlFile.LoadN(new MemoryStream(GetMubin("Dynamic")));
-
             TeraTreeInstances = new ProdInfo(new MemoryStream(GetBlwp("TeraTree")));
             ClusteringInstances = new ProdInfo(new MemoryStream(GetBlwp("Clustering")));
 
@@ -51,12 +47,14 @@ namespace UKingLibrary
             //Global actor list
             GlobalData.LoadActorDatabase();
 
-            //Load into muunt editor
-            editor.LoadFile(MapStaticData.RootNode,  $"{DungeonName}_Static.smubin", true);
-            editor.LoadFile(MapDynamicData.RootNode, $"{DungeonName}_Dynamic.smubin", false);
+            //Static and dynamic actors
+            MapFiles.Add(new MapData(new MemoryStream(GetMubin("Static")), $"{DungeonName}_Static.smubin"));
+            MapFiles.Add(new MapData(new MemoryStream(GetMubin("Dynamic")), $"{DungeonName}_Dynamic.smubin"));
 
-            editor.LoadProd(ClusteringInstances, $"{DungeonName}_Clustering.sblwp");
-            editor.LoadProd(TeraTreeInstances, $"{DungeonName}_TeraTree.sblwp");
+            //Load into muunt editor
+            editor.Load(MapFiles);
+            //editor.LoadProd(ClusteringInstances, $"{DungeonName}_Clustering.sblwp");
+            //editor.LoadProd(TeraTreeInstances, $"{DungeonName}_TeraTree.sblwp");
 
             //Load model data into editor
             var render = new BfresRender(new MemoryStream(GetModel()), $"DgnMrgPrt_{DungeonName}.sbfres", null);

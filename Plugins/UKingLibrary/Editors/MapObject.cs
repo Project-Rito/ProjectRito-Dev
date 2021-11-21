@@ -17,8 +17,6 @@ namespace UKingLibrary
 {
     public class MapObject : ActorBase
     {
-        public bool IsStatic { get; set; }
-
         /// <summary>
         /// Properties related to the object instance.
         /// </summary>
@@ -88,7 +86,7 @@ namespace UKingLibrary
         /// <summary>
         /// Loads all the actor data into the scene.
         /// </summary>
-        public void LoadActor(MapMuuntEditor editor, dynamic obj, dynamic actor, NodeBase parent)
+        public void LoadActor(dynamic obj, dynamic actor, NodeBase parent)
         {
             Properties = obj;
             ActorInfo = actor;

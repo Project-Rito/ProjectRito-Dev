@@ -44,7 +44,6 @@ namespace UKingLibrary
                 if (subEditor != value)
                 {
                     subEditor = value;
-                    FilterActorProfiles(value);
                 }
             }
         }
@@ -85,123 +84,20 @@ namespace UKingLibrary
             return new List<MenuItemModel>();
         }
 
-        public Dictionary<uint, MapObject> Objs = new Dictionary<uint, MapObject>();
-        public Dictionary<uint, RailPathData> Rails = new Dictionary<uint, RailPathData>();
+        private List<MapData> MapFiles;
 
-        public void LoadFile(ref dynamic mubinRoot, string fileName, bool isStatic)
+        public void Load(List<MapData> mapFiles)
         {
-            Dictionary<string, NodeBase> nodeFolders = new Dictionary<string, NodeBase>();
-
-            ActorProfiles.Clear();
-            ActorProfiles.Add("Default");
-
             //Allow actor objects to be loaded in the asset list
             Workspace.ActiveWorkspace.AddAssetCategory(new AssetViewMapObject());
 
-            NodeBase ObjectFolder = new NodeBase(TranslationSource.GetText("OBJECTS"));
-            NodeBase RailFolder = new NodeBase(TranslationSource.GetText("RAIL_PATHS"));
-
-            NodeBase folder = new NodeBase(fileName);
-            folder.AddChild(ObjectFolder);
-            folder.AddChild(RailFolder);
-
-            Nodes.Add(folder);
-
-            int numObjs = mubinRoot["Objs"].Count;
-
-            ProcessLoading.Instance.Update(70, 100, "Loading map objs");
-
-            foreach (var obj in     mubinRoot["Objs"]) // Your spacebar broken
-            {
-                var mapObj = (IDictionary<string, dynamic>)obj;
-                if (mapObj.ContainsKey("UnitConfigName"))
-                {
-                    string name = mapObj["UnitConfigName"];
-                    //Get the actor in the database
-                    var actor = GlobalData.Actors[name] as IDictionary<string, dynamic>;
-                    //Get the actor profile
-                    string profile = actor.ContainsKey("profile") ? (string)actor["profile"] : null;
-
-                    //Set nodebase parent as the profile assigned by actor
-                    NodeBase parent = null;
-                    if (profile != null)
-                    {
-                        if (!nodeFolders.ContainsKey(profile)) {
-                            nodeFolders.Add(profile, new NodeBase(profile));
-                            nodeFolders[profile].HasCheckBox = true; //Allow checking
-
-                            ActorProfiles.Add(profile);
-                        }
-                        parent = nodeFolders[profile];
-                    }
-
-                    //Setup properties for editing
-                    MapObject data = new MapObject();
-                    if (profile == "Area")
-                        data = new MapObjectArea();
-
-                    data.IsStatic = isStatic;
-                    data.LoadActor(this, mapObj, actor, parent);
-                    Objs.Add(data.HashId, data);
-                    //Add the renderable to the viewport
-                    data.AddToScene();
-                }
-            }
-
-            ProcessLoading.Instance.Update(90, 100, "Loading map rails");
-
-            foreach (var obj in mubinRoot["Rails"])
-            {
-                RailPathData data = new RailPathData();
-                data.IsStatic = isStatic;
-                data.LoadRail(this, obj, RailFolder);
-
-                string name = obj["UnitConfigName"];
-                if (obj.ContainsKey("UniqueName"))
-                    name = obj["UniqueName"];
-
-                data.PathRender.UINode.Header = name;
-                data.AddToScene();
-            }
-
             ToolWindowDrawer = new MubinToolSettings();
 
-            //Prepare object links
-            foreach (var obj in Objs.Values)
-            {
-                 if (obj.Properties.ContainsKey("LinksToObj")) {
-                    foreach (IDictionary<string, dynamic> link in obj.Properties["LinksToObj"]) {
-                        uint dest = link["DestUnitHashId"];
-                        //Rendered links
-                        obj.Render.DestObjectLinks.Add(Objs[dest].Render);
-                        //Add a link instance aswell for keeping track of both source and dest links
-                        obj.AddLink(new MapObject.LinkInstance()
-                        {
-                            Properties = link,
-                            Object = Objs[dest],
-                        });
+            MapFiles = mapFiles;
 
-                        //Set LODs
-                        if (link["DefinitionName"] == "PlacementLOD")
-                            Objs[dest].Render.IsVisible = false;
-                    }
-                }
-            }
-
-            //Load all the outliner nodes into the editor
-            foreach (var node in nodeFolders.OrderBy(x => x.Key))
-                ObjectFolder.AddChild(node.Value);
-
-            // Todo - set camera position to map pos
-            if (mubinRoot.ContainsKey("LocationPosX") && mubinRoot.ContainsKey("LocationPosZ"))
-            {
-                float posX = mubinRoot["LocationPosX"];
-                float posY = 150;
-                float posZ = mubinRoot["LocationPosZ"];
-                GLContext.ActiveContext.Camera.TargetPosition = new OpenTK.Vector3(posX, posY, posZ) * GLContext.PreviewScale;
-            }
-
-            ProcessLoading.Instance.Update(100, 100, "Finished!");
+            this.Nodes.Clear();
+            foreach (var map in mapFiles)
+                this.Nodes.AddRange(map.Nodes);
         }
 
         public void LoadProd(ProdInfo prodInfo, string fileName)
@@ -226,50 +122,12 @@ namespace UKingLibrary
             }
         }
 
-        public void SaveFile(ref dynamic mubinRoot, bool isStatic)
-        {
-            List<dynamic> objs = new List<dynamic>();
-            List<dynamic> rails = new List<dynamic>();
-
-            //Save actors in order by their hash ID
-            foreach (var obj in Objs.OrderBy(x => x.Key)) {
-                if (obj.Value.IsStatic != isStatic)
-                    continue;
-
-                obj.Value.SaveActor();
-                //Add objs
-                objs.Add(obj.Value.Properties);
-            }
-            //Save rails in order by their hash ID
-            foreach (var rail in Rails.OrderBy(x => x.Key)) {
-                if (rail.Value.IsStatic != isStatic)
-                    continue;
-
-                rail.Value.SaveRail();
-                //Add rails
-                rails.Add(rail.Value.Properties);
-            }
-            //Apply the object and rails to the file
-            BymlHelper.SetValue(mubinRoot, "Objs", objs);
-            BymlHelper.SetValue(mubinRoot, "Rails", rails);
-        }
-
-        void FilterActorProfiles(string text)
-        {
-            foreach (var objData in Objs.Values)
-            {
-                //Toggle visiblity based on the profile tag
-                if (objData.ActorInfo["profile"] == text || text == "Default")
-                    objData.Render.CanSelect = true;
-                else
-                    objData.Render.CanSelect = false;
-            }
-        }
-
         public void AssetViewportDrop(AssetItem item, Vector2 screenCoords) 
         {
             if (!(item.Tag is IDictionary<string, dynamic>))
                 return;
+
+            var mapData = MapFiles.FirstOrDefault();
 
             //Actor data attached to map object assets
             var actorInfo = item.Tag as IDictionary<string, dynamic>;
@@ -290,10 +148,10 @@ namespace UKingLibrary
             var name = actorInfo["name"];
             //Create the actor data and add it to the scene
             var obj = new MapObject();
-            var index = Objs.Count;
+            var index = mapData.Objs.Count;
             obj.CreateNew(Crc32.Compute($"ID{index}"), name);
-            obj.LoadActor(this, obj.Properties, actorInfo, parent);
-            Objs.Add(obj.HashId, obj);
+            obj.LoadActor(obj.Properties, actorInfo, parent);
+            mapData.Objs.Add(obj.HashId, obj);
             //Add to the viewport scene
             obj.AddToScene();
 
@@ -325,18 +183,19 @@ namespace UKingLibrary
         public void OnKeyDown() {
             GLContext.ActiveContext.Scene.BeginUndoCollection();
 
-            foreach (var rail in Rails.Values)
-                rail.OnKeyDown();
+            foreach (var mubin in MapFiles)
+            {
+                foreach (var rail in mubin.Rails.Values)
+                    rail.OnKeyDown();
+            }
 
             GLContext.ActiveContext.Scene.EndUndoCollection();
         }
 
         public void Dispose()
         {
-            foreach (var objData in Objs.Values)
-                objData.Render?.Dispose();
-            foreach (var rail in Rails.Values)
-                rail.PathRender?.Dispose();
+            foreach (var mubin in MapFiles)
+                mubin.Dispose();
         }
     }
 }

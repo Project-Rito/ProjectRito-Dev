@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using Toolbox.Core;
 using Toolbox.Core.IO;
 using System.IO;
@@ -38,6 +38,17 @@ namespace CafeLibrary
         public SARC()
         {
             FileInfo = new File_Info();
+        }
+
+
+        public Stream TryGetFileStream(string fullPath)
+        {
+            string fileName = Path.GetFileName(fullPath);
+            var file = files.FirstOrDefault(x => x.FileName == fileName);
+            if (file != null)
+                return file.FileData;
+
+            return null;
         }
 
         public static byte[] GetFile(string sarcPath, string file)

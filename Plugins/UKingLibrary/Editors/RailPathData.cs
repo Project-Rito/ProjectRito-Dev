@@ -11,8 +11,6 @@ namespace UKingLibrary
 {
     public class RailPathData
     {
-        public bool IsStatic { get; set; }
-
         public RenderablePath PathRender = new RenderablePath();
 
         public IDictionary<string, dynamic> Properties;
@@ -35,7 +33,7 @@ namespace UKingLibrary
             set { Properties["RailType"] = value; }
         }
 
-        public void LoadRail(MapMuuntEditor editor, IDictionary<string, dynamic> properties, NodeBase parent)
+        public void LoadRail(MapData mapData, IDictionary<string, dynamic> properties, NodeBase parent)
         {
             RenderablePath.BezierArrowLength = 2;
             RenderablePath.BezierLineWidth = 2;
@@ -52,12 +50,12 @@ namespace UKingLibrary
             PathRender.AddCallback += delegate
             {
                 parent.AddChild(PathRender.UINode);
-                editor.Rails.Add(HashId, this);
+                mapData.Rails.Add(HashId, this);
             };
             PathRender.RemoveCallback += delegate
             {
                 parent.Children.Remove(PathRender.UINode);
-                editor.Rails.Remove(HashId);
+                mapData.Rails.Remove(HashId);
             };
 
             PathRender.Loop = this.IsClosed;
