@@ -452,36 +452,36 @@ namespace GLFrameworkEngine
 
         public void OnKeyDown(GLContext context)
         {
-            bool multiAxis = KeyEventInfo.KeyCtrl;
+            bool multiAxis = KeyInfo.EventInfo.KeyCtrl;
 
             //Axis set
             if (multiAxis)
             {
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisX)) UpdateAxis(context, Axis.YZ);
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisY)) UpdateAxis(context, Axis.XZ);
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisZ)) UpdateAxis(context, Axis.XY);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisX)) UpdateAxis(context, Axis.YZ);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisY)) UpdateAxis(context, Axis.XZ);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisZ)) UpdateAxis(context, Axis.XY);
             }
             else
             {
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisX)) UpdateAxis(context, Axis.X);
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisY)) UpdateAxis(context, Axis.Y);
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisZ)) UpdateAxis(context, Axis.Z);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisX)) UpdateAxis(context, Axis.X);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisY)) UpdateAxis(context, Axis.Y);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisZ)) UpdateAxis(context, Axis.Z);
             }
 
-            if (!KeyEventInfo.KeyCtrl)
+            if (!KeyInfo.EventInfo.KeyCtrl)
             {
                 //SRT action set
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.TranslateGizmo)) UpdateTransformMode(TransformActions.Translate);
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.RotateGizmo)) UpdateTransformMode(TransformActions.Rotate);
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.ScaleGizmo)) UpdateTransformMode(TransformActions.Scale);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.TranslateGizmo)) UpdateTransformMode(TransformActions.Translate);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.RotateGizmo)) UpdateTransformMode(TransformActions.Rotate);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.ScaleGizmo)) UpdateTransformMode(TransformActions.Scale);
 
                 //SRT action starting
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.Scale)) DragTransformAction(context, TransformActions.Scale);
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.Rotate)) DragTransformAction(context, TransformActions.Rotate);
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Transform.Translate)) DragTransformAction(context, TransformActions.Translate);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.Scale)) DragTransformAction(context, TransformActions.Scale);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.Rotate)) DragTransformAction(context, TransformActions.Rotate);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.Translate)) DragTransformAction(context, TransformActions.Translate);
             }
 
-            if (ActiveActions.Count > 0 && !KeyEventInfo.KeyCtrl)
+            if (ActiveActions.Count > 0 && !KeyInfo.EventInfo.KeyCtrl)
             {
                 TextInput();
                 if (!string.IsNullOrEmpty(textInput)) {
@@ -502,13 +502,13 @@ namespace GLFrameworkEngine
         private void TextInput()
         {
             for (char i = '0'; i <= '9'; i++) {
-                if (KeyEventInfo.IsKeyDown(i.ToString())) {
+                if (KeyInfo.EventInfo.IsKeyDown(i.ToString())) {
                     textInput += i.ToString();
                 }
             }
-            if (KeyEventInfo.IsKeyDown($"backspace") && textInput.Length > 0)
+            if (KeyInfo.EventInfo.IsKeyDown($"backspace") && textInput.Length > 0)
                 textInput = textInput.Remove(textInput.Length - 1);
-            if (KeyEventInfo.IsKeyDown($"period"))
+            if (KeyInfo.EventInfo.IsKeyDown($"period"))
                 textInput += ".";
         }
 

@@ -35,7 +35,7 @@ namespace GLFrameworkEngine
                 return;
 
             //Create new connection
-            if (KeyEventInfo.KeyCtrl)
+            if (KeyInfo.EventInfo.KeyCtrl)
             {
                 //Check for a picked model during a linkable operation
                 Vector2 position = new Vector2(MouseEventInfo.Position.X, context.Height - MouseEventInfo.Position.Y);

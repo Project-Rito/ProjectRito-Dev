@@ -329,11 +329,11 @@ namespace GLFrameworkEngine
             LinkingTools.OnMouseUp(this);
         }
 
-        public void OnKeyDown(bool isRepeat)
+        public void OnKeyDown(KeyEventInfo e, bool isRepeat)
         {
             SelectionTools.OnKeyDown(this);
             TransformTools.OnKeyDown(this);
-            Scene.OnKeyDown(this);
+            Scene.OnKeyDown(e, this);
 
             if (!isRepeat)
                 Camera.KeyPress();
