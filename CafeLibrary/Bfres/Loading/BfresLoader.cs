@@ -51,70 +51,7 @@ namespace CafeLibrary.Rendering
                 else
                     return GetTextures(System.IO.File.OpenRead(filePath));
             }
-            else
-            {
-                var stream = GetNestedStream(filePath);
-                if (stream != null)
-                    return GetTextures(stream);
-            }
             return null;
-        }
-
-        /// <summary>
-        /// Gets a stream for a file inside one or more SARCs
-        /// </summary>
-        /// <param name="fullPath">The full path. Ex: C:/Example.sarc/Example.bfres</param>
-        /// <returns>A Stream object for usage, or null if no file is found.</returns>
-        static System.IO.Stream GetNestedStream(string fullPath)
-        {
-            string[] paths = SeperatePaths(fullPath);
-            if (File.Exists(paths[0]))
-            {
-                System.IO.Stream stream = System.IO.File.OpenRead(paths[0]);
-                var sarc = new SARC();
-                sarc.Load(stream);
-
-                foreach (var path in paths.Skip(1).SkipLast(1))
-                {
-                    foreach (var file in sarc.Files)
-                    {
-                        if (file.FileName == path)
-                        {
-                            stream = new System.IO.MemoryStream(file.AsBytes());
-                            sarc.Load(stream);
-                        }
-                    }
-
-                }
-                foreach (var file in sarc.Files)
-                {
-                    if (file.FileName == paths[paths.Length - 1])
-                        return new System.IO.MemoryStream(file.AsBytes());
-                }
-            }
-            return null;
-        }
-
-        static string[] SeperatePaths(string fullPath)
-        {
-            string[] paths = { };
-
-            int lastIndex = 0;
-            for (int i = fullPath.IndexOf('.'); i > -1; i = fullPath.IndexOf('.', i + 1))
-            {
-                int seperatorIndex = fullPath.IndexOf("\\", i);
-                if (seperatorIndex == -1)
-                {
-                    if (paths.Length > 0)
-                        return paths;
-                    else
-                        return new string[] { fullPath };
-                }
-                paths.Append(fullPath.Substring(lastIndex, seperatorIndex));
-
-                lastIndex = i;
-            }
-            return paths;
         }
 
         public static void LoadAnimations(BfresRender render, string filePath)
@@ -383,7 +320,7 @@ namespace CafeLibrary.Rendering
 
             for (int i = 0; i < positions.Data.Length; i++)
             {
-                var position = new Vector3(positions.Data[i].X, positions.Data[i].Y, positions.Data[i].Z) * GLContext.PreviewScale;
+                var position = new Vector3(positions.Data[i].X, positions.Data[i].Y, positions.Data[i].Z);
                 //Calculate in worldspace
                 if (shape.VertexSkinCount == 1)
                 {
@@ -396,6 +333,7 @@ namespace CafeLibrary.Rendering
                     var transform = modelRender.ModelData.Skeleton.Bones[shape.BoneIndex].Transform;
                     position = Vector3.TransformPosition(position, transform);
                 }
+                position *= GLContext.PreviewScale;
 
                 min.X = MathF.Min(min.X, position.X);
                 min.Y = MathF.Min(min.Y, position.Y);
