@@ -59,18 +59,18 @@ namespace GLFrameworkEngine
             bool hasSelection = this.GetSelectedPoints().Count > 0;
             bool isActive = this.IsActive;
 
-            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Extrude) && (hasSelection || isActive))
+            if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.Extrude) && (hasSelection || isActive))
                 this.ExtrudePointsFromSelected();
-            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Create) && isActive)
+            if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.Create) && isActive)
                 this.ExtrudePointsFromSelected(true, true);
 
             if (hasSelection)
             {
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Fill))
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.Fill))
                     this.FillSelectedPoints();
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Merge))
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.Merge))
                     this.MergeSelectedPoints();
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Insert))
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.Insert))
                     this.SubdivideSelectedPoints();
             }
         }

@@ -794,7 +794,7 @@ namespace MapStudio
                 }
             }
 
-            Workspace.ActiveWorkspace?.OnKeyDown(e.IsRepeat);
+            Workspace.ActiveWorkspace?.OnKeyDown(InputState.CreateKeyState(), e.IsRepeat);
         }
 
         protected override void OnFocusedChanged(EventArgs e)

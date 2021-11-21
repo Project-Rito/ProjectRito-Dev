@@ -20,9 +20,9 @@ namespace GLFrameworkEngine
                 return;
 
             //Shortcuts for selection tools
-            if (!KeyEventInfo.KeyCtrl && KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.SelectionBox))
+            if (!KeyInfo.EventInfo.KeyCtrl && KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.SelectionBox))
                 SelectionBox = new SelectionBox();
-            if (!KeyEventInfo.KeyCtrl && KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.SelectionCircle))
+            if (!KeyInfo.EventInfo.KeyCtrl && KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.SelectionCircle))
             {
                 SelectionCircle = new SelectionCircle();
                 SelectionCircle?.Start(context,

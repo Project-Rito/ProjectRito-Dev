@@ -12,37 +12,45 @@ namespace MapStudio.UI
     /// </summary>
     public class InputState
     {
+        
         public static void UpdateKeyState()
         {
-            KeyEventInfo.KeyChars.Clear();
+            KeyInfo.EventInfo = CreateKeyState();
+        }
 
-            KeyEventInfo.KeyShift = ImGui.GetIO().KeyShift;
-            KeyEventInfo.KeyCtrl = ImGui.GetIO().KeyCtrl;
-            KeyEventInfo.KeyAlt = ImGui.GetIO().KeyAlt;
+        public static KeyEventInfo CreateKeyState()
+        {
+            KeyEventInfo eventInfo = new KeyEventInfo();
+
+            eventInfo.KeyShift = ImGui.GetIO().KeyShift;
+            eventInfo.KeyCtrl = ImGui.GetIO().KeyCtrl;
+            eventInfo.KeyAlt = ImGui.GetIO().KeyAlt;
 
             int index = 0;
             for (char c = 'A'; c <= 'Z'; c++)
             {
-                if (Keyboard.GetState().IsKeyDown(Key.A + index)) KeyEventInfo.KeyChars.Add(c.ToString());
+                if (Keyboard.GetState().IsKeyDown(Key.A + index)) eventInfo.KeyChars.Add(c.ToString());
                 index++;
             }
             index = 0;
             for (char c = '0'; c <= '9'; c++)
             {
-                if (Keyboard.GetState().IsKeyDown(Key.Number0 + index)) KeyEventInfo.KeyChars.Add(c.ToString());
+                if (Keyboard.GetState().IsKeyDown(Key.Number0 + index)) eventInfo.KeyChars.Add(c.ToString());
                 index++;
             }
 
-            if (Keyboard.GetState().IsKeyDown(Key.Period)) KeyEventInfo.KeyChars.Add("period");
-            if (Keyboard.GetState().IsKeyDown(Key.Space)) KeyEventInfo.KeyChars.Add("Space");
-            if (Keyboard.GetState().IsKeyDown(Key.BackSpace)) KeyEventInfo.KeyChars.Add("backspace");
-            if (Keyboard.GetState().IsKeyDown(Key.Delete)) KeyEventInfo.KeyChars.Add("Delete");
-            if (Keyboard.GetState().IsKeyDown(Key.Tab)) KeyEventInfo.KeyChars.Add("Tab");
-            if (Keyboard.GetState().IsKeyDown(Key.Minus)) KeyEventInfo.KeyChars.Add("-");
-            if (Keyboard.GetState().IsKeyDown(Key.Plus)) KeyEventInfo.KeyChars.Add("+");
+            if (Keyboard.GetState().IsKeyDown(Key.Period)) eventInfo.KeyChars.Add("period");
+            if (Keyboard.GetState().IsKeyDown(Key.Space)) eventInfo.KeyChars.Add("Space");
+            if (Keyboard.GetState().IsKeyDown(Key.BackSpace)) eventInfo.KeyChars.Add("backspace");
+            if (Keyboard.GetState().IsKeyDown(Key.Delete)) eventInfo.KeyChars.Add("Delete");
+            if (Keyboard.GetState().IsKeyDown(Key.Tab)) eventInfo.KeyChars.Add("Tab");
+            if (Keyboard.GetState().IsKeyDown(Key.Minus)) eventInfo.KeyChars.Add("-");
+            if (Keyboard.GetState().IsKeyDown(Key.Plus)) eventInfo.KeyChars.Add("+");
 
             for (int i = 0; i < 10; i++)
-                if (Keyboard.GetState().IsKeyDown(Key.Keypad0 + i)) KeyEventInfo.KeyChars.Add($"keypad{i}");
+                if (Keyboard.GetState().IsKeyDown(Key.Keypad0 + i)) eventInfo.KeyChars.Add($"keypad{i}");
+
+            return eventInfo;
         }
 
 

@@ -135,7 +135,7 @@ namespace UKingLibrary
 
         public void OnKeyDown()
         {
-            if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.Delete) && !PathRender.EditMode && PathRender.IsSelected)
+            if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.Delete) && !PathRender.EditMode && PathRender.IsSelected)
                 RemoveSelected();
         }
     }

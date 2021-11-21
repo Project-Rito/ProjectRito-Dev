@@ -531,17 +531,17 @@ namespace MapStudio.UI
         /// The key event for when a key has been pressed down.
         /// Used to perform editor shortcuts.
         /// </summary>
-        public void OnKeyDown(bool isRepeat)
+        public void OnKeyDown(KeyEventInfo e, bool isRepeat)
         {
             if (Outliner.IsFocused)
-                ViewportWindow.Pipeline._context.OnKeyDown(isRepeat);
+                ViewportWindow.Pipeline._context.OnKeyDown(e, isRepeat);
             else if (ViewportWindow.IsFocused)
             {
                 if (!isRepeat)
                     ActiveEditor.OnKeyDown();
 
-                ViewportWindow.Pipeline._context.OnKeyDown(isRepeat);
-                if (KeyEventInfo.IsKeyDown(InputSettings.INPUT.Scene.ShowAddContextMenu))
+                ViewportWindow.Pipeline._context.OnKeyDown(e, isRepeat);
+                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.ShowAddContextMenu))
                     ViewportWindow.LoadAddContextMenu();
             }
         }

@@ -7,17 +7,24 @@ using OpenTK.Input;
 
 namespace GLFrameworkEngine
 {
+    public class KeyInfo
+    {
+        public static KeyEventInfo EventInfo { get; set; } = new KeyEventInfo();
+    }
     public class KeyEventInfo
     {
-        public static List<string> KeyChars { get; set; } = new List<string>();
+        public KeyEventInfo LastState { get; set; }
 
-        public static bool HasKeyDown() => KeyChars.Count > 0;
+        public List<string> KeyChars { get; set; } = new List<string>();
 
-        public static bool KeyShift { get; set; }
-        public static bool KeyCtrl { get; set; }
-        public static bool KeyAlt { get; set; }
+        public bool HasKeyDown() => KeyChars.Count > 0;
 
-        public static bool IsKeyDown(string key) {
+        public bool KeyShift { get; set; }
+        public bool KeyCtrl { get; set; }
+        public bool KeyAlt { get; set; }
+
+        public bool IsKeyDown(string key)
+        {
             if (KeyCtrl && key.StartsWith("Ctrl+"))
                 return KeyChars.Contains(key.Split("+").Last());
             if (KeyShift && key.StartsWith("Shift+"))
