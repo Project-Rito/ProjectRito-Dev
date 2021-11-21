@@ -109,6 +109,8 @@ namespace UKingLibrary.UI
 
         public override void Background_LoadThumbnail()
         {
+            return; //Todo the icon loader does not work correctly
+
             string modelpath = PluginConfig.GetContentPath($"Model\\{BfresPath}.sbfres");
             string texpath = PluginConfig.GetContentPath($"Model\\{BfresPath}.Tex.sbfres");
 
