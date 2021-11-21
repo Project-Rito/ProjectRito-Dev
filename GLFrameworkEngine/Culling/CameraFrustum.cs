@@ -91,7 +91,7 @@ namespace GLFrameworkEngine
 
             for (int p = 0; p < 6; p++)
             {
-                var intersect = TestIntersct(planes[p], box.GetCenter(), box.GetExtent());
+                var intersect = TestIntersect(planes[p], box.GetCenter(), box.GetExtent());
                 if (intersect == Frustum.NONE)
                     return Frustum.NONE;
 
@@ -100,7 +100,7 @@ namespace GLFrameworkEngine
             return finalResult;
         }
 
-        static Frustum TestIntersct(Vector4 plane, Vector3 center, Vector3 extent)
+        static Frustum TestIntersect(Vector4 plane, Vector3 center, Vector3 extent)
         {
             float d = Vector3.Dot(center, plane.Xyz) + plane.W;
             float n = extent.X * MathF.Abs(plane.X) +

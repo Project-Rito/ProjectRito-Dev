@@ -84,17 +84,20 @@ namespace UKingLibrary
 
             ProcessLoading.Instance.Update(90, 100, "Loading map rails");
 
-            foreach (var obj in byaml.RootNode["Rails"])
+            if (byaml.RootNode.ContainsKey("Rails"))
             {
-                RailPathData data = new RailPathData();
-                data.LoadRail(this, obj, RailFolder);
+                foreach (var obj in byaml.RootNode["Rails"])
+                {
+                    RailPathData data = new RailPathData();
+                    data.LoadRail(this, obj, RailFolder);
 
-                string name = obj["UnitConfigName"];
-                if (obj.ContainsKey("UniqueName"))
-                    name = obj["UniqueName"];
+                    string name = obj["UnitConfigName"];
+                    if (obj.ContainsKey("UniqueName"))
+                        name = obj["UniqueName"];
 
-                data.PathRender.UINode.Header = name;
-                data.AddToScene();
+                    data.PathRender.UINode.Header = name;
+                    data.AddToScene();
+                }
             }
 
             //Prepare object links

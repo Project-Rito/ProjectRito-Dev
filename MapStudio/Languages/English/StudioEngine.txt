@@ -126,6 +126,7 @@ PROPERTIES - Properties
 VIEWPORT - Viewport
 CONSOLE - Console
 ASSETS - Assets
+STATS - Stats
 
 # Console Window
 

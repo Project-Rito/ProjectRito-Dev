@@ -388,7 +388,7 @@ namespace UKingLibrary
             var transform = render.Transform;
             var context = GLContext.ActiveContext;
 
-            var bounding = ((BfresModelRender)render.Models[0]).BoundingNode;
+            var bounding = render.BoundingNode;
             bounding.UpdateTransform(transform.TransformMatrix);
             if (!context.Camera.InFustrum(bounding))
                 return false;
