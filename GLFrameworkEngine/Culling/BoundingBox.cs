@@ -250,8 +250,9 @@ namespace GLFrameworkEngine
 
         public void DrawSolid(GLContext context, Matrix4 transform, Vector4 color)
         {
+            UpdateTransform(transform);
+
             var solid = new StandardMaterial();
-            solid.ModelMatrix = transform;
             solid.Color = color;
             solid.Render(context);
             BoundingBoxRender.Draw(context, Min, Max);
