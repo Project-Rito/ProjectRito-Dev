@@ -45,9 +45,10 @@ namespace CafeLibrary.Rendering
             {
                 var bounding = new BoundingNode(new Vector3(float.MaxValue), new Vector3(float.MinValue));
                 foreach (var model in Models) {
-                    foreach (var mesh in model.MeshList) {
+                    if (!model.IsVisible)
+                        continue;
+                    foreach (var mesh in model.MeshList)
                         bounding.Include(mesh.BoundingNode);
-                    }
                 }
                 return bounding;
             }
