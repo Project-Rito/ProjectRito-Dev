@@ -81,7 +81,7 @@ namespace GLFrameworkEngine
                     new Vector4(0, 0, 1, 1),
                 };
 
-                Boundings.Box.DrawSolid(context, sel ? GLConstants.SelectColor : Vector4.One);
+                Boundings.Box.DrawSolid(context, Matrix4.Identity, sel ? GLConstants.SelectColor : Vector4.One);
 
                 var solid = new StandardMaterial();
                 solid.hasVertexColors = true;

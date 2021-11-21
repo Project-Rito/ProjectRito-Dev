@@ -190,8 +190,12 @@ namespace CafeLibrary.Rendering
                 if (model.IsVisible)
                     model.Draw(control, pass, this);
 
+            //Draw debug boundings
             if (Runtime.RenderBoundingBoxes)
-                DrawBoundings(control);
+                this.BoundingNode.Box.DrawSolid(control, this.Transform.TransformMatrix, Vector4.One);
+
+         //  if (Runtime.RenderBoundingBoxes)
+             //   DrawBoundings(control);
 
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Back);
