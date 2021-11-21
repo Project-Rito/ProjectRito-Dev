@@ -369,7 +369,10 @@ namespace UKingLibrary
                         containsActorMainModel = true;
                 }
                 else
-                    StudioLogger.WriteWarning($"No mainModel specified for {actor["bfres"]}!");
+                {
+                    StudioLogger.WriteWarning($"No mainModel specified for {actor["bfres"]}! Using fallback.");
+                    return render;
+                }
             }
             if (!containsActorMainModel)
                 return null;
