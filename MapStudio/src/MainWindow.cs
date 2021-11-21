@@ -538,6 +538,13 @@ namespace MapStudio
 #endif
                         ImGui.EndMenu();
                     }
+                    if (ImGui.BeginMenu($"{TranslationSource.GetText("CULLING")}##vmenu03"))
+                    {
+#if DEBUG
+                        updateSettings |= ImGui.Checkbox(TranslationSource.GetText("DEBUG"), ref Runtime.RenderBoundingBoxes);
+#endif
+                        ImGui.EndMenu();
+                    }
                     ImGui.Checkbox($"{TranslationSource.GetText("CREATE_NEW_WORKSPACE")}", ref createNewWorkspace);
                     if (updateSettings && GLContext.ActiveContext != null)
                     {
