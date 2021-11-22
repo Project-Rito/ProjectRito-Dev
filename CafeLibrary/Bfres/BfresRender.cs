@@ -39,20 +39,8 @@ namespace CafeLibrary.Rendering
             }
         }
 
-        public override BoundingNode BoundingNode
-        {
-            get
-            {
-                var bounding = new BoundingNode(new Vector3(float.MaxValue), new Vector3(float.MinValue));
-                foreach (var model in Models) {
-                    if (!model.IsVisible)
-                        continue;
-                    foreach (var mesh in model.MeshList)
-                        bounding.Include(mesh.BoundingNode);
-                }
-                return bounding;
-            }
-        }
+        private BoundingNode _boundingNode;
+        public override BoundingNode BoundingNode => _boundingNode;
 
         public List<BfresSkeletalAnim> SkeletalAnimations = new List<BfresSkeletalAnim>();
         public List<BfresMaterialAnim> MaterialAnimations = new List<BfresMaterialAnim>();
@@ -111,16 +99,12 @@ namespace CafeLibrary.Rendering
             {
                 var cachedModel = DataCache.ModelCache[name] as BfresRender;
                 BfresLoader.LoadBfresCached(this, cachedModel);
+                UpdateBoundingBox();
                 return false;
             }
 
             BfresLoader.OpenBfres(stream, this);
-
-            if (Models.Count > 0)
-            {
-                var bounding = ((BfresModelRender)Models[0]).BoundingNode;
-                Transform.ModelBounding = bounding.Box;
-            }
+            UpdateBoundingBox();
 
             if (!DataCache.ModelCache.ContainsKey(name) && Models.Count > 0)
                 DataCache.ModelCache.Add(name, this);
@@ -325,6 +309,23 @@ namespace CafeLibrary.Rendering
             //if (UseDrawDistance)
              //   return context.Camera.InRange(renderDistanceSquared, Transform.Position);
             return true;
+        }
+
+        public void UpdateBoundingBox()
+        {
+            _boundingNode = new BoundingNode(new Vector3(float.MaxValue), new Vector3(float.MinValue));
+            foreach (var model in Models)
+            {
+                if (!model.IsVisible)
+                    continue;
+
+                foreach (var mesh in model.MeshList)
+                    _boundingNode.Include(mesh.BoundingNode);
+            }
+            this.Transform.ModelBounding = BoundingNode.Box;
+            this.Transform.TransformUpdated += delegate {
+                _boundingNode.UpdateTransform(this.Transform.TransformMatrix);
+            };
         }
     }
 }
