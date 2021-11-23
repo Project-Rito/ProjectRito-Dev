@@ -128,13 +128,24 @@ namespace UKingLibrary
             foreach (var node in nodeFolders.OrderBy(x => x.Key))
                 ObjectFolder.AddChild(node.Value);
 
-            // Todo - set camera position to map pos
+            // Set the camera position to the map pos
             if (byaml.RootNode.ContainsKey("LocationPosX") && byaml.RootNode.ContainsKey("LocationPosZ"))
             {
                 float posX = byaml.RootNode["LocationPosX"];
                 float posY = 150;
                 float posZ = byaml.RootNode["LocationPosZ"];
                 GLContext.ActiveContext.Camera.TargetPosition = new OpenTK.Vector3(posX, posY, posZ) * GLContext.PreviewScale;
+            }
+            // Fallback
+            else
+            {
+                try
+                {
+                    float posX = Objs.First().Value.Properties["Translate"][0];
+                    float posY = Objs.First().Value.Properties["Translate"][1] + 150;
+                    float posZ = Objs.First().Value.Properties["Translate"][2];
+                    GLContext.ActiveContext.Camera.TargetPosition = new OpenTK.Vector3(posX, posY, posZ) * GLContext.PreviewScale;
+                } catch { }
             }
 
             ProcessLoading.Instance.Update(100, 100, "Finished!");
