@@ -320,7 +320,7 @@ namespace CafeLibrary.Rendering
 
             for (int i = 0; i < positions.Data.Length; i++)
             {
-                var position = new Vector3(positions.Data[i].X, positions.Data[i].Y, positions.Data[i].Z);
+                var position = new Vector3(positions.Data[i].X, positions.Data[i].Y, positions.Data[i].Z) * GLContext.PreviewScale;
                 //Calculate in worldspace
                 if (shape.VertexSkinCount == 1)
                 {
@@ -333,7 +333,6 @@ namespace CafeLibrary.Rendering
                     var transform = modelRender.ModelData.Skeleton.Bones[shape.BoneIndex].Transform;
                     position = Vector3.TransformPosition(position, transform);
                 }
-                position *= GLContext.PreviewScale;
 
                 min.X = MathF.Min(min.X, position.X);
                 min.Y = MathF.Min(min.Y, position.Y);
