@@ -20,6 +20,7 @@ namespace UKingLibrary
 
         static bool HasValidGamePath;
         static bool HasValidUpdatePath;
+        static bool HasValidAocPath;
 
         //Only load the config once when this constructor is activated.
         internal static bool init = false;
@@ -33,12 +34,17 @@ namespace UKingLibrary
 
             if (ImguiCustomWidgets.PathSelector("BOTW Update Path", ref UpdatePath, HasValidUpdatePath))
                 Save();
+
+            if (ImguiCustomWidgets.PathSelector("BOTW DLC Path", ref AocPath, HasValidAocPath))
+                Save();
         }
 
         public static string GetContentPath(string relativePath)
         {
             //DLC content
-            if (File.Exists($"{AocPath}\\{relativePath}"))    return $"{AocPath}\\{relativePath}";
+            if (File.Exists($"{AocPath}\\0010\\{relativePath}"))    return $"{AocPath}\\0010\\{relativePath}";
+            if (File.Exists($"{AocPath}\\0011\\{relativePath}"))    return $"{AocPath}\\0011\\{relativePath}";
+            if (File.Exists($"{AocPath}\\0012\\{relativePath}"))    return $"{AocPath}\\0012\\{relativePath}";
             //Update content
             if (File.Exists($"{UpdatePath}\\{relativePath}")) return $"{UpdatePath}\\{relativePath}";
             //Base game content
@@ -76,6 +82,7 @@ namespace UKingLibrary
         {
             HasValidGamePath = File.Exists($"{GamePath}\\Actor\\ActorInfo.product.sbyml");
             HasValidUpdatePath = File.Exists($"{UpdatePath}\\Actor\\ActorInfo.product.sbyml");
+            HasValidAocPath = File.Exists($"{AocPath}\\0010\\Pack\\AocMainField.pack");
         }
     }
 }
