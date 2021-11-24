@@ -77,7 +77,7 @@ namespace GLFrameworkEngine
             }
         }
 
-        private float _znear = 10.0f;
+        private float _znear = 1.0f;
 
         /// <summary>
         /// The z near value.
@@ -92,7 +92,7 @@ namespace GLFrameworkEngine
             set
             {
                 _znear = Math.Max(value, 0.001f);
-                _znear = Math.Min(_znear, 10.001f);
+                _znear = Math.Min(_znear, 1.001f);
             }
         }
 
@@ -394,8 +394,8 @@ namespace GLFrameworkEngine
         /// <summary>
         /// Checks if the given position is in range with the camera position.
         /// </summary>
-        public bool InRange(Vector3 pos, float range) {
-            return (pos - GetViewPostion()).Length < range;
+        public bool InRange(Vector3 pos, float rangeSquared) {
+            return (pos - GetViewPostion()).LengthSquared < rangeSquared;
         }
 
         /// <summary>
@@ -489,7 +489,9 @@ namespace GLFrameworkEngine
                 return Matrix4.CreateOrthographicOffCenter(-(Width * scale), Width * scale, -(Height * scale), Height * scale, -100000, 100000);
             }
             else
-                return Matrix4.CreatePerspectiveFieldOfView(Fov, AspectRatio, ZNear, ZFar);
+                return Matrix4.CreatePerspectiveFieldOfView(Fov, AspectRatio, 
+                    ZNear * GLContext.PreviewScale, 
+                    ZFar * GLContext.PreviewScale);
         }
 
         /// <summary>

@@ -40,8 +40,8 @@ namespace CafeLibrary.Rendering
             camera.SetKeyframe(CameraAnimationKeys.PositionX, posX);
             camera.SetKeyframe(CameraAnimationKeys.PositionY, posY);
             camera.SetKeyframe(CameraAnimationKeys.PositionZ, posZ);
-           // camera.SetKeyframe(CameraAnimationKeys.Near, near);
-          //  camera.SetKeyframe(CameraAnimationKeys.Far, far);
+            camera.SetKeyframe(CameraAnimationKeys.Near, near);
+            camera.SetKeyframe(CameraAnimationKeys.Far, far);
             camera.SetKeyframe(CameraAnimationKeys.FieldOfView, fov);
             camera.SetKeyframe(CameraAnimationKeys.Distance, 0);
             camera.RotationLookat = group.IsLookat;

@@ -28,7 +28,7 @@ namespace UKingLibrary
 
         public void Load(MuuntByamlPlugin plugin, MapMuuntEditor editor, Stream stream)
         {
-            GLFrameworkEngine.GLContext.PreviewScale = 50;
+            GLFrameworkEngine.GLContext.PreviewScale = 25;
 
             MubinPlugin = plugin;
             DungeonName = Path.GetFileNameWithoutExtension(plugin.FileInfo.FileName);

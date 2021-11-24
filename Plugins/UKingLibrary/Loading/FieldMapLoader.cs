@@ -38,7 +38,7 @@ namespace UKingLibrary
         {
             MubinPlugin = plugin;
 
-            GLFrameworkEngine.GLContext.PreviewScale = 50;
+            GLFrameworkEngine.GLContext.PreviewScale = 25;
 
             ProcessLoading.Instance.Update(0, 100, "Loading map files.");
 
