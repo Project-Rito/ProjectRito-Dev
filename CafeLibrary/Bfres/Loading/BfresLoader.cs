@@ -296,7 +296,7 @@ namespace CafeLibrary.Rendering
                         var transform = modelRender.ModelData.Skeleton.Bones[index].Transform;
                         position = Vector3.TransformPosition(position, transform);
                     }
-                    if (shape.VertexSkinCount == 0)
+                    else if (shape.VertexSkinCount == 0)
                     {
                         var transform = modelRender.ModelData.Skeleton.Bones[shape.BoneIndex].Transform;
                         position = Vector3.TransformPosition(position, transform);

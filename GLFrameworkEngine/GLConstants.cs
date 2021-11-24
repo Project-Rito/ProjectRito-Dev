@@ -20,9 +20,9 @@ namespace GLFrameworkEngine
         public const string VTexCoord2 = "vTexCoord2";
         public const string VColor = "vColor";
         public const string vBoneIndex = "vBoneIndex";
-        public const string VBoneWeight = "VBoneWeight";
-        public const string VTangent = "VTangent";
-        public const string VBitangent = "VBitangent";
+        public const string VBoneWeight = "vBoneWeight";
+        public const string VTangent = "vTangent";
+        public const string VBitangent = "vBitangent";
 
         public const string SelectionColorUniform = "highlight_color";
         public const float SelectionWidth = 2;

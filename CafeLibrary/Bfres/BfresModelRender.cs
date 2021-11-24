@@ -332,7 +332,7 @@ namespace CafeLibrary.Rendering
             if (!MeshInFrustum[mesh.Index])
                 return;
 
-            bool enableSkinning = false;
+            bool enableSkinning = true;
 
             if (mesh.VertexSkinCount > 0 && enableSkinning)
                 SetModelMatrix(shader.program, ModelData.Skeleton, mesh.VertexSkinCount > 1);

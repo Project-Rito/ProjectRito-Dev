@@ -101,12 +101,12 @@ void main(){
         ivec4 index = vBoneIndex;
 
         //Apply skinning to vertex position and normal
-	    if (SkinCount > 0)
+	    if (SkinCount > 0) {
 		    worldPosition = skin(worldPosition.xyz, index);
-	    if(SkinCount > 0)
 		    normal = normalize(mat3(mtxMdl) * (skinNRM(vNormal.xyz, index)).xyz);
+        }
         //Single bind models that have no skinning to the bone they are mapped to
-        if (SkinCount == 0)
+        else if (SkinCount == 0)
         {
             worldPosition = RigidBindTransform * worldPosition;
             normal = mat3(RigidBindTransform) * normal;
