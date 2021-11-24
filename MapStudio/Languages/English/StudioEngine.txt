@@ -234,3 +234,15 @@ CULLING_INFO - Frustum Culling Info
 DRAW_CALLS - Draw Calls
 DRAW_TRIANGLES - Draw Triangles
 SHADOW_DRAW_CALLS - Shadow Draw Calls
+
+# Stats Panel
+DRAW_CALL_NUM - Num Draw Calls:
+DRAW_TRI_NUM - Num Draw Triangles:
+FX_DRAW_CALL_NUM - Num Effect Draw Calls:
+FX_INST_NUM - Num Effect Instances:
+FX_TRI_NUM - Num Effect Triangles:
+SK_ANIM_NUM - Num Skeletal Anims:
+MAT_ANIM_NUM - Num Material Anims:
+CAM_POS_X - Camera Pos X:
+CAM_POS_Y - Camera Pos Y:
+CAM_POS_Z - Camera Pos Z:
