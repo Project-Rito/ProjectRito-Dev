@@ -226,6 +226,20 @@ namespace GLFrameworkEngine
             return TransformedVertices != null ? TransformedVertices : Vertices;
         }
 
+        public Vector3 GetClosestPosition(Vector3 location)
+        {
+            OpenTK.Vector3 pos = OpenTK.Vector3.Zero;
+            float closestDist = float.MaxValue;
+            var vertices = GetVertices();
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                var distance = (vertices[i] - location).Length;
+                if (distance < closestDist)
+                    pos = vertices[i];
+            }
+            return pos;
+        }
+
         public void ApplyTransform(Matrix4 transform)
         {
             for (int i = 0; i < 8; i++)

@@ -14,8 +14,8 @@ namespace CafeLibrary.Rendering
 {
     public class BfresRender : GenericRenderer, IColorPickable, ITransformableObject
     {
-        public const float LOD_LEVEL_1_DISTANCE = 100000;
-        public const float LOD_LEVEL_2_DISTANCE = 1000000;
+        public const float LOD_LEVEL_1_DISTANCE = 1000;
+        public const float LOD_LEVEL_2_DISTANCE = 10000;
 
         public bool UseGameShaders = true;
 

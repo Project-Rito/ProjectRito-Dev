@@ -64,28 +64,14 @@ namespace CafeLibrary.Rendering
 
         public int GetDisplayLevel(GLContext context, BfresRender render)
         {
-            var pos = GetClosestPosition(context);
-
-            if (!context.Camera.InRange(pos, BfresRender.LOD_LEVEL_1_DISTANCE * GLContext.PreviewScale) && LODMeshes.Count > 1)
-                return 1;
+            var pos = render.BoundingNode.Box.GetClosestPosition(context.Camera.GetViewPostion());
+            if (render.BoundingNode.Box.IsInside(context.Camera.GetViewPostion()))
+                return 0;
             if (!context.Camera.InRange(pos, BfresRender.LOD_LEVEL_2_DISTANCE * GLContext.PreviewScale) && LODMeshes.Count > 2)
                 return 2;
+            if (!context.Camera.InRange(pos, BfresRender.LOD_LEVEL_1_DISTANCE * GLContext.PreviewScale) && LODMeshes.Count > 1)
+                return 1;
             return 0;
-        }
-
-        private OpenTK.Vector3 GetClosestPosition(GLContext context)
-        {
-            OpenTK.Vector3 pos = OpenTK.Vector3.Zero;
-            float closestDist = float.MaxValue;
-
-            var vertices = BoundingNode.Box.GetVertices();
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                var distance = (vertices[i] - context.Camera.GetViewPostion()).Length;
-                if (distance < closestDist)
-                    pos = vertices[i];
-            }
-            return pos;
         }
 
         public void DrawCustom(ShaderProgram shader)
