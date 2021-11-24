@@ -77,7 +77,7 @@ namespace GLFrameworkEngine
             }
         }
 
-        private float _znear = 1.0f;
+        private float _znear = 10.0f;
 
         /// <summary>
         /// The z near value.
@@ -92,11 +92,11 @@ namespace GLFrameworkEngine
             set
             {
                 _znear = Math.Max(value, 0.001f);
-                _znear = Math.Min(_znear, 1.001f);
+                _znear = Math.Min(_znear, 10.001f);
             }
         }
 
-        private float _zfar = 100000.0f;
+        private float _zfar = 50000.0f;
 
         /// <summary>
         /// The z far value.
@@ -110,7 +110,7 @@ namespace GLFrameworkEngine
                 return _zfar; }
             set
             {
-                _zfar = Math.Max(value, 10.0f);
+                _zfar = Math.Max(value, _znear + 10f);
             }
         }
 
