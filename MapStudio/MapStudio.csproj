@@ -87,8 +87,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="cimgui.dll">
+    <None Update="x86/cimgui.dll" Condition="'$(Platform)'=='x86'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+    <None Update="x64/cimgui.dll" Condition="'$(Platform)'=='x64' or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
     </None>
     <None Update="cimgui.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -412,15 +417,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="tinyfiledialogs.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="x64\libzstd.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="x86\cimgui.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="x86\libzstd.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
