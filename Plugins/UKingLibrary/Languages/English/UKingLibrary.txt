@@ -7,8 +7,8 @@ SHOW_MAP_MODEL - Show Map Model
 SHOW_ACTOR_LINKS - Show Actor Links
 
 OBJ - Obj
-SOURCE_LINKS - Source Links
-DEST_LINKS - Dest Links
+INCOMING_LINKS - Incoming Links
+OUTGOING_LINKS - Outgoing Links
 
 OBJECTS - Objects
 RAIL_PATHS - Rail Paths

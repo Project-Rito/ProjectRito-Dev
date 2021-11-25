@@ -40,7 +40,7 @@ namespace UKingLibrary.UI
                 ImGui.Columns(1);
             }
 
-            if (ImGui.CollapsingHeader(TranslationSource.GetText("SOURCE_LINKS"), ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader(TranslationSource.GetText("INCOMING_LINKS"), ImGuiTreeNodeFlags.DefaultOpen))
             {
                 ImGui.Columns(2);
                 foreach (var link in mapObject.SourceLinks)
@@ -49,7 +49,7 @@ namespace UKingLibrary.UI
                 ImGui.Columns(1);
             }
 
-            if (ImGui.CollapsingHeader(TranslationSource.GetText("DEST_LINKS"), ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader(TranslationSource.GetText("OUTGOING_LINKS"), ImGuiTreeNodeFlags.DefaultOpen))
             {
                 ImGui.Columns(2);
                 foreach (var link in mapObject.DestLinks)
