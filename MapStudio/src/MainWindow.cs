@@ -17,7 +17,7 @@ namespace MapStudio
 {
     public class MainWindow : GameWindow
     {
-        bool ForceFocused = false;
+        bool ForceFocused = true;
 
         ImGuiController _controller;
         GlobalSettings GlobalSettings { get; set; }
