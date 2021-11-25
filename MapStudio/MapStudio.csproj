@@ -87,7 +87,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="x86/cimgui.dll" Condition="'$(Platform)'=='x86'">
+    <None Update="x86/cimgui.dll" Condition="'$(Platform)'=='x86' or '$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>%(Filename)%(Extension)</Link>
     </None>
