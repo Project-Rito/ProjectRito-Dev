@@ -36,21 +36,9 @@
   </PropertyGroup>
 
 
-  <ItemGroup>
-    <None Remove="x64\tinyfiledialogs.dll" />
-    <None Remove="x86\tinyfiledialogs.dll" />
-  </ItemGroup>
 
   <ItemGroup>
-    <Content Include="x64\tinyfiledialogs.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="x86\tinyfiledialogs.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.App" Version="2.2.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="WindowsAPICodePack-Shell" Version="1.1.1" />
   </ItemGroup>
@@ -91,7 +79,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>%(Filename)%(Extension)</Link>
     </None>
+    <None Update="x86/tinyfiledialogs.dll" Condition="'$(Platform)'=='x86' or '$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
     <None Update="x64/cimgui.dll" Condition="'$(Platform)'=='x64' or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+    <None Update="x64/tinyfiledialogs.dll" Condition="'$(Platform)'=='x64' or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>%(Filename)%(Extension)</Link>
     </None>
@@ -414,9 +410,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Shaders\Viewer\GridInfinite.frag">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="tinyfiledialogs.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
