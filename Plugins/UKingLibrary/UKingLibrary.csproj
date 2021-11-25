@@ -2,11 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <BaseOutputPath>..\..\MapStudio\bin\Debug\net5.0\Plugins</BaseOutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\MapStudio\bin\Debug\net5.0\Plugins\</OutputPath>
+    <OutputPath>bin</OutputPath>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
 
   <ItemGroup>
@@ -76,5 +73,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /E /Y bin\ ..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\&#xD;&#xA;xcopy /E /Y bin\ ..\..\MapStudio\bin\x86\$(Configuration)\net5.0\Plugins\&#xD;&#xA;xcopy /E /Y bin\ ..\..\MapStudio\bin\x64\$(Configuration)\net5.0\Plugins\" />
+  </Target>
 
 </Project>
