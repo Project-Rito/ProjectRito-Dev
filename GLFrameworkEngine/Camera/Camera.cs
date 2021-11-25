@@ -394,8 +394,8 @@ namespace GLFrameworkEngine
         /// <summary>
         /// Checks if the given position is in range with the camera position.
         /// </summary>
-        public bool InRange(Vector3 pos, float rangeSquared) {
-            return (pos - GetViewPostion()).LengthSquared < rangeSquared;
+        public bool InRange(Vector3 pos, float range) {
+            return (pos - GetViewPostion()).Length < range;
         }
 
         /// <summary>
