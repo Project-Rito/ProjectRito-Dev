@@ -665,8 +665,8 @@ namespace MapStudio.UI
 
         private void UpdateCamera(GLContext context)
         {
+            //Update the mouse input relative to the viewport window
             InputState.UpdateMouseState();
-            InputState.UpdateKeyState();
 
             float frameTime = DateTimeOffset.Now.ToUnixTimeMilliseconds() - _lastTime; // Todo - change things so this is a long or something, not a float.
             _lastTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();

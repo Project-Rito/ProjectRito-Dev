@@ -303,6 +303,8 @@ void main()
 
             PrevMouseState = MouseState;
             PrevKeyboardState = KeyboardState;
+
+            InputState.UpdateKeyState();
         }
 
         public void PressChar(char keyChar)
