@@ -8,6 +8,8 @@ using OpenTK;
 using UKingLibrary.UI;
 using MapStudio.UI;
 using CafeLibrary;
+using Toolbox.Core.IO;
+using GLFrameworkEngine;
 
 namespace UKingLibrary
 {
@@ -97,12 +99,27 @@ namespace UKingLibrary
 
         private void CacheBackgroundFiles()
         {
-            Terrain = new Terrain();
-            Terrain.LoadTerrainTable();
-
-            var path = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
-            TitleBG = new SARC();
-            TitleBG.Load(File.OpenRead(path));
+            {
+                string path = PluginConfig.GetContentPath("Model\\Terrain.Tex1.sbfres");
+                var texs = CafeLibrary.Rendering.BfresLoader.GetTextures(path);
+                foreach (var tex in texs)
+                {
+                    string outputPath = $"Images\\UKingTerrain\\{tex.Key}";
+                    if (tex.Value.RenderTexture is GLTexture2D)
+                        ((GLTexture2D)tex.Value.RenderTexture).Save(outputPath);
+                    else
+                        ((GLTexture2DArray)tex.Value.RenderTexture).Save(outputPath);
+                }
+            }
+            {
+                Terrain = new Terrain();
+                Terrain.LoadTerrainTable();
+            }
+            {
+                var path = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
+                TitleBG = new SARC();
+                TitleBG.Load(File.OpenRead(path));
+            }
         }
 
         private byte[] GetTreeProdInfo()
