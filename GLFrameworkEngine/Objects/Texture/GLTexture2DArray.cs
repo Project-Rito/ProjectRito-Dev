@@ -344,7 +344,7 @@ namespace GLFrameworkEngine
         public void Save(string fileName, bool saveAlpha = false)
         {
             Bind();
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < this.ArrayCount; i++)
             {
                 byte[] output = new byte[Width * Height * 4];
                 GL.GetTextureSubImage(this.ID, 0, 0, 0, i, Width, Height, 1,
