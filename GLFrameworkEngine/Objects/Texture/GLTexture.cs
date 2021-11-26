@@ -57,7 +57,8 @@ namespace GLFrameworkEngine
             UpdateParameters();
         }
 
-        public void GenerateMipmaps() {
+        public void GenerateMipmaps()
+        {
             Bind();
             GL.GenerateMipmap((GenerateMipmapTarget)Target);
         }
@@ -74,7 +75,8 @@ namespace GLFrameworkEngine
             GL.DeleteTexture(ID);
         }
 
-        public virtual void Attach(FramebufferAttachment attachment, Framebuffer target) {
+        public virtual void Attach(FramebufferAttachment attachment, Framebuffer target)
+        {
             target.Bind();
             GL.FramebufferTexture(target.Target, attachment, ID, 0);
         }
@@ -100,7 +102,7 @@ namespace GLFrameworkEngine
             switch (texture.SurfaceType)
             {
                 case STSurfaceType.Texture2D_Array:
-                 return GLTexture2DArray.FromGeneric(texture, parameters);
+                    return GLTexture2DArray.FromGeneric(texture, parameters);
                 case STSurfaceType.Texture3D:
                     return GLTexture3D.FromGeneric(texture, parameters);
                 case STSurfaceType.TextureCube:
@@ -121,68 +123,83 @@ namespace GLFrameworkEngine
             var height = CalculateMipDimension((int)texture.Height, 0);
 
             int numSurfaces = 1;
-            if (Target == TextureTarget.Texture3D || Target == TextureTarget.Texture2DArray) {
+            if (Target == TextureTarget.Texture3D)
+            {
                 numSurfaces = (int)Math.Max(1, texture.Depth);
             }
-            if (Target == TextureTarget.TextureCubeMap || Target == TextureTarget.TextureCubeMapArray) {
+            if (Target == TextureTarget.TextureCubeMap || Target == TextureTarget.TextureCubeMapArray || Target == TextureTarget.Texture2DArray)
+            {
                 numSurfaces = (int)Math.Max(1, texture.ArrayCount);
             }
 
-            for (int i = 0; i < numSurfaces; i++)
+            int depth = numSurfaces;
+
+            bool loadAsBitmap = !IsPower2(width, height) && texture.IsBCNCompressed() && false;
+            if (texture.IsASTC() || parameters.FlipY)
+                loadAsBitmap = true;
+
+            int numMips = 1;
+            for (int mipLevel = 0; mipLevel < numMips; mipLevel++)
             {
-                var surface = texture.GetDeswizzledSurface(i, 0);
-                int depth = 1;
+                var surface = GetTextureBuffer(texture, mipLevel);
 
-                bool loadAsBitmap = !IsPower2(width, height) && texture.IsBCNCompressed() && false;
-                if (texture.IsASTC() || parameters.FlipY)
-                    loadAsBitmap = true;
-
-                int numMips = 1;
-
-                for (int mipLevel = 0; mipLevel < numMips; mipLevel++)
+                if (loadAsBitmap || parameters.UseSoftwareDecoder)
                 {
-                    if (loadAsBitmap || parameters.UseSoftwareDecoder)
-                    {
-                        var rgbaData = texture.GetDecodedSurface(i, mipLevel);
-                        if (parameters.FlipY)
-                            rgbaData = FlipVertical(width, height, rgbaData);
+                    var rgbaData = texture.GetDecodedSurface(0, mipLevel);
+                    if (parameters.FlipY)
+                        rgbaData = FlipVertical(width, height, rgbaData);
 
-                        var formatInfo = GLFormatHelper.ConvertPixelFormat(TexFormat.RGBA8_UNORM);
-                        if (texture.IsSRGB) formatInfo.InternalFormat = PixelInternalFormat.Srgb8Alpha8;
+                    var formatInfo = GLFormatHelper.ConvertPixelFormat(TexFormat.RGBA8_UNORM);
+                    if (texture.IsSRGB) formatInfo.InternalFormat = PixelInternalFormat.Srgb8Alpha8;
 
-                        GLTextureDataLoader.LoadImage(Target, width, height, depth, formatInfo, rgbaData, mipLevel);
-                    }
-                    else if (texture.IsBCNCompressed())
-                    {
-                        var internalFormat = GLFormatHelper.ConvertCompressedFormat(format, true);
-                        GLTextureDataLoader.LoadCompressedImage(Target, width, height, depth, internalFormat, surface, mipLevel);
-                    }
-                    else
-                    {
-                        var formatInfo = GLFormatHelper.ConvertPixelFormat(format);
-                        GLTextureDataLoader.LoadImage(Target, width, height, depth, formatInfo, surface, mipLevel);
-                    }
+                    GLTextureDataLoader.LoadImage(Target, width, height, depth, formatInfo, rgbaData, mipLevel);
                 }
-
-                if (texture.MipCount > 1 && texture.Platform.OutputFormat != TexFormat.BC5_SNORM)
-                    GL.GenerateMipmap((GenerateMipmapTarget)Target);
+                else if (texture.IsBCNCompressed())
+                {
+                    var internalFormat = GLFormatHelper.ConvertCompressedFormat(format, true);
+                    GLTextureDataLoader.LoadCompressedImage(Target, width, height, depth, internalFormat, surface, mipLevel);
+                }
                 else
                 {
-                    //Set level to base only
-                    GL.TexParameter(Target, TextureParameterName.TextureBaseLevel, 0);
-                    GL.TexParameter(Target, TextureParameterName.TextureMaxLevel, 0);
+                    var formatInfo = GLFormatHelper.ConvertPixelFormat(format);
+                    GLTextureDataLoader.LoadImage(Target, width, height, depth, formatInfo, surface, mipLevel);
                 }
             }
 
+            if (texture.MipCount > 1 && texture.Platform.OutputFormat != TexFormat.BC5_SNORM)
+                GL.GenerateMipmap((GenerateMipmapTarget)Target);
+            else
+            {
+                //Set level to base only
+                GL.TexParameter(Target, TextureParameterName.TextureBaseLevel, 0);
+                GL.TexParameter(Target, TextureParameterName.TextureMaxLevel, 0);
+            }
+
             Unbind();
+        }
+
+        private byte[] GetTextureBuffer(STGenericTexture tex, int mipLevel)
+        {
+            //Combine all array levels into one single buffer
+            if (tex.ArrayCount > 1)
+            {
+                List<byte[]> levels = new List<byte[]>();
+                for (int j = 0; j < tex.ArrayCount; j++)
+                {
+                    var data = tex.GetDeswizzledSurface(j, mipLevel);
+                    levels.Add(data);
+                }
+                return ByteUtils.CombineArray(levels.ToArray());
+            }
+            else
+                return tex.GetDeswizzledSurface(0, mipLevel);
         }
 
         public static bool IsPower2(int width, int height) {
             return IsPow2(width) && IsPow2(height);
         }
 
-        public virtual System.Drawing.Bitmap ToBitmap(bool saveAlpha = false)
-        {
+        public virtual System.Drawing.Bitmap ToBitmap(bool saveAlpha = false) {
             return null;
         }
 
@@ -190,7 +207,7 @@ namespace GLFrameworkEngine
             return baseLevelDimension / (int)Math.Pow(2, mipLevel);
         }
 
-        internal static bool IsPow2(int Value){
+        internal static bool IsPow2(int Value) {
             return Value != 0 && (Value & (Value - 1)) == 0;
         }
 
