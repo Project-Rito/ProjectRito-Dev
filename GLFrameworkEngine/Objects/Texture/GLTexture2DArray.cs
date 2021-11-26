@@ -92,6 +92,7 @@ namespace GLFrameworkEngine
             GLTexture2DArray glTexture = new GLTexture2DArray();
             glTexture.Width = (int)texture.Width;
             glTexture.Height = (int)texture.Height;
+            glTexture.ArrayCount = (int)texture.ArrayCount;
             glTexture.LoadImage(texture, parameters);
             return glTexture;
         }
@@ -343,11 +344,11 @@ namespace GLFrameworkEngine
         public void Save(string fileName, bool saveAlpha = false)
         {
             Bind();
-            for (int i = 0; i < this.ArrayCount; i++)
+            for (int i = 0; i < 6; i++)
             {
                 byte[] output = new byte[Width * Height * 4];
                 GL.GetTextureSubImage(this.ID, 0, 0, 0, i, Width, Height, 1,
-                PixelFormat.Rgba, PixelType.UnsignedByte, output.Length, output);
+                    PixelFormat.Bgra, PixelType.UnsignedByte, output.Length, output);
 
                 var bitmap = BitmapImageHelper.CreateBitmap(output, Width, Height);
                 bitmap.Save(fileName + $"_{i}.png");

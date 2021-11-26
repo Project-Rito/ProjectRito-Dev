@@ -163,7 +163,7 @@ namespace GLFrameworkEngine
             {
                 byte[] output = new byte[Width * Height * 4];
                 GL.GetTextureSubImage(this.ID, 0, 0, 0, i, Width, Height, 1,
-                   PixelFormat.Rgba, PixelType.UnsignedByte, output.Length, output);
+                   PixelFormat.Bgra, PixelType.UnsignedByte, output.Length, output);
 
                 //Remove alpha
                 output = SetImageData(output, true, true);
