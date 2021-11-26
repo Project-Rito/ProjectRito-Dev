@@ -394,7 +394,7 @@ namespace GLFrameworkEngine
                     dds.Dx10Header = new DDS.DX10Header();
 
                 dds.Dx10Header.ResourceDim = 3;
-                dds.Dx10Header.ArrayCount = 1;
+                dds.Dx10Header.ArrayCount = (uint)surfaces.Count;
             }
 
             dds.Save(fileName, surfaces);
