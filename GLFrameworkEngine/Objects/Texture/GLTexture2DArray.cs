@@ -158,7 +158,7 @@ namespace GLFrameworkEngine
                 for (int X = 0; X < Width; X++)
                 {
                     int IOffs = (Y * Width + X) * 4;
-                    int OOffs = (Y * Width + Width - 1 - X) * 4; 
+                    int OOffs = (Y * Width + Width - 1 - X) * 4;
 
                     FlippedOutput[OOffs + 0] = Input[IOffs + 0];
                     FlippedOutput[OOffs + 1] = Input[IOffs + 1];
@@ -343,35 +343,63 @@ namespace GLFrameworkEngine
         public void Save(string fileName, bool saveAlpha = false)
         {
             Bind();
+            for (int i = 0; i < 6; i++)
+            {
+                byte[] output = new byte[Width * Height * 4];
+                GL.GetTextureSubImage((int)this.Target, 0, 0, 0, i, Width, Height, 1,
+                PixelFormat.Bgra, PixelType.UnsignedByte, output.Length, output);
 
-            var bmp = ToBitmap(saveAlpha);
-            bmp.Save(fileName + ".png");
-
+                var bitmap = BitmapImageHelper.CreateBitmap(output, Width, Height);
+                bitmap.Save(fileName + $"_{i}.png");
+            }
             Unbind();
         }
 
-        public override System.Drawing.Bitmap ToBitmap(bool saveAlpha = false)
+        public override void SaveDDS(string fileName)
         {
+            List<STGenericTexture.Surface> surfaces = new List<STGenericTexture.Surface>();
+
             Bind();
 
-            var bmp = new System.Drawing.Bitmap(Width, Height);
+            for (int i = 0; i < this.ArrayCount; i++)
+            {
+                var surface = new STGenericTexture.Surface();
+                surfaces.Add(surface);
 
-            System.Drawing.Imaging.BitmapData data =
-                bmp.LockBits(new System.Drawing.Rectangle(0, 0, Width, Height),
-                System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                saveAlpha ?
-                System.Drawing.Imaging.PixelFormat.Format32bppArgb
-                :
-                 System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                for (int m = 0; m < this.MipCount; m++)
+                {
+                    int mipW = (int)(this.Width * Math.Pow(0.5, m));
+                    int mipH = (int)(this.Height * Math.Pow(0.5, m));
 
-            GL.ReadPixels(0, 0, Width, Height, saveAlpha ? PixelFormat.Bgra : PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
-            bmp.UnlockBits(data);
+                    byte[] outputRaw = new byte[mipW * mipH * 4];
+                    GL.GetTextureSubImage(this.ID, m, 0, 0, i, mipW, mipH, 1,
+                     PixelFormat.Rgba, PixelType.UnsignedByte, outputRaw.Length, outputRaw);
 
-            bmp.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipY);
+                    surface.mipmaps.Add(outputRaw);
+                }
+            }
+
+            var dds = new DDS();
+            dds.MainHeader.Width = (uint)this.Width;
+            dds.MainHeader.Height = (uint)this.Height;
+            dds.MainHeader.Depth = 1;
+            dds.MainHeader.MipCount = (uint)this.MipCount;
+            dds.MainHeader.PitchOrLinearSize = (uint)surfaces[0].mipmaps[0].Length;
+
+            dds.SetFlags(TexFormat.RGBA8_UNORM, false, true);
+
+            if (dds.IsDX10)
+            {
+                if (dds.Dx10Header == null)
+                    dds.Dx10Header = new DDS.DX10Header();
+
+                dds.Dx10Header.ResourceDim = 3;
+                dds.Dx10Header.ArrayCount = 1;
+            }
+
+            dds.Save(fileName, surfaces);
 
             Unbind();
-
-            return bmp;
         }
     }
 }
