@@ -201,10 +201,8 @@ namespace UKingLibrary.Rendering
             TerrainTexture.WrapT = TextureWrapMode.Repeat;
             TerrainTexture.MinFilter = TextureMinFilter.LinearMipmapLinear;
             //Load the terrain data as cached images.
-            string cache = $"{Toolbox.Core.Runtime.ExecutableDir}\\Images\\UkingTerrain";
+            string cache = PluginConfig.GetCachePath("Images\\Terrain");
 
-            
-            
             for (int i = 0; i < TerrainTexture.ArrayCount; i++)
             {
                 string tex = $"{cache}\\MaterialAlb_{i}.png";

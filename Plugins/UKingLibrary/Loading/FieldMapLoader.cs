@@ -100,15 +100,24 @@ namespace UKingLibrary
         private void CacheBackgroundFiles()
         {
             {
-                string path = PluginConfig.GetContentPath("Model\\Terrain.Tex1.sbfres");
-                var texs = CafeLibrary.Rendering.BfresLoader.GetTextures(path);
-                foreach (var tex in texs)
+                // Where to cache to
+                string cache = PluginConfig.GetCachePath($"Images\\Terrain");
+                if (!Directory.Exists(cache))
                 {
-                    string outputPath = $"Images\\UKingTerrain\\{tex.Key}";
-                    if (tex.Value.RenderTexture is GLTexture2D)
-                        ((GLTexture2D)tex.Value.RenderTexture).Save(outputPath);
-                    else
-                        ((GLTexture2DArray)tex.Value.RenderTexture).Save(outputPath);
+
+                    // Get the data from the bfres
+                    string path = PluginConfig.GetContentPath("Model\\Terrain.Tex1.sbfres");
+                    var texs = CafeLibrary.Rendering.BfresLoader.GetTextures(path);
+
+                    Directory.CreateDirectory(cache); // Ensure that our cache folder exists
+                    foreach (var tex in texs)
+                    {
+                        string outputPath = $"{cache}\\{tex.Key}";
+                        if (tex.Value.RenderTexture is GLTexture2D)
+                            ((GLTexture2D)tex.Value.RenderTexture).Save(outputPath);
+                        else
+                            ((GLTexture2DArray)tex.Value.RenderTexture).Save(outputPath);
+                    }
                 }
             }
             {
