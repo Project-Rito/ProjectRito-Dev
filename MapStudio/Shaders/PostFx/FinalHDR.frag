@@ -47,7 +47,7 @@ void main()
 
     vec3 backgroundTotalColor = mix(backgroundBottomColor, backgroundTopColor, TexCoords.y);
     if (ENABLE_BACKGROUND == 1)
-        FragColor.rgb = mix(backgroundTotalColor, outputColor.rgb, min(1, hdrColor.a));
+        FragColor.rgb = mix(backgroundTotalColor, outputColor.rgb, min(1,hdrColor.a));
     else
         FragColor.rgb = outputColor.rgb;
 

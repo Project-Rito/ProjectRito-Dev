@@ -1,4 +1,4 @@
-﻿#version 330
+﻿#version 330 core
 uniform vec4 gridColor;
 uniform int linearToSrgb;
 

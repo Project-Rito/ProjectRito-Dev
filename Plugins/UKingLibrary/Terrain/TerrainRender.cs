@@ -81,7 +81,7 @@ namespace UKingLibrary.Rendering
 
         public override void DrawModel(GLContext context, Pass pass)
         {
-            if (TerrainMesh == null || pass == Pass.TRANSPARENT || !InFrustum)
+            if (TerrainMesh == null || pass != Pass.OPAQUE || !InFrustum)
                 return;
 
             var shader = GlobalShaders.GetShader("TERRAIN");

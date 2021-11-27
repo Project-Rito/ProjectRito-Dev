@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Input;
 using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL4;
 using ImGuiNET;
 using MapStudio.UI;
 using GLFrameworkEngine;
@@ -38,7 +38,7 @@ namespace MapStudio
                                 TranslationSource.GetText("TRACK_STUDIO"),
                                 GameWindowFlags.Default,
                                 DisplayDevice.Default,
-                                3, 2, GraphicsContextFlags.Default)
+                                4, 6, GraphicsContextFlags.ForwardCompatible)
         {
             Title += $": {TranslationSource.GetText("OPENGL_VERSION")}: " + GL.GetString(StringName.Version);
 

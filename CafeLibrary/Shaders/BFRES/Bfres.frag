@@ -1,4 +1,4 @@
-﻿#version 330
+﻿#version 330 core
 
 in vec3 v_PositionWorld;
 in vec2 v_TexCoord0;
@@ -94,6 +94,7 @@ uniform float alphaRefValue;
 //Toggles
 uniform int hasDiffuseMap;
 uniform int hasAlphaMap;
+uniform int hasNormalMap;
 
 //GL
 uniform mat4 mtxCam;
@@ -106,6 +107,7 @@ out vec4 fragOutput;
 float GetComponent(int Type, vec4 Texture);
 
 void main(){
+    vec2 texCoord0 = v_TexCoord0;
 
     if (colorOverride == 1)
     {
@@ -113,17 +115,27 @@ void main(){
         return;
     }
 
+    // Normals
+    vec4 texNormal = vec4(1);
+    
+    if (hasNormalMap == 1)
+        texNormal = texture(u_TextureNormal0, texCoord0);
+
     vec3 N = v_NormalWorld;
-    vec3 displayNormal = (N.xyz * 0.5) + 0.5;
+    vec3 T = v_TangentWorld.xyz;
+    vec3 BiT = cross(N, T) * texNormal.w;
+    vec3 displayNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
 
+
+    // Diffuse
     vec4 diffuseMapColor = vec4(1);
-    vec2 texCoord0 = v_TexCoord0;
-
+    
     if (hasDiffuseMap == 1) {
         diffuseMapColor = texture(u_TextureAlbedo0,texCoord0);
     }
 
-    float halfLambert = max(displayNormal.y,0.5);
+    // Lighting
+    float halfLambert = max(displayNormal.y,0.2);
     fragOutput = vec4(diffuseMapColor.rgb * halfLambert, diffuseMapColor.a);
     fragOutput.rgb *= vec3(uBrightness);
 
