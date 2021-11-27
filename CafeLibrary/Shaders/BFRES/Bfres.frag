@@ -135,7 +135,7 @@ void main(){
     }
 
     // Lighting
-    float halfLambert = max(displayNormal.y,0.2);
+    float halfLambert = max(displayNormal.y,0.5);
     fragOutput = vec4(diffuseMapColor.rgb * halfLambert, diffuseMapColor.a);
     fragOutput.rgb *= vec3(uBrightness);
 
