@@ -34,7 +34,8 @@ namespace UKingLibrary.Rendering
 
         BoundingNode Bounding = new BoundingNode();
 
-        public bool IsInsideFrustum(GLContext context) {
+        public bool IsInsideFrustum(GLContext context)
+        {
             return context.Camera.InFustrum(Bounding);
         }
 
@@ -81,14 +82,14 @@ namespace UKingLibrary.Rendering
 
         public override void DrawModel(GLContext context, Pass pass)
         {
-            if (TerrainMesh == null || pass != Pass.OPAQUE || !InFrustum)
+            if (TerrainMesh == null || pass == Pass.TRANSPARENT || !InFrustum)
                 return;
 
             var shader = GlobalShaders.GetShader("TERRAIN");
             context.CurrentShader = shader;
             shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
             shader.SetTexture(TerrainTexture, "texTerrain", 1);
-            
+
             TerrainMesh.Draw(context);
         }
 
@@ -181,7 +182,7 @@ namespace UKingLibrary.Rendering
             {
                 vertices[vertexIndex++] = new Vector3(
                     TEXTURE_INDEX_MAP[materialBuffer[i]],
-                    TEXTURE_INDEX_MAP[materialBuffer[i+1]],
+                    TEXTURE_INDEX_MAP[materialBuffer[i + 1]],
                     materialBuffer[i + 2]);
             }
             return vertices;

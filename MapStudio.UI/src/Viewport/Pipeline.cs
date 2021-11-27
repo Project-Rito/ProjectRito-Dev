@@ -14,6 +14,7 @@ namespace MapStudio.UI
         DrawableInfiniteFloor _floor;
         ObjectLinkDrawer _objectLinkDrawer;
         OrientationGizmo _orientationGizmo;
+        DrawableBackground _background;
 
         public List<IRenderableFile> Files = new List<IRenderableFile>();
         public List<CameraAnimation> CameraAnimations = new List<CameraAnimation>();
@@ -66,6 +67,7 @@ namespace MapStudio.UI
 
         public void InitScene()
         {
+            _background = new DrawableBackground();
             _floor = new DrawableInfiniteFloor();
             _objectLinkDrawer = new ObjectLinkDrawer();
             _orientationGizmo = new OrientationGizmo();
@@ -236,6 +238,10 @@ namespace MapStudio.UI
             GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, ScreenBuffer.ID);
             GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, FinalBuffer.ID);
             GL.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
+
+            //Background
+            if (frameArgs.DisplayBackground)
+                _background.Draw(_context, Pass.OPAQUE);
 
             DrawSceneNoPostEffects();
 

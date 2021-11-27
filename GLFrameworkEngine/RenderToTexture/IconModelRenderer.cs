@@ -68,7 +68,6 @@ namespace GLFrameworkEngine
                 drawable.IsVisible = true;
 
                 //Draw the models
-                drawable.DrawModel(Control, Pass.BACKGROUND);
                 drawable.DrawModel(Control, Pass.OPAQUE);
                 drawable.DrawModel(Control, Pass.TRANSPARENT);
 
