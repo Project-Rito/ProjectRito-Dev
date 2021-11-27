@@ -7,10 +7,6 @@ uniform int ENABLE_BLOOM;
 uniform int ENABLE_LUT;
 uniform int ENABLE_SRGB;
 uniform int ENABLE_FBO_ALPHA;
-uniform int ENABLE_BACKGROUND;
-
-uniform vec3 backgroundTopColor;
-uniform vec3 backgroundBottomColor;
 
 uniform sampler2D uColorTex;
 uniform sampler2D uBloomTex;
@@ -44,12 +40,7 @@ void main()
     {
         outputColor.rgb = pow(outputColor.rgb, vec3(1.0/GAMMA));
     }
-
-    vec3 backgroundTotalColor = mix(backgroundBottomColor, backgroundTopColor, TexCoords.y);
-    if (ENABLE_BACKGROUND == 1)
-        FragColor.rgb = mix(backgroundTotalColor, outputColor.rgb, min(1, hdrColor.a));
-    else
-        FragColor.rgb = outputColor.rgb;
+    FragColor.rgb = outputColor.rgb;
 
     //Used for keeping alpha information if needed
     if (ENABLE_FBO_ALPHA == 1)

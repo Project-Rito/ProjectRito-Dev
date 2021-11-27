@@ -99,27 +99,25 @@ namespace UKingLibrary
 
         private void CacheBackgroundFiles()
         {
+            //Load background files
+            var path = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
+            TitleBG = new SARC();
+            TitleBG.Load(File.OpenRead(path));
+
+            //Get terrain tex file from archive
+            var stream = TitleBG.TryGetFileStream("Model\\Terrain.Tex1.sbfres");
+            var texs = CafeLibrary.Rendering.BfresLoader.GetTextures(stream);
+            foreach (var tex in texs)
             {
-                string path = PluginConfig.GetContentPath("Model\\Terrain.Tex1.sbfres");
-                var texs = CafeLibrary.Rendering.BfresLoader.GetTextures(path);
-                foreach (var tex in texs)
-                {
-                    string outputPath = $"Images\\UKingTerrain\\{tex.Key}";
-                    if (tex.Value.RenderTexture is GLTexture2D)
-                        ((GLTexture2D)tex.Value.RenderTexture).Save(outputPath);
-                    else
-                        ((GLTexture2DArray)tex.Value.RenderTexture).Save(outputPath);
-                }
+                string outputPath = $"Images\\UKingTerrain\\{tex.Key}";
+                if (tex.Value.RenderTexture is GLTexture2D)
+                    ((GLTexture2D)tex.Value.RenderTexture).Save(outputPath);
+                else
+                    ((GLTexture2DArray)tex.Value.RenderTexture).Save(outputPath);
             }
-            {
-                Terrain = new Terrain();
-                Terrain.LoadTerrainTable();
-            }
-            {
-                var path = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
-                TitleBG = new SARC();
-                TitleBG.Load(File.OpenRead(path));
-            }
+
+            Terrain = new Terrain();
+            Terrain.LoadTerrainTable();
         }
 
         private byte[] GetTreeProdInfo()
