@@ -1,4 +1,4 @@
-﻿#version 330
+﻿#version 330 core
 in float faceIndex;
 
 layout (location = 0) out vec4 fragOutput;

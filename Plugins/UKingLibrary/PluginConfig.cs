@@ -11,6 +11,8 @@ namespace UKingLibrary
 {
     public class PluginConfig : IPluginConfig
     {
+        public static readonly string PluginName = "UKing";
+
         [JsonProperty]
         static string GamePath = @"";
         [JsonProperty]
@@ -51,6 +53,11 @@ namespace UKingLibrary
             if (File.Exists($"{GamePath}\\{relativePath}"))   return $"{GamePath}\\{relativePath}";
 
             return relativePath;
+        }
+
+        public static string GetCachePath(string relativePath)
+        {
+            return $"{Toolbox.Core.Runtime.ExecutableDir}Cache\\{PluginName}\\{relativePath}";
         }
 
         /// <summary>

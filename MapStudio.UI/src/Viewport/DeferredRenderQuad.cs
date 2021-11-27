@@ -44,7 +44,7 @@ namespace MapStudio.UI
             if (frameArgs.DisplayBackground && DrawableBackground.Display)
             {
                 shader.SetInt("ENABLE_BACKGROUND", 1);
-             }
+            }
             if (bloomPass != null && control.EnableBloom)
             {
                 shader.SetInt("ENABLE_BLOOM", 1);

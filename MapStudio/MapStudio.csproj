@@ -57,6 +57,15 @@
     <Reference Include="OpenTK">
       <HintPath>..\MapStudiohaderStudio\Lib\OpenTK.dll</HintPath>
     </Reference>
+    <Reference Include="OpenTK.Mathematics">
+      <HintPath>Lib\OpenTK.Mathematics.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK.Windowing.Common">
+      <HintPath>Lib\OpenTK.Windowing.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK.Windowing.Desktop">
+      <HintPath>Lib\OpenTK.Windowing.Desktop.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

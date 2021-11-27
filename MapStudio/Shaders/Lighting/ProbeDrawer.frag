@@ -1,4 +1,4 @@
-﻿#version 330
+﻿#version 330 core
 
 in int instanceID;
 in vec3 normal;

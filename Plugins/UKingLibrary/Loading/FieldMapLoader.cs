@@ -93,31 +93,42 @@ namespace UKingLibrary
         public void Save(Stream stream)
         {
             //Save the map data
-           // foreach (var map in MapFiles)
-              //  map.Save();
+            // foreach (var map in MapFiles)
+            //  map.Save();
         }
 
         private void CacheBackgroundFiles()
         {
-            //Load background files
-            var path = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
-            TitleBG = new SARC();
-            TitleBG.Load(File.OpenRead(path));
-
-            //Get terrain tex file from archive
-            var stream = TitleBG.TryGetFileStream("Model\\Terrain.Tex1.sbfres");
-            var texs = CafeLibrary.Rendering.BfresLoader.GetTextures(stream);
-            foreach (var tex in texs)
             {
-                string outputPath = $"Images\\UKingTerrain\\{tex.Key}";
-                if (tex.Value.RenderTexture is GLTexture2D)
-                    ((GLTexture2D)tex.Value.RenderTexture).Save(outputPath);
-                else
-                    ((GLTexture2DArray)tex.Value.RenderTexture).Save(outputPath);
-            }
+                // Where to cache to
+                string cache = PluginConfig.GetCachePath($"Images\\Terrain");
+                if (!Directory.Exists(cache))
+                {
 
-            Terrain = new Terrain();
-            Terrain.LoadTerrainTable();
+                    // Get the data from the bfres
+                    string path = PluginConfig.GetContentPath("Model\\Terrain.Tex1.sbfres");
+                    var texs = CafeLibrary.Rendering.BfresLoader.GetTextures(path);
+
+                    Directory.CreateDirectory(cache); // Ensure that our cache folder exists
+                    foreach (var tex in texs)
+                    {
+                        string outputPath = $"{cache}\\{tex.Key}";
+                        if (tex.Value.RenderTexture is GLTexture2D)
+                            ((GLTexture2D)tex.Value.RenderTexture).Save(outputPath);
+                        else
+                            ((GLTexture2DArray)tex.Value.RenderTexture).Save(outputPath);
+                    }
+                }
+            }
+            {
+                Terrain = new Terrain();
+                Terrain.LoadTerrainTable();
+            }
+            {
+                var path = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
+                TitleBG = new SARC();
+                TitleBG.Load(File.OpenRead(path));
+            }
         }
 
         private byte[] GetTreeProdInfo()

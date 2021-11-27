@@ -341,6 +341,7 @@ namespace CafeLibrary.Rendering
 
             shader.SetBoolToInt("hasDiffuseMap", false);
             shader.SetBoolToInt("hasAlphaMap", false);
+            shader.SetBoolToInt("hasNormalMap", false);
 
             int id = 1;
             for (int i = 0; i < this.TextureMaps?.Count; i++)
@@ -368,6 +369,10 @@ namespace CafeLibrary.Rendering
                 else if (sampler == "_ms0")
                 {
                     shader.SetBoolToInt("hasAlphaMap", hasTexture);
+                }
+                else if (sampler == "_n0")
+                {
+                    shader.SetBoolToInt("hasNormalMap", hasTexture);
                 }
 
                 

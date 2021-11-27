@@ -34,7 +34,8 @@ namespace UKingLibrary.Rendering
 
         BoundingNode Bounding = new BoundingNode();
 
-        public bool IsInsideFrustum(GLContext context) {
+        public bool IsInsideFrustum(GLContext context)
+        {
             return context.Camera.InFustrum(Bounding);
         }
 
@@ -88,7 +89,7 @@ namespace UKingLibrary.Rendering
             context.CurrentShader = shader;
             shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
             shader.SetTexture(TerrainTexture, "texTerrain", 1);
-            
+
             TerrainMesh.Draw(context);
         }
 
@@ -181,7 +182,7 @@ namespace UKingLibrary.Rendering
             {
                 vertices[vertexIndex++] = new Vector3(
                     TEXTURE_INDEX_MAP[materialBuffer[i]],
-                    TEXTURE_INDEX_MAP[materialBuffer[i+1]],
+                    TEXTURE_INDEX_MAP[materialBuffer[i + 1]],
                     materialBuffer[i + 2]);
             }
             return vertices;
@@ -201,7 +202,8 @@ namespace UKingLibrary.Rendering
             TerrainTexture.WrapT = TextureWrapMode.Repeat;
             TerrainTexture.MinFilter = TextureMinFilter.LinearMipmapLinear;
             //Load the terrain data as cached images.
-            string cache = $"{Toolbox.Core.Runtime.ExecutableDir}\\Images\\UkingTerrain";
+            string cache = PluginConfig.GetCachePath("Images\\Terrain");
+
             for (int i = 0; i < TerrainTexture.ArrayCount; i++)
             {
                 string tex = $"{cache}\\MaterialAlb_{i}.png";
