@@ -150,7 +150,7 @@ namespace UKingLibrary
             var obj = new MapObject();
             var index = mapData.Objs.Count;
             obj.CreateNew(Crc32.Compute($"ID{index}"), name);
-            obj.LoadActor(obj.Properties, actorInfo, parent);
+            obj.LoadActor((MapMuuntEditor)Workspace.ActiveWorkspace.ActiveEditor, obj.Properties, actorInfo, parent);
             mapData.Objs.Add(obj.HashId, obj);
             //Add to the viewport scene
             obj.AddToScene();

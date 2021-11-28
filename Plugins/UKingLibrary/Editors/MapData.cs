@@ -75,7 +75,7 @@ namespace UKingLibrary
                     if (profile == "Area")
                         data = new MapObjectArea();
 
-                    data.LoadActor(mapObj, actor, parent);
+                    data.LoadActor((MapMuuntEditor)Workspace.ActiveWorkspace.ActiveEditor, mapObj, actor, parent);
                     Objs.Add(data.HashId, data);
                     //Add the renderable to the viewport
                     data.AddToScene();

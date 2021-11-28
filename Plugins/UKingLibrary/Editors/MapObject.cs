@@ -26,6 +26,10 @@ namespace UKingLibrary
         /// Parameters related to the actor instance.
         /// </summary>
         public IDictionary<string, dynamic> ActorInfo;
+        /// <summary>
+        /// Whatever that parent thing is.
+        /// </summary>
+        public NodeBase Parent;
 
         /// <summary>
         /// The render instance of the scene which can be transformed and altered.
@@ -86,17 +90,24 @@ namespace UKingLibrary
         /// <summary>
         /// Loads all the actor data into the scene.
         /// </summary>
-        public void LoadActor(dynamic obj, dynamic actor, NodeBase parent)
+        public void LoadActor(MapMuuntEditor editor, dynamic obj, dynamic actor, NodeBase parent)
         {
             Properties = obj;
             ActorInfo = actor;
+            Parent = parent;
+            ReloadActor();
+        }
 
+        private void ReloadActor()
+        {
             //Dispose any previous renderables if the object is being updated
             if (Render != null)
+            {
                 Render?.Dispose();
+            }
 
             //Get the renderable object
-            Render = LoadRenderObject(ActorInfo, Properties, parent);
+            Render = LoadRenderObject(ActorInfo, Properties, Parent);
             //Prepare the gui tree node on the outliner with property tag and header name
             Render.UINode.Tag = this;
             Render.UINode.Header = Name;
@@ -112,22 +123,53 @@ namespace UKingLibrary
 
             ((EditableObjectNode)Render.UINode).UIProperyDrawer += delegate
             {
-                PropertyDrawer.Draw(this, Properties);
+                PropertyDrawer.Draw(this, Properties, new PropertyDrawer.PropertyChangedCallback(OnParamUpdate));
             };
             //Icon for gui node
             string icon = "Node";
-            if (actor.ContainsKey("bfres"))
+            if (ActorInfo.ContainsKey("bfres"))
             {
-                if (File.Exists($"{Runtime.ExecutableDir}\\Images\\UkingObj\\{actor["bfres"]}.sbfres.png"))
-                    IconManager.LoadTextureFile($"{Runtime.ExecutableDir}\\Images\\UkingObj\\{actor["bfres"]}.sbfres.png", 32, 32);
+                if (File.Exists($"{Runtime.ExecutableDir}\\Images\\UkingObj\\{ActorInfo["bfres"]}.sbfres.png"))
+                    IconManager.LoadTextureFile($"{Runtime.ExecutableDir}\\Images\\UkingObj\\{ActorInfo["bfres"]}.sbfres.png", 32, 32);
 
-                if (IconManager.HasIcon($"{Runtime.ExecutableDir}\\Images\\UkingObj\\{actor["bfres"]}.sbfres.png"))
-                    icon = $"{Runtime.ExecutableDir}\\Images\\UkingObj\\{actor["bfres"]}.sbfres.png";
+                if (IconManager.HasIcon($"{Runtime.ExecutableDir}\\Images\\UkingObj\\{ActorInfo["bfres"]}.sbfres.png"))
+                    icon = $"{Runtime.ExecutableDir}\\Images\\UkingObj\\{ActorInfo["bfres"]}.sbfres.png";
             }
             Render.UINode.Icon = icon;
 
             //Load the transform attached to the object
             LoadObjectTransform();
+        }
+
+        public void UpdateActorModel()
+        {
+            var context = GLContext.ActiveContext;
+            var srcLinks = Render.SourceObjectLinks;
+            var destLinks = Render.DestObjectLinks;
+
+            bool selected = Render.IsSelected;
+            context.Scene.DeselectAll(context);
+
+            //Remove old from scene
+            context.Scene.RemoveRenderObject(Render);
+            //Reload actor
+            ReloadActor();
+            //Add new render
+            context.Scene.AddRenderObject(Render);
+            //Select it if previously selected
+            Render.IsSelected = selected;
+            Render.SourceObjectLinks = srcLinks;
+            Render.DestObjectLinks = destLinks;
+        }
+
+        private void OnParamUpdate(string key) {
+            if (key == "UnitConfigName")
+            {
+                if (!GlobalData.Actors.ContainsKey(Properties[key]))
+                    return;
+                ActorInfo = GlobalData.Actors[Properties[key]];
+                UpdateActorModel();
+            }
         }
 
         public void AddLink(LinkInstance link)
@@ -225,7 +267,7 @@ namespace UKingLibrary
         /// </summary>
         public void RemoveFromScene() {
             GLContext.ActiveContext.Scene.RemoveRenderObject(Render);
-            //Remove the actor to the animation player
+            //Remove the actor from the animation player
             Workspace.ActiveWorkspace.StudioSystem.RemoveActor(this);
         }
 
