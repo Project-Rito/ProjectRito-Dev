@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ImGuiNET;
 using MapStudio.UI;
+using System.Numerics;
 
 namespace UKingLibrary.UI
 {
@@ -61,8 +62,8 @@ namespace UKingLibrary.UI
 
         static void DrawLinkItem(MapObject.LinkInstance link)
         {
-            string def = link.Properties["DefinitionName"];
-            uint dest = (uint)link.Properties["DestUnitHashId"];
+            string def = link.Properties["DefinitionName"].Value;
+            uint dest = (uint)link.Properties["DestUnitHashId"].Value;
             bool selected = ImGui.Selectable(def, false, ImGuiSelectableFlags.SpanAllColumns);
 
             if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
@@ -75,7 +76,7 @@ namespace UKingLibrary.UI
             }
 
             ImGui.NextColumn();
-            ImGui.Text($"{link.Object.Properties["UnitConfigName"]}");
+            ImGui.Text($"{link.Object.Properties["UnitConfigName"].Value}");
             ImGui.NextColumn();
         }
 
@@ -213,6 +214,13 @@ namespace UKingLibrary.UI
                 if (pair.Value is IList<dynamic>)
                     continue;
 
+                if (pair.Value.Invalid)
+                {
+                    Vector2 p_min = ImGui.GetCursorScreenPos();
+                    Vector2 p_max = new Vector2(p_min.X + ImGui.GetContentRegionAvail().X, p_min.Y + ImGui.GetFrameHeight());
+                    ImGui.GetWindowDrawList().AddRectFilled(p_min, p_max, ImGui.GetColorU32(new Vector4(0.7f, 0, 0, 1)));
+                }
+
                 ImGui.Text(pair.Key);
                 ImGui.NextColumn();
 
@@ -232,7 +240,7 @@ namespace UKingLibrary.UI
             ImGui.PushItemWidth(colwidth);
             if (value != null)
             {
-                Type type = value.GetType();
+                Type type = value.Value.GetType();
 
                 //Check type and set property UI here
                 if (type == typeof(float))
@@ -267,7 +275,7 @@ namespace UKingLibrary.UI
 
         public static void DrawXYZ(IDictionary<string, dynamic> properties, string key, PropertyChangedCallback callback = null)
         {
-            var values = (IDictionary<string, dynamic>)properties[key];
+            var values = (IDictionary<string, dynamic>)properties[key].Value;
             var vec = new System.Numerics.Vector3(values["X"], values["Y"], values["Z"]);
             if (ImGui.DragFloat3($"##{key}", ref vec))
             {
@@ -279,10 +287,10 @@ namespace UKingLibrary.UI
 
         public static void DrawString(IDictionary<string, dynamic> properties, string key, PropertyChangedCallback callback = null)
         {
-            string value = (string)properties[key];
+            string value = (string)properties[key].Value;
             if (ImGui.InputText($"##{key}", ref value, 0x200))
             {
-                properties[key] = (string)value;
+                properties[key].Value = (string)value;
                 if (callback != null)
                     callback(key);
             }
@@ -290,10 +298,10 @@ namespace UKingLibrary.UI
 
         public static void DrawDouble(IDictionary<string, dynamic> properties, string key, PropertyChangedCallback callback = null)
         {
-            double value = (double)properties[key];
+            double value = (double)properties[key].Value;
             if (ImGui.InputDouble($"##{key}", ref value, 1, 1))
             {
-                properties[key] = (double)value;
+                properties[key].Value = (double)value;
                 if (callback != null)
                     callback(key);
             }
@@ -301,10 +309,10 @@ namespace UKingLibrary.UI
 
         public static void DrawFloat(IDictionary<string, dynamic> properties, string key, PropertyChangedCallback callback = null)
         {
-            float value = (float)properties[key];
+            float value = (float)properties[key].Value;
             if (ImGui.DragFloat($"##{key}", ref value, 1, 1))
             {
-                properties[key] = (float)value;
+                properties[key].Value = (float)value;
                 if (callback != null)
                     callback(key);
             }
@@ -312,10 +320,10 @@ namespace UKingLibrary.UI
 
         public static void DrawInt(IDictionary<string, dynamic> properties, string key, PropertyChangedCallback callback = null)
         {
-            int value = (int)properties[key];
+            int value = (int)properties[key].Value;
             if (ImGui.DragInt($"##{key}", ref value, 1, 1))
             {
-                properties[key] = (int)value;
+                properties[key].Value = (int)value;
                 if (callback != null)
                     callback(key);
             }
@@ -323,10 +331,10 @@ namespace UKingLibrary.UI
 
         public static void DrawUint(IDictionary<string, dynamic> properties, string key, PropertyChangedCallback callback = null)
         {
-            int value = (int)((uint)properties[key]);
+            int value = (int)((uint)properties[key].Value);
             if (ImGui.DragInt($"##{key}", ref value, 1, 1))
             {
-                properties[key] = (uint)value;
+                properties[key].Value = (uint)value;
                 if (callback != null)
                     callback(key);
             }
@@ -334,10 +342,10 @@ namespace UKingLibrary.UI
 
         public static void DrawBool(IDictionary<string, dynamic> properties, string key, PropertyChangedCallback callback = null)
         {
-            bool value = (bool)properties[key];
+            bool value = (bool)properties[key].Value;
             if (ImGui.Checkbox($"##{key}", ref value))
             {
-                properties[key] = (bool)value;
+                properties[key].Value = (bool)value;
                 if (callback != null)
                     callback(key);
             }

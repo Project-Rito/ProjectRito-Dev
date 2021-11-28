@@ -17,20 +17,20 @@ namespace UKingLibrary
 
         public uint HashId
         {
-            get { return Properties["HashId"]; }
-            set { Properties["HashId"] = value; }
+            get { return Properties["HashId"].Value; }
+            set { Properties["HashId"] = new MapData.Property<dynamic>(value); }
         }
 
         public bool IsClosed
         {
-            get { return Properties["IsClosed"]; }
-            set { Properties["IsClosed"] = value; }
+            get { return Properties["IsClosed"].Value; }
+            set { Properties["IsClosed"] = new MapData.Property<dynamic>(value); }
         }
 
         public string RailType
         {
-            get { return Properties["RailType"]; }
-            set { Properties["RailType"] = value; }
+            get { return Properties["RailType"].Value; }
+            set { Properties["RailType"] = new MapData.Property<dynamic>(value); }
         }
 
         public void LoadRail(MapData mapData, IDictionary<string, dynamic> properties, NodeBase parent)
@@ -40,7 +40,7 @@ namespace UKingLibrary
             RenderablePath.BezierPointScale = 2;
             RenderablePath.PointSize = 2;
 
-            Properties = properties;
+            Properties = MapData.ValuesToProperties(properties);
             var translate = (IList<dynamic>)properties["Translate"]; // NOT the origin point - railpoints aren't relative.
 
             PathRender.UINode.ContextMenus.Add(new MenuItemModel("Remove", () =>
@@ -64,20 +64,20 @@ namespace UKingLibrary
             if (RailType == "Bezier")
                 PathRender.InterpolationMode = RenderablePath.Interpolation.Bezier;
 
-            PathRender.UINode.Tag = properties;
+            PathRender.UINode.Tag = Properties;
             PathRender.UINode.TagUI.UIDrawer += delegate
             {
-                PropertyDrawer.LoadPropertyUI(properties);
+                PropertyDrawer.LoadPropertyUI(Properties);
             };
 
-            foreach (IDictionary<string, dynamic> point in properties["RailPoints"])
+            foreach (IDictionary<string, dynamic> point in Properties["RailPoints"])
             {
                 var pos = (IList<dynamic>)point["Translate"];
                 RenderablePathPoint pathPoint = new RenderablePathPoint(PathRender,
                     new OpenTK.Vector3(
-                    pos[0],
-                    pos[1],
-                    pos[2]) * GLContext.PreviewScale);
+                    pos[0].Value,
+                    pos[1].Value,
+                    pos[2].Value) * GLContext.PreviewScale);
 
                 pathPoint.UINode.Tag = point;
                 pathPoint.UINode.TagUI.UIDrawer += delegate
@@ -94,10 +94,10 @@ namespace UKingLibrary
                     var controlPoint2 = point["ControlPoints"][1];
 
                     pathPoint.ControlPoint1.LocalPosition = new OpenTK.Vector3(
-                        controlPoint1[0], controlPoint1[1], controlPoint1[2]) * GLContext.PreviewScale;
+                        controlPoint1[0].Value, controlPoint1[1].Value, controlPoint1[2].Value) * GLContext.PreviewScale;
 
                     pathPoint.ControlPoint2.LocalPosition = new OpenTK.Vector3(
-                        controlPoint2[0], controlPoint2[1], controlPoint2[2]) * GLContext.PreviewScale;
+                        controlPoint2[0].Value, controlPoint2[1].Value, controlPoint2[2].Value) * GLContext.PreviewScale;
 
                     pathPoint.UpdateMatrices();
                 }

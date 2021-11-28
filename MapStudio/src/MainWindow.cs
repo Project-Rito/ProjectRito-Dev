@@ -79,12 +79,13 @@ namespace MapStudio
             RenderTools.Init();
             //Load outlier icons to cache
             IconManager.LoadTextureFile("Node", Properties.Resources.Object, 32, 32);
+            IconManager.LoadTextureFile("Warning", Properties.Resources.Warning, 32, 32);
 
-            //Load icons for map objects
-            if (Directory.Exists($"{Runtime.ExecutableDir}\\Images\\MapObjects"))
-            {
-                foreach (var imageFile in Directory.GetFiles($"{Runtime.ExecutableDir}\\Images\\MapObjects"))
-                {
+            //Load icons for map objects                                                                     // - This should be handled per-plugin.
+            if (Directory.Exists($"{Runtime.ExecutableDir}\\Images\\MapObjects"))                            //   This is for consistency reasons, and also 
+            {                                                                                                //   so that there aren't name conflicts.
+                foreach (var imageFile in Directory.GetFiles($"{Runtime.ExecutableDir}\\Images\\MapObjects"))//   When migrated, it should use
+                {                                                                                            //   PluginConfig.GetCachePath().
                     IconManager.LoadTextureFile(imageFile, 32, 32);
                 }
             }
@@ -326,7 +327,7 @@ namespace MapStudio
                     Workspace.UpdateActive(workspace);
 
                 ImGui.DockSpace(dockspaceId, new System.Numerics.Vector2(0, 0),
-                    ImGuiDockNodeFlags.CentralNode, workspace.window_class);
+                    ImGuiDockNodeFlags.PassthruCentralNode, workspace.window_class);
 
                 if (visible)
                     workspace.Render((int)workspace.DockID);

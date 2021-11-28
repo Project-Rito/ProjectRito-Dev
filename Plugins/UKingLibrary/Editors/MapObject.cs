@@ -41,8 +41,8 @@ namespace UKingLibrary
         /// </summary>
         public override string Name
         {
-            get { return Properties["UnitConfigName"]; }
-            set { Properties["UnitConfigName"] = value; }
+            get { return Properties["UnitConfigName"].Value; }
+            set { Properties["UnitConfigName"] = new MapData.Property<dynamic>(value); }
         }
 
         /// <summary>
@@ -50,8 +50,8 @@ namespace UKingLibrary
         /// </summary>
         public uint HashId
         {
-            get { return Properties["HashId"]; }
-            set { Properties["HashId"] = value; }
+            get { return Properties["HashId"].Value; }
+            set { Properties["HashId"] = new MapData.Property<dynamic>(value); }
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace UKingLibrary
         {
             //This can be set as 0.
             int hash = 0;
-            Properties["SRTHash"] = hash;
+            Properties["SRTHash"] = new MapData.Property<dynamic>(hash);
         }
 
         public List<LinkInstance> SourceLinks = new List<LinkInstance>();
@@ -78,10 +78,10 @@ namespace UKingLibrary
         public void CreateNew(uint HashID, string configName)
         {
             Properties = new Dictionary<string, dynamic>();
-            Properties.Add("UnitConfigName", configName);
-            Properties.Add("HashId", HashID);
-            Properties.Add("Translate", new List<float> { 0, 0, 0 });
-            Properties.Add("SRTHash", (int)0);
+            Properties.Add("UnitConfigName", new MapData.Property<dynamic>(configName));
+            Properties.Add("HashId", new MapData.Property<dynamic>(HashID));
+            Properties.Add("Translate", new MapData.Property<dynamic>(new List<float> { 0, 0, 0 }));
+            Properties.Add("SRTHash", new MapData.Property<dynamic>((int)0));
 
             if (GlobalData.Actors.ContainsKey(configName))
                 ActorInfo = GlobalData.Actors[configName] as IDictionary<string, dynamic>;
@@ -92,11 +92,13 @@ namespace UKingLibrary
         /// </summary>
         public void LoadActor(MapMuuntEditor editor, dynamic obj, dynamic actor, NodeBase parent)
         {
-            Properties = obj;
+            Properties = MapData.ValuesToProperties(obj);
             ActorInfo = actor;
             Parent = parent;
             ReloadActor();
         }
+
+        
 
         private void ReloadActor()
         {
@@ -129,11 +131,12 @@ namespace UKingLibrary
             string icon = "Node";
             if (ActorInfo.ContainsKey("bfres"))
             {
-                if (File.Exists($"{Runtime.ExecutableDir}\\Images\\UkingObj\\{ActorInfo["bfres"]}.sbfres.png"))
-                    IconManager.LoadTextureFile($"{Runtime.ExecutableDir}\\Images\\UkingObj\\{ActorInfo["bfres"]}.sbfres.png", 32, 32);
-
-                if (IconManager.HasIcon($"{Runtime.ExecutableDir}\\Images\\UkingObj\\{ActorInfo["bfres"]}.sbfres.png"))
-                    icon = $"{Runtime.ExecutableDir}\\Images\\UkingObj\\{ActorInfo["bfres"]}.sbfres.png";
+                if (!IconManager.HasIcon(PluginConfig.GetCachePath($"Images\\ActorImages\\{ActorInfo["bfres"]}.sbfres.png")))
+                {
+                    if (File.Exists(PluginConfig.GetCachePath($"Images\\ActorImages\\{ActorInfo["bfres"]}.sbfres.png")))
+                        IconManager.LoadTextureFile(PluginConfig.GetCachePath($"Images\\ActorImages\\{ActorInfo["bfres"]}.sbfres.png"), 32, 32);
+                }
+                icon = PluginConfig.GetCachePath($"Images\\ActorImages\\{ActorInfo["bfres"]}.sbfres.png");
             }
             Render.UINode.Icon = icon;
 
@@ -165,9 +168,16 @@ namespace UKingLibrary
         private void OnParamUpdate(string key) {
             if (key == "UnitConfigName")
             {
-                if (!GlobalData.Actors.ContainsKey(Properties[key]))
+                if (!GlobalData.Actors.ContainsKey(Properties[key].Value))
+                {
+                    // Oh no! We can't find this actor in ActorInfo...
+                    Render.UINode.Icon = "Warning";
+                    Render.UINode.Header = Properties[key].Value;
+                    Properties[key].Invalid = true;
                     return;
-                ActorInfo = GlobalData.Actors[Properties[key]];
+                }
+                ActorInfo = GlobalData.Actors[Properties[key].Value];
+                Properties[key].Invalid = false;
                 UpdateActorModel();
             }
         }
@@ -288,18 +298,21 @@ namespace UKingLibrary
 
         private Vector3 LoadVector(string key, Vector3 defaultValue, bool isRotation = false)
         {
-            if (Properties.ContainsKey(key) && Properties[key] is float && isRotation)
-                return new Vector3(0, (float)Properties[key], 0);
-            else if(Properties.ContainsKey(key) && Properties[key] is float)
-                    return new Vector3((float)Properties[key]);
+            if (Properties.ContainsKey(key) && Properties[key] is MapData.Property<object>) // If this is a single value and not an array or something
+            {
+                if (Properties[key].Value is float && isRotation)
+                    return new Vector3(0, (float)Properties[key].Value, 0);
+                else if (Properties[key].Value is float)
+                    return new Vector3((float)Properties[key].Value);
+            }
 
             if (Properties.ContainsKey(key) && Properties[key] is IList<dynamic>)
             {
                 var array = (IList<dynamic>)Properties[key];
                 return new Vector3(
-                        array[0],
-                        array[1],
-                        array[2]);
+                        array[0].Value,
+                        array[1].Value,
+                        array[2].Value);
             }
             return defaultValue;
         }
@@ -339,9 +352,9 @@ namespace UKingLibrary
             }
         }
 
-        public virtual EditableObject LoadRenderObject(IDictionary<string, dynamic> actor, dynamic obj, NodeBase parent)
+        public virtual EditableObject LoadRenderObject(IDictionary<string, dynamic> actor, IDictionary<string, dynamic> obj, NodeBase parent)
         {
-            string name = obj["UnitConfigName"];
+            string name = obj["UnitConfigName"].Value;
 
             //Default transform cube
             EditableObject render = new TransformableObject(parent);

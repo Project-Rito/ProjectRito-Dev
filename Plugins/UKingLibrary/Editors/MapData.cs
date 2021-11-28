@@ -107,7 +107,7 @@ namespace UKingLibrary
                 {
                     foreach (IDictionary<string, dynamic> link in obj.Properties["LinksToObj"])
                     {
-                        uint dest = link["DestUnitHashId"];
+                        uint dest = link["DestUnitHashId"].Value;
                         //Rendered links
                         obj.Render.DestObjectLinks.Add(Objs[dest].Render);
                         //Add a link instance aswell for keeping track of both source and dest links
@@ -118,7 +118,7 @@ namespace UKingLibrary
                         });
 
                         //Set LODs
-                        if (link["DefinitionName"] == "PlacementLOD")
+                        if (link["DefinitionName"].Value == "PlacementLOD")
                             Objs[dest].Render.IsVisible = false;
                     }
                 }
@@ -141,9 +141,9 @@ namespace UKingLibrary
             {
                 try
                 {
-                    float posX = Objs.First().Value.Properties["Translate"][0];
-                    float posY = Objs.First().Value.Properties["Translate"][1] + 150;
-                    float posZ = Objs.First().Value.Properties["Translate"][2];
+                    float posX = Objs.First().Value.Properties["Translate"][0].Value;
+                    float posY = Objs.First().Value.Properties["Translate"][1].Value + 150;
+                    float posZ = Objs.First().Value.Properties["Translate"][2].Value;
                     GLContext.ActiveContext.Camera.TargetPosition = new OpenTK.Vector3(posX, posY, posZ) * GLContext.PreviewScale;
                 } catch { }
             }
@@ -187,6 +187,52 @@ namespace UKingLibrary
                 objData.Render?.Dispose();
             foreach (var rail in Rails.Values)
                 rail.PathRender?.Dispose();
+        }
+
+        public static dynamic ValuesToProperties(dynamic input)
+        {
+            if (input is IDictionary<string, dynamic>)
+            {
+                IDictionary<string, dynamic> output = new Dictionary<string, dynamic>();
+                foreach (KeyValuePair<string, dynamic> pair in input)
+                {
+                    if (pair.Value is IDictionary<string, dynamic>)
+                        output.Add(pair.Key, ValuesToProperties(pair.Value));
+                    else if (pair.Value is IList<dynamic>)
+                        output.Add(pair.Key, ValuesToProperties(pair.Value));
+                    else
+                        output.Add(pair.Key, new MapData.Property<dynamic>(pair.Value));
+                }
+                return output;
+            }
+            else if (input is IList<dynamic>)
+            {
+                IList<dynamic> output = new List<dynamic>();
+                foreach (dynamic item in input)
+                {
+                    if (item is IDictionary<string, dynamic>)
+                        output.Add(ValuesToProperties(item));
+                    else if (item is IList<dynamic>)
+                        output.Add(ValuesToProperties(item));
+                    else
+                        output.Add(new MapData.Property<dynamic>(item));
+                }
+                return output;
+            }
+            else
+            {
+                return new MapData.Property<dynamic>(input);
+            }
+        }
+
+        public class Property<T>
+        {
+            public Property(T value)
+            {
+                Value = value;
+            }
+            public T Value;
+            public bool Invalid; // Todo - make this a delegate to save memory, IsInvalid() or something.
         }
     }
 }

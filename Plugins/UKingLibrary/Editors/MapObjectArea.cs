@@ -29,11 +29,11 @@ namespace UKingLibrary
                 if (!Parameters.ContainsKey("Shape"))
                     return AreaShapes.Box;
 
-                return Enum.Parse(typeof(AreaShapes), Parameters["Shape"]); }
+                return Enum.Parse(typeof(AreaShapes), Parameters["Shape"].Value); }
             set { BymlHelper.SetValue(Parameters, "Shape", value.ToString()); }
         }
 
-        public override EditableObject LoadRenderObject(IDictionary<string, dynamic> actor, dynamic obj, NodeBase parent)
+        public override EditableObject LoadRenderObject(IDictionary<string, dynamic> actor, IDictionary<string, dynamic> obj, NodeBase parent)
         {
             return new AreaRender(parent, Shape, new Vector4(0, 0, 0, 1));
         }
