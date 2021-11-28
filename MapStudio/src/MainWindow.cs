@@ -38,7 +38,7 @@ namespace MapStudio
                                 TranslationSource.GetText("TRACK_STUDIO"),
                                 GameWindowFlags.Default,
                                 DisplayDevice.Default,
-                                4, 6, GraphicsContextFlags.ForwardCompatible)
+                                3, 2, GraphicsContextFlags.Default)
         {
             Title += $": {TranslationSource.GetText("OPENGL_VERSION")}: " + GL.GetString(StringName.Version);
 
