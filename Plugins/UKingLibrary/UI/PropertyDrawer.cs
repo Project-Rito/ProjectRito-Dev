@@ -214,7 +214,7 @@ namespace UKingLibrary.UI
                 if (pair.Value is IList<dynamic>)
                     continue;
 
-                if (pair.Value.Invalid)
+                if (pair.Value is MapData.Property<dynamic> && pair.Value.Invalid)
                 {
                     Vector2 p_min = ImGui.GetCursorScreenPos();
                     Vector2 p_max = new Vector2(p_min.X + ImGui.GetContentRegionAvail().X, p_min.Y + ImGui.GetFrameHeight());
@@ -240,7 +240,11 @@ namespace UKingLibrary.UI
             ImGui.PushItemWidth(colwidth);
             if (value != null)
             {
-                Type type = value.Value.GetType();
+                Type type;
+                if (value is MapData.Property<dynamic>)
+                    type = value.Value.GetType();
+                else
+                    type = value.GetType();
 
                 //Check type and set property UI here
                 if (type == typeof(float))
@@ -275,8 +279,12 @@ namespace UKingLibrary.UI
 
         public static void DrawXYZ(IDictionary<string, dynamic> properties, string key, PropertyChangedCallback callback = null)
         {
-            var values = (IDictionary<string, dynamic>)properties[key].Value;
-            var vec = new System.Numerics.Vector3(values["X"], values["Y"], values["Z"]);
+            dynamic values;
+            if (properties[key] is MapData.Property<dynamic>)
+                values = (IDictionary<string, dynamic>)properties[key].Value;
+            else
+                values = (IDictionary<string, dynamic>)properties[key];
+            var vec = new System.Numerics.Vector3(values["X"].Value, values["Y"].Value, values["Z"].Value);
             if (ImGui.DragFloat3($"##{key}", ref vec))
             {
                 values["X"] = vec.X;
