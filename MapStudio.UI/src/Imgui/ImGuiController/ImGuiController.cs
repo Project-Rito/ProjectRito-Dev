@@ -3,6 +3,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Toolbox.Core;
@@ -73,10 +74,15 @@ namespace MapStudio.UI
             };
             char min = Convert.ToChar(0xe000);
             char max = Convert.ToChar(0xe0fe);
+            float fontSize = 16.0f;
 
-            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\OpenFontIcons.ttf", 16, config, new[] { min, max, (char)0 });
-            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\fa-regular-400.ttf", 16, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
-            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\fa-solid-900.ttf", 16, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\OpenFontIcons.ttf", fontSize, config, new[] { min, max, (char)0 });
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\fa-regular-400.ttf", fontSize, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\fa-solid-900.ttf", fontSize, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
+
+            //Font needs a slight shift.
+            config.GlyphMinAdvanceX = 12;
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\NotoSansCJKjp-Medium.otf", fontSize, config, io.Fonts.GetGlyphRangesJapanese());
 
             //Store the default font for monospaced UI (ie hex viewer)
             DefaultFont = io.Fonts.AddFontDefault();
@@ -97,6 +103,20 @@ namespace MapStudio.UI
          ImFontConfig config,
          char[] glyphRanges)
         {
+            unsafe
+            {
+                fixed (char* glyphs = &glyphRanges[0])
+                {
+                    AddFontFromFileTTF(filename, sizePixels, config, (IntPtr)glyphs);
+                }
+            }
+        }
+
+        public static void AddFontFromFileTTF(string filename,
+     float sizePixels,
+     ImFontConfig config,
+    IntPtr glyphRanges)
+        {
             ImGuiIOPtr io = ImGui.GetIO();
             config.OversampleH = 1;
             config.OversampleV = 1;
@@ -104,9 +124,7 @@ namespace MapStudio.UI
 
             unsafe
             {
-                fixed (char* glyphs = &glyphRanges[0]) {
-                    io.Fonts.AddFontFromFileTTF(filename, sizePixels, &config, (IntPtr)glyphs);
-                }
+                io.Fonts.AddFontFromFileTTF(filename, sizePixels, &config, glyphRanges);
             }
         }
 

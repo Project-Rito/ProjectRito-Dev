@@ -471,7 +471,7 @@ namespace MapStudio.UI
                 if (!window.Opened)
                     continue;
 
-                if (ImGui.Begin(window.Name, ref window.Opened))
+                if (ImGui.Begin(window.Name, ref window.Opened, window.Flags))
                 {
                     window.Render();
                     ImGui.End();

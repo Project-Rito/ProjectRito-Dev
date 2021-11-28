@@ -6,15 +6,27 @@ using OpenTK.Graphics;
 using Toolbox.Core;
 using GLFrameworkEngine;
 using System.Reflection;
+using MapStudio.UI;
 
 namespace MapStudio
 {
     public class Program
     {
+        static bool IS_DEBUG = false;
+
         const string DLL_DIRECTORY = "Lib";
 
         static void Main(string[] args)
         {
+            //Set global for method that compiles during debug building.
+            IsDebugCheck(ref IS_DEBUG);
+
+            //Hide the console unless debugging
+            if (!IS_DEBUG)
+                ConsoleWindowUtil.Hide();
+            else
+                ConsoleWindowUtil.Show();
+
             //Assembly searching from folders
             var domain = AppDomain.CurrentDomain;
             domain.AssemblyResolve += LoadAssembly;
@@ -26,7 +38,7 @@ namespace MapStudio
             //Global variables across the application
             InitRuntime();
             //Reload the language keys
-            MapStudio.UI.TranslationSource.Instance.Reload();
+            TranslationSource.Instance.Reload();
             //Initiate the texture resource creator for making texture instances from STGenericTexture.
             InitGLResourceCreation();
             //Load the window and run the application
@@ -35,6 +47,11 @@ namespace MapStudio
             wnd.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
             wnd.VSync = OpenTK.VSyncMode.On;
             wnd.Run();
+        }
+
+        [Conditional("DEBUG")]
+        static void IsDebugCheck(ref bool isDebug) {
+            isDebug = true;
         }
 
         static void InitRuntime()
@@ -86,14 +103,12 @@ namespace MapStudio
                 FileInfo info = new FileInfo(Assembly.GetExecutingAssembly().Location);
 
                 //Get folder of the executing .exe
-                var folderPath = Path.Combine(info.Directory.FullName, DLL_DIRECTORY);
+                var folderPath = Path.Combine(info.Directory.FullName, DLL_DIRECTORY);  
 
                 //Build potential fullpath to the loading assembly
                 var assemblyName = args.Name.Split(new string[] { "," }, StringSplitOptions.None)[0];
                 var assemblyExtension = "dll";
                 var assemblyPath = Path.Combine(folderPath, string.Format("{0}.{1}", assemblyName, assemblyExtension));
-
-                Console.WriteLine($"LoadAssembly {assemblyPath}");
 
                 //Check if the assembly exists in our "Libs" directory
                 if (File.Exists(assemblyPath))

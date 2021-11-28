@@ -598,7 +598,7 @@ namespace GLFrameworkEngine
         //Draws a line from the origin to the changed transformation point
         private void DrawLine(GLContext context)
         {
-            if (this.ActiveMode != TransformActions.Scale || this.ActiveMode != TransformActions.Rotate)
+            if (this.ActiveMode != TransformActions.Scale && this.ActiveMode != TransformActions.Rotate)
                 return;
 
             var shader = GlobalShaders.GetShader("GIZMO");
