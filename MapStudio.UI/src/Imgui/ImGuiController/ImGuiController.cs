@@ -74,14 +74,15 @@ namespace MapStudio.UI
             };
             char min = Convert.ToChar(0xe000);
             char max = Convert.ToChar(0xe0fe);
+            float fontSize = 16.0f;
 
-            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\OpenFontIcons.ttf", 16, config, new[] { min, max, (char)0 });
-            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\fa-regular-400.ttf", 16, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
-            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\fa-solid-900.ttf", 16, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\OpenFontIcons.ttf", fontSize, config, new[] { min, max, (char)0 });
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\fa-regular-400.ttf", fontSize, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\fa-solid-900.ttf", fontSize, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
 
-            //Optional jpn font
-            if (File.Exists($"{Runtime.ExecutableDir}\\Lib\\Fonts\\NotoSansCJKjp-Regular.otf"))
-                AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\NotoSansCJKjp-Regular.otf", 16, config, ImGui.GetIO().Fonts.GetGlyphRangesJapanese());
+            //Font needs a slight shift.
+            config.GlyphMinAdvanceX = 12;
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\NotoSansCJKjp-Medium.otf", fontSize, config, io.Fonts.GetGlyphRangesJapanese());
 
             //Store the default font for monospaced UI (ie hex viewer)
             DefaultFont = io.Fonts.AddFontDefault();
