@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -327,7 +327,7 @@ namespace MapStudio
                     Workspace.UpdateActive(workspace);
 
                 ImGui.DockSpace(dockspaceId, new System.Numerics.Vector2(0, 0),
-                    ImGuiDockNodeFlags.PassthruCentralNode, workspace.window_class);
+                    ImGuiDockNodeFlags.CentralNode, workspace.window_class);
 
                 if (visible)
                     workspace.Render((int)workspace.DockID);
