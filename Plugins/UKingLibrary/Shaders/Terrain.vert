@@ -7,6 +7,7 @@ in vec3 vNormal;
 
 out vec4 fTexCoords;
 out vec3 fNormals;
+out vec4 fTangentWorld;
 out float materialWeight;
 flat out vec2 texIndex;
 

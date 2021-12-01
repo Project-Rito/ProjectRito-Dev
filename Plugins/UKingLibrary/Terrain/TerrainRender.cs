@@ -25,7 +25,8 @@ namespace UKingLibrary.Rendering
         float[] TEXTURE_UV_MAP = new float[] { 0.1f, 0.1f, 0.05f, 0.05f, 0.1f, 0.1f, 0.04f, 0.04f, 0.05f, 0.05f, 0.1f, 0.1f, 0.05f, 0.05f, 0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f, 0.09f, 0.09f, 0.05f, 0.05f, 0.1f, 0.1f, 0.2f, 0.2f, 0.14f, 0.14f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.07f, 0.07f, 0.07f, 0.07f, 0.05f, 0.05f, 0.15f, 0.15f, 0.1f, 0.1f, 0.1f, 0.1f, 0.07f, 0.07f, 0.04f, 0.04f, 0.05f, 0.16f, 0.03f, 0.03f, 0.05f, 0.05f, 0.05f, 0.05f, 0.03f, 0.03f, 0.05f, 0.05f, 0.45f, 0.45f, 0.2f, 0.2f, 0.1f, 0.1f, 0.59f, 0.59f, 0.15f, 0.15f, 0.2f, 0.2f, 0.35f, 0.35f, 0.2f, 0.2f, 0.1f, 0.1f, 0.15f, 0.15f, 0.2f, 0.2f, 0.15f, 0.15f, 0.2f, 0.2f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.1f, 0.1f, 0.08f, 0.08f, 0.04f, 0.04f, 0.1f, 0.1f, 0.05f, 0.05f, 0.05f, 0.05f, 0.1f, 0.1f, 0.25f, 0.25f, 0.04f, 0.05f, 0.08f, 0.08f, 0.08f, 0.08f, 0.2f, 0.2f, 0.1f, 0.1f, 0.15f, 0.15f, 0.04f, 0.04f, 0.25f, 0.25f, 0.05f, 0.05f, 0.15f, 0.15f, 0.05f, 0.05f, 0.08f, 0.08f, 0.1f, 0.1f, 0.07f, 0.07f, 0.05f, 0.05f, 0.23f, 0.23f, 0.16f, 0.16f, 0.16f, 0.16f, 0.04f, 0.04f, 0.1f, 0.1f, 0.05f, 0.05f, 0.1f, 0.1f };
 
         RenderMesh<TerrainVertex> TerrainMesh;
-        static GLTexture2DArray TerrainTexture;
+        static GLTexture2DArray TerrainTexture_Alb;
+        static GLTexture2DArray TerrainTexture_Nrm;
 
         static int[] IndexBuffer;
 
@@ -88,7 +89,8 @@ namespace UKingLibrary.Rendering
             var shader = GlobalShaders.GetShader("TERRAIN");
             context.CurrentShader = shader;
             shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
-            shader.SetTexture(TerrainTexture, "texTerrain", 1);
+            shader.SetTexture(TerrainTexture_Alb, "texTerrain_Alb", 1);
+            shader.SetTexture(TerrainTexture_Nrm, "texTerrain_Nrm", 2);
 
             TerrainMesh.Draw(context);
         }
@@ -191,34 +193,58 @@ namespace UKingLibrary.Rendering
         private void LoadTerrainTextures()
         {
             //Only load the terrain texture once
-            if (TerrainTexture != null)
+            if (TerrainTexture_Alb != null || TerrainTexture_Nrm != null)
                 return;
 
             Toolbox.Core.StudioLogger.WriteLine($"Loading terrain textures...");
 
-            //Load all 83 terrain textures into a 2D array.
-            TerrainTexture = GLTexture2DArray.CreateUncompressedTexture(1024, 1024, 83, 1, PixelInternalFormat.Rgba, PixelFormat.Bgra);
-            TerrainTexture.WrapS = TextureWrapMode.Repeat;
-            TerrainTexture.WrapT = TextureWrapMode.Repeat;
-            TerrainTexture.MinFilter = TextureMinFilter.LinearMipmapLinear;
+            //Load all 83 terrain textures into a 2D array. // Eventually don't hardcode this.... same with res
+            TerrainTexture_Alb = GLTexture2DArray.CreateUncompressedTexture(1024, 1024, 83, 1, PixelInternalFormat.Rgba, PixelFormat.Bgra);
+            TerrainTexture_Alb.WrapS = TextureWrapMode.Repeat;
+            TerrainTexture_Alb.WrapT = TextureWrapMode.Repeat;
+            TerrainTexture_Alb.MinFilter = TextureMinFilter.LinearMipmapLinear;
+
+            TerrainTexture_Nrm = GLTexture2DArray.CreateUncompressedTexture(512, 512, 83, 1, PixelInternalFormat.Rgba, PixelFormat.Bgra);
+            TerrainTexture_Nrm.WrapS = TextureWrapMode.Repeat;
+            TerrainTexture_Nrm.WrapT = TextureWrapMode.Repeat;
+            TerrainTexture_Nrm.MinFilter = TextureMinFilter.LinearMipmapLinear;
+
             //Load the terrain data as cached images.
             string cache = PluginConfig.GetCachePath("Images\\Terrain");
 
-            for (int i = 0; i < TerrainTexture.ArrayCount; i++)
+            // Alb ------------------------------------------------
+            for (int i = 0; i < TerrainTexture_Alb.ArrayCount; i++) 
             {
                 string tex = $"{cache}\\MaterialAlb_{i}.png";
                 if (System.IO.File.Exists(tex))
                 {
                     var image = new System.Drawing.Bitmap(tex);
-                    TerrainTexture.InsertImage(image, i);
+                    TerrainTexture_Alb.InsertImage(image, i);
                     image.Dispose();
                 }
             }
             //Update the terrain sampler parameters and generate mips.
-            TerrainTexture.Bind();
-            TerrainTexture.UpdateParameters();
-            TerrainTexture.GenerateMipmaps();
-            TerrainTexture.Unbind();
+            TerrainTexture_Alb.Bind();
+            TerrainTexture_Alb.UpdateParameters();
+            TerrainTexture_Alb.GenerateMipmaps();
+            TerrainTexture_Alb.Unbind();
+
+            // Nrm ------------------------------------------------
+            for (int i = 0; i < TerrainTexture_Nrm.ArrayCount; i++) 
+            {
+                string tex = $"{cache}\\MaterialCmb_{i}.png";
+                if (System.IO.File.Exists(tex))
+                {
+                    var image = new System.Drawing.Bitmap(tex);
+                    TerrainTexture_Nrm.InsertImage(image, i);
+                    image.Dispose();
+                }
+            }
+            //Update the terrain sampler parameters and generate mips.
+            TerrainTexture_Nrm.Bind();
+            TerrainTexture_Nrm.UpdateParameters();
+            TerrainTexture_Nrm.GenerateMipmaps();
+            TerrainTexture_Nrm.Unbind();
         }
 
         public struct TerrainVertex
