@@ -59,16 +59,18 @@ namespace MapStudio.UI
             //Prepare info
             if (ImGui.IsMouseDown(ImGuiMouseButton.Right))
                 MouseEventInfo.RightButton = ButtonState.Pressed;
+            else if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
+                MouseEventInfo.RightButton = ButtonState.Released;
+
             if (ImGui.IsMouseDown(ImGuiMouseButton.Left))
                 MouseEventInfo.LeftButton = ButtonState.Pressed;
-
-            if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
-                MouseEventInfo.RightButton = ButtonState.Released;
-            if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+            else if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
                 MouseEventInfo.LeftButton = ButtonState.Released;
 
             if (ImGui.IsMouseDown(ImGuiMouseButton.Middle))
                 MouseEventInfo.MiddleButton = ButtonState.Pressed;
+            else if (ImGui.IsMouseReleased(ImGuiMouseButton.Middle))
+                MouseEventInfo.MiddleButton = ButtonState.Released;
 
             MouseState mouseState = Mouse.GetState();
             MouseEventInfo.WheelPrecise = mouseState.WheelPrecise;
