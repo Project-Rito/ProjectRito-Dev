@@ -200,6 +200,18 @@ namespace UKingLibrary
             SaveTransform();
         }
 
+        public override void BeginFrame()
+        {
+            UpdateCalc = true;
+
+            var render = Render as BfresRender;
+            if (render == null)
+                return;
+
+            foreach (var model in render.Models)
+                model.ModelData.Skeleton.Updated = false;
+        }
+
         /// <summary>
         /// Calculates actor behavior in the scene during a timer loop.
         /// </summary>
@@ -244,7 +256,7 @@ namespace UKingLibrary
             if (idle != null)
                 animations.Add(idle);
             else
-                animations.Add(render.SkeletalAnimations.FirstOrDefault());
+                animations.Add(render.SkeletalAnimations.FirstOrDefault(x => x.Loop == true));
             return animations;
         }
 

@@ -194,7 +194,6 @@ namespace CafeLibrary.Rendering
                     if (bone == null)
                         continue;
 
-
                     update = true;
 
                     Vector3 position = bone.Position;
