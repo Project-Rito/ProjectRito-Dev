@@ -41,6 +41,8 @@ WORKSPACES - Workspaces
 EDITORS - Editors
 IMPORT - Import
 EXPORT - Export
+LOADING - Loading
+SAVING - Saving
 NONE - None
 COPY - Copy
 PASTE - Paste

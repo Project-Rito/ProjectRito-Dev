@@ -42,24 +42,18 @@ namespace GLFrameworkEngine
             float radius = gizmoScale * 2.2f;
             if (GLMath.RayIntersectsLineSphere(ray, position, radius, out Vector3 result))
             {
-                var distance = Vector3.Distance(result, position);
-                if (Math.Abs(distance - radius) < (radius * 1.5f)) //Point lies within orb radius
-                {
-                    Vector3 angle = Angles(Vector3.TransformPosition(result, invTrasnform)) * Toolbox.Core.STMath.Rad2Deg;
-                    angle.X = (float)Math.Abs(angle.X);
-                    angle.Y = (float)Math.Abs(angle.Y);
-                    angle.Z = (float)Math.Abs(angle.Z);
+                Vector3 angle = Angles(Vector3.TransformPosition(result, invTrasnform)) * Toolbox.Core.STMath.Rad2Deg;
+                angle.X = (float)Math.Abs(angle.X);
+                angle.Y = (float)Math.Abs(angle.Y);
+                angle.Z = (float)Math.Abs(angle.Z);
 
-                    float _axisSnapRange = 15.0f;
-                    if (Math.Abs(angle.Y - 90.0f) <= _axisSnapRange)
-                        axis = TransformEngine.Axis.X;
-                    else if (angle.X >= (180.0f - _axisSnapRange) || angle.X <= _axisSnapRange)
-                        axis = TransformEngine.Axis.Y;
-                    else if (angle.Y >= (180.0f - _axisSnapRange) || angle.Y <= _axisSnapRange)
-                        axis = TransformEngine.Axis.Z;
-                }
-                  else if (Math.Abs(distance - (radius * 1.5f)) < (radius * 1.8f)) //Point lies on circ line
-                    axis = TransformEngine.Axis.All;
+                float _axisSnapRange = 15.0f;
+                if (Math.Abs(angle.Y - 90.0f) <= _axisSnapRange)
+                    axis = TransformEngine.Axis.X;
+                else if (angle.X >= (180.0f - _axisSnapRange) || angle.X <= _axisSnapRange)
+                    axis = TransformEngine.Axis.Y;
+                else if (angle.Y >= (180.0f - _axisSnapRange) || angle.Y <= _axisSnapRange)
+                    axis = TransformEngine.Axis.Z;
 
                 return axis;
             }
@@ -120,11 +114,12 @@ namespace GLFrameworkEngine
 
                 transform = scaleMtx * rotationMtx * translateMtx;
 
-                for (int i = 0; i < 3; i++) {
+                for (int i = 0; i < 3; i++)
+                {
                     if (isMoving && !isSelected[i])
                         continue;
 
-                    DrawAxis(context, isMoving && isSelected[i], isHovered[i], ref transform,_rotations[i], _colors[i]);
+                    DrawAxis(context, isMoving && isSelected[i], isHovered[i], ref transform, _rotations[i], _colors[i]);
                 }
 
                 GL.PopAttrib();
@@ -164,7 +159,7 @@ namespace GLFrameworkEngine
 
         public void DrawOrb(GLContext context, ref Matrix4 transform, bool isMoving, bool isHovered)
         {
-            var matrix = Matrix4.CreateScale(2) *  new Matrix4(context.Camera.InverseRotationMatrix) * transform;
+            var matrix = Matrix4.CreateScale(2.0f - context.ZOffset) * new Matrix4(context.Camera.InverseRotationMatrix) * transform;
             var matrix2 = Matrix4.CreateScale(2.5f) * new Matrix4(context.Camera.InverseRotationMatrix) * transform;
 
             context.CurrentShader.SetMatrix4x4("mtxMdl", ref matrix);
@@ -209,9 +204,9 @@ namespace GLFrameworkEngine
                 GL.Disable(EnableCap.DepthTest);
                 CircleRenderer.Draw(context);
 
-               // context.CurrentShader.SetVector4("color", new Vector4(1, 1, 0, 1));
+                // context.CurrentShader.SetVector4("color", new Vector4(1, 1, 0, 1));
                 //CircleChangeSegmentRenderer.SetCustomSegment(startAngleRotate, endAngleRotate);
-               // CircleChangeSegmentRenderer.Draw(context);
+                // CircleChangeSegmentRenderer.Draw(context);
             }
             else
             {

@@ -72,36 +72,45 @@ namespace GLFrameworkEngine
 
         public static bool RayIntersectsLineSphere(CameraRay ray, Vector3 center, float radius, out Vector3 result)
         {
-            var p1 = ray.Origin.Xyz;
-            var p2 = ray.Far.Xyz;
+            Vector3d resultDouble = new Vector3d();
+            bool intersects = RayIntersectsLineSphere(ray, (Vector3d)center, radius, out resultDouble);
+
+            result = (Vector3)resultDouble;
+            return intersects;
+        }
+        
+        public static bool RayIntersectsLineSphere(CameraRay ray, Vector3d center, float radius, out Vector3d result)
+        {
+            var p1 = (Vector3d)ray.Origin.Xyz;
+            var p2 = (Vector3d)ray.Far.Xyz;
 
             var d = p2 - p1;
-            float a = Vector3.Dot(d, d);
+            double a = Vector3d.Dot(d, d);
 
             if (a > 0.0f)
             {
-                float b = 2 * Vector3.Dot(d, p1 - center);
-                float c = (Vector3.Dot(center, center) + Vector3.Dot(p1, p1)) - (2 * Vector3.Dot(center, p1)) - (radius * radius);
+                double b = 2 * Vector3d.Dot(d, p1 - center);
+                double c = (Vector3d.Dot(center, center) + Vector3d.Dot(p1, p1)) - (2 * Vector3d.Dot(center, p1)) - (radius * radius);
 
-                float magnitude = (b * b) - (4 * a * c);
+                double magnitude = (b * b) - (4 * a * c);
 
                 if (magnitude >= 0.0f)
                 {
                     magnitude = (float)Math.Sqrt(magnitude);
                     a *= 2;
 
-                    float scale = (-b + magnitude) / a;
-                    float dist2 = (-b - magnitude) / a;
+                    double scale = (-b + magnitude) / a;
+                    double dist2 = (-b - magnitude) / a;
 
                     if (dist2 < scale)
                         scale = dist2;
 
-                    result = p1 + (d * scale);
+                    result = (p1 + (d * scale));
                     return true;
                 }
             }
 
-            result = new Vector3();
+            result = new Vector3d();
             return false;
         }
 

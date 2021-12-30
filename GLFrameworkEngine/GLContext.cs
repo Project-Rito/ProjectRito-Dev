@@ -129,6 +129,12 @@ namespace GLFrameworkEngine
 
         private float _previewScale = 1.0f;
 
+        /// <summary>
+        /// An offset used to avoid z-fighting in cases of overlapping.
+        /// Used in editor features like gizmos.
+        /// </summary>
+        public float ZOffset = 0.01f;
+
         public bool UpdateViewport = false;
 
         public bool DisableCameraMovement = false;
