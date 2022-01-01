@@ -316,7 +316,7 @@ namespace MapStudio.UI
             menus.Add(new MenuItemModel($"   {IconManager.REDO_ICON}    {TranslationSource.GetText("REDO")}", () => Pipeline._context.Scene.Redo()));
             menus.Add(new MenuItemModel(""));
             menus.Add(new MenuItemModel($"   {IconManager.COPY_ICON}    {TranslationSource.GetText("COPY")}", Pipeline._context.Scene.CopySelected));
-            menus.Add(new MenuItemModel($"   {IconManager.PASTE_ICON}    {TranslationSource.GetText("PASTE")}", Pipeline._context.Scene.PasteSelected));
+            menus.Add(new MenuItemModel($"   {IconManager.PASTE_ICON}    {TranslationSource.GetText("PASTE")}", () => Pipeline._context.Scene.PasteSelected(Pipeline._context)));
             menus.Add(new MenuItemModel($"   {IconManager.DELETE_ICON}    {TranslationSource.GetText("REMOVE")}", Pipeline._context.Scene.DeleteSelected));
 
             return menus;
@@ -401,8 +401,8 @@ namespace MapStudio.UI
             }, "RECTANGLE_SCALE", isRectScaleActive && !isSelectionMode));
             menus.Add(new MenuItemModel(""));
             menus.Add(new MenuItemModel(""));
-            menus.Add(new MenuItemModel($"{IconManager.COPY_ICON}", () => { }, "COPY"));
-            menus.Add(new MenuItemModel($"{IconManager.PASTE_ICON}", () => { }, "PASTE"));
+            menus.Add(new MenuItemModel($"{IconManager.COPY_ICON}", Pipeline._context.Scene.CopySelected, "COPY"));
+            menus.Add(new MenuItemModel($"{IconManager.PASTE_ICON}", () => Pipeline._context.Scene.PasteSelected(Pipeline._context), "PASTE"));
             menus.Add(new MenuItemModel($"{IconManager.DELETE_ICON}", Pipeline._context.Scene.DeleteSelected, "REMOVE"));
             //A workspace can have its own menu icons per editor
             if (Workspace.ActiveWorkspace != null)

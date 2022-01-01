@@ -30,7 +30,7 @@ namespace GLFrameworkEngine
             if (e.IsKeyDown(InputSettings.INPUT.Scene.Copy))
                 CopySelected();
             if (e.IsKeyDown(InputSettings.INPUT.Scene.Paste))
-                PasteSelected();
+                PasteSelected(context);
             if (e.IsKeyDown(InputSettings.INPUT.Scene.Delete))
                 DeleteSelected();
 
@@ -57,6 +57,8 @@ namespace GLFrameworkEngine
         List<EditableObject> copiedObjects = new List<EditableObject>();
 
         public void CopySelected() {
+            copiedObjects.Clear();
+
             var selected = GetEditObjects();
 
             foreach (EditableObject obj in selected)
@@ -66,16 +68,20 @@ namespace GLFrameworkEngine
             }
         }
 
-        public void PasteSelected()
+        public void PasteSelected(GLContext context)
         {
             if (copiedObjects.Count > 0)
                 GLContext.ActiveContext.Scene.AddToUndo(new EditableObjectAddUndo(this, copiedObjects));
 
+            DeselectAll(context);
             foreach (var obj in copiedObjects)
             {
                 EditableObject copy = ((ICloneable)obj).Clone() as EditableObject;
                 AddRenderObject(copy);
+
+                copy.IsSelected = true;
             }
+            OnSelectionChanged(context);
         }
 
         /// <summary>

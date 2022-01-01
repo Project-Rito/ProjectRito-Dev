@@ -44,18 +44,11 @@ namespace UKingLibrary.Rendering
 
         public object Clone()
         {
-            var area = new AreaRender(this.ParentUINode, AreaShape, this.Color);
-            area.Transform = new GLTransform()
-            {
-                Position = this.Transform.Position,
-                Rotation = this.Transform.Rotation,
-                Scale = this.Transform.Scale * GLContext.PreviewScale,
-            };
-            area.Transform.UpdateMatrix(true);
-
             if (this.UINode.Tag is ICloneable)
-                area.UINode.Tag = ((ICloneable)this.UINode.Tag).Clone();
-            return area;
+            {
+                return ((ICloneable)this.UINode.Tag).Clone();
+            }
+            return null;
         }
 
         public void DrawColorPicking(GLContext context)

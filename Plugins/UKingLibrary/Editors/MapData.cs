@@ -72,8 +72,6 @@ namespace UKingLibrary
 
                     //Setup properties for editing
                     MapObject data = new MapObject();
-                    if (profile == "Area")
-                        data = new MapObjectArea();
 
                     data.LoadActor((MapMuuntEditor)Workspace.ActiveWorkspace.ActiveEditor, mapObj, actor, parent);
                     Objs.Add(data.HashId, data);
@@ -225,11 +223,15 @@ namespace UKingLibrary
             }
         }
 
-        public class Property<T>
+        public class Property<T> : ICloneable
         {
             public Property(T value)
             {
                 Value = value;
+            }
+            public object Clone()
+            {
+                return new Property<T>(Value);
             }
             public T Value;
             public bool Invalid; // Todo - make this a delegate to save memory, IsInvalid() or something.

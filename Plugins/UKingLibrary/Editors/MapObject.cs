@@ -10,12 +10,13 @@ using Toolbox.Core;
 using Toolbox.Core.ViewModels;
 using Toolbox.Core.Hashes.Cryptography;
 using UKingLibrary.UI;
+using UKingLibrary.Rendering;
 using CafeLibrary.Rendering;
 using Toolbox.Core.Animations;
 
 namespace UKingLibrary
 {
-    public class MapObject : ActorBase
+    public class MapObject : ActorBase, ICloneable
     {
         /// <summary>
         /// Properties related to the object instance.
@@ -52,6 +53,37 @@ namespace UKingLibrary
         {
             get { return Properties["HashId"].Value; }
             set { Properties["HashId"] = new MapData.Property<dynamic>(value); }
+        }
+
+        /// <summary>
+        /// The parameters section (if it exists)
+        /// </summary>
+        public IDictionary<string, dynamic> Parameters
+        {
+            get
+            {
+                if (!Properties.ContainsKey("!Parameters"))
+                    return new Dictionary<string, dynamic>();
+
+                return Properties["!Parameters"];
+            }
+            set { Properties["!Parameters"] = value; }
+        }
+
+        /// <summary>
+        /// The area shape (if this is an area)
+        /// </summary>
+        public AreaShapes AreaShape
+        {
+            get
+            {
+
+                if (!Parameters.ContainsKey("Shape"))
+                    return AreaShapes.Box;
+
+                return Enum.Parse(typeof(AreaShapes), Parameters["Shape"].Value);
+            }
+            set { BymlHelper.SetValue(Parameters, "Shape", value.ToString()); }
         }
 
         /// <summary>
@@ -142,6 +174,50 @@ namespace UKingLibrary
 
             //Load the transform attached to the object
             LoadObjectTransform();
+        }
+
+        public object Clone()
+        {
+            MapObject newObj = new MapObject();
+
+            SaveTransform(); // We wanna make sure that the new actor is in the right location!
+
+            newObj.Properties = DeepCloneDictionary(Properties);
+            newObj.ActorInfo = ActorInfo;
+            newObj.Parent = Parent;
+            newObj.ReloadActor();
+
+            return newObj.Render; // Ugh, I guess we have to return this because of how things are structured
+        }
+
+        public IDictionary<string, dynamic> DeepCloneDictionary(IDictionary<string, dynamic> properties)
+        {
+            IDictionary<string, dynamic> clonedDictionary = new Dictionary<string, dynamic>();
+            foreach (KeyValuePair<string, dynamic> entry in properties)
+            {
+                if (entry.Value is IDictionary<string, dynamic>)
+                    clonedDictionary.Add(entry.Key, DeepCloneDictionary(entry.Value));
+                else if (entry.Value is IList<dynamic>)
+                    clonedDictionary.Add(entry.Key, DeepCloneList(entry.Value));
+                else
+                    clonedDictionary.Add(entry.Key, ((ICloneable)entry.Value).Clone()); // We're gonna assume that all values are ICloneable.
+            }
+            return clonedDictionary;
+        }
+
+        public IList<dynamic> DeepCloneList(IList<dynamic> properties)
+        {
+            IList<dynamic> clonedList = new List<dynamic>();
+            foreach (dynamic value in properties)
+            {
+                if (value is IDictionary<string, dynamic>)
+                    clonedList.Add(DeepCloneDictionary(value));
+                else if (value is IList<dynamic>)
+                    clonedList.Add(DeepCloneList(value));
+                else
+                    clonedList.Add(((ICloneable)value).Clone()); // We're gonna assume that all values are ICloneable.
+            }
+            return clonedList;
         }
 
         public void UpdateActorModel()
@@ -349,28 +425,32 @@ namespace UKingLibrary
             {
                 //Single rotation on the up axis
                 if (value.X == 0 && value.Z == 0 && value.Y != 0)
-                    BymlHelper.SetValue(Properties, key, value.Y);
+                    BymlHelper.SetValue(Properties, key, new MapData.Property<dynamic>(value.Y));
             }
             else if (value.IsUniform())
-                BymlHelper.SetValue(Properties, key, value.X);
+                BymlHelper.SetValue(Properties, key, new MapData.Property<dynamic>(value.X));
             else
             {
-                BymlHelper.SetValue(Properties, key, new List<float>()
+                BymlHelper.SetValue(Properties, key, new List<dynamic>()
                 {
-                    value.X,
-                    value.Y,
-                    value.Z,
+                    new MapData.Property<dynamic>(value.X),
+                    new MapData.Property<dynamic>(value.Y),
+                    new MapData.Property<dynamic>(value.Z),
                 });
             }
         }
 
         public virtual EditableObject LoadRenderObject(IDictionary<string, dynamic> actor, IDictionary<string, dynamic> obj, NodeBase parent)
         {
+            if (actor.ContainsKey("profile") && (string)actor["profile"] == "Area")
+                return new AreaRender(parent, AreaShape, new Vector4(0, 0, 0, 1));
+
             string name = obj["UnitConfigName"].Value;
 
             //Default transform cube
             EditableObject render = new TransformableObject(parent);
-            //Bfres renderer
+
+            //Bfres render
             if (actor.ContainsKey("bfres"))
             {
                 string modelPath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}.sbfres");

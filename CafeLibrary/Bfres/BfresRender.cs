@@ -12,7 +12,7 @@ using Toolbox.Core.ViewModels;
 
 namespace CafeLibrary.Rendering
 {
-    public class BfresRender : GenericRenderer, IColorPickable, ITransformableObject
+    public class BfresRender : GenericRenderer, IColorPickable, ITransformableObject, ICloneable
     {
         public const float LOD_LEVEL_1_DISTANCE = 1000;
         public const float LOD_LEVEL_2_DISTANCE = 10000;
@@ -110,6 +110,15 @@ namespace CafeLibrary.Rendering
                 DataCache.ModelCache.Add(name, this);
 
             return Models.Count > 0;
+        }
+
+        public object Clone()
+        {
+            if (this.UINode.Tag is ICloneable)
+            {
+                return ((ICloneable)this.UINode.Tag).Clone();
+            }
+            return null;
         }
 
 
