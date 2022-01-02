@@ -237,7 +237,6 @@ namespace MapStudio.UI
                 }
 
                 updateSettings |= ImGuiHelper.InputFromBoolean(TranslationSource.GetText("ORTHOGRAPHIC"), Pipeline._context.Camera, "IsOrthographic");
-                ImGuiHelper.InputFromBoolean(TranslationSource.GetText("LOCK_ROTATION"), Pipeline._context.Camera, "LockRotation");
 
                 updateSettings |= ImGuiHelper.InputFromFloat(TranslationSource.GetText("FOV_(DEGREES)"), Pipeline._context.Camera, "FovDegrees", true, 1f);
                 if (Pipeline._context.Camera.FovDegrees != 45)

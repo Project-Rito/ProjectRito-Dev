@@ -83,7 +83,6 @@ namespace MapStudio.UI
             _camera2D.IsOrthographic = true;
             _camera2D.Mode = Camera.CameraMode.Inspect;
             _camera2D.ResetViewportTransform();
-            _camera2D.LockRotation = true;
             _camera2D.Direction = Camera.FaceDirection.Top;
             _camera2D.UpdateMatrices();
 

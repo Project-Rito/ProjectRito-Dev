@@ -145,7 +145,9 @@ namespace GLFrameworkEngine
         /// <summary>
         /// Locks the camera state to prevent rotations.
         /// </summary>
-        public bool LockRotation { get; set; } = false;
+        public bool LockRotation { 
+            get { return Direction != FaceDirection.Any; }
+        }
 
         internal Vector3 _targetPosition;
 
