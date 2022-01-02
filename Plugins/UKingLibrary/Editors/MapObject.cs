@@ -330,7 +330,10 @@ namespace UKingLibrary
             //Get the wait animation by default
             var idle = render.SkeletalAnimations.FirstOrDefault(x => x.Name == "Wait");
             if (idle != null)
+            {
+                idle.Loop = true; // We don't really want to worry about idle random states
                 animations.Add(idle);
+            }
             else
                 animations.Add(render.SkeletalAnimations.FirstOrDefault(x => x.Loop == true));
             return animations;
@@ -444,7 +447,7 @@ namespace UKingLibrary
         {
             string name = obj["UnitConfigName"].Value;
 
-            if (actor.ContainsKey("profile") && (string)actor["profile"] == "Area")
+            if (actor.ContainsKey("profile") && ((string)actor["profile"] == "Area" || (string)actor["profile"] == "SpotBgmTag"))
                 return new AreaRender(parent, AreaShape, new Vector4(0, 0, 0, 1));
 
             if (name == "BoxWater")
