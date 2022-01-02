@@ -328,14 +328,16 @@ namespace UKingLibrary
 
             List<STAnimation> animations = new List<STAnimation>();
             //Get the wait animation by default
-            var idle = render.SkeletalAnimations.FirstOrDefault(x => x.Name == "Wait");
+            var idle = render.SkeletalAnimations.FirstOrDefault(x => x.Name == "Wait" || x.Name == "Wait_Loop");
+            if (idle == null)
+                idle = render.SkeletalAnimations.FirstOrDefault(x => x.Loop == true);
+
             if (idle != null)
             {
                 idle.Loop = true; // We don't really want to worry about idle random states
                 animations.Add(idle);
             }
-            else
-                animations.Add(render.SkeletalAnimations.FirstOrDefault(x => x.Loop == true));
+
             return animations;
         }
 
