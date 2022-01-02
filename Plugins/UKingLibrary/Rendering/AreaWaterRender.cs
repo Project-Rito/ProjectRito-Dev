@@ -10,9 +10,9 @@ using Toolbox.Core.ViewModels;
 
 namespace UKingLibrary.Rendering
 {
-    public class AreaRender : EditableObject, IColorPickable, ICloneable
+    // Todo - have this interact with water heightmap
+    public class AreaWaterRender : EditableObject, IColorPickable, ICloneable
     {
-        public AreaShapes AreaShape = AreaShapes.Box;
 
         public static bool DrawFilled = true;
 
@@ -29,9 +29,8 @@ namespace UKingLibrary.Rendering
              0, 0, GLContext.PreviewScale, 0,
              0, 0, 0, 1);
 
-        public AreaRender(NodeBase parent, AreaShapes shape, Vector4 color) : base(parent)
+        public AreaWaterRender(NodeBase parent, Vector4 color) : base(parent)
         {
-            AreaShape = shape;
             Color = color;
         }
 
@@ -83,37 +82,14 @@ namespace UKingLibrary.Rendering
             //Draw lines of the region
             GL.LineWidth(1);
             OutlineRenderer.DrawSolidWithSelection(context, InitalTransform * Transform.TransformMatrix, Color, IsSelected | IsHovered);
-            /*
-            switch (AreaShape)
-            {
-                case AreaShapes.Sphere:
-                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-                    SphereRenderer.DrawSolidWithSelection(context, InitalTransform * Transform.TransformMatrix, Color, IsSelected | IsHovered);
-                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-                    break;
-                default:
-                    OutlineRenderer.DrawSolidWithSelection(context, InitalTransform * Transform.TransformMatrix, Color, IsSelected | IsHovered);
-                    break;
-            }
-            */
             GL.Enable(EnableCap.CullFace);
         }
 
         private void Prepare()
         {
             if (OutlineRenderer == null)
-                OutlineRenderer = new CubeCrossedRenderer(1, PrimitiveType.LineStrip);
-            if (AreaShape == AreaShapes.Sphere)
-            {
-                if (FillRenderer == null)
-                    FillRenderer = new SphereRender(1, 10, 10);
-
-            }
-            else
-            {
-                if (FillRenderer == null)
-                    FillRenderer = new CubeRenderer(1);
-            }
+                OutlineRenderer = new CubeCrossedRenderer(0.5f, PrimitiveType.LineStrip);
+            FillRenderer = new CubeRenderer(0.5f);
         }
 
         public override void Dispose()
@@ -124,7 +100,7 @@ namespace UKingLibrary.Rendering
 
         class CubeCrossedRenderer : RenderMesh<VertexPositionNormal>
         {
-            public CubeCrossedRenderer(float size = 1.0f, PrimitiveType primitiveType = PrimitiveType.Triangles) :
+            public CubeCrossedRenderer(float size = 0.5f, PrimitiveType primitiveType = PrimitiveType.Triangles) :
                 base(DrawingHelper.GetCubeVertices(size), Indices, primitiveType)
             {
 

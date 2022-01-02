@@ -442,10 +442,13 @@ namespace UKingLibrary
 
         public virtual EditableObject LoadRenderObject(IDictionary<string, dynamic> actor, IDictionary<string, dynamic> obj, NodeBase parent)
         {
+            string name = obj["UnitConfigName"].Value;
+
             if (actor.ContainsKey("profile") && (string)actor["profile"] == "Area")
                 return new AreaRender(parent, AreaShape, new Vector4(0, 0, 0, 1));
 
-            string name = obj["UnitConfigName"].Value;
+            if (name == "BoxWater")
+                return new AreaWaterRender(parent, new Vector4(0, 0, 1, 1));
 
             //Default transform cube
             EditableObject render = new TransformableObject(parent);
