@@ -73,9 +73,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /E /Y bin\ ..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\&#xD;&#xA;xcopy /E /Y bin\ ..\..\MapStudio\bin\x86\$(Configuration)\net5.0\Plugins\&#xD;&#xA;xcopy /E /Y bin\ ..\..\MapStudio\bin\x64\$(Configuration)\net5.0\Plugins\" />
+  
+  <Target Name="CopyFiles" AfterTargets="Build">
+    <ItemGroup>
+      <CopyFiles Include="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\"/>
+    </ItemGroup>
+    <Copy SourceFiles="$CopyFiles" DestinationFolder="bin\" SkipUnchangedFiles="true"/>
   </Target>
-
 </Project>
