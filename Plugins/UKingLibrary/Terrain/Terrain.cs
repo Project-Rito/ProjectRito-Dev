@@ -64,11 +64,11 @@ namespace UKingLibrary
         /// <summary>
         /// Loads the terrain table.
         /// </summary>
-        public void LoadTerrainTable()
+        public void LoadTerrainTable(string fieldName)
         {
             ProcessLoading.Instance.Update(40, 100, "Loading terrain table");
 
-            var terrainPath = PluginConfig.GetContentPath("Terrain\\A\\MainField.tscb");
+            var terrainPath = PluginConfig.GetContentPath($"Terrain\\A\\{fieldName}.tscb");
             TerrainTable = new TSCB(terrainPath);
         }
 
@@ -211,7 +211,7 @@ namespace UKingLibrary
 
         private byte[] LoadTerrainFiles(string packName, string name, string type)
         {
-            var path = PluginConfig.GetContentPath($"Terrain\\A\\MainField\\{packName}.{type}.sstera");
+            var path = PluginConfig.GetContentPath($"Terrain\\A\\{PluginConfig.FieldName}\\{packName}.{type}.sstera");
            return SARC.GetFile(path, $"{name}.{type}");
         }
 

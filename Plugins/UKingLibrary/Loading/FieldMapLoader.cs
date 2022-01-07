@@ -78,7 +78,7 @@ namespace UKingLibrary
             string[] prodIDs = new string[] { "00", "01", "10", "11" };
             foreach (var id in prodIDs)
             {
-                var path = PluginConfig.GetContentPath($"Map/MainField/{SectionName}/{SectionName}.{id}_Clustering.sblwp");
+                var path = PluginConfig.GetContentPath($"Map/{PluginConfig.FieldName}/{SectionName}/{SectionName}.{id}_Clustering.sblwp");
                 if (!File.Exists(path))
                     continue;
 
@@ -122,7 +122,7 @@ namespace UKingLibrary
             }
             {
                 Terrain = new Terrain();
-                Terrain.LoadTerrainTable();
+                Terrain.LoadTerrainTable(PluginConfig.FieldName);
             }
             {
                 var path = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
@@ -133,13 +133,13 @@ namespace UKingLibrary
 
         private byte[] GetTreeProdInfo()
         {
-            var data = TitleBG.SarcData.Files[$"Map/MainField/{SectionName}/{SectionName}_TeraTree.sblwp"];
+            var data = TitleBG.SarcData.Files[$"Map/{PluginConfig.FieldName}/{SectionName}/{SectionName}_TeraTree.sblwp"];
             return Toolbox.Core.IO.YAZ0.Decompress(data);
         }
 
         private byte[] GetClusterProdInfo(string id)
         {
-            var path = PluginConfig.GetContentPath($"Map/MainField/{SectionName}/{SectionName}.{id}_Clustering.sblwp");
+            var path = PluginConfig.GetContentPath($"Map/{PluginConfig.FieldName}/{SectionName}/{SectionName}.{id}_Clustering.sblwp");
             return Toolbox.Core.IO.YAZ0.Decompress(path);
         }
 

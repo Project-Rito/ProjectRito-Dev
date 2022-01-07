@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Toolbox.Core;
 using MapStudio.UI;
 using Newtonsoft.Json;
+using ImGuiNET;
 
 namespace UKingLibrary
 {
@@ -18,11 +19,14 @@ namespace UKingLibrary
         [JsonProperty]
         static string UpdatePath = @"";
         [JsonProperty]
-        static string AocPath = "";
+        static string AocPath = @"";
 
         static bool HasValidGamePath;
         static bool HasValidUpdatePath;
         static bool HasValidAocPath;
+
+        [JsonProperty]
+        public static string FieldName = @"MainField";
 
         //Only load the config once when this constructor is activated.
         internal static bool init = false;
@@ -39,6 +43,21 @@ namespace UKingLibrary
 
             if (ImguiCustomWidgets.PathSelector("BOTW DLC Path", ref AocPath, HasValidAocPath))
                 Save();
+
+            string[] fieldNames = { "AocField", "MainField" };
+            if (ImGui.BeginCombo("Field Name", FieldName))
+            {
+                for (int i = 0; i < fieldNames.Length; i++)
+                {
+                    bool is_selected = (FieldName == fieldNames[i]);
+                    if (ImGui.Selectable(fieldNames[i], is_selected))
+                        FieldName = fieldNames[i];
+                    if (is_selected)
+                        ImGui.SetItemDefaultFocus();
+                }
+                ImGui.EndCombo();
+                Save();
+            }
         }
 
         public static string GetContentPath(string relativePath)
