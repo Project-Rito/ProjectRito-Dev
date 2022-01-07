@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKingLibrary", "Plugins\UKi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CafeLibrary", "CafeLibrary\CafeLibrary.csproj", "{97635060-BD51-41DC-9B44-9AD6EE4583B9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CurveEditorLibrary", "CurveEditorLibraryCore\CurveEditorLibrary.csproj", "{CD1EC593-ED98-4BA2-96DB-62AF1F2C3D11}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
