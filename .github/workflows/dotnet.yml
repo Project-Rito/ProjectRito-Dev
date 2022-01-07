@@ -22,9 +22,9 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Upload build results
-        uses: actions/upload-artifact@v2
-        with:
-          name: build-${{ matrix.dotnet-version }}
-          path: path: /home/runner/work/ProjectRito-Dev/MapStudio/bin/Debug/${{ matrix.dotnet-version }}/
+      uses: actions/upload-artifact@v2
+      with:
+        name: build-${{ matrix.dotnet-version }}
+        path: /home/runner/work/ProjectRito-Dev/MapStudio/bin/Debug/${{ matrix.dotnet-version }}/
     - name: Test
       run: dotnet test --no-build --verbosity normal
