@@ -24,7 +24,7 @@ jobs:
     - name: Upload build results
       uses: actions/upload-artifact@v2
       with:
-        name: build-${{ matrix.dotnet-version }}
+        name: build
         path: /home/runner/work/ProjectRito-Dev/ProjectRito-Dev/MapStudio/bin
     - name: Test
       run: dotnet test --no-build --verbosity normal
