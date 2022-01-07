@@ -57,7 +57,7 @@ namespace UKingLibrary
 
         public static string GetCachePath(string relativePath)
         {
-            return $"{Toolbox.Core.Runtime.ExecutableDir}Cache\\{PluginName}\\{relativePath}";
+            return $"{Toolbox.Core.Runtime.ExecutableDir}\\Cache\\{PluginName}\\{relativePath}";
         }
 
         /// <summary>
