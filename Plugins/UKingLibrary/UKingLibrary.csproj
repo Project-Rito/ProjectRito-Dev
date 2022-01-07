@@ -79,6 +79,7 @@
       <CopyFiles Include="bin/*.*"/>
     </ItemGroup>
     
+    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\"/>
     <Copy SourceFiles="$(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\" SkipUnchangedFiles="true"/>
   </Target>
 </Project>
