@@ -78,6 +78,6 @@
     <ItemGroup>
       <CopyFiles Include="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\*.*"/>
     </ItemGroup>
-    <Copy SourceFiles="$(CopyFiles)" DestinationFolder="bin\" SkipUnchangedFiles="true"/>
+    <Copy SourceFiles="$(CopyFiles)" DestinationFolder="bin\Plugins" SkipUnchangedFiles="true"/>
   </Target>
 </Project>
