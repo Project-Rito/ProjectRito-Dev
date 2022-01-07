@@ -76,7 +76,7 @@
   
   <Target Name="CopyFiles" AfterTargets="Build">
     <ItemGroup>
-      <CopyFiles Include="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\"/>
+      <CopyFiles Include="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\*.*"/>
     </ItemGroup>
     <Copy SourceFiles="$(CopyFiles)" DestinationFolder="bin\" SkipUnchangedFiles="true"/>
   </Target>
