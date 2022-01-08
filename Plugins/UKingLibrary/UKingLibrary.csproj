@@ -72,18 +72,24 @@
     <None Update="Shaders\Terrain.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Shaders\Water.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Shaders\Water.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   
   <Target Name="CopyFiles" AfterTargets="Build">
     <ItemGroup>
-      <CopyFiles Include="$(ProjectDir)bin/net5.0/*.*"/>
+      <CopyFiles Include="$(ProjectDir)bin/net5.0/*.*" />
     </ItemGroup>
     
-    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\"/>
-    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\x86\$(Configuration)\net5.0\Plugins\"/>
-    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\x64\$(Configuration)\net5.0\Plugins\"/>
-    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\" SkipUnchangedFiles="true"/>
-    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\x86\$(Configuration)\net5.0\Plugins\" SkipUnchangedFiles="true"/>
-    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\x64\$(Configuration)\net5.0\Plugins\" SkipUnchangedFiles="true"/>
+    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\" />
+    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\x86\$(Configuration)\net5.0\Plugins\" />
+    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\x64\$(Configuration)\net5.0\Plugins\" />
+    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\x86\$(Configuration)\net5.0\Plugins\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\x64\$(Configuration)\net5.0\Plugins\" SkipUnchangedFiles="true" />
   </Target>
 </Project>

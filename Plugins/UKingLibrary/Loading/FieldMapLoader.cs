@@ -30,10 +30,6 @@ namespace UKingLibrary
 
         public Vector2 SectionIDs = new Vector2(0, 0);
 
-        //Todo it would be ideal to generate these real time via quad trees
-        //But for editing map regions it is not necessary atm.
-        const int DISPLAY_LOD = 5;
-
         static string SectionName;
 
         public void Load(MuuntByamlPlugin plugin, MapMuuntEditor editor, Stream stream)
@@ -53,7 +49,7 @@ namespace UKingLibrary
                 SectionIDs = GetSectionIndex(SectionName);
                 CacheBackgroundFiles();
 
-                Terrain.LoadTerrainSection((int)SectionIDs.X, (int)SectionIDs.Y, DISPLAY_LOD);
+                Terrain.LoadTerrainSection((int)SectionIDs.X, (int)SectionIDs.Y, PluginConfig.MaxTerrainLOD);
             }
 
             ProcessLoading.Instance.Update(60, 100, "Loading map units");

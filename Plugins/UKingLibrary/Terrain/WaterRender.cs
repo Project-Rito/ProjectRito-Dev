@@ -11,26 +11,22 @@ using Toolbox.Core.ViewModels;
 
 namespace UKingLibrary.Rendering
 {
-    public class TerrainRender : EditableObject, IFrustumCulling
+    public class WaterRender : EditableObject, IFrustumCulling
     {
         public override bool UsePostEffects => false;
 
         const float MAP_HEIGHT_SCALE = 0.0122075f;
 
-        const int MAP_TILE_LENGTH = 256;
+        const int MAP_TILE_LENGTH = 64;
         const int MAP_TILE_SIZE = MAP_TILE_LENGTH * MAP_TILE_LENGTH;
         const int INDEX_COUNT_SIDE = MAP_TILE_LENGTH - 1;
-
-        const int MAP_EXTM_TILE_LENGTH = 64;
-        const int MAP_EXTM_TILE_SIZE = MAP_EXTM_TILE_LENGTH * MAP_EXTM_TILE_LENGTH;
-        const int INDEX_EXTM_COUNT_SIDE = MAP_EXTM_TILE_LENGTH - 1;
 
         float[] TEXTURE_INDEX_MAP = new float[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 17, 18, 0, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 7, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 0, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82 };
         float[] TEXTURE_UV_MAP = new float[] { 0.1f, 0.1f, 0.05f, 0.05f, 0.1f, 0.1f, 0.04f, 0.04f, 0.05f, 0.05f, 0.1f, 0.1f, 0.05f, 0.05f, 0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f, 0.09f, 0.09f, 0.05f, 0.05f, 0.1f, 0.1f, 0.2f, 0.2f, 0.14f, 0.14f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.07f, 0.07f, 0.07f, 0.07f, 0.05f, 0.05f, 0.15f, 0.15f, 0.1f, 0.1f, 0.1f, 0.1f, 0.07f, 0.07f, 0.04f, 0.04f, 0.05f, 0.16f, 0.03f, 0.03f, 0.05f, 0.05f, 0.05f, 0.05f, 0.03f, 0.03f, 0.05f, 0.05f, 0.45f, 0.45f, 0.2f, 0.2f, 0.1f, 0.1f, 0.59f, 0.59f, 0.15f, 0.15f, 0.2f, 0.2f, 0.35f, 0.35f, 0.2f, 0.2f, 0.1f, 0.1f, 0.15f, 0.15f, 0.2f, 0.2f, 0.15f, 0.15f, 0.2f, 0.2f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.1f, 0.1f, 0.08f, 0.08f, 0.04f, 0.04f, 0.1f, 0.1f, 0.05f, 0.05f, 0.05f, 0.05f, 0.1f, 0.1f, 0.25f, 0.25f, 0.04f, 0.05f, 0.08f, 0.08f, 0.08f, 0.08f, 0.2f, 0.2f, 0.1f, 0.1f, 0.15f, 0.15f, 0.04f, 0.04f, 0.25f, 0.25f, 0.05f, 0.05f, 0.15f, 0.15f, 0.05f, 0.05f, 0.08f, 0.08f, 0.1f, 0.1f, 0.07f, 0.07f, 0.05f, 0.05f, 0.23f, 0.23f, 0.16f, 0.16f, 0.16f, 0.16f, 0.04f, 0.04f, 0.1f, 0.1f, 0.05f, 0.05f, 0.1f, 0.1f };
 
-        RenderMesh<TerrainVertex> TerrainMesh;
-        static GLTexture2DArray TerrainTexture_Alb;
-        static GLTexture2DArray TerrainTexture_Nrm;
+        RenderMesh<WaterVertex> WaterMesh;
+        static GLTexture2DArray WaterTexture_Alb;
+        static GLTexture2DArray WaterTexture_Nrm;
 
         static int[] IndexBuffer;
 
@@ -44,7 +40,7 @@ namespace UKingLibrary.Rendering
             return context.Camera.InFustrum(Bounding);
         }
 
-        public TerrainRender(NodeBase parent = null) : base(null)
+        public WaterRender(NodeBase parent = null) : base(null)
         {
             IsVisible = true;
             CanSelect = false;
@@ -53,27 +49,30 @@ namespace UKingLibrary.Rendering
             };
         }
 
-        public void LoadTerrainData(byte[] heightBuffer, byte[] materialBuffer)
+        public void LoadWaterData(byte[] heightBuffer, byte[] materialBuffer)
         {
             //Load all attribute data.
-            var positions = GetTerrainVertices(heightBuffer);
-            var texCoords = GetTexCoords(materialBuffer, MAP_TILE_SIZE, MAP_TILE_LENGTH, INDEX_COUNT_SIDE);
-            var materialMap = GetTexIndexBuffer(materialBuffer);
+            var positionData = GetWaterTerrainVertices(heightBuffer);
+            var texCoords = GetTexCoords(materialBuffer);
             //Normals calculation
+            Vector3[] positions = new Vector3[positionData.Length];
+            for (int i = 0; i < positionData.Length; i++)
+                positions[i] = positionData[i].Translate;
+
             var normals = DrawingHelper.CalculateNormals(positions.ToList());
             //Fixed index buffer. It can be kept static as all terrain tiles use the same index layout.
             if (IndexBuffer == null)
                 IndexBuffer = GetIndexBuffer();
             //Prepare the terrain vertices for rendering
-            TerrainVertex[] vertices = new TerrainVertex[positions.Length];
-            for (int i = 0; i < positions.Length; i++)
+            WaterVertex[] vertices = new WaterVertex[positionData.Length];
+            for (int i = 0; i < positionData.Length; i++)
             {
-                vertices[i] = new TerrainVertex()
+                vertices[i] = new WaterVertex()
                 {
                     Position = positions[i] * GLContext.PreviewScale,
                     Normal = normals[i],
                     TexCoords = texCoords[i],
-                    MaterialMap = materialMap[i],
+                    MaterialIndex = positionData[i].MaterialIndex,
                 };
             }
             //Calculate bounding data for frustum culling
@@ -81,25 +80,25 @@ namespace UKingLibrary.Rendering
             Bounding.Radius = (Bounding.Box.Max - Bounding.Box.Min).Length;
 
             //Finish loading the terrain mesh
-            TerrainMesh = new RenderMesh<TerrainVertex>(vertices, IndexBuffer, PrimitiveType.Triangles);
-            LoadTerrainTextures();
+            WaterMesh = new RenderMesh<WaterVertex>(vertices, IndexBuffer, PrimitiveType.Triangles);
+            LoadWaterTextures();
         }
 
         public override void DrawModel(GLContext context, Pass pass)
         {
-            if ((TerrainMesh == null || pass != Pass.OPAQUE || !InFrustum))
+            if ((WaterMesh == null || pass != Pass.TRANSPARENT || !InFrustum))
                 return;
 
-            var shader = GlobalShaders.GetShader("TERRAIN");
+            var shader = GlobalShaders.GetShader("WATER");
             context.CurrentShader = shader;
             shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
-            shader.SetTexture(TerrainTexture_Alb, "texTerrain_Alb", 1);
-            shader.SetTexture(TerrainTexture_Nrm, "texTerrain_Nrm", 2);
+            shader.SetTexture(WaterTexture_Alb, "texWater_Alb", 1);
+            shader.SetTexture(WaterTexture_Nrm, "texWater_Nrm", 2);
 
-            TerrainMesh.Draw(context);
+            WaterMesh.Draw(context);
         }
 
-        
+
 
         private Vector3[] GetTerrainVertices(byte[] heightBuffer)
         {
@@ -124,14 +123,14 @@ namespace UKingLibrary.Rendering
         private WaterVertexData[] GetWaterTerrainVertices(byte[] heightBuffer)
         {
 
-            WaterVertexData[] vertices = new WaterVertexData[MAP_EXTM_TILE_SIZE];
+            WaterVertexData[] vertices = new WaterVertexData[MAP_TILE_SIZE];
             using (var reader = new FileReader(heightBuffer))
             {
                 int vertexIndex = 0;
-                for (float y = 0; y < MAP_EXTM_TILE_LENGTH; y++)
+                for (float y = 0; y < MAP_TILE_LENGTH; y++)
                 {
-                    float normY = y / (float)INDEX_EXTM_COUNT_SIDE;
-                    for (float x = 0; x < MAP_EXTM_TILE_LENGTH; x++)
+                    float normY = y / (float)INDEX_COUNT_SIDE;
+                    for (float x = 0; x < MAP_TILE_LENGTH; x++)
                     {
                         float heightValue = reader.ReadUInt16() * MAP_HEIGHT_SCALE;
                         ushort xAxisFlowRate = reader.ReadUInt16(); // xAxisFlowRate
@@ -142,7 +141,7 @@ namespace UKingLibrary.Rendering
 
                         WaterVertexData vertexData = new WaterVertexData()
                         {
-                            Translate = new Vector3(x / (float)INDEX_EXTM_COUNT_SIDE - 0.5f, heightValue, normY - 0.5f),
+                            Translate = new Vector3(x / (float)INDEX_COUNT_SIDE - 0.5f, heightValue, normY - 0.5f),
                             MaterialIndex = materialIndex,
                             XAxisFlowRate = xAxisFlowRate,
                             ZAxisFlowRate = zAxisFlowRate
@@ -163,20 +162,20 @@ namespace UKingLibrary.Rendering
             public byte MaterialIndex;
         }
 
-        private Vector4[] GetTexCoords(byte[] materialBuffer, int mapTileSize, int mapTileLength, int indexCountSide)
+        private Vector4[] GetTexCoords(byte[] materialBuffer)
         {
-            Vector4[] vertices = new Vector4[mapTileSize];
+            Vector4[] vertices = new Vector4[MAP_TILE_SIZE];
 
             float uvBaseScale = 100;
             int vertexIndex = 0;
             int matIndex = 0;
 
-            for (float y = 0; y < mapTileLength; y++)
+            for (float y = 0; y < MAP_TILE_LENGTH; y++)
             {
-                float normY = y / (float)indexCountSide;
-                for (float x = 0; x < mapTileLength; x++)
+                float normY = y / (float)INDEX_COUNT_SIDE;
+                for (float x = 0; x < MAP_TILE_LENGTH; x++)
                 {
-                    float normX = x / (float)indexCountSide;
+                    float normX = x / (float)INDEX_COUNT_SIDE;
                     Vector2 uvScaleA = new Vector2(
                         TEXTURE_UV_MAP[materialBuffer[matIndex] * 2],
                         TEXTURE_UV_MAP[materialBuffer[matIndex] * 2 + 1]);
@@ -238,64 +237,64 @@ namespace UKingLibrary.Rendering
             return vertices;
         }
 
-        private void LoadTerrainTextures()
+        private void LoadWaterTextures()
         {
             //Only load the terrain texture once
-            if (TerrainTexture_Alb != null || TerrainTexture_Nrm != null)
+            if (WaterTexture_Alb != null || WaterTexture_Nrm != null)
                 return;
 
-            Toolbox.Core.StudioLogger.WriteLine($"Loading terrain textures...");
+            Toolbox.Core.StudioLogger.WriteLine($"Loading water textures...");
 
             //Load all 83 terrain textures into a 2D array. // Eventually don't hardcode this.... same with res
-            TerrainTexture_Alb = GLTexture2DArray.CreateUncompressedTexture(1024, 1024, 83, 1, PixelInternalFormat.Rgba, PixelFormat.Bgra);
-            TerrainTexture_Alb.WrapS = TextureWrapMode.Repeat;
-            TerrainTexture_Alb.WrapT = TextureWrapMode.Repeat;
-            TerrainTexture_Alb.MinFilter = TextureMinFilter.LinearMipmapLinear;
+            WaterTexture_Alb = GLTexture2DArray.CreateUncompressedTexture(1024, 1024, 8, 1, PixelInternalFormat.Rgba, PixelFormat.Bgra);
+            WaterTexture_Alb.WrapS = TextureWrapMode.Repeat;
+            WaterTexture_Alb.WrapT = TextureWrapMode.Repeat;
+            WaterTexture_Alb.MinFilter = TextureMinFilter.LinearMipmapLinear;
 
-            TerrainTexture_Nrm = GLTexture2DArray.CreateUncompressedTexture(512, 512, 83, 1, PixelInternalFormat.Rgba, PixelFormat.Bgra);
-            TerrainTexture_Nrm.WrapS = TextureWrapMode.Repeat;
-            TerrainTexture_Nrm.WrapT = TextureWrapMode.Repeat;
-            TerrainTexture_Nrm.MinFilter = TextureMinFilter.LinearMipmapLinear;
+            WaterTexture_Nrm = GLTexture2DArray.CreateUncompressedTexture(512, 512, 8, 1, PixelInternalFormat.Rgba, PixelFormat.Bgra);
+            WaterTexture_Nrm.WrapS = TextureWrapMode.Repeat;
+            WaterTexture_Nrm.WrapT = TextureWrapMode.Repeat;
+            WaterTexture_Nrm.MinFilter = TextureMinFilter.LinearMipmapLinear;
 
             //Load the terrain data as cached images.
             string cache = PluginConfig.GetCachePath("Images\\Terrain");
 
             // Alb ------------------------------------------------
-            for (int i = 0; i < TerrainTexture_Alb.ArrayCount; i++) 
+            for (int i = 0; i < WaterTexture_Alb.ArrayCount; i++)
             {
                 string tex = $"{cache}\\MaterialAlb_{i}.png";
                 if (System.IO.File.Exists(tex))
                 {
                     var image = new System.Drawing.Bitmap(tex);
-                    TerrainTexture_Alb.InsertImage(image, i);
+                    WaterTexture_Alb.InsertImage(image, i);
                     image.Dispose();
                 }
             }
             //Update the terrain sampler parameters and generate mips.
-            TerrainTexture_Alb.Bind();
-            TerrainTexture_Alb.UpdateParameters();
-            TerrainTexture_Alb.GenerateMipmaps();
-            TerrainTexture_Alb.Unbind();
+            WaterTexture_Alb.Bind();
+            WaterTexture_Alb.UpdateParameters();
+            WaterTexture_Alb.GenerateMipmaps();
+            WaterTexture_Alb.Unbind();
 
             // Nrm ------------------------------------------------
-            for (int i = 0; i < TerrainTexture_Nrm.ArrayCount; i++) 
+            for (int i = 0; i < WaterTexture_Nrm.ArrayCount; i++)
             {
-                string tex = $"{cache}\\MaterialCmb_{i}.png";
+                string tex = $"{cache}\\WaterNm_{i}.png";
                 if (System.IO.File.Exists(tex))
                 {
                     var image = new System.Drawing.Bitmap(tex);
-                    TerrainTexture_Nrm.InsertImage(image, i);
+                    WaterTexture_Nrm.InsertImage(image, i);
                     image.Dispose();
                 }
             }
             //Update the terrain sampler parameters and generate mips.
-            TerrainTexture_Nrm.Bind();
-            TerrainTexture_Nrm.UpdateParameters();
-            TerrainTexture_Nrm.GenerateMipmaps();
-            TerrainTexture_Nrm.Unbind();
+            WaterTexture_Nrm.Bind();
+            WaterTexture_Nrm.UpdateParameters();
+            WaterTexture_Nrm.GenerateMipmaps();
+            WaterTexture_Nrm.Unbind();
         }
 
-        public struct TerrainVertex
+        public struct WaterVertex
         {
             [RenderAttribute("vPosition", VertexAttribPointerType.Float, 0)]
             public Vector3 Position;
@@ -303,17 +302,17 @@ namespace UKingLibrary.Rendering
             [RenderAttribute("vNormal", VertexAttribPointerType.Float, 12)]
             public Vector3 Normal;
 
-            [RenderAttribute("vMaterialMap", VertexAttribPointerType.Float, 24)]
-            public Vector3 MaterialMap;
+            [RenderAttribute("vMaterialIndex", VertexAttribPointerType.Float, 24)]
+            public byte MaterialIndex;
 
             [RenderAttribute("vTexCoord", VertexAttribPointerType.Float, 36)]
             public Vector4 TexCoords;
 
-            public TerrainVertex(Vector3 position, Vector3 normal, Vector3 materialMap, Vector4 texCoords)
+            public WaterVertex(Vector3 position, Vector3 normal, byte materialIndex, Vector4 texCoords)
             {
                 Normal = normal;
                 Position = position;
-                MaterialMap = materialMap;
+                MaterialIndex = materialIndex;
                 TexCoords = texCoords;
             }
         }

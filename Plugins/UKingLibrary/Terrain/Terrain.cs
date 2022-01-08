@@ -62,6 +62,11 @@ namespace UKingLibrary
         public List<TerrainRender> TerrainMeshes = new List<TerrainRender>();
 
         /// <summary>
+        /// The rendered water meshes in the scene
+        /// </summary>
+        public List<WaterRender> WaterMeshes = new List<WaterRender>();
+
+        /// <summary>
         /// Loads the terrain table.
         /// </summary>
         public void LoadTerrainTable(string fieldName)
@@ -75,36 +80,67 @@ namespace UKingLibrary
         /// <summary>
         /// Loads all the terrain data in a given area.
         /// </summary>
-        public void LoadTerrainSection(int areaID, int sectionID, int lod_level = LOD_LEVEL_MAX)
+        public void LoadTerrainSection(int areaID, int sectionID, int lodLevel = LOD_LEVEL_MAX)
         {
-            float lod_scale = DetailLevels[Math.Clamp(lod_level, 0, 7)];
-            Vector3 mid_point = CalculateMidPoint(areaID, sectionID);
-            var sectionTiles     = TerrainTable.GetSectionTilesByPos(lod_scale, mid_point, SECTION_WIDTH);
-            var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / lod_scale) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
+            float lodScale = DetailLevels[Math.Clamp(lodLevel, 0, 7)];
+            Vector3 midpoint = CalculateMidPoint(areaID, sectionID);
+            
 
-            int index = 0;
-            foreach (var tile in sectionTiles)
+            // Terrain
+            int index = 1; // For reporting progress
+
+            var sectionTilesCore = TerrainTable.GetSectionTilesByPos(lodScale, midpoint, SECTION_WIDTH);
+            
+            foreach (var tile in sectionTilesCore)
             {
-                ProcessLoading.Instance.Update((index  * 70) / sectionTiles.Count, 100, $"Loading terrain mesh {index++} / {sectionTiles.Count}");
-                CreateTile(tile.Value, tile.Key, tileSectionScale);
+                ProcessLoading.Instance.Update((index * 70) / sectionTilesCore.Count, 100, $"Loading terrain mesh {index++} / {sectionTilesCore.Count}");
+
+                var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / tile.Value.Core.AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
+
+                CreateTile(tile.Value.Core, tile.Key, tileSectionScale);
             }
+
+            
+            // Water
+            index = 1; // For reporting progress
+
+            var sectionTilesExtra = TerrainTable.GetSectionTilesByPos(lodScale, midpoint, SECTION_WIDTH, true, false);
+
+            foreach (var tile in sectionTilesExtra)
+            {
+                ProcessLoading.Instance.Update((index * 70) / sectionTilesExtra.Count, 100, $"Loading tile extra groups {index++} / {sectionTilesExtra.Count}");
+
+                var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / tile.Value.Core.AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
+
+                foreach (TSCB.TerrainAreaExtra extmData in tile.Value.Extra)
+                {
+                    if (extmData.Type == TSCB.ExtraSectionType.Water)
+                        CreateWaterTile(tile.Value.Core, extmData, tile.Key, tileSectionScale);
+                }
+            }
+
+            // Collision
             CreateCollisionTile(areaID, sectionID, 0);
         }
 
-        public void CreateCollisionTile(int areaID, int sectionID, int lod_level = 0)
+        public void CreateCollisionTile(int areaID, int sectionID, int lodLevel = LOD_LEVEL_MAX)
         {
-            float lod_scale = DetailLevels[Math.Clamp(lod_level, 0, 7)];
+            float lodScale = DetailLevels[Math.Clamp(lodLevel, 0, 7)];
+
             Vector3 mid_point = CalculateMidPoint(areaID, sectionID);
-            var sectionTiles = TerrainTable.GetSectionTilesByPos(lod_scale, mid_point, SECTION_WIDTH);
-            var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / lod_scale) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
+            var sectionTiles = TerrainTable.GetSectionTilesByPos(lodScale, mid_point, SECTION_WIDTH);
 
             foreach (var tile in sectionTiles)
-                CreateCollisionTile(tile.Value, tile.Key, tileSectionScale);
+            {
+                var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / tile.Value.Core.AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
+
+                CreateCollisionTile(tile.Value.Core, tile.Key, tileSectionScale);
+            }
 
             GLContext.ActiveContext.CollisionCaster.UpdateCache();
         }
 
-        private void CreateCollisionTile(TSCB.TerrainArea tile, string name, float tileSectionScale)
+        private void CreateCollisionTile(TSCB.TerrainAreaCore tile, string name, float tileSectionScale)
         {
             string packName = GetTilePackName(name);
             var meshData = LoadTerrainFiles(packName, name, "hght");
@@ -178,7 +214,7 @@ namespace UKingLibrary
         }
 
         //Creates a terrain mesh from a given tile
-        private void CreateTile(TSCB.TerrainArea tile, string name, float tileSectionScale)
+        private void CreateTile(TSCB.TerrainAreaCore tile, string name, float tileSectionScale)
         {
             string packName = GetTilePackName(name);
 
@@ -188,6 +224,7 @@ namespace UKingLibrary
             var materialData = LoadTerrainFiles(packName, name, "mate");
             //Height map
             var heightBuffer = LoadTerrainFiles(packName, name, "hght");
+
             //Create a terrain mesh for rendering
             var meshRender = new TerrainRender();
             meshRender.LoadTerrainData(heightBuffer, materialData);
@@ -195,6 +232,38 @@ namespace UKingLibrary
             //Scale and place the title in the correct place
             meshRender.Transform.Position = new Vector3(
                 tile.PositionX * SECTION_WIDTH * TILE_TO_SECTION_SCALE, 
+                0,
+                tile.PositionZ * SECTION_WIDTH * TILE_TO_SECTION_SCALE) * GLContext.PreviewScale;
+            meshRender.Transform.Scale = new Vector3(tileSectionScale, 1, tileSectionScale);
+            meshRender.Transform.UpdateMatrix(true);
+            meshRender.UINode.Tag = tile;
+            meshRender.UINode.Header = name;
+            meshRender.IsVisibleCallback += delegate
+            {
+                return MapMuuntEditor.ShowMapModel;
+            };
+
+            GLContext.ActiveContext.Scene.AddRenderObject(meshRender);
+        }
+
+        private void CreateWaterTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string name, float tileSectionScale)
+        {
+            string packName = GetTilePackName(name);
+
+            Toolbox.Core.StudioLogger.WriteLine($"Creating terrain tile {name} in pack {packName}...");
+
+            //Material info
+            var materialData = LoadTerrainFiles(packName, name, "mate");
+            //Height map;
+            var heightBuffer = LoadTerrainFiles(packName, name, "water.extm");
+
+            //Create a terrain mesh for rendering
+            var meshRender = new WaterRender();
+            meshRender.LoadWaterData(heightBuffer, materialData);
+            WaterMeshes.Add(meshRender);
+            //Scale and place the title in the correct place
+            meshRender.Transform.Position = new Vector3(
+                tile.PositionX * SECTION_WIDTH * TILE_TO_SECTION_SCALE,
                 0,
                 tile.PositionZ * SECTION_WIDTH * TILE_TO_SECTION_SCALE) * GLContext.PreviewScale;
             meshRender.Transform.Scale = new Vector3(tileSectionScale, 1, tileSectionScale);
@@ -223,6 +292,12 @@ namespace UKingLibrary
                 mesh?.Dispose();
             }
             TerrainMeshes.Clear();
+            foreach (var mesh in WaterMeshes)
+            {
+                GLFrameworkEngine.GLContext.ActiveContext.Scene.RemoveRenderObject(mesh);
+                mesh?.Dispose();
+            }
+            WaterMeshes.Clear();
         }
     }
 }

@@ -28,6 +28,9 @@ namespace UKingLibrary
         [JsonProperty]
         public static string FieldName = @"MainField";
 
+        [JsonProperty]
+        public static int MaxTerrainLOD = 5;
+
         //Only load the config once when this constructor is activated.
         internal static bool init = false;
 
@@ -56,6 +59,11 @@ namespace UKingLibrary
                         ImGui.SetItemDefaultFocus();
                 }
                 ImGui.EndCombo();
+                Save();
+            }
+
+            if (ImGui.SliderInt("Max Terrain Detail", ref MaxTerrainLOD, 0, 7))
+            {
                 Save();
             }
         }
