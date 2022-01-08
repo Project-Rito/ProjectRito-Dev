@@ -45,11 +45,28 @@ namespace CafeLibrary.Rendering
 
         public static Dictionary<string, GenericRenderer.TextureView> GetTextures(string filePath)
         {
-            if (File.Exists(filePath)) {
+            Console.WriteLine(filePath);
+            if (DataCache.TextureCache.ContainsKey(filePath))
+            {
+                var cachedTextures = DataCache.TextureCache[filePath];
+
+                return cachedTextures;
+            }
+
+            if (File.Exists(filePath))
+            {
                 if (YAZ0.IsCompressed(filePath))
-                    return GetTextures(new System.IO.MemoryStream(YAZ0.Decompress(filePath)));
+                {
+                    var textures = GetTextures(new System.IO.MemoryStream(YAZ0.Decompress(filePath)));
+                    DataCache.TextureCache.Add(filePath, textures);
+                    return textures;
+                }
                 else
-                    return GetTextures(System.IO.File.OpenRead(filePath));
+                {
+                    var textures = GetTextures(System.IO.File.OpenRead(filePath));
+                    DataCache.TextureCache.Add(filePath, textures);
+                    return textures;
+                }
             }
             return null;
         }

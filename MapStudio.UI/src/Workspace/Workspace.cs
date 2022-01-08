@@ -647,8 +647,9 @@ namespace MapStudio.UI
             //Dispose renderables
             foreach (var render in DataCache.ModelCache.Values)
                 render.Dispose();
-            foreach (var tex in DataCache.TextureCache.Values)
-                tex.Dispose();
+            foreach (var texGroup in DataCache.TextureCache.Values)
+                foreach (var tex in texGroup.Values)
+                    tex.RenderTexture.Dispose();
 
             StudioSystem.Dispose();
 

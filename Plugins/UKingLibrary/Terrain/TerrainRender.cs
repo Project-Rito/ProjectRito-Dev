@@ -49,10 +49,10 @@ namespace UKingLibrary.Rendering
             };
         }
 
-        public void LoadTerrainData(byte[] meshBuffer, byte[] materialBuffer)
+        public void LoadTerrainData(byte[] heightBuffer, byte[] materialBuffer)
         {
             //Load all attribute data.
-            var positions = GetTerrainVertices(meshBuffer);
+            var positions = GetTerrainVertices(heightBuffer);
             var texCoords = GetTexCoords(materialBuffer);
             var materialMap = GetTexIndexBuffer(materialBuffer);
             //Normals calculation
@@ -95,10 +95,10 @@ namespace UKingLibrary.Rendering
             TerrainMesh.Draw(context);
         }
 
-        private Vector3[] GetTerrainVertices(byte[] meshBuffer)
+        private Vector3[] GetTerrainVertices(byte[] heightBuffer)
         {
             Vector3[] vertices = new Vector3[MAP_TILE_SIZE];
-            using (var reader = new FileReader(meshBuffer))
+            using (var reader = new FileReader(heightBuffer))
             {
                 int vertexIndex = 0;
                 for (float y = 0; y < MAP_TILE_LENGTH; y++)

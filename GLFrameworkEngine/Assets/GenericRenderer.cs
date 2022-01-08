@@ -10,7 +10,7 @@ using Toolbox.Core.ViewModels;
 
 namespace GLFrameworkEngine
 {
-    public class GenericRenderer : EditableObject, IFrustumCulling
+    public class GenericRenderer : EditableObject, IFrustumCulling, IDisposable
     {
         public Dictionary<string, TextureView> Textures = new Dictionary<string, TextureView>();
 

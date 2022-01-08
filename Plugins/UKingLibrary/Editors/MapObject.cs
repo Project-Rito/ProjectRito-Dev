@@ -328,9 +328,11 @@ namespace UKingLibrary
 
             List<STAnimation> animations = new List<STAnimation>();
             //Get the wait animation by default
-            var idle = render.SkeletalAnimations.FirstOrDefault(x => x.Name == "Wait" || x.Name == "Wait_Loop");
+            var idle = render.SkeletalAnimations.FirstOrDefault(x => x.Name.StartsWith("Wait") && x.Loop == true); // Ideally: Find a wait animation that loops
             if (idle == null)
-                idle = render.SkeletalAnimations.FirstOrDefault(x => x.Loop == true);
+                idle = render.SkeletalAnimations.FirstOrDefault(x => x.Name.StartsWith("Wait")); // Fallback #1: Find a wait animation and force it to loop
+            if (idle == null)
+                idle = render.SkeletalAnimations.FirstOrDefault(x => x.Loop == true); // Fallback #2: Just get some random animation that loops
 
             if (idle != null)
             {

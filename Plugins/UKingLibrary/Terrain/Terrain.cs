@@ -187,10 +187,10 @@ namespace UKingLibrary
             //Material info
             var materialData = LoadTerrainFiles(packName, name, "mate");
             //Height map
-            var meshData = LoadTerrainFiles(packName, name, "hght");
+            var heightBuffer = LoadTerrainFiles(packName, name, "hght");
             //Create a terrain mesh for rendering
             var meshRender = new TerrainRender();
-            meshRender.LoadTerrainData(meshData, materialData);
+            meshRender.LoadTerrainData(heightBuffer, materialData);
             TerrainMeshes.Add(meshRender);
             //Scale and place the title in the correct place
             meshRender.Transform.Position = new Vector3(

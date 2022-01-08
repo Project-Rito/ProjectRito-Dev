@@ -9,6 +9,6 @@ namespace GLFrameworkEngine
     public class DataCache
     {
         public static Dictionary<string, GenericRenderer> ModelCache = new Dictionary<string, GenericRenderer>();
-        public static Dictionary<string, GLTexture> TextureCache = new Dictionary<string, GLTexture>();
+        public static Dictionary<string, Dictionary<string, GenericRenderer.TextureView>> TextureCache = new Dictionary<string, Dictionary<string, GenericRenderer.TextureView>>();
     }
 }
