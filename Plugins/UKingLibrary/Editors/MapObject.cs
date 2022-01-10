@@ -566,11 +566,13 @@ namespace UKingLibrary
             string texpathNX = PluginConfig.GetContentPath($"Model\\{bfres}.Tex.sbfres");
             string texpath1 = PluginConfig.GetContentPath($"Model\\{bfres}.Tex1.sbfres");
 
+            string teratexpathNX = PluginConfig.GetContentPath($"Model\\Terrain.Tex.sbfres");
+            string teratexpath1 = PluginConfig.GetContentPath($"Model\\Terrain.Tex1.sbfres");
+
             string titleBGPath = PluginConfig.GetContentPath($"Pack\\TitleBG.pack");
 
             if (render.Textures.Count == 0)
             {
-
                 var candidate = BfresLoader.GetTextures(texpathNX);
                 if (candidate != null)
                     render.Textures = candidate;
@@ -578,6 +580,21 @@ namespace UKingLibrary
                 candidate = BfresLoader.GetTextures(texpath1);
                 if (candidate != null)
                     render.Textures = candidate;
+
+                
+                // Attach terrain textures in case we need them
+                candidate = BfresLoader.GetTextures(teratexpathNX);
+                if (candidate != null)
+                    // Merge with terrain textures, so those are avaliable
+                    foreach (KeyValuePair<string, GenericRenderer.TextureView> tex in candidate)
+                        render.Textures.TryAdd(tex.Key, tex.Value);
+
+                candidate = BfresLoader.GetTextures(teratexpath1);
+                if (candidate != null)
+                    // Merge with terrain textures, so those are avaliable
+                    foreach (KeyValuePair<string, GenericRenderer.TextureView> tex in candidate)
+                        render.Textures.TryAdd(tex.Key, tex.Value);
+
 
                 // Try TitleBG - probably not gonna be there anyway, but whatever
                 candidate = BfresLoader.GetTextures(titleBGPath + "\\" + texpathNX);

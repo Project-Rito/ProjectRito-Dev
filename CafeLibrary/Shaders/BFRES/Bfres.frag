@@ -59,6 +59,9 @@ layout(std140) uniform ub_MaterialParams {
     EnvLightParam u_EnvLightParams[2];
 };
 
+//Default Samplers
+uniform sampler2D u_TextureAlbedo0_Default;
+
 //Samplers
 uniform sampler2D u_TextureAlbedo0;   // _a0
 uniform sampler2D u_TextureAlpha;     // _ms0
@@ -71,6 +74,16 @@ uniform sampler2D u_TextureBake1;     // _b1
 uniform sampler2D u_TextureMultiA;    // _a1
 uniform sampler2D u_TextureMultiB;    // _a2
 uniform sampler2D u_TextureIndirect;  // _a3
+
+//Array Samplers
+uniform sampler2DArray u_TextureArrAlbedo0; // tma
+uniform sampler2DArray u_TextureArrSpecMask; // tmc
+
+uniform uint u_TextureArrAlbedo0_Index;
+uniform uint u_TextureArrAlpha_Index;
+uniform uint u_TextureArrSpecMask_Index;
+uniform uint u_TextureArrNormal0_Index;
+uniform uint u_TextureArrNormal1_Index;
 
 #define enable_diffuse
 #define enable_alpha_map;
@@ -95,6 +108,10 @@ uniform float alphaRefValue;
 uniform int hasDiffuseMap;
 uniform int hasAlphaMap;
 uniform int hasNormalMap;
+
+uniform int hasDiffuseArray;
+uniform int hasAlphaArray;
+uniform int hasNormalArray;
 
 //GL
 uniform mat4 mtxCam;
@@ -128,10 +145,12 @@ void main(){
 
 
     // Diffuse
-    vec4 diffuseMapColor = vec4(1);
-    
-    if (hasDiffuseMap == 1) {
-        diffuseMapColor = texture(u_TextureAlbedo0,texCoord0);
+    vec4 diffuseMapColor = texture(u_TextureAlbedo0_Default, texCoord0); // Default
+
+    diffuseMapColor = texture(u_TextureAlbedo0, texCoord0);
+
+    if (hasDiffuseArray == 1) {
+        diffuseMapColor = texture(u_TextureArrAlbedo0, vec3(texCoord0, u_TextureArrAlbedo0_Index));
     }
 
     // Lighting

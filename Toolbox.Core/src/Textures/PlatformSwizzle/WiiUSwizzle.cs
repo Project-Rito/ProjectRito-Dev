@@ -80,8 +80,6 @@ namespace Toolbox.Core.Imaging
             surf.tileMode = (uint)TileMode;
             surf.swizzle = Swizzle;
 
-            Console.WriteLine("WII U DECODE");
-
             return GX2.Decode(surf, array, mip);
         }
 

@@ -423,7 +423,6 @@ namespace CafeLibrary.Rendering
                         TangentIn = slopeIn,
                         TangentOut = slopeOut,
                     });
-                    Console.WriteLine("TEST");
                 }
                 else if (editedTrack.InterpolationType == STInterpoaltionType.Linear)
                 {
