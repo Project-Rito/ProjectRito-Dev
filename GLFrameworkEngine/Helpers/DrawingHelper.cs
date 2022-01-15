@@ -276,5 +276,29 @@ namespace GLFrameworkEngine
             }
             return normals;
         }
+
+        public static Vector3[] CalculateNormals(List<Vector3> positions, List<int> indices)
+        {
+            Vector3[] normals = new Vector3[positions.Count];
+            for (int i = 0; i < indices.Count; i += 3)
+            {
+                if (i + 3 >= indices.Count)
+                    break;
+
+                var v1 = positions[indices[i + 0]];
+                var v2 = positions[indices[i + 1]];
+                var v3 = positions[indices[i + 2]];
+
+                var v1to2 = v2 - v1;
+                var v1to3 = v3 - v1;
+
+                var normal = Vector3.Cross(v1to2, v1to3).Normalized();
+
+                normals[indices[i + 0]] = normal;
+                normals[indices[i + 1]] = normal;
+                normals[indices[i + 2]] = normal;
+            }
+            return normals;
+        }
     }
 }

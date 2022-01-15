@@ -57,11 +57,19 @@ namespace UKingLibrary.Rendering
             Vector3[] positions = new Vector3[positionData.Length];
             for (int i = 0; i < positionData.Length; i++)
                 positions[i] = positionData[i].Translate;
-
-            var normals = DrawingHelper.CalculateNormals(positions.ToList());
             //Fixed index buffer. It can be kept static as all terrain tiles use the same index layout.
             if (IndexBuffer == null)
                 IndexBuffer = GetIndexBuffer();
+
+            // I'm not sure why... but for good results on normals and tangents I need to scale down Y again..?
+            var scaledPositions = new Vector3[positions.Length];
+            for (int i = 0; i < positions.Length; i++)
+                scaledPositions[i] = new Vector3(positions[i].X, positions[i].Y * MAP_HEIGHT_SCALE, positions[i].Z);
+            //Normals calculation
+            var normals = DrawingHelper.CalculateNormals(scaledPositions.ToList(), IndexBuffer.ToList());
+            //Tangents calculation
+            var tangents = GetTangents(positions);
+            
             //Prepare the terrain vertices for rendering
             WaterVertex[] vertices = new WaterVertex[positionData.Length];
             for (int i = 0; i < positionData.Length; i++)
@@ -70,6 +78,7 @@ namespace UKingLibrary.Rendering
                 {
                     Position = positions[i] * GLContext.PreviewScale,
                     Normal = normals[i],
+                    TangentWorld = tangents[i],
                     TexCoords = texCoords[i],
                     MaterialIndex = (uint)positionData[i].MaterialIndex,
                 };
@@ -93,6 +102,7 @@ namespace UKingLibrary.Rendering
             shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
             shader.SetTexture(WaterTexture_Emm, "texWater_Emm", 1);
             shader.SetTexture(WaterTexture_Nrm, "texWater_Nrm", 2);
+            shader.SetFloat("uBrightness", 2.0f); // Hack to fit in (normals calculation is kinda off or something)
 
 
             WaterMesh.Draw(context);
@@ -161,6 +171,33 @@ namespace UKingLibrary.Rendering
                 }
             }
             return vertices;
+        }
+
+        private Vector3[] GetTangents(Vector3[] vertices)
+        {
+            Vector3[] tangents = new Vector3[MAP_TILE_SIZE];
+            for (int y = 0; y < MAP_TILE_LENGTH; y++)
+            {
+                for (int x = 0; x < MAP_TILE_LENGTH; x++)
+                {
+                    int index = (y * MAP_TILE_LENGTH) + x;
+
+                    if (index == MAP_TILE_SIZE - 1)
+                        break;
+
+                    var vertex = vertices[index];
+                    var nextVertex = vertices[index + 1];
+                    // I have no idea why I have to do this... didn't we already?
+                    vertex.Y *= MAP_HEIGHT_SCALE;
+                    nextVertex.Y *= MAP_HEIGHT_SCALE;
+
+                    Vector3 tangent = new Vector3(nextVertex - vertex);
+                    tangent.Normalize();
+
+                    tangents[index] = tangent;
+                }
+            }
+            return tangents;
         }
 
         private int[] GetIndexBuffer(int indexCountSide = INDEX_COUNT_SIDE, int tileLength = MAP_TILE_LENGTH)
@@ -267,18 +304,22 @@ namespace UKingLibrary.Rendering
             [RenderAttribute("vPosition", VertexAttribPointerType.Float, 0)]
             public Vector3 Position;
 
-            [RenderAttribute("vNormal", VertexAttribPointerType.Float, 12)]
+            [RenderAttribute("vNormalWorld", VertexAttribPointerType.Float, 12)]
             public Vector3 Normal;
 
-            [RenderAttribute("vMaterialIndex", VertexAttribPointerType.Float, 24)]
+            [RenderAttribute("vTangentWorld", VertexAttribPointerType.Float, 24)]
+            public Vector3 TangentWorld;
+
+            [RenderAttribute("vMaterialIndex", VertexAttribPointerType.Float, 36)]
             public uint MaterialIndex;
 
-            [RenderAttribute("vTexCoord", VertexAttribPointerType.Float, 28)]
+            [RenderAttribute("vTexCoord", VertexAttribPointerType.Float, 40)]
             public Vector2 TexCoords;
 
-            public WaterVertex(Vector3 position, Vector3 normal, uint materialIndex, Vector2 texCoords)
+            public WaterVertex(Vector3 position, Vector3 normal, Vector3 tangentWorld, uint materialIndex, Vector2 texCoords)
             {
                 Normal = normal;
+                TangentWorld = tangentWorld;
                 Position = position;
                 MaterialIndex = materialIndex;
                 TexCoords = texCoords;

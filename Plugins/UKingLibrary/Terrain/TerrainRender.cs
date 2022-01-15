@@ -59,11 +59,19 @@ namespace UKingLibrary.Rendering
             var positions = GetTerrainVertices(heightBuffer);
             var texCoords = GetTexCoords(materialBuffer, MAP_TILE_SIZE, MAP_TILE_LENGTH, INDEX_COUNT_SIDE);
             var materialMap = GetTexIndexBuffer(materialBuffer);
-            //Normals calculation
-            var normals = DrawingHelper.CalculateNormals(positions.ToList());
             //Fixed index buffer. It can be kept static as all terrain tiles use the same index layout.
             if (IndexBuffer == null)
                 IndexBuffer = GetIndexBuffer();
+
+            // I'm not sure why... but for good results on normals and tangents I need to scale down Y again..?
+            var scaledPositions = new Vector3[positions.Length];
+            for (int i = 0; i < positions.Length; i++)
+                scaledPositions[i] = new Vector3(positions[i].X, positions[i].Y * MAP_HEIGHT_SCALE, positions[i].Z);
+            //Normals calculation
+            var normals = DrawingHelper.CalculateNormals(scaledPositions.ToList(), IndexBuffer.ToList());
+            //Tangents calculation
+            var tangents = GetTangents(positions);
+
             //Prepare the terrain vertices for rendering
             TerrainVertex[] vertices = new TerrainVertex[positions.Length];
             for (int i = 0; i < positions.Length; i++)
@@ -72,6 +80,7 @@ namespace UKingLibrary.Rendering
                 {
                     Position = positions[i] * GLContext.PreviewScale,
                     Normal = normals[i],
+                    TangentWorld = tangents[i],
                     TexCoords = texCoords[i],
                     MaterialMap = materialMap[i],
                 };
@@ -95,6 +104,7 @@ namespace UKingLibrary.Rendering
             shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
             shader.SetTexture(TerrainTexture_Alb, "texTerrain_Alb", 1);
             shader.SetTexture(TerrainTexture_Nrm, "texTerrain_Nrm", 2);
+            shader.SetFloat("uBrightness", 2.0f); // Hack to fit in (normals calculation is kinda off or something)
 
             TerrainMesh.Draw(context);
         }
@@ -119,48 +129,6 @@ namespace UKingLibrary.Rendering
                 }
             }
             return vertices;
-        }
-
-        private WaterVertexData[] GetWaterTerrainVertices(byte[] heightBuffer)
-        {
-
-            WaterVertexData[] vertices = new WaterVertexData[MAP_EXTM_TILE_SIZE];
-            using (var reader = new FileReader(heightBuffer))
-            {
-                int vertexIndex = 0;
-                for (float y = 0; y < MAP_EXTM_TILE_LENGTH; y++)
-                {
-                    float normY = y / (float)INDEX_EXTM_COUNT_SIDE;
-                    for (float x = 0; x < MAP_EXTM_TILE_LENGTH; x++)
-                    {
-                        float heightValue = reader.ReadUInt16() * MAP_HEIGHT_SCALE;
-                        ushort xAxisFlowRate = reader.ReadUInt16(); // xAxisFlowRate
-                        ushort zAxisFlowRate = reader.ReadUInt16(); // zAxisFlowRate
-                        reader.ReadByte(); // materialIndex + 3
-                        byte materialIndex = reader.ReadByte(); // materialIndex
-                        //Terrain vertices range from 0 - 1
-
-                        WaterVertexData vertexData = new WaterVertexData()
-                        {
-                            Translate = new Vector3(x / (float)INDEX_EXTM_COUNT_SIDE - 0.5f, heightValue, normY - 0.5f),
-                            MaterialIndex = materialIndex,
-                            XAxisFlowRate = xAxisFlowRate,
-                            ZAxisFlowRate = zAxisFlowRate
-                        };
-
-                        vertices[vertexIndex++] = vertexData;
-                    }
-                }
-            }
-            return vertices;
-        }
-
-        public class WaterVertexData
-        {
-            public Vector3 Translate;
-            public ushort XAxisFlowRate;
-            public ushort ZAxisFlowRate;
-            public byte MaterialIndex;
         }
 
         private Vector4[] GetTexCoords(byte[] materialBuffer, int mapTileSize, int mapTileLength, int indexCountSide)
@@ -194,6 +162,33 @@ namespace UKingLibrary.Rendering
                 }
             }
             return vertices;
+        }
+
+        private Vector3[] GetTangents(Vector3[] vertices)
+        {
+            Vector3[] tangents = new Vector3[MAP_TILE_SIZE];
+            for (int y = 0; y < MAP_TILE_LENGTH; y++)
+            {
+                for (int x = 0; x < MAP_TILE_LENGTH; x++)
+                {
+                    int index = (y * MAP_TILE_LENGTH) + x;
+
+                    if (index == MAP_TILE_SIZE - 1)
+                        break;
+
+                    var vertex = vertices[index];
+                    var nextVertex = vertices[index + 1];
+                    // I have no idea why I have to do this... didn't we already?
+                    vertex.Y *= MAP_HEIGHT_SCALE;
+                    nextVertex.Y *= MAP_HEIGHT_SCALE;
+
+                    Vector3 tangent = new Vector3(nextVertex - vertex);
+                    tangent.Normalize();
+
+                    tangents[index] = tangent;
+                }
+            }
+            return tangents;
         }
 
         private int[] GetIndexBuffer(int indexCountSide = INDEX_COUNT_SIDE, int tileLength = MAP_TILE_LENGTH)
@@ -300,18 +295,22 @@ namespace UKingLibrary.Rendering
             [RenderAttribute("vPosition", VertexAttribPointerType.Float, 0)]
             public Vector3 Position;
 
-            [RenderAttribute("vNormal", VertexAttribPointerType.Float, 12)]
+            [RenderAttribute("vNormalWorld", VertexAttribPointerType.Float, 12)]
             public Vector3 Normal;
 
-            [RenderAttribute("vMaterialMap", VertexAttribPointerType.Float, 24)]
+            [RenderAttribute("vTangentWorld", VertexAttribPointerType.Float, 24)]
+            public Vector3 TangentWorld;
+
+            [RenderAttribute("vMaterialMap", VertexAttribPointerType.Float, 36)]
             public Vector3 MaterialMap;
 
-            [RenderAttribute("vTexCoord", VertexAttribPointerType.Float, 36)]
+            [RenderAttribute("vTexCoord", VertexAttribPointerType.Float, 48)]
             public Vector4 TexCoords;
 
-            public TerrainVertex(Vector3 position, Vector3 normal, Vector3 materialMap, Vector4 texCoords)
+            public TerrainVertex(Vector3 position, Vector3 normal, Vector3 tangentWorld, Vector3 materialMap, Vector4 texCoords)
             {
                 Normal = normal;
+                TangentWorld = tangentWorld;
                 Position = position;
                 MaterialMap = materialMap;
                 TexCoords = texCoords;

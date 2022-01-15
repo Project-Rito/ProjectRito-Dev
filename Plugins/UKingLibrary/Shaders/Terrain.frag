@@ -3,9 +3,11 @@
 uniform sampler2DArray texTerrain_Alb;
 uniform sampler2DArray texTerrain_Nrm;
 
-in vec4 fTexCoords;
-in vec3 fNormals;
-in vec4 fTangentWorld;
+uniform float uBrightness;
+
+in vec4 v_TexCoords;
+in vec3 v_NormalWorld;
+in vec3 v_TangentWorld;
 
 in float materialWeight;
 
@@ -15,25 +17,26 @@ out vec4 fragColor;
 
 void main(void)
 {
-    vec4 color0 = texture(texTerrain_Alb, vec3(fTexCoords.xy, texIndex[0]));
-    vec4 color1 = texture(texTerrain_Alb, vec3(fTexCoords.zw, texIndex[1]));
+    vec4 color0 = texture(texTerrain_Alb, vec3(v_TexCoords.xy, texIndex[0]));
+    vec4 color1 = texture(texTerrain_Alb, vec3(v_TexCoords.zw, texIndex[1]));
 
 
     // Normals
-    vec4 texNormal0 = texture(texTerrain_Nrm, vec3(fTexCoords.xy, texIndex[0]));
-    vec4 texNormal1 = texture(texTerrain_Nrm, vec3(fTexCoords.zw, texIndex[1]));
+    vec4 texNormal0 = texture(texTerrain_Nrm, vec3(v_TexCoords.xy, texIndex[0]));
+    vec4 texNormal1 = texture(texTerrain_Nrm, vec3(v_TexCoords.zw, texIndex[1]));
     vec4 texNormal = mix(texNormal0, texNormal1, materialWeight);
-    vec3 N = fNormals;
-    vec3 T = fTangentWorld.xyz;
+    vec3 N = v_NormalWorld;
+    vec3 T = v_TangentWorld;
     vec3 BiT = cross(N, T) * texNormal.w;
 
-    // Not used right now, since we need to calculate tangents.
-    vec3 displayNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
+    // World normal calculation
+    vec3 worldNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
 
     // Base color
     fragColor = mix(color0, color1, materialWeight);
 
     // Lighting
-    float halfLambert = max(texNormal.y,0.5);
+    float halfLambert = max(worldNormal.y,0.5);
     fragColor = vec4(fragColor.rgb * halfLambert, fragColor.a); // Use that lighting here
+    fragColor.rgb *= uBrightness;
 }

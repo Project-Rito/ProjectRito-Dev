@@ -138,7 +138,7 @@ void main(){
     vec3 N = v_NormalWorld;
     vec3 T = v_TangentWorld.xyz;
     vec3 BiT = cross(N, T) * texNormal.w;
-    vec3 displayNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
+    vec3 worldNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
 
 
     // Diffuse
@@ -150,9 +150,9 @@ void main(){
 
 
     // Lighting
-    float halfLambert = max(displayNormal.y,0.5);
+    float halfLambert = max(worldNormal.y,0.5);
     fragOutput = vec4(diffuseMapColor.rgb * halfLambert, diffuseMapColor.a);
-    fragOutput.rgb *= vec3(uBrightness);
+    fragOutput.rgb *= uBrightness;
 
     //Highlight color
 	if (highlight_color.w > 0.0)
