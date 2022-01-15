@@ -338,12 +338,19 @@ namespace CafeLibrary.Rendering
         {
             GL.ActiveTexture(TextureUnit.Texture0 + 1);
             GL.BindTexture(TextureTarget.Texture2D, RenderTools.defaultTex.ID);
+            shader.SetInt("u_TextureAlbedo0", 1);
+            GL.ActiveTexture(TextureUnit.Texture0 + 2);
+            GL.BindTexture(TextureTarget.Texture2DArray, RenderTools.defaultArrayTex.ID);
+            shader.SetInt("u_TextureArrAlbedo0", 2);
+            shader.SetInt("u_TextureArrSpecMask", 2);
+
 
             shader.SetBoolToInt("hasDiffuseMap", false);
+            shader.SetBoolToInt("hasDiffuseArray", false);
             shader.SetBoolToInt("hasAlphaMap", false);
             shader.SetBoolToInt("hasNormalMap", false);
 
-            int id = 1;
+            int id = 3;
             for (int i = 0; i < this.TextureMaps?.Count; i++)
             {
                 var name = TextureMaps[i].Name;
@@ -360,11 +367,15 @@ namespace CafeLibrary.Rendering
                 var binded = BindTexture(shader, GetTextures(), TextureMaps[i], name, id);
                 bool hasTexture = binded != null;
 
-               
-
                 if (sampler == "_a0")
                 {
-                    shader.SetBoolToInt("hasDiffuseMap", true);
+                    shader.SetBoolToInt("hasDiffuseMap", hasTexture);
+                }
+                else if (sampler == "tma")
+                {
+                    shader.SetBoolToInt("hasDiffuseArray", hasTexture);
+                    if (ShaderParams.ContainsKey("texture_array_index0")) // It should have this... there are other ones too, maybe eventually manage that
+                        shader.SetFloat("u_TextureArrAlbedo0_Index", (float)ShaderParams["texture_array_index0"].DataValue);
                 }
                 else if (sampler == "_ms0")
                 {
@@ -374,16 +385,10 @@ namespace CafeLibrary.Rendering
                 {
                     shader.SetBoolToInt("hasNormalMap", hasTexture);
                 }
-
                 
-
-                
-                if (binded != null)
+                if (hasTexture)
                     shader.SetInt(uniformName, id++);
             }
-
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         private string GetUniformName(string sampler)
@@ -391,8 +396,10 @@ namespace CafeLibrary.Rendering
             switch (sampler)
             {
                 case "_a0": return "u_TextureAlbedo0";
+                case "tma": return "u_TextureArrAlbedo0";
                 case "_ms0": return "u_TextureAlpha";
                 case "_s0": return "u_TextureSpecMask";
+                case "tmc": return "u_TextureArrSpecMask"; // Looks like normal data though... kinda
                 case "_n0": return "u_TextureNormal0";
                 case "_n1": return "u_TextureNormal1";
                 case "_e0": return "u_TextureEmission0";
@@ -406,6 +413,15 @@ namespace CafeLibrary.Rendering
             }
         }
 
+        /// <summary>
+        /// Binds a texture to the given id
+        /// </summary>
+        /// <param name="shader">The shader to interact with.</param>
+        /// <param name="textures">A texture dictionary to look to for the texture.</param>
+        /// <param name="textureMap">Texture mapping info.</param>
+        /// <param name="name">The texture name to look for in the textures dictionary or in other scene models.</param>
+        /// <param name="id">The OpenGL id to bind to.</param>
+        /// <returns>A GLTexture on success and null on failure.</returns>
         public static GLTexture BindTexture(ShaderProgram shader, Dictionary<string, GenericRenderer.TextureView> textures,
             STGenericTextureMap textureMap, string name, int id)
         {
@@ -413,18 +429,25 @@ namespace CafeLibrary.Rendering
                 return null;
 
             GL.ActiveTexture(TextureUnit.Texture0 + id);
-            GL.BindTexture(TextureTarget.Texture2D, RenderTools.defaultTex.ID);
 
             if (textures.ContainsKey(name))
-                return BindGLTexture(textures[name], textureMap, shader);
+            {
+                GLTexture tex = BindGLTexture(textures[name], textureMap, shader);
+                if (tex != null)
+                    return tex;
+            }
 
             foreach (var model in DataCache.ModelCache.Values)
             {
                 if (model.Textures.ContainsKey(name))
-                    return BindGLTexture(model.Textures[name], textureMap, shader);
+                {
+                    GLTexture tex = BindGLTexture(model.Textures[name], textureMap, shader);
+                    if (tex != null)
+                        return tex;
+                }
             }
-
-            return RenderTools.defaultTex;
+            
+            return null;
         }
 
         private static GLTexture BindGLTexture(GenericRenderer.TextureView texture, STGenericTextureMap textureMap, ShaderProgram shader)

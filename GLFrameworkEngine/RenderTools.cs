@@ -9,7 +9,8 @@ namespace GLFrameworkEngine
 {
     public class RenderTools
     {
-        public static GLTexture defaultTex { get; private set; }
+        public static GLTexture2D defaultTex { get; private set; }
+        public static GLTexture2DArray defaultArrayTex { get; private set; }
         public static GLTexture uvTestPattern { get; private set; }
         public static GLTexture boneWeightGradient { get; private set; }
         public static GLTexture boneWeightGradient2 { get; private set; }
@@ -31,6 +32,7 @@ namespace GLFrameworkEngine
             if (defaultTex != null) return;
 
             defaultTex = GLTexture2D.FromBitmap(Properties.Resources.DefaultTexture);
+            defaultArrayTex = new GLTexture2DArray();
             uvTestPattern = GLTexture2D.FromBitmap(Properties.Resources.UVPattern);
             boneWeightGradient = GLTexture2D.FromBitmap(Properties.Resources.boneWeightGradient);
             boneWeightGradient2 = GLTexture2D.FromBitmap(Properties.Resources.boneWeightGradient2);

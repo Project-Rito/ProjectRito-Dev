@@ -25,7 +25,6 @@ namespace GLFrameworkEngine
             texture.PixelType = pixelType;
             texture.PixelInternalFormat = pixelInternalFormat;
             texture.Width = width; texture.Height = height;
-            texture.Target = TextureTarget.Texture2DArray;
             texture.MinFilter = TextureMinFilter.Linear;
             texture.MagFilter = TextureMagFilter.Linear;
             texture.MipCount = mipCount;

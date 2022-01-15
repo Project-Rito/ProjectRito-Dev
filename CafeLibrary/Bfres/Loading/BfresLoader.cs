@@ -45,7 +45,6 @@ namespace CafeLibrary.Rendering
 
         public static Dictionary<string, GenericRenderer.TextureView> GetTextures(string filePath)
         {
-            Console.WriteLine(filePath);
             if (DataCache.TextureCache.ContainsKey(filePath))
             {
                 var cachedTextures = DataCache.TextureCache[filePath];
