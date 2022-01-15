@@ -336,13 +336,13 @@ namespace CafeLibrary.Rendering
 
         public virtual void SetTextureUniforms(GLContext control, ShaderProgram shader)
         {
-            GL.ActiveTexture(TextureUnit.Texture0 + 0);
-            GL.BindTexture(TextureTarget.Texture2D, RenderTools.defaultTex.ID);
-            shader.SetInt("u_TextureAlbedo0_Default", 0);
             GL.ActiveTexture(TextureUnit.Texture0 + 1);
-            GL.BindTexture(TextureTarget.Texture2D, RenderTools.defaultArrayTex.ID);
-            shader.SetInt("u_TextureArrAlbedo0", 1);
-            shader.SetInt("u_TextureArrSpecMask", 1);
+            GL.BindTexture(TextureTarget.Texture2D, RenderTools.defaultTex.ID);
+            shader.SetInt("u_TextureAlbedo0", 1);
+            GL.ActiveTexture(TextureUnit.Texture0 + 2);
+            GL.BindTexture(TextureTarget.Texture2DArray, RenderTools.defaultArrayTex.ID);
+            shader.SetInt("u_TextureArrAlbedo0", 2);
+            shader.SetInt("u_TextureArrSpecMask", 2);
 
 
             shader.SetBoolToInt("hasDiffuseMap", false);
@@ -350,7 +350,7 @@ namespace CafeLibrary.Rendering
             shader.SetBoolToInt("hasAlphaMap", false);
             shader.SetBoolToInt("hasNormalMap", false);
 
-            int id = 2;
+            int id = 3;
             for (int i = 0; i < this.TextureMaps?.Count; i++)
             {
                 var name = TextureMaps[i].Name;
@@ -367,8 +367,6 @@ namespace CafeLibrary.Rendering
                 var binded = BindTexture(shader, GetTextures(), TextureMaps[i], name, id);
                 bool hasTexture = binded != null;
 
-                
-
                 if (sampler == "_a0")
                 {
                     shader.SetBoolToInt("hasDiffuseMap", hasTexture);
@@ -376,6 +374,8 @@ namespace CafeLibrary.Rendering
                 else if (sampler == "tma")
                 {
                     shader.SetBoolToInt("hasDiffuseArray", hasTexture);
+                    if (ShaderParams.ContainsKey("texture_array_index0")) // It should have this... there are other ones too, maybe eventually manage that
+                        shader.SetFloat("u_TextureArrAlbedo0_Index", (float)ShaderParams["texture_array_index0"].DataValue);
                 }
                 else if (sampler == "_ms0")
                 {
@@ -386,7 +386,7 @@ namespace CafeLibrary.Rendering
                     shader.SetBoolToInt("hasNormalMap", hasTexture);
                 }
                 
-                if (binded != null)
+                if (hasTexture)
                     shader.SetInt(uniformName, id++);
             }
         }

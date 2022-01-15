@@ -79,11 +79,11 @@ uniform sampler2D u_TextureIndirect;  // _a3
 uniform sampler2DArray u_TextureArrAlbedo0; // tma
 uniform sampler2DArray u_TextureArrSpecMask; // tmc
 
-uniform uint u_TextureArrAlbedo0_Index;
-uniform uint u_TextureArrAlpha_Index;
-uniform uint u_TextureArrSpecMask_Index;
-uniform uint u_TextureArrNormal0_Index;
-uniform uint u_TextureArrNormal1_Index;
+uniform float u_TextureArrAlbedo0_Index;
+uniform float u_TextureArrAlpha_Index;
+uniform float u_TextureArrSpecMask_Index;
+uniform float u_TextureArrNormal0_Index;
+uniform float u_TextureArrNormal1_Index;
 
 #define enable_diffuse
 #define enable_alpha_map;
@@ -145,13 +145,12 @@ void main(){
 
 
     // Diffuse
-    vec4 diffuseMapColor = texture(u_TextureAlbedo0_Default, texCoord0); // Default
-
-    diffuseMapColor = texture(u_TextureAlbedo0, texCoord0);
+    vec4 diffuseMapColor = texture(u_TextureAlbedo0, texCoord0);
 
     if (hasDiffuseArray == 1) {
         diffuseMapColor = texture(u_TextureArrAlbedo0, vec3(texCoord0, u_TextureArrAlbedo0_Index));
     }
+
 
     // Lighting
     float halfLambert = max(displayNormal.y,0.5);
