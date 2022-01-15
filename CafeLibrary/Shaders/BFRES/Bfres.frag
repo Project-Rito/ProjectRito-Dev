@@ -59,9 +59,6 @@ layout(std140) uniform ub_MaterialParams {
     EnvLightParam u_EnvLightParams[2];
 };
 
-//Default Samplers
-uniform sampler2D u_TextureAlbedo0_Default;
-
 //Samplers
 uniform sampler2D u_TextureAlbedo0;   // _a0
 uniform sampler2D u_TextureAlpha;     // _ms0

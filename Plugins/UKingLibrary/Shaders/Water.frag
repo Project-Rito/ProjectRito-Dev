@@ -22,18 +22,14 @@ void main(void)
     // Not used right now, since we need to calculate tangents.
     vec3 displayNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
 
-    // Emmission
-    float emm = texture(texWater_Emm, vec3(fTexCoords.xy, texIndex)).r;
-
-
-    // Lighting
-    float halfLambert = max(texNormal.y,0.5);
-
-
     // Base water color
     fragColor = vec4(0.1, 0.1, 0.25, 1);
 
+    // Fake emmission
+    float emm = texture(texWater_Emm, vec3(fTexCoords.xy, texIndex)).r;
     fragColor = vec4(fragColor.rgb * (emm + 1), fragColor.a);
 
+    // Lighting
+    float halfLambert = max(texNormal.y,0.5);
     fragColor = vec4(fragColor.rgb * halfLambert, fragColor.a); // Use that lighting here
 }

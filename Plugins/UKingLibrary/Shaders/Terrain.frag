@@ -30,12 +30,10 @@ void main(void)
     // Not used right now, since we need to calculate tangents.
     vec3 displayNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
 
+    // Base color
+    fragColor = mix(color0, color1, materialWeight);
 
     // Lighting
     float halfLambert = max(texNormal.y,0.5);
-
-
-    fragColor = mix(color0, color1, materialWeight);
-
     fragColor = vec4(fragColor.rgb * halfLambert, fragColor.a); // Use that lighting here
 }
