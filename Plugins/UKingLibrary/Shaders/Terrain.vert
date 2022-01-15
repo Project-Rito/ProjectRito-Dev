@@ -22,5 +22,5 @@ void main()
     fTexCoords = vTexCoord;
     fNormals = vNormal;
 
-    gl_Position = mtxCam * mtxMdl * vec4(vPosition, 1.0 );
+    gl_Position = mtxCam * mtxMdl * vec4(vPosition, 1.0);
 }

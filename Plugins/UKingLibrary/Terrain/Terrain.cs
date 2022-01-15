@@ -252,14 +252,12 @@ namespace UKingLibrary
 
             Toolbox.Core.StudioLogger.WriteLine($"Creating terrain tile {name} in pack {packName}...");
 
-            //Material info
-            var materialData = LoadTerrainFiles(packName, name, "mate");
             //Height map;
             var heightBuffer = LoadTerrainFiles(packName, name, "water.extm");
 
             //Create a terrain mesh for rendering
             var meshRender = new WaterRender();
-            meshRender.LoadWaterData(heightBuffer, materialData);
+            meshRender.LoadWaterData(heightBuffer);
             WaterMeshes.Add(meshRender);
             //Scale and place the title in the correct place
             meshRender.Transform.Position = new Vector3(

@@ -1,28 +1,20 @@
 ﻿#version 330 core
 
-uniform sampler2DArray texWater_Alb;
+uniform sampler2DArray texWater_Emm;
 uniform sampler2DArray texWater_Nrm;
 
-in vec4 fTexCoords;
+in vec2 fTexCoords;
 in vec3 fNormals;
 in vec4 fTangentWorld;
 
-in float materialWeight;
-
-flat in vec2 texIndex;
+flat in uint texIndex;
 
 out vec4 fragColor;
 
 void main(void)
 {
-    vec4 color0 = texture(texWater_Alb, vec3(fTexCoords.xy, texIndex[0]));
-    vec4 color1 = texture(texWater_Alb, vec3(fTexCoords.zw, texIndex[1]));
-
-
     // Normals
-    vec4 texNormal0 = texture(texWater_Nrm, vec3(fTexCoords.xy, texIndex[0]));
-    vec4 texNormal1 = texture(texWater_Nrm, vec3(fTexCoords.zw, texIndex[1]));
-    vec4 texNormal = mix(texNormal0, texNormal1, materialWeight);
+    vec4 texNormal = texture(texWater_Nrm, vec3(fTexCoords.xy, texIndex));
     vec3 N = fNormals;
     vec3 T = fTangentWorld.xyz;
     vec3 BiT = cross(N, T) * texNormal.w;
@@ -30,12 +22,18 @@ void main(void)
     // Not used right now, since we need to calculate tangents.
     vec3 displayNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
 
+    // Emmission
+    float emm = texture(texWater_Emm, vec3(fTexCoords.xy, texIndex)).r;
+
 
     // Lighting
     float halfLambert = max(texNormal.y,0.5);
 
 
-    fragColor = mix(color0, color1, materialWeight);
+    // Base water color
+    fragColor = vec4(0.1, 0.1, 0.25, 1);
 
-    fragColor = vec4(vec3(0, 0, 1) * halfLambert, fragColor.a); // Use that lighting here
+    fragColor = vec4(fragColor.rgb * (emm + 1), fragColor.a);
+
+    fragColor = vec4(fragColor.rgb * halfLambert, fragColor.a); // Use that lighting here
 }
