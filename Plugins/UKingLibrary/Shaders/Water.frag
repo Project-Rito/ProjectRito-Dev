@@ -33,6 +33,6 @@ void main(void)
 
     // Lighting
     float halfLambert = max(worldNormal.y,0.5);
-    fragColor = vec4(fragColor.rgb * halfLambert, fragColor.a); // Use that lighting here
+    fragColor = vec4(fragColor.rgb * halfLambert, 0.5); // Use that lighting here
     fragColor.rgb *= uBrightness;
 }

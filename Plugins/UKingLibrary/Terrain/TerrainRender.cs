@@ -106,6 +106,9 @@ namespace UKingLibrary.Rendering
             shader.SetTexture(TerrainTexture_Nrm, "texTerrain_Nrm", 2);
             shader.SetFloat("uBrightness", 2.0f); // Hack to fit in (normals calculation is kinda off or something)
 
+            GL.Disable(EnableCap.Blend);
+            GL.Enable(EnableCap.CullFace);
+
             TerrainMesh.Draw(context);
         }
 

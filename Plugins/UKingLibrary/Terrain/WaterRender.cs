@@ -104,6 +104,9 @@ namespace UKingLibrary.Rendering
             shader.SetTexture(WaterTexture_Nrm, "texWater_Nrm", 2);
             shader.SetFloat("uBrightness", 2.0f); // Hack to fit in (normals calculation is kinda off or something)
 
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Disable(EnableCap.CullFace);
 
             WaterMesh.Draw(context);
         }
