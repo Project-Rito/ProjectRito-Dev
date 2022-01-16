@@ -149,7 +149,7 @@ namespace UKingLibrary
 
             context.Scene.DeselectAll(context);
 
-            obj.Render.Transform.Position = context.ScreenToWorld(MouseEventInfo.ViewCenter.X, MouseEventInfo.ViewCenter.Y, 5 * GLContext.PreviewScale);
+            obj.Render.Transform.Position = context.ScreenToWorld(context.Width / 2, context.Height / 2, 5 * GLContext.PreviewScale);
             obj.Render.Transform.UpdateMatrix(true);
 
             obj.Render.IsSelected = true;
