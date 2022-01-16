@@ -152,7 +152,9 @@ namespace UKingLibrary
         public void Save(Stream stream)
         {
             SaveEditor();
-            ByamlFile.SaveN(stream, Byaml);
+            var byamlData = Byaml;
+            byamlData.RootNode = PropertiesToValues(Byaml.RootNode);
+            ByamlFile.SaveN(stream, byamlData);
         }
 
         private void SaveEditor()
@@ -214,6 +216,46 @@ namespace UKingLibrary
                         output.Add(ValuesToProperties(item));
                     else
                         output.Add(new MapData.Property<dynamic>(item));
+                }
+                return output;
+            }
+            else
+            {
+                return new MapData.Property<dynamic>(input);
+            }
+        }
+
+        public static dynamic PropertiesToValues(dynamic input)
+        {
+            if (input is IDictionary<string, dynamic>)
+            {
+                IDictionary<string, dynamic> output = new Dictionary<string, dynamic>();
+                foreach (KeyValuePair<string, dynamic> pair in input)
+                {
+                    if (pair.Value is IDictionary<string, dynamic>)
+                        output.Add(pair.Key, PropertiesToValues(pair.Value));
+                    else if (pair.Value is IList<dynamic>)
+                        output.Add(pair.Key, PropertiesToValues(pair.Value));
+                    else if (pair.Value is MapData.Property<dynamic>)
+                        output.Add(pair.Key, pair.Value.Value);
+                    else
+                        output.Add(pair.Key, pair.Value);
+                }
+                return output;
+            }
+            else if (input is IList<dynamic>)
+            {
+                IList<dynamic> output = new List<dynamic>();
+                foreach (dynamic item in input)
+                {
+                    if (item is IDictionary<string, dynamic>)
+                        output.Add(PropertiesToValues(item));
+                    else if (item is IList<dynamic>)
+                        output.Add(PropertiesToValues(item));
+                    else if (item is MapData.Property<dynamic>)
+                        output.Add(item.Value);
+                    else
+                        output.Add(item);
                 }
                 return output;
             }
