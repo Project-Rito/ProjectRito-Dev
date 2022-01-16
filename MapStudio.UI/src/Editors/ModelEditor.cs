@@ -95,6 +95,11 @@ namespace MapStudio.UI
             return new List<MenuItemModel>();
         }
 
+        public void CreateAndSelect(GLContext context)
+        {
+
+        }
+
         public void AssetViewportDrop(AssetItem item, Vector2 screenCoords)
         {
 

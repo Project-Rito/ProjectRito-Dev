@@ -52,6 +52,8 @@ namespace MapStudio.UI
         /// </summary>
         List<MenuItemModel> GetEditMenuItems();
 
+        void CreateAndSelect(GLContext context);
+
         void AssetViewportDrop(AssetItem item, Vector2 screenCoords);
 
         void OnMouseMove();

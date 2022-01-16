@@ -122,6 +122,40 @@ namespace UKingLibrary
             }
         }
 
+        public void CreateAndSelect(GLContext context)
+        {
+            var mapData = MapFiles.FirstOrDefault();
+
+            var actorInfo = GlobalData.Actors["LinkTagAnd"] as IDictionary<string, dynamic>;
+            string profile = actorInfo.ContainsKey("profile") ? (string)actorInfo["profile"] : null;
+
+            NodeBase parent = null;
+            if (profile != null)
+            {
+                var folder = mapData.ObjectFolder.Children.FirstOrDefault(x => x.Header == profile);
+                if (folder == null)
+                {
+                    folder = new NodeBase(profile);
+                    mapData.ObjectFolder.Children.Add(folder);
+                }
+                parent = folder;
+            }
+
+            var obj = new MapObject();
+            var index = mapData.Objs.Count;
+            obj.CreateNew(Crc32.Compute($"ID{index}"), "LinkTagAnd", actorInfo, parent);
+            obj.AddToScene();
+
+            context.Scene.DeselectAll(context);
+
+            obj.Render.Transform.Position = context.ScreenToWorld(MouseEventInfo.ViewCenter.X, MouseEventInfo.ViewCenter.Y, 5 * GLContext.PreviewScale);
+            obj.Render.Transform.UpdateMatrix(true);
+
+            obj.Render.IsSelected = true;
+
+            Workspace.ActiveWorkspace.ReloadOutliner();
+        }
+
         public void AssetViewportDrop(AssetItem item, Vector2 screenCoords) 
         {
             if (!(item.Tag is IDictionary<string, dynamic>))
@@ -149,8 +183,7 @@ namespace UKingLibrary
             //Create the actor data and add it to the scene
             var obj = new MapObject();
             var index = mapData.Objs.Count;
-            obj.CreateNew(Crc32.Compute($"ID{index}"), name);
-            obj.LoadActor((MapMuuntEditor)Workspace.ActiveWorkspace.ActiveEditor, obj.Properties, actorInfo, parent);
+            obj.CreateNew(Crc32.Compute($"ID{index}"), name, actorInfo, parent);
             mapData.Objs.Add(obj.HashId, obj);
             //Add to the viewport scene
             obj.AddToScene();

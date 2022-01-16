@@ -104,33 +104,32 @@ namespace UKingLibrary
 
         }
 
-        /// <summary>
-        /// Creates a new object instance with default properties.
-        /// </summary>
-        public void CreateNew(uint HashID, string configName)
+
+        public void CreateNew(uint hashId, string unitConfigName, dynamic actorInfo, NodeBase parent)
         {
             Properties = new Dictionary<string, dynamic>();
-            Properties.Add("UnitConfigName", configName);
-            Properties.Add("HashId", HashID);
+            Properties.Add("UnitConfigName", unitConfigName);
+            Properties.Add("HashId", hashId);
             Properties.Add("Translate", new List<float> { 0, 0, 0 });
             Properties.Add("SRTHash", (int)0);
+            Properties = MapData.ValuesToProperties(Properties);
 
-            if (GlobalData.Actors.ContainsKey(configName))
-                ActorInfo = GlobalData.Actors[configName] as IDictionary<string, dynamic>;
-        }
+            ActorInfo = actorInfo;
 
-        /// <summary>
-        /// Loads all the actor data into the scene.
-        /// </summary>
-        public void LoadActor(MapMuuntEditor editor, dynamic obj, dynamic actor, NodeBase parent)
-        {
-            Properties = MapData.ValuesToProperties(obj);
-            ActorInfo = actor;
             Parent = parent;
             ReloadActor();
         }
 
-        
+        public void CreateNew(dynamic properties, dynamic actorInfo, NodeBase parent)
+        {
+            Properties = MapData.ValuesToProperties(properties);
+
+            ActorInfo = actorInfo;
+            string unitConfigName = Properties["UnitConfigName"].Value;
+
+            Parent = parent;
+            ReloadActor();
+        }
 
         private void ReloadActor()
         {
@@ -254,6 +253,7 @@ namespace UKingLibrary
                 }
                 ActorInfo = GlobalData.Actors[Properties[key].Value];
                 Properties[key].Invalid = false;
+                SaveTransform();
                 UpdateActorModel();
             }
         }

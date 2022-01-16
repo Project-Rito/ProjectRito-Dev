@@ -402,6 +402,7 @@ namespace MapStudio.UI
             menus.Add(new MenuItemModel(""));
             menus.Add(new MenuItemModel($"{IconManager.COPY_ICON}", Pipeline._context.Scene.CopySelected, "COPY"));
             menus.Add(new MenuItemModel($"{IconManager.PASTE_ICON}", () => Pipeline._context.Scene.PasteSelected(Pipeline._context), "PASTE"));
+            menus.Add(new MenuItemModel($"{IconManager.ADD_ICON}", () => Workspace.ActiveWorkspace.ActiveEditor.CreateAndSelect(Pipeline._context), "CREATE"));
             menus.Add(new MenuItemModel($"{IconManager.DELETE_ICON}", Pipeline._context.Scene.DeleteSelected, "REMOVE"));
             //A workspace can have its own menu icons per editor
             if (Workspace.ActiveWorkspace != null)

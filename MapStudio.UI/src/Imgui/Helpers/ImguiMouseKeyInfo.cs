@@ -40,6 +40,8 @@ namespace MapStudio.UI
                 MouseEventInfo.HasValue = false;
 
             MouseEventInfo.FullPosition = new System.Drawing.Point(Mouse.GetCursorState().X, Mouse.GetCursorState().Y);
+
+            MouseEventInfo.ViewCenter = new System.Drawing.Point((int)ImGui.GetWindowWidth() / 2, (int)ImGui.GetWindowHeight() / 2);
         }
     }
 }

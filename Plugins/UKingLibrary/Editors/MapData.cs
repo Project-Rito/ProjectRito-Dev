@@ -54,9 +54,9 @@ namespace UKingLibrary
                 {
                     string name = mapObj["UnitConfigName"];
                     //Get the actor in the database
-                    var actor = GlobalData.Actors[name] as IDictionary<string, dynamic>;
+                    var actorInfo = GlobalData.Actors[name] as IDictionary<string, dynamic>;
                     //Get the actor profile
-                    string profile = actor.ContainsKey("profile") ? (string)actor["profile"] : null;
+                    string profile = actorInfo.ContainsKey("profile") ? (string)actorInfo["profile"] : null;
 
                     //Set nodebase parent as the profile assigned by actor
                     NodeBase parent = null;
@@ -73,7 +73,7 @@ namespace UKingLibrary
                     //Setup properties for editing
                     MapObject data = new MapObject();
 
-                    data.LoadActor((MapMuuntEditor)Workspace.ActiveWorkspace.ActiveEditor, mapObj, actor, parent);
+                    data.CreateNew(mapObj, actorInfo, parent);
                     Objs.Add(data.HashId, data);
                     //Add the renderable to the viewport
                     data.AddToScene();

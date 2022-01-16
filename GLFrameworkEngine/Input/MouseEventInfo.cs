@@ -19,6 +19,8 @@ namespace GLFrameworkEngine
 
         public static System.Drawing.Point FullPosition { get; set; }
 
+        public static System.Drawing.Point ViewCenter { get; set; } // Relative to the window pos. Maybe this isn't the best place for this...
+
         public static ButtonState RightButton { get; set; }
         public static ButtonState LeftButton { get; set; }
         public static ButtonState MiddleButton { get; set; }

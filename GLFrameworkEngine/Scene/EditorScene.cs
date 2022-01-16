@@ -54,27 +54,27 @@ namespace GLFrameworkEngine
             GLContext.ActiveContext.UpdateViewport = true;
         }
 
-        List<EditableObject> copiedObjects = new List<EditableObject>();
+        List<EditableObject> CopiedObjects = new List<EditableObject>();
 
         public void CopySelected() {
-            copiedObjects.Clear();
+            CopiedObjects.Clear();
 
             var selected = GetEditObjects();
 
             foreach (EditableObject obj in selected)
             {
                 if (obj is ICloneable)
-                    copiedObjects.Add(obj);
+                    CopiedObjects.Add(obj);
             }
         }
 
         public void PasteSelected(GLContext context)
         {
-            if (copiedObjects.Count > 0)
-                GLContext.ActiveContext.Scene.AddToUndo(new EditableObjectAddUndo(this, copiedObjects));
+            if (CopiedObjects.Count > 0)
+                GLContext.ActiveContext.Scene.AddToUndo(new EditableObjectAddUndo(this, CopiedObjects));
 
             DeselectAll(context);
-            foreach (var obj in copiedObjects)
+            foreach (var obj in CopiedObjects)
             {
                 EditableObject copy = ((ICloneable)obj).Clone() as EditableObject;
                 AddRenderObject(copy);
