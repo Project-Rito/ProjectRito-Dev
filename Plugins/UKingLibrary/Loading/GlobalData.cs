@@ -13,7 +13,7 @@ namespace UKingLibrary
             if (Actors.Count > 0)
                 return;
 
-            MapStudio.UI.ProcessLoading.Instance.Update(30, 100, "Loading actor database");
+            MapStudio.UI.ProcessLoading.Instance.Update(50, 100, "Loading actor database");
 
             //Todo cache these somewhere to load as decompressed next time
             var path = PluginConfig.GetContentPath("Actor\\ActorInfo.product.sbyml");

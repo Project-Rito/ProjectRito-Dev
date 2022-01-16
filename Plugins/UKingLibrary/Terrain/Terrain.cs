@@ -71,7 +71,7 @@ namespace UKingLibrary
         /// </summary>
         public void LoadTerrainTable(string fieldName)
         {
-            ProcessLoading.Instance.Update(40, 100, "Loading terrain table");
+            ProcessLoading.Instance.Update(55, 100, "Loading terrain table");
 
             var terrainPath = PluginConfig.GetContentPath($"Terrain\\A\\{fieldName}.tscb");
             TerrainTable = new TSCB(terrainPath);
@@ -93,7 +93,7 @@ namespace UKingLibrary
             
             foreach (var tile in sectionTilesCore)
             {
-                ProcessLoading.Instance.Update((index * 100) / sectionTilesCore.Count, 100, $"Loading terrain mesh {index++} / {sectionTilesCore.Count}");
+                ProcessLoading.Instance.Update(((index * 25) / sectionTilesCore.Count) + 0, 100, $"Loading terrain mesh {index++} / {sectionTilesCore.Count}");
 
                 var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / tile.Value.Core.AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
 
@@ -108,7 +108,7 @@ namespace UKingLibrary
 
             foreach (var tile in sectionTilesExtra)
             {
-                ProcessLoading.Instance.Update((index * 100) / sectionTilesExtra.Count, 100, $"Loading tile extra groups {index++} / {sectionTilesExtra.Count}");
+                ProcessLoading.Instance.Update(((index * 25) / sectionTilesExtra.Count) + 25, 100, $"Loading tile extra groups {index++} / {sectionTilesExtra.Count}");
 
                 var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / tile.Value.Core.AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
 
