@@ -7,6 +7,7 @@ using Toolbox.Core;
 using MapStudio.UI;
 using Newtonsoft.Json;
 using ImGuiNET;
+using GLFrameworkEngine;
 
 namespace UKingLibrary
 {
@@ -31,6 +32,9 @@ namespace UKingLibrary
         [JsonProperty]
         public static int MaxTerrainLOD = 5;
 
+        [JsonProperty]
+        public static bool DebugTerrainSections = false;
+
         //Only load the config once when this constructor is activated.
         internal static bool init = false;
 
@@ -38,13 +42,13 @@ namespace UKingLibrary
 
         public void DrawUI()
         {
-            if (ImguiCustomWidgets.PathSelector("BOTW Game Path", ref GamePath, HasValidGamePath))
+            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW GAME PATH"), ref GamePath, HasValidGamePath))
                 Save();
 
-            if (ImguiCustomWidgets.PathSelector("BOTW Update Path", ref UpdatePath, HasValidUpdatePath))
+            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW UPDATE PATH"), ref UpdatePath, HasValidUpdatePath))
                 Save();
 
-            if (ImguiCustomWidgets.PathSelector("BOTW DLC Path", ref AocPath, HasValidAocPath))
+            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW DLC Path"), ref AocPath, HasValidAocPath))
                 Save();
 
             string[] fieldNames = { "AocField", "MainField" };
@@ -62,9 +66,15 @@ namespace UKingLibrary
                 Save();
             }
 
-            if (ImGui.SliderInt("Max Terrain Detail", ref MaxTerrainLOD, 0, 7))
+            if (ImGui.BeginMenu($"{TranslationSource.GetText("TERRAIN")}##uk_vmenu01"))
             {
-                Save();
+                if (ImGui.SliderInt(TranslationSource.GetText("MAX DETAIL"), ref MaxTerrainLOD, 0, 7))
+                    Save();
+#if DEBUG
+                if (ImGui.Checkbox(TranslationSource.GetText("DEBUG SECTIONS"), ref DebugTerrainSections))
+                    Save();
+#endif
+                ImGui.EndMenu();
             }
         }
 
@@ -117,6 +127,9 @@ namespace UKingLibrary
             HasValidGamePath = File.Exists($"{GamePath}\\Actor\\ActorInfo.product.sbyml");
             HasValidUpdatePath = File.Exists($"{UpdatePath}\\Actor\\ActorInfo.product.sbyml");
             HasValidAocPath = File.Exists($"{AocPath}\\0010\\Pack\\AocMainField.pack");
+
+            if (GLContext.ActiveContext != null)
+                GLContext.ActiveContext.UpdateViewport = true;
         }
     }
 }

@@ -83,6 +83,12 @@ namespace UKingLibrary.Rendering
                     TangentWorld = tangents[i],
                     TexCoords = texCoords[i],
                     MaterialMap = materialMap[i],
+                    DebugHighlight = (
+                    i % MAP_TILE_LENGTH == 0 || 
+                    i % MAP_TILE_LENGTH == INDEX_COUNT_SIDE || 
+                    i / MAP_TILE_LENGTH == 0  || 
+                    i / MAP_TILE_LENGTH == INDEX_COUNT_SIDE
+                    ) ? new Vector3(1) : new Vector3(0),
                 };
             }
             //Calculate bounding data for frustum culling
@@ -105,6 +111,7 @@ namespace UKingLibrary.Rendering
             shader.SetTexture(TerrainTexture_Alb, "texTerrain_Alb", 1);
             shader.SetTexture(TerrainTexture_Nrm, "texTerrain_Nrm", 2);
             shader.SetFloat("uBrightness", 2.0f); // Hack to fit in (normals calculation is kinda off or something)
+            shader.SetBool("uDebugSections", PluginConfig.DebugTerrainSections);
 
             GL.Disable(EnableCap.Blend);
             GL.Enable(EnableCap.CullFace);
@@ -313,13 +320,17 @@ namespace UKingLibrary.Rendering
             [RenderAttribute("vTexCoord", VertexAttribPointerType.Float, 48)]
             public Vector4 TexCoords;
 
-            public TerrainVertex(Vector3 position, Vector3 normal, Vector3 tangentWorld, Vector3 materialMap, Vector4 texCoords)
+            [RenderAttribute("vDebugHighlight", VertexAttribPointerType.Float, 64)]
+            public Vector3 DebugHighlight;
+
+            public TerrainVertex(Vector3 position, Vector3 normal, Vector3 tangentWorld, Vector3 materialMap, Vector4 texCoords, Vector3 debugHighlight)
             {
                 Normal = normal;
                 TangentWorld = tangentWorld;
                 Position = position;
                 MaterialMap = materialMap;
                 TexCoords = texCoords;
+                DebugHighlight = debugHighlight;
             }
         }
     }

@@ -12,3 +12,10 @@ OUTGOING_LINKS - Outgoing Links
 
 OBJECTS - Objects
 RAIL_PATHS - Rail Paths
+TERRAIN - Terrain
+MAX DETAIL - Max Detail
+DEBUG SECTIONS - Debug Sections
+
+BOTW GAME PATH - BotW Game Path
+BOTW UPDATE PATH - BotW Update Path
+BOTW DLC PATH - BotW DLC Path

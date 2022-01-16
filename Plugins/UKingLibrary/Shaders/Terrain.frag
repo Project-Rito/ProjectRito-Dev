@@ -4,10 +4,12 @@ uniform sampler2DArray texTerrain_Alb;
 uniform sampler2DArray texTerrain_Nrm;
 
 uniform float uBrightness;
+uniform bool uDebugSections;
 
 in vec4 v_TexCoords;
 in vec3 v_NormalWorld;
 in vec3 v_TangentWorld;
+in vec3 v_DebugHighlight;
 
 in float materialWeight;
 
@@ -34,6 +36,10 @@ void main(void)
 
     // Base color
     fragColor = mix(color0, color1, materialWeight);
+
+    // Debug highlight
+    if (uDebugSections)
+        fragColor.rgb += v_DebugHighlight;
 
     // Lighting
     float halfLambert = max(worldNormal.y,0.5);

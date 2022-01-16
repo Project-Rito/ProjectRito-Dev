@@ -4,10 +4,12 @@ uniform sampler2DArray texWater_Emm;
 uniform sampler2DArray texWater_Nrm;
 
 uniform float uBrightness;
+uniform bool uDebugSections;
 
 in vec2 v_TexCoords;
 in vec3 v_NormalWorld;
 in vec3 v_TangentWorld;
+in vec3 v_DebugHighlight;
 
 flat in uint texIndex;
 
@@ -26,6 +28,10 @@ void main(void)
 
     // Base water color
     fragColor = vec4(0.1, 0.1, 0.25, 1);
+
+    // Debug highlight
+    if (uDebugSections)
+        fragColor.rgb += v_DebugHighlight;
 
     // Fake emmission
     float emm = texture(texWater_Emm, vec3(v_TexCoords.xy, texIndex)).r;
