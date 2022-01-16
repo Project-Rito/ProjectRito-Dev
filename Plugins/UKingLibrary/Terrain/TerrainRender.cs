@@ -176,8 +176,11 @@ namespace UKingLibrary.Rendering
                 {
                     int index = (y * MAP_TILE_LENGTH) + x;
 
-                    if (index == MAP_TILE_SIZE - 1)
+                    if (x == MAP_TILE_LENGTH - 1) // If this is the last vertex in the row use the last tangent
+                    {
+                        tangents[index] = tangents[index - 1];
                         break;
+                    }
 
                     var vertex = vertices[index];
                     var nextVertex = vertices[index + 1];
