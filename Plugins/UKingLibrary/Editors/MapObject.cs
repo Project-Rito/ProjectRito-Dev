@@ -110,10 +110,10 @@ namespace UKingLibrary
         public void CreateNew(uint HashID, string configName)
         {
             Properties = new Dictionary<string, dynamic>();
-            Properties.Add("UnitConfigName", new MapData.Property<dynamic>(configName));
-            Properties.Add("HashId", new MapData.Property<dynamic>(HashID));
-            Properties.Add("Translate", new MapData.Property<dynamic>(new List<float> { 0, 0, 0 }));
-            Properties.Add("SRTHash", new MapData.Property<dynamic>((int)0));
+            Properties.Add("UnitConfigName", configName);
+            Properties.Add("HashId", HashID);
+            Properties.Add("Translate", new List<float> { 0, 0, 0 });
+            Properties.Add("SRTHash", (int)0);
 
             if (GlobalData.Actors.ContainsKey(configName))
                 ActorInfo = GlobalData.Actors[configName] as IDictionary<string, dynamic>;
