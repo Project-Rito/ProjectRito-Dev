@@ -156,7 +156,7 @@ namespace UKingLibrary
 
             ((EditableObjectNode)Render.UINode).UIProperyDrawer += delegate
             {
-                PropertyDrawer.Draw(this, Properties, new PropertyDrawer.PropertyChangedCallback(OnParamUpdate));
+                PropertyDrawer.Draw(this, Properties, new PropertyDrawer.PropertyChangedCallback(OnPropertyUpdate));
             };
             //Icon for gui node
             string icon = "Node";
@@ -170,6 +170,9 @@ namespace UKingLibrary
                 icon = PluginConfig.GetCachePath($"Images\\ActorImages\\{ActorInfo["bfres"]}.sbfres.png");
             }
             Render.UINode.Icon = icon;
+
+            foreach (var property in Properties.ToList())
+                ValidateProperty(property.Key);
 
             //Load the transform attached to the object
             LoadObjectTransform();
@@ -240,7 +243,24 @@ namespace UKingLibrary
             Render.DestObjectLinks = destLinks;
         }
 
-        private void OnParamUpdate(string key) {
+        private void OnPropertyUpdate(string key) {
+            if (!ValidateProperty(key))
+                return;
+            if (key == "UnitConfigName")
+            {
+                ActorInfo = GlobalData.Actors[Properties[key].Value];
+                SaveTransform();
+                UpdateActorModel();
+            }
+        }
+
+        /// <summary>
+        /// Decides whether a property value is valid and updates the UI
+        /// </summary>
+        /// <param name="key">The property key</param>
+        /// <returns>True if the property value is valid or the property is unknown</returns>
+        private bool ValidateProperty(string key)
+        {
             if (key == "UnitConfigName")
             {
                 if (!GlobalData.Actors.ContainsKey(Properties[key].Value))
@@ -249,13 +269,11 @@ namespace UKingLibrary
                     Render.UINode.Icon = "Warning";
                     Render.UINode.Header = Properties[key].Value;
                     Properties[key].Invalid = true;
-                    return;
+                    return false;
                 }
-                ActorInfo = GlobalData.Actors[Properties[key].Value];
                 Properties[key].Invalid = false;
-                SaveTransform();
-                UpdateActorModel();
             }
+            return true;
         }
 
         public void AddLink(LinkInstance link)

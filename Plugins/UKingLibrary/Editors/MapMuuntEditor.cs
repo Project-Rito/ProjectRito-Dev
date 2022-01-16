@@ -144,6 +144,7 @@ namespace UKingLibrary
             var obj = new MapObject();
             var index = mapData.Objs.Count;
             obj.CreateNew(Crc32.Compute($"ID{index}"), "LinkTagAnd", actorInfo, parent);
+            mapData.Objs.Add(obj.HashId, obj);
             obj.AddToScene();
 
             context.Scene.DeselectAll(context);

@@ -205,7 +205,7 @@ namespace UKingLibrary.UI
 
         static void LoadProperties(IDictionary<string, dynamic> properties, PropertyChangedCallback callback = null)
         {
-            foreach (var pair in properties)
+            foreach (var pair in properties.ToList())
             {
                 //Skip lists, scale, and rotate properties as they are loaded in the UI in other places
                 if (pair.Key == "!Parameters" || pair.Key == "Scale" || pair.Key == "Translate" || pair.Key == "Rotate")

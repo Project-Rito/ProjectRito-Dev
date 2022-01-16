@@ -54,7 +54,9 @@ namespace UKingLibrary
                 {
                     string name = mapObj["UnitConfigName"];
                     //Get the actor in the database
-                    var actorInfo = GlobalData.Actors[name] as IDictionary<string, dynamic>;
+                    var actorInfo = new Dictionary<string, dynamic>();
+                    if (GlobalData.Actors.ContainsKey(name))
+                        actorInfo = GlobalData.Actors[name] as Dictionary<string, dynamic>;
                     //Get the actor profile
                     string profile = actorInfo.ContainsKey("profile") ? (string)actorInfo["profile"] : null;
 
@@ -68,6 +70,15 @@ namespace UKingLibrary
                             nodeFolders[profile].HasCheckBox = true; //Allow checking
                         }
                         parent = nodeFolders[profile];
+                    }
+                    else
+                    {
+                        if (!nodeFolders.ContainsKey("Unknown"))
+                        {
+                            nodeFolders.Add("Unknown", new NodeBase("Unknown"));
+                            nodeFolders["Unknown"].HasCheckBox = true; //Allow checking
+                        }
+                        parent = nodeFolders["Unknown"];
                     }
 
                     //Setup properties for editing
