@@ -101,19 +101,49 @@ namespace MapStudio.UI
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    if (line.StartsWith("#") || !line.Contains("-"))
+                    if (line.StartsWith("#") || !(line.Contains("-") || line.Contains(":"))) // If this line contains nothing of value skip it
                         continue;
 
-                    var entries = line.Split('-');
-                    //Remove comments at end if used
-                    var value = entries[1].Split('#').FirstOrDefault().Trim();
-                    var key = entries[0].Trim();
-                    if (!Translation.ContainsKey(key))
-                        Translation.Add(key, value);
-                    else
-                        Translation[key] = value;
+
+                    if (line.Contains(":") && !line.Contains("-")) // If this line indicates it's a text block, read out the text block. Prefer text lines.
+                    {
+                        var key = line.Split(':')[0].Trim();
+                        var value = ReadTextBlock(reader);
+                        if (!Translation.ContainsKey(key))
+                            Translation.Add(key, value);
+                        else
+                            Translation[key] = value;
+                    }
+                    else // This must be a text line translation. Process it as such.
+                    {
+                        var entries = line.Split('-');
+                        //Remove comments at end if used
+                        var value = entries[1].Split('#').FirstOrDefault().Trim();
+                        var key = entries[0].Trim();
+                        if (!Translation.ContainsKey(key))
+                            Translation.Add(key, value);
+                        else
+                            Translation[key] = value;
+                    }
                 }
             }
+        }
+
+        private string ReadTextBlock(StreamReader reader)
+        {
+            string text = "";
+            string line = "";
+            while (!reader.EndOfStream)
+            {
+                line = reader.ReadLine();
+                if (line.Split('#')[0] == ":")
+                    break;
+
+                text += line + "\n";
+            }
+
+            text.Trim();
+            return text;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
