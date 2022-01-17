@@ -227,14 +227,14 @@ namespace UKingLibrary
 
             //Create a terrain mesh for rendering
             var meshRender = new TerrainRender();
-            meshRender.LoadTerrainData(heightBuffer, materialData);
+            meshRender.LoadTerrainData(heightBuffer, materialData, tileSectionScale);
             TerrainMeshes.Add(meshRender);
             //Scale and place the title in the correct place
             meshRender.Transform.Position = new Vector3(
                 tile.PositionX * SECTION_WIDTH * TILE_TO_SECTION_SCALE, 
                 0,
                 tile.PositionZ * SECTION_WIDTH * TILE_TO_SECTION_SCALE) * GLContext.PreviewScale;
-            meshRender.Transform.Scale = new Vector3(tileSectionScale, 1, tileSectionScale);
+            meshRender.Transform.Scale = new Vector3(1);
             meshRender.Transform.UpdateMatrix(true);
             meshRender.UINode.Tag = tile;
             meshRender.UINode.Header = name;
@@ -257,14 +257,14 @@ namespace UKingLibrary
 
             //Create a terrain mesh for rendering
             var meshRender = new WaterRender();
-            meshRender.LoadWaterData(heightBuffer);
+            meshRender.LoadWaterData(heightBuffer, tileSectionScale);
             WaterMeshes.Add(meshRender);
             //Scale and place the title in the correct place
             meshRender.Transform.Position = new Vector3(
                 tile.PositionX * SECTION_WIDTH * TILE_TO_SECTION_SCALE,
                 0,
                 tile.PositionZ * SECTION_WIDTH * TILE_TO_SECTION_SCALE) * GLContext.PreviewScale;
-            meshRender.Transform.Scale = new Vector3(tileSectionScale, 1, tileSectionScale);
+            meshRender.Transform.Scale = new Vector3(1);
             meshRender.Transform.UpdateMatrix(true);
             meshRender.UINode.Tag = tile;
             meshRender.UINode.Header = name;

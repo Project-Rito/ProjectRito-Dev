@@ -53,7 +53,7 @@ namespace UKingLibrary.Rendering
             };
         }
 
-        public void LoadTerrainData(byte[] heightBuffer, byte[] materialBuffer)
+        public void LoadTerrainData(byte[] heightBuffer, byte[] materialBuffer, float tileSectionScale)
         {
             //Load all attribute data.
             var positions = GetTerrainVertices(heightBuffer);
@@ -63,12 +63,15 @@ namespace UKingLibrary.Rendering
             if (IndexBuffer == null)
                 IndexBuffer = GetIndexBuffer();
 
-            // I'm not sure why... but for good results on normals and tangents I need to scale down Y again..?
-            var scaledPositions = new Vector3[positions.Length];
+            // Apply X and Z scaling
             for (int i = 0; i < positions.Length; i++)
-                scaledPositions[i] = new Vector3(positions[i].X, positions[i].Y * MAP_HEIGHT_SCALE, positions[i].Z);
+            {
+                positions[i].X *= tileSectionScale;
+                positions[i].Z *= tileSectionScale;
+            }
+
             //Normals calculation
-            var normals = DrawingHelper.CalculateNormals(scaledPositions.ToList(), IndexBuffer.ToList());
+            var normals = DrawingHelper.CalculateNormals(positions.ToList(), IndexBuffer.ToList());
             //Tangents calculation
             var tangents = GetTangents(positions);
 
