@@ -345,14 +345,22 @@ namespace CafeLibrary.Rendering
             shader.SetInt("u_TextureArrSpecMask", 2);
 
 
-            shader.SetBoolToInt("hasDiffuseMap", false);
+            shader.SetBoolToInt("hasDiffuseMap", true);
             shader.SetBoolToInt("hasDiffuseArray", false);
             shader.SetBoolToInt("hasAlphaMap", false);
             shader.SetBoolToInt("hasNormalMap", false);
 
+            bool hasDiffuseMap = false;
+            foreach (var textureMap in TextureMaps)
+                if (textureMap.Sampler == "_a0")
+                    hasDiffuseMap = true;
+
             int id = 3;
             for (int i = 0; i < this.TextureMaps?.Count; i++)
             {
+                if (hasDiffuseMap && TextureMaps[i].Sampler == "tma")
+                    continue; // We only want the diffuse map showing... plus this creates bugs anyway if not and causes the model to be invisible for some reason..
+
                 var name = TextureMaps[i].Name;
                 var sampler = TextureMaps[i].Sampler;
                 //Lookup samplers targeted via animations and use that texture instead if possible
@@ -374,8 +382,8 @@ namespace CafeLibrary.Rendering
                 else if (sampler == "tma")
                 {
                     shader.SetBoolToInt("hasDiffuseArray", hasTexture);
-                    if (ShaderParams.ContainsKey("texture_array_index0")) // It should have this... there are other ones too, maybe eventually manage that
-                        shader.SetFloat("u_TextureArrAlbedo0_Index", (float)ShaderParams["texture_array_index0"].DataValue);
+                    if (ShaderParams.ContainsKey("texture_array_index" + i)) // It should have this... there are other ones too, maybe eventually manage that
+                        shader.SetFloat("u_TextureArrAlbedo0_Index", (float)ShaderParams["texture_array_index" + i].DataValue);
                 }
                 else if (sampler == "_ms0")
                 {
