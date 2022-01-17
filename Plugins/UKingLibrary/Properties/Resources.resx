@@ -118,10 +118,31 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="TagAnd" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\TagAnd;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="EventTag" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\EventTag;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="TagOr" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\TagOr;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="LinkTagAnd" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\LinkTagAnd;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="LinkTagCount" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\LinkTagCount;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="LinkTagNAnd" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\LinkTagNAnd;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="LinkTagNone" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\LinkTagNone;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="LinkTagNOr" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\LinkTagNOr;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="LinkTagOr" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\LinkTagOr;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="LinkTagPulse" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\LinkTagPulse;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="LinkTagXOr" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\LinkTagXOr;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

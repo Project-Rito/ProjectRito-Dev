@@ -475,6 +475,9 @@ namespace UKingLibrary
             if (name == "BoxWater")
                 return new AreaWaterRender(parent, new Vector4(0, 0, 1, 1));
 
+            if (TagRender.IsTag(name))
+                return new TagRender(name, parent);
+
             //Default transform cube
             EditableObject render = new TransformableObject(parent);
 

@@ -63,9 +63,9 @@ namespace UKingLibrary.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] TagAnd {
+        internal static byte[] EventTag {
             get {
-                object obj = ResourceManager.GetObject("TagAnd", resourceCulture);
+                object obj = ResourceManager.GetObject("EventTag", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -73,9 +73,79 @@ namespace UKingLibrary.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] TagOr {
+        internal static byte[] LinkTagAnd {
             get {
-                object obj = ResourceManager.GetObject("TagOr", resourceCulture);
+                object obj = ResourceManager.GetObject("LinkTagAnd", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] LinkTagCount {
+            get {
+                object obj = ResourceManager.GetObject("LinkTagCount", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] LinkTagNAnd {
+            get {
+                object obj = ResourceManager.GetObject("LinkTagNAnd", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] LinkTagNone {
+            get {
+                object obj = ResourceManager.GetObject("LinkTagNone", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] LinkTagNOr {
+            get {
+                object obj = ResourceManager.GetObject("LinkTagNOr", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] LinkTagOr {
+            get {
+                object obj = ResourceManager.GetObject("LinkTagOr", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] LinkTagPulse {
+            get {
+                object obj = ResourceManager.GetObject("LinkTagPulse", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] LinkTagXOr {
+            get {
+                object obj = ResourceManager.GetObject("LinkTagXOr", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -9,12 +9,21 @@ using OpenTK;
 
 namespace UKingLibrary
 {
-    public class TagRender : EditableObject
+    public class TagRender : EditableObject, IColorPickable, IFrustumCulling
     {
+        public string Name;
+
         public Vector4 Color = new Vector4(1, 1, 1, 1);
 
-        static GLTexture TagAndTexture = null;
-        static GLTexture TagOrTexture = null;
+        static GLTexture LinkTagAndTexture = null;
+        static GLTexture LinkTagNAndTexture = null;
+        static GLTexture LinkTagOrTexture = null;
+        static GLTexture LinkTagXOrTexture = null;
+        static GLTexture LinkTagNOrTexture = null;
+        static GLTexture LinkTagNoneTexture = null;
+        static GLTexture LinkTagCountTexture = null;
+        static GLTexture LinkTagPulseTexture = null;
+        static GLTexture EventTagTexture = null;
 
         UVCubeRenderer CubeRenderer = null;
         StandardMaterial Material = new StandardMaterial();
@@ -32,12 +41,15 @@ namespace UKingLibrary
             return context.Camera.InFustrum(Boundings);
         }
 
-        public TagRender(NodeBase parent) : base(parent)
+        public TagRender(string name, NodeBase parent) : base(parent)
         {
+            Name = name;
             //Update boundings on transform changed
             this.Transform.TransformUpdated += delegate {
                 Boundings.UpdateTransform(this.Transform.TransformMatrix);
             };
+            UINode.Tag = this;
+            ReloadTexture();
         }
 
         public void DrawColorPicking(GLContext context)
@@ -54,23 +66,6 @@ namespace UKingLibrary
 
             Prepare();
 
-            Material.DiffuseTextureID = -1;
-            Material.Color = this.Color;
-
-            string type = UINode.Header;
-            switch (type)
-            {
-                case "LinkTagAnd":
-                    Material.DiffuseTextureID = TagAndTexture.ID;
-                    break;
-                case "LinkTagOr":
-                    Material.DiffuseTextureID = TagAndTexture.ID;
-                    break;
-                case "LinkTagNone":
-                    Material.DiffuseTextureID = TagAndTexture.ID;
-                    break;
-            }
-
             Material.DisplaySelection = IsSelected | IsHovered;
             Material.HalfLambertShading = false;
             Material.ModelMatrix = Transform.TransformMatrix;
@@ -79,9 +74,43 @@ namespace UKingLibrary
             CubeRenderer.DrawWithSelection(context, IsSelected || IsHovered);
         }
 
-        private void UpdateMaterial(GLTexture texture)
+        private void ReloadTexture()
         {
-            Material.DiffuseTextureID = TagAndTexture.ID;
+            Prepare();
+
+            Material.DiffuseTextureID = -1;
+            Material.Color = this.Color;
+
+            switch (Name)
+            {
+                case "LinkTagAnd":
+                    Material.DiffuseTextureID = LinkTagAndTexture.ID;
+                    break;
+                case "LinkTagNAnd":
+                    Material.DiffuseTextureID = LinkTagNAndTexture.ID;
+                    break;
+                case "LinkTagOr":
+                    Material.DiffuseTextureID = LinkTagOrTexture.ID;
+                    break;
+                case "LinkTagXOr":
+                    Material.DiffuseTextureID = LinkTagXOrTexture.ID;
+                    break;
+                case "LinkTagNOr":
+                    Material.DiffuseTextureID = LinkTagNOrTexture.ID;
+                    break;
+                case "LinkTagNone":
+                    Material.DiffuseTextureID = LinkTagNoneTexture.ID;
+                    break;
+                case "LinkTagCount":
+                    Material.DiffuseTextureID = LinkTagCountTexture.ID;
+                    break;
+                case "LinkTagPulse":
+                    Material.DiffuseTextureID = LinkTagPulseTexture.ID;
+                    break;
+                case "EventTag":
+                    Material.DiffuseTextureID = EventTagTexture.ID;
+                    break;
+            }
         }
 
         private void Prepare()
@@ -89,15 +118,44 @@ namespace UKingLibrary
             if (CubeRenderer == null || CubeRenderer.IsDisposed)
                 CubeRenderer = new UVCubeRenderer(10);
 
-            if (TagAndTexture == null)
-                TagAndTexture = GLTexture2D.FromBitmap(Properties.Resources.TagAnd);
-            if (TagOrTexture == null)
-                TagOrTexture = GLTexture2D.FromBitmap(Properties.Resources.TagOr);
+            if (LinkTagAndTexture == null)
+                LinkTagAndTexture = GLTexture2D.FromBitmap(Properties.Resources.LinkTagAnd);
+            if (LinkTagNAndTexture == null)
+                LinkTagNAndTexture = GLTexture2D.FromBitmap(Properties.Resources.LinkTagNAnd);
+            if (LinkTagOrTexture == null)
+                LinkTagOrTexture = GLTexture2D.FromBitmap(Properties.Resources.LinkTagOr);
+            if (LinkTagXOrTexture == null)
+                LinkTagXOrTexture = GLTexture2D.FromBitmap(Properties.Resources.LinkTagXOr);
+            if (LinkTagNOrTexture == null)
+                LinkTagNOrTexture = GLTexture2D.FromBitmap(Properties.Resources.LinkTagNOr);
+            if (LinkTagNoneTexture == null)
+                LinkTagNoneTexture = GLTexture2D.FromBitmap(Properties.Resources.LinkTagNone);
+            if (LinkTagCountTexture == null)
+                LinkTagCountTexture = GLTexture2D.FromBitmap(Properties.Resources.LinkTagCount);
+            if (LinkTagPulseTexture == null)
+                LinkTagPulseTexture = GLTexture2D.FromBitmap(Properties.Resources.LinkTagPulse);
+            if (EventTagTexture == null)
+                EventTagTexture = GLTexture2D.FromBitmap(Properties.Resources.EventTag);
         }
 
         public override void Dispose()
         {
             CubeRenderer?.Dispose();
+        }
+
+
+        public static bool IsTag(string name)
+        {
+            if (name.StartsWith("LinkTag"))
+                return true;
+            
+            switch (name)
+            {
+                case "EventTag":
+                    return true;
+            }
+
+            return false;
         }
     }
 }
