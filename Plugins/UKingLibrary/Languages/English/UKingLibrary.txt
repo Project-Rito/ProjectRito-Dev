@@ -20,3 +20,5 @@ BOTW GAME PATH - BotW Game Path
 BOTW UPDATE PATH - BotW Update Path
 BOTW DLC PATH - BotW DLC Path
 MOD PATHS - Mod Paths
+
+ACTOR_DOCS - Actor Docs

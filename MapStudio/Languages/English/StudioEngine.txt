@@ -35,7 +35,7 @@ PROPERTIES - Properties
 SEARCH - Search
 DISTANCE - Distance
 UNKNOWN - Unknown
-PIVOT = Pivot
+PIVOT - Pivot
 CONTROL_POINT - Control Point
 WORKSPACES - Workspaces
 EDITORS - Editors
