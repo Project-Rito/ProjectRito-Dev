@@ -48,9 +48,9 @@ namespace UKingLibrary
 
             ProcessLoading.Instance.Update(70, 100, "Loading map objs");
 
-            foreach (var obj in byaml.RootNode["Objs"]) // Your spacebar broken
+            for (int i = 0; i < numObjs; i++)
             {
-                var mapObj = (IDictionary<string, dynamic>)obj;
+                var mapObj = (IDictionary<string, dynamic>)byaml.RootNode["Objs"][i];
                 if (mapObj.ContainsKey("UnitConfigName"))
                 {
                     string name = mapObj["UnitConfigName"];
@@ -90,6 +90,7 @@ namespace UKingLibrary
                     //Add the renderable to the viewport
                     data.AddToScene();
                 }
+                ProcessLoading.Instance.Update((((i+1) * 40)/numObjs) + 70, 100, "Loading map objs");
             }
 
             ProcessLoading.Instance.Update(90, 100, "Loading map rails");

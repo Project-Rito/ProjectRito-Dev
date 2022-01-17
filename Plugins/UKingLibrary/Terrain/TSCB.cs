@@ -114,9 +114,10 @@ namespace UKingLibrary
                 float candidateTileScale = TerrainAreas[x].Core.AreaSize;
                 
                 // Is our candidate inside the section
-                if (TileOverlapsTile(candidateTilePos, candidateTileScale, sectionPos, 2))
+                if (TileOverlapsTile(candidateTilePos, candidateTileScale, sectionPos, 1))
                 {
-                    // Can we find 4 tiles inside this tile? (Ideally we would go for only at least 1, then stitch together. We're not there yet.)
+                    // Can we replace this tile with a complete set of fully-filled higher-detail tiles? If not, keep this as well as higher-detailed tiles.
+                    // (In future we should stitch stuff together, but we're not there yet)
                     float percentageHasHigherDetail = 0;
                     for (int y = 0; y < TerrainAreas.Length; y++) {
                         if (x == y)
@@ -132,6 +133,7 @@ namespace UKingLibrary
 
                         var thisTilePos = new Vector2(TerrainAreas[y].Core.PositionX, TerrainAreas[y].Core.PositionZ);
                         var thisTileScale = TerrainAreas[y].Core.AreaSize;
+
                         if (TileInTile(thisTilePos, thisTileScale, candidateTilePos, candidateTileScale))
                         {
                             percentageHasHigherDetail += (thisTileScale * thisTileScale) / (candidateTileScale * candidateTileScale);

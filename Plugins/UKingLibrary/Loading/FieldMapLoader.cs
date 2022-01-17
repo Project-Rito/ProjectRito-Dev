@@ -38,7 +38,7 @@ namespace UKingLibrary
 
             GLFrameworkEngine.GLContext.PreviewScale = 25;
 
-            ProcessLoading.Instance.Update(0, 100, "Loading map files.");
+            ProcessLoading.Instance.Update(0, 100, "Loading map files");
 
             string fileName = plugin.FileInfo.FileName;
             SectionName = fileName.Substring(0, 3);
@@ -51,8 +51,6 @@ namespace UKingLibrary
 
                 Terrain.LoadTerrainSection((int)SectionIDs.X, (int)SectionIDs.Y, PluginConfig.MaxTerrainLOD);
             }
-
-            ProcessLoading.Instance.Update(60, 100, "Loading map units");
 
             GlobalData.LoadActorDatabase();
 
