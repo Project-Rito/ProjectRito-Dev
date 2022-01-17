@@ -37,8 +37,8 @@ namespace UKingLibrary.Rendering
         public override BoundingNode BoundingNode { get; } = new BoundingNode()
         {
             Box = new BoundingBox(
-                new OpenTK.Vector3(-50, -50, -50),
-                new OpenTK.Vector3(50, 50, 50)),
+                new OpenTK.Vector3(-1, -1, -1) * GLContext.PreviewScale,
+                new OpenTK.Vector3(1, 1, 1) * GLContext.PreviewScale),
         };
 
         public object Clone()
