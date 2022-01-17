@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using Toolbox.Core;
 using MapStudio.UI;
@@ -21,10 +22,13 @@ namespace UKingLibrary
         static string UpdatePath = @"";
         [JsonProperty]
         static string AocPath = @"";
+        [JsonProperty]
+        static List<string> ModPaths = new List<string>();
 
         static bool HasValidGamePath;
         static bool HasValidUpdatePath;
         static bool HasValidAocPath;
+        static List<bool> HasValidModPaths;
 
         [JsonProperty]
         public static string FieldName = @"MainField";
@@ -42,6 +46,22 @@ namespace UKingLibrary
 
         public void DrawUI()
         {
+            if (ImGui.BeginMenu($"{TranslationSource.GetText("MOD PATHS")}##uk_vmenu01"))
+            {
+                for (int i = 0; i < ModPaths.Count; i++)
+                {
+                    string path = ModPaths[i];
+                    if (ImguiCustomWidgets.PathSelector($"##uk_modpath{i}", ref path, HasValidModPaths[i]))
+                    {
+                        ModPaths[i] = path;
+                        Save();
+                    }
+                }
+                
+
+                ImGui.EndMenu();
+            }
+
             if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW GAME PATH"), ref GamePath, HasValidGamePath))
                 Save();
 
@@ -66,7 +86,7 @@ namespace UKingLibrary
                 Save();
             }
 
-            if (ImGui.BeginMenu($"{TranslationSource.GetText("TERRAIN")}##uk_vmenu01"))
+            if (ImGui.BeginMenu($"{TranslationSource.GetText("TERRAIN")}##uk_vmenu02"))
             {
                 if (ImGui.SliderInt(TranslationSource.GetText("MAX DETAIL"), ref MaxTerrainLOD, 0, 7))
                     Save();
@@ -80,6 +100,15 @@ namespace UKingLibrary
 
         public static string GetContentPath(string relativePath)
         {
+            //Mod content
+            foreach (string modPath in ModPaths) {
+                if (File.Exists($"{modPath}\\aoc\\0010\\{relativePath}"))    return $"{modPath}\\aoc\\0010\\{relativePath}";
+                if (File.Exists($"{modPath}\\aoc\\0011\\{relativePath}"))    return $"{modPath}\\aoc\\0011\\{relativePath}";
+                if (File.Exists($"{modPath}\\aoc\\0012\\{relativePath}"))    return $"{modPath}\\aoc\\0012\\{relativePath}";
+
+                if (File.Exists($"{modPath}\\content\\{relativePath}")) return $"{modPath}\\content\\{relativePath}";
+            }
+
             //DLC content
             if (File.Exists($"{AocPath}\\0010\\{relativePath}"))    return $"{AocPath}\\0010\\{relativePath}";
             if (File.Exists($"{AocPath}\\0011\\{relativePath}"))    return $"{AocPath}\\0011\\{relativePath}";
@@ -127,6 +156,22 @@ namespace UKingLibrary
             HasValidGamePath = File.Exists($"{GamePath}\\Actor\\ActorInfo.product.sbyml");
             HasValidUpdatePath = File.Exists($"{UpdatePath}\\Actor\\ActorInfo.product.sbyml");
             HasValidAocPath = File.Exists($"{AocPath}\\0010\\Pack\\AocMainField.pack");
+
+            HasValidModPaths = Enumerable.Repeat(false, ModPaths.Count).ToList();
+            bool allModPathsValid = true;
+            for (int i = 0; i < ModPaths.Count; i++)
+            {
+                bool valid = Directory.Exists($"{ModPaths[i]}\\content") || Directory.Exists($"{ModPaths[i]}\\aoc");
+                HasValidModPaths[i] = valid;
+                if (!valid)
+                    allModPathsValid = false;
+            }
+            if (allModPathsValid)
+            {
+                ModPaths.Add(@"");
+                HasValidModPaths.Add(false);
+            }
+                
 
             if (GLContext.ActiveContext != null)
                 GLContext.ActiveContext.UpdateViewport = true;

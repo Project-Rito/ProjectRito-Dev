@@ -5,6 +5,7 @@ using System.IO;
 using GLFrameworkEngine;
 using Toolbox.Core.ViewModels;
 using MapStudio.UI;
+using Toolbox.Core;
 using ByamlExt.Byaml;
 
 namespace UKingLibrary
@@ -117,6 +118,8 @@ namespace UKingLibrary
                     foreach (IDictionary<string, dynamic> link in obj.Properties["LinksToObj"])
                     {
                         uint dest = link["DestUnitHashId"].Value;
+                        if (!Objs.ContainsKey(dest))
+                            StudioLogger.WriteWarning($"Cannot resolve link! Actor HashId: {obj.HashId} Link HashId: {dest}"); continue;
                         //Rendered links
                         obj.Render.DestObjectLinks.Add(Objs[dest].Render);
                         //Add a link instance aswell for keeping track of both source and dest links
