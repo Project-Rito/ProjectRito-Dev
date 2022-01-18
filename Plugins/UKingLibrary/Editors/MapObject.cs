@@ -144,6 +144,14 @@ namespace UKingLibrary
             //Prepare the gui tree node on the outliner with property tag and header name
             Render.UINode.Tag = this;
             Render.UINode.Header = Name;
+            Render.UINode.GetTooltip = () =>
+            {
+                if (TranslationSource.HasKey($"ACTOR_DOCS {Name}"))
+                    return TranslationSource.GetText($"ACTOR_DOCS {Name}");
+                else
+                    return TranslationSource.GetText("NO_ACTOR_DOCUMENTATION_FOUND");
+            };
+            
             //Property drawer for gui node
             Render.UINode.TagUI = new NodePropertyUI();
             Render.IsVisibleCallback += delegate

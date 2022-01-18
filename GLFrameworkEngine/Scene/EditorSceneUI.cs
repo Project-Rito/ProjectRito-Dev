@@ -9,7 +9,6 @@ namespace GLFrameworkEngine
     public class EditableObjectNode : NodeBase
     {
         private string header = $"Object";
-
         public override string Header
         {
             get { return header; }

@@ -21,6 +21,15 @@ namespace UKingLibrary
             //Load plugin specific data. This is where the game path is stored.
             if (!PluginConfig.init)
                 PluginConfig.Load();
+
+            if (PluginConfig.FirstStartup)
+            {
+                ActorDocs.Update();
+
+                PluginConfig.FirstStartup = false;
+                new PluginConfig().Save();
+            } // Get our ActorDocs!
+                
         }
     }
 }

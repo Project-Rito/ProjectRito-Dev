@@ -55,6 +55,9 @@ namespace Toolbox.Core.ViewModels
             }
         }
 
+
+        public Func<string> GetTooltip;
+
         private bool _hasCheckBox = false;
 
         /// <summary>

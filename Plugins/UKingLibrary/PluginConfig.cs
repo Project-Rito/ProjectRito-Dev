@@ -39,6 +39,9 @@ namespace UKingLibrary
         [JsonProperty]
         public static bool DebugTerrainSections = false;
 
+        [JsonProperty]
+        public static bool FirstStartup = true;
+
         //Only load the config once when this constructor is activated.
         internal static bool init = false;
 
@@ -46,6 +49,9 @@ namespace UKingLibrary
 
         public void DrawUI()
         {
+            if (ImGui.Button(TranslationSource.GetText("UPDATE_ACTORDOCS")))
+                ActorDocs.Update();
+
             if (ImGui.BeginMenu($"{TranslationSource.GetText("MOD PATHS")}##uk_vmenu01"))
             {
                 for (int i = 0; i < ModPaths.Count; i++)

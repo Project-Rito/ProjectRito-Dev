@@ -21,4 +21,6 @@ BOTW UPDATE PATH - BotW Update Path
 BOTW DLC PATH - BotW DLC Path
 MOD PATHS - Mod Paths
 
-ACTOR_DOCS - Actor Docs
+ACTOR_DOCUMENTATION - Actor Documentation
+NO_ACTOR_DOCUMENTATION_FOUND - No actor documentation found.
+UPDATE_ACTORDOCS - Update ActorDocs

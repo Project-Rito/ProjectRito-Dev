@@ -60,7 +60,7 @@ namespace UKingLibrary.UI
             }
 
             if (TranslationSource.HasKey($"DOCS {mapObject.Name}"))
-                if (ImGui.CollapsingHeader(TranslationSource.GetText("ACTOR_DOCS"), ImGuiTreeNodeFlags.DefaultOpen))
+                if (ImGui.CollapsingHeader(TranslationSource.GetText("ACTOR_DOCUMENTATION"), ImGuiTreeNodeFlags.DefaultOpen))
                     ImGui.TextWrapped(TranslationSource.GetText($"DOCS {mapObject.Name}"));
         }
 
