@@ -23,7 +23,7 @@ namespace UKingLibrary.UI
 
             if (ImGui.CollapsingHeader(TranslationSource.GetText("OBJ"), ImGuiTreeNodeFlags.DefaultOpen))
             {
-                if (ImGui.Button("Edit##obj", new System.Numerics.Vector2(width, 22)))
+                if (ImGui.Button($"{TranslationSource.GetText("EDIT")}##obj", new System.Numerics.Vector2(width, 22)))
                     DialogHandler.Show("Property Window", () => PropertiesDialog(values), null);
 
                 ImGui.Columns(2);
@@ -136,6 +136,20 @@ namespace UKingLibrary.UI
                 {
                     string name = pair.Key;
 
+                    switch (name)
+                    {
+                        case "!Parameters":
+                            continue;
+                        case "LinksToObj":
+                            continue;
+                        case "Translate":
+                            continue;
+                        case "Rotate":
+                            continue;
+                        case "Scale":
+                            continue;
+                    }
+
                     ImGui.PushItemWidth(ImGui.GetColumnWidth());
                     ImGui.InputText($"##name{name}", ref name, 0x100);
                     ImGui.PopItemWidth();
@@ -169,19 +183,19 @@ namespace UKingLibrary.UI
         {
             switch (PropertyTypes[selectedPropertyType])
             {
-                case "Float": return 0.0f;
-                case "Int": return 0;
-                case "Uint": return 0u;
-                case "String": return "";
-                case "Double": return 0d;
-                case "ULong": return 0UL;
-                case "Long": return 0L;
-                case "Bool": return false;
+                case "Float": return new MapData.Property<dynamic>(0.0f);
+                case "Int": return new MapData.Property<dynamic>(0);
+                case "Uint": return new MapData.Property<dynamic>(0u);
+                case "String": return new MapData.Property<dynamic>("");
+                case "Double": return new MapData.Property<dynamic>(0d);
+                case "ULong": return new MapData.Property<dynamic>(0UL);
+                case "Long": return new MapData.Property<dynamic>(0L);
+                case "Bool": return new MapData.Property<dynamic>(false);
                 case "Float3":
                     var dict = new Dictionary<string, dynamic>();
-                    dict.Add("X", 0.0f);
-                    dict.Add("Y", 0.0f);
-                    dict.Add("Z", 0.0f);
+                    dict.Add("X", new MapData.Property<dynamic>(0.0f));
+                    dict.Add("Y", new MapData.Property<dynamic>(0.0f));
+                    dict.Add("Z", new MapData.Property<dynamic>(0.0f));
                     return dict;
                 case "<NULL>": return null;
             }
