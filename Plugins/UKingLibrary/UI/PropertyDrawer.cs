@@ -62,6 +62,10 @@ namespace UKingLibrary.UI
             if (TranslationSource.HasKey($"ACTOR_DOCS {mapObject.Name}"))
                 if (ImGui.CollapsingHeader(TranslationSource.GetText("ACTOR_DOCUMENTATION"), ImGuiTreeNodeFlags.DefaultOpen))
                     ImGui.TextWrapped(TranslationSource.GetText($"ACTOR_DOCS {mapObject.Name}"));
+
+            if (TranslationSource.HasKey($"ID_DOCS {mapObject.HashId}"))
+                if (ImGui.CollapsingHeader(TranslationSource.GetText("INSTANCE_DOCUMENTATION"), ImGuiTreeNodeFlags.DefaultOpen))
+                    ImGui.TextWrapped(TranslationSource.GetText($"ID_DOCS {mapObject.HashId}"));
         }
 
         static void DrawLinkItem(MapObject.LinkInstance link)
