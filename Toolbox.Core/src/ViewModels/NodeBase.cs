@@ -40,23 +40,43 @@ namespace Toolbox.Core.ViewModels
 
         public int DisplayIndex = -1;
 
-        private string _header;
+        public Func<string> GetHeader;
 
         /// <summary>
         /// Gets or sets the header of the tree node.
         /// </summary>
         public virtual string Header
         {
-            get { return _header; }
+            get
+            {
+                return GetHeader();
+            }
             set
             {
-                _header = value;
-                RaisePropertyChanged("Header");
+                GetHeader = () => { return value; };
             }
         }
 
+        public Action CustomHeaderDraw;
 
         public Func<string> GetTooltip;
+
+        /// <summary>
+        /// Gets or sets the tooltip of the tree node.
+        /// </summary>
+        public virtual string Tooltip
+        {
+            get
+            {
+                return GetTooltip();
+            }
+            set
+            {
+                GetTooltip = () => { return value; };
+            }
+        }
+
+        public Action CustomTooltipDraw;
 
         private bool _hasCheckBox = false;
 

@@ -13,6 +13,7 @@ using UKingLibrary.UI;
 using UKingLibrary.Rendering;
 using CafeLibrary.Rendering;
 using Toolbox.Core.Animations;
+using ImGuiNET;
 
 namespace UKingLibrary
 {
@@ -143,7 +144,34 @@ namespace UKingLibrary
             Render = LoadRenderObject(ActorInfo, Properties, Parent);
             //Prepare the gui tree node on the outliner with property tag and header name
             Render.UINode.Tag = this;
-            Render.UINode.Header = Name;
+
+            // We're drawing a custom header, but we still want to set Header properly for searching and whatnot.
+            Render.UINode.GetHeader = () =>
+            {
+                string header = Name;
+                if (TranslationSource.HasKey($"ACTOR_NAME {Name}"))
+                    header += " " + TranslationSource.GetText($"ACTOR_NAME {Name}");
+                return header;
+            };
+            
+            Render.UINode.CustomHeaderDraw = () =>
+            {
+                ImGui.BeginGroup(); // Set this to a single group so that the tooltip applies to the whole text section
+
+                if (TranslationSource.HasKey($"ACTOR_NAME {Name}"))
+                {
+                    ImGui.SameLine();
+                    ImGui.PushFont(ImGuiController.DefaultFontBold);
+                    ImGui.Text(" " + TranslationSource.GetText($"ACTOR_NAME {Name}"));
+                    ImGui.PopFont();
+                }
+                else
+                    ImGui.Text(Name);
+                
+                ImGui.EndGroup();
+            };
+
+            
             Render.UINode.GetTooltip = () =>
             {
                 if (TranslationSource.HasKey($"ACTOR_DOCS {Name}"))

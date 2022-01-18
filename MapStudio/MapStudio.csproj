@@ -84,6 +84,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Lib\Fonts\FontBold.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="x86/cimgui.dll" Condition="'$(Platform)'=='x86' or '$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>%(Filename)%(Extension)</Link>

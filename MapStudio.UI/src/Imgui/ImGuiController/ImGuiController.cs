@@ -38,6 +38,7 @@ namespace MapStudio.UI
         private System.Numerics.Vector2 _scaleFactor = System.Numerics.Vector2.One;
 
         public static ImFontPtr DefaultFont;
+        public static ImFontPtr DefaultFontBold;
 
         /// <summary>
         /// Constructs a new ImGuiController.
@@ -86,6 +87,19 @@ namespace MapStudio.UI
 
             //Store the default font for monospaced UI (ie hex viewer)
             DefaultFont = io.Fonts.AddFontDefault();
+
+            unsafe // Load the bold font
+            {
+                var nativeConfig = ImGuiNative.ImFontConfig_ImFontConfig();
+                //Add a higher horizontal/vertical sample rate for global scaling.
+                (*nativeConfig).OversampleH = 8;
+                (*nativeConfig).OversampleV = 8;
+                (*nativeConfig).RasterizerMultiply = 1f;
+                (*nativeConfig).GlyphOffset = new System.Numerics.Vector2(0);
+
+                DefaultFontBold = io.Fonts.AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\FontBold.ttf", 16, nativeConfig);
+            }
+            
 
             io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
 

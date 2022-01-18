@@ -8,11 +8,10 @@ namespace GLFrameworkEngine
     //For rendering objects in the tree
     public class EditableObjectNode : NodeBase
     {
-        private string header = $"Object";
         public override string Header
         {
-            get { return header; }
-            set { header = value; }
+            get { return GetHeader(); }
+            set { GetHeader = () => { return value; }; }
         }
 
         public List<string> Icons = new List<string>();
@@ -50,6 +49,7 @@ namespace GLFrameworkEngine
         {
             Object = obj;
             HasCheckBox = true;
+            Header = "Object";
         }
 
         public override void OnDoubleClicked()

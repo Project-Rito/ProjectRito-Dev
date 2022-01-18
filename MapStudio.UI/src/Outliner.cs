@@ -452,7 +452,10 @@ namespace MapStudio.UI
 
                 if (!isRenaming)
                 {
-                    ImGui.Text(node.Header);
+                    if (node.CustomHeaderDraw == null)
+                        ImGui.Text(node.Header);
+                    else
+                        node.CustomHeaderDraw();
                     if (node.GetTooltip?.Invoke() != null && ImGui.IsItemHovered())
                         ImGui.SetTooltip(node.GetTooltip());
                 }

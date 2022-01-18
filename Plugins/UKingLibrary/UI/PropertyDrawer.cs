@@ -59,9 +59,9 @@ namespace UKingLibrary.UI
                 ImGui.Columns(1);
             }
 
-            if (TranslationSource.HasKey($"DOCS {mapObject.Name}"))
+            if (TranslationSource.HasKey($"ACTOR_DOCS {mapObject.Name}"))
                 if (ImGui.CollapsingHeader(TranslationSource.GetText("ACTOR_DOCUMENTATION"), ImGuiTreeNodeFlags.DefaultOpen))
-                    ImGui.TextWrapped(TranslationSource.GetText($"DOCS {mapObject.Name}"));
+                    ImGui.TextWrapped(TranslationSource.GetText($"ACTOR_DOCS {mapObject.Name}"));
         }
 
         static void DrawLinkItem(MapObject.LinkInstance link)
@@ -284,7 +284,29 @@ namespace UKingLibrary.UI
             }
             else
                 ImGui.Text("<NULL>");
+
+            if (value.Value is string)
+            {
+                ImGui.PushFont(ImGuiController.DefaultFontBold);
+                string translation = GetStringTranslation(key, value.Value);
+                if (translation != null)
+                    ImGui.Text(translation);
+                ImGui.PopFont();
+            }
+
             ImGui.PopItemWidth();
+        }
+
+        private static string GetStringTranslation(string key, string value)
+        {
+            switch (key)
+            {
+                case "UnitConfigName":
+                    if (TranslationSource.HasKey($"ACTOR_NAME {value}"))
+                        return TranslationSource.GetText($"ACTOR_NAME {value}");
+                    return null;
+            }
+            return null;
         }
 
         public static bool IsXYZ(dynamic prop)
