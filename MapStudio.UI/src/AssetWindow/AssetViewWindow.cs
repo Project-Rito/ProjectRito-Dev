@@ -135,9 +135,15 @@ namespace MapStudio.UI
             DrawListView();     ImGui.NextColumn();
         }
 
+        private bool initial_spacing = true;
+
         private void DrawCategoryList()
         {
-            ImGui.SetColumnWidth(0, 200);
+            //Setup the default spacing
+            if (initial_spacing) {
+                ImGui.SetColumnWidth(0, 200);
+                initial_spacing = false;
+            }
 
             if (ImGui.BeginChild("assetCategoryList1"))
             {
@@ -145,17 +151,16 @@ namespace MapStudio.UI
                 ImGui.PushItemWidth(200);
                 foreach (var category in AssetCategories)
                 {
-                    //Scroll focus using arrow keys
-                    if (ImGui.IsItemFocused() && ActiveCategory != category) {
-                        ActiveCategory = category;
-                        Reload(category);
-                    }
-
                     bool isSelected = category == ActiveCategory;
                     if (ImGui.Selectable(category.Name, isSelected)) {
                         Reload(category);
                     }
 
+                    //Scroll focus using arrow keys
+                    if (ImGui.IsItemFocused() && ActiveCategory != category) {
+                        ActiveCategory = category;
+                        Reload(category);
+                    }
 
                     if (isSelected)
                         ImGui.SetItemDefaultFocus();
