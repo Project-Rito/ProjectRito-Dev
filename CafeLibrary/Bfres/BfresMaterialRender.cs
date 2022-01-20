@@ -338,29 +338,17 @@ namespace CafeLibrary.Rendering
         {
             GL.ActiveTexture(TextureUnit.Texture0 + 1);
             GL.BindTexture(TextureTarget.Texture2D, RenderTools.defaultTex.ID);
-            shader.SetInt("u_TextureAlbedo0", 1);
-            GL.ActiveTexture(TextureUnit.Texture0 + 2);
-            GL.BindTexture(TextureTarget.Texture2DArray, RenderTools.defaultArrayTex.ID);
-            shader.SetInt("u_TextureArrAlbedo0", 2);
-            shader.SetInt("u_TextureArrSpecMask", 2);
+            shader.SetInt("u_TextureAlbedo0", 1); // Attach default texture
 
 
-            shader.SetBoolToInt("hasDiffuseMap", true);
+            shader.SetBoolToInt("hasDiffuseMap", false);
             shader.SetBoolToInt("hasDiffuseArray", false);
             shader.SetBoolToInt("hasAlphaMap", false);
             shader.SetBoolToInt("hasNormalMap", false);
 
-            bool hasDiffuseMap = false;
-            foreach (var textureMap in TextureMaps)
-                if (textureMap.Sampler == "_a0")
-                    hasDiffuseMap = true;
-
-            int id = 3;
+            int id = 2;
             for (int i = 0; i < this.TextureMaps?.Count; i++)
             {
-                if (hasDiffuseMap && TextureMaps[i].Sampler == "tma")
-                    continue; // We only want the diffuse map showing... plus this creates bugs anyway if not and causes the model to be invisible for some reason..
-
                 var name = TextureMaps[i].Name;
                 var sampler = TextureMaps[i].Sampler;
                 //Lookup samplers targeted via animations and use that texture instead if possible
@@ -371,6 +359,11 @@ namespace CafeLibrary.Rendering
                 string uniformName = GetUniformName(sampler);
                 if (uniformName == string.Empty)
                     continue;
+
+                // Unbind stuff
+                GL.ActiveTexture(TextureUnit.Texture0 + id);
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+                GL.BindTexture(TextureTarget.Texture2DArray, 0);
 
                 var binded = BindTexture(shader, GetTextures(), TextureMaps[i], name, id);
                 bool hasTexture = binded != null;
@@ -396,6 +389,8 @@ namespace CafeLibrary.Rendering
                 
                 if (hasTexture)
                     shader.SetInt(uniformName, id++);
+
+                
             }
         }
 

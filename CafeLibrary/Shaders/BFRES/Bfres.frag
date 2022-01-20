@@ -144,7 +144,7 @@ void main(){
     // Diffuse
     vec4 diffuseMapColor = texture(u_TextureAlbedo0, texCoord0);
 
-    if (hasDiffuseArray == 1) {
+    if (hasDiffuseArray == 1 && hasDiffuseMap != 1) {
         diffuseMapColor = texture(u_TextureArrAlbedo0, vec3(texCoord0, u_TextureArrAlbedo0_Index));
     }
 
