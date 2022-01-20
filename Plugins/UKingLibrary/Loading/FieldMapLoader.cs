@@ -102,6 +102,8 @@ namespace UKingLibrary
                     // Get the data from the bfres
                     string path = PluginConfig.GetContentPath("Model\\Terrain.Tex1.sbfres");
                     var texs = CafeLibrary.Rendering.BfresLoader.GetTextures(path);
+                    if (texs == null)
+                        return;
 
                     Directory.CreateDirectory(cache); // Ensure that our cache folder exists
                     foreach (var tex in texs)

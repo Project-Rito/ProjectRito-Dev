@@ -89,7 +89,32 @@ namespace UKingLibrary
         public void Load(List<MapData> mapFiles)
         {
             //Allow actor objects to be loaded in the asset list
-            Workspace.ActiveWorkspace.AddAssetCategory(new AssetViewMapObject());
+            //Todo add more profiles and add a proper tree hiearchy to asset viewer
+            var profiles = new string[] {
+                "Dragon",
+                "Enemy",
+                "EnemySwarm",
+                "GiantEnemy",
+                "Guardian",
+                "Item", 
+                "LastBoss",
+                "Horse",
+                "MapDynamicActive",
+                "MapConstActive",
+                "MergedDungeonParts", 
+                "NPC",
+                "Prey",
+                "Sandworm",
+                "SiteBoss",
+                "System",
+                "Weapon",
+                "WeaponBow", 
+                "WeaponShield",
+                "WeaponLargeSword",
+                "WeaponSmallSword" };
+
+            foreach (var profile in profiles)
+                Workspace.ActiveWorkspace.AddAssetCategory(new AssetViewMapObject(profile));
 
             ToolWindowDrawer = new MubinToolSettings();
 

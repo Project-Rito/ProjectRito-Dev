@@ -17,12 +17,15 @@ namespace UKingLibrary.UI
     /// </summary>
     public class AssetViewMapObject : IAssetCategory
     {
-        public string Name => "Map Objects";
+        public string Name => Category;
 
-        public bool IsFilterMode => filterSkybox || filterObjPath;
+        public bool IsFilterMode => false;
 
-        public static bool filterSkybox = false;
-        public static bool filterObjPath = false;
+        public string Category { get; set; }
+
+        public AssetViewMapObject(string category) {
+            Category = category;
+        }
 
         public List<AssetItem> Reload()
         {
@@ -41,7 +44,7 @@ namespace UKingLibrary.UI
                 string bfres = obj["bfres"];
                 string profile = obj["profile"];
 
-                if (!profile.Contains("Enemy"))
+                if (profile != Category)
                     continue;
 
                 if (!folders.ContainsKey(profile)) {

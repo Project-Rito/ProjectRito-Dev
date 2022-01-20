@@ -139,17 +139,30 @@ namespace MapStudio.UI
         {
             ImGui.SetColumnWidth(0, 200);
 
-            //Category filter
-            ImGui.PushItemWidth(200);
-            foreach (var category in AssetCategories)
+            if (ImGui.BeginChild("assetCategoryList1"))
             {
-                bool isSelected = category == ActiveCategory;
-                if (ImGui.Selectable(category.Name, isSelected)) {
-                    Reload(category);
+                //Category filter
+                ImGui.PushItemWidth(200);
+                foreach (var category in AssetCategories)
+                {
+                    //Scroll focus using arrow keys
+                    if (ImGui.IsItemFocused() && ActiveCategory != category) {
+                        ActiveCategory = category;
+                        Reload(category);
+                    }
+
+                    bool isSelected = category == ActiveCategory;
+                    if (ImGui.Selectable(category.Name, isSelected)) {
+                        Reload(category);
+                    }
+
+
+                    if (isSelected)
+                        ImGui.SetItemDefaultFocus();
                 }
-                if (isSelected)
-                    ImGui.SetItemDefaultFocus();
+                ImGui.EndChild();
             }
+
             ImGui.PopItemWidth();
         }
 
