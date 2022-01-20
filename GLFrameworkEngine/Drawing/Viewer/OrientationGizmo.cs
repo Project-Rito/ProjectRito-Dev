@@ -26,27 +26,28 @@ namespace GLFrameworkEngine
 
             GL.Clear(ClearBufferMask.DepthBufferBit);
             GL.Enable(EnableCap.DepthTest);
-
-            //Create a view rectangle to store the orientation cube in.
-            var width = (int)(context.Width * 0.1f);
-            var height = (int)(context.Height * 0.1f);
-            //Display at the bottom left corner
-            GL.Viewport(0, 0, width, height);
-
-            float scale = 0.5f;
+            //Smaller view space (15% of the screen)
+            var width = (int)(context.Width * 0.15f);
+            var height = (int)(context.Height * 0.15f);
+            //Get the center
+            var centerX = width / 2.0f;
+            var centerY = height / 2.0f;
+            //Place the object to the bottom left side. Shift it to fit based on the cube size.
+            Matrix4 translationMatrix = Matrix4.CreateTranslation(-centerX + 6, -centerY + 6, 0);
+            Matrix4 scaleMatrix = Matrix4.CreateScale(0.3f);
             //Use only the rotation in the view matrix.
-            Matrix4 viewMatrix = context.Camera.ViewMatrix.ClearTranslation();
-            //Use an ortho view.
-            Matrix4 projMatrix = Matrix4.CreateOrthographic(width * scale, height * scale, -200f, 200f);
+            Matrix4 viewMatrix = context.Camera.ViewMatrix.ClearTranslation() * translationMatrix;
+            //Use an ortho view covering the entire view space.
+            Matrix4 projMatrix = Matrix4.CreateOrthographic(width, height, -200f, 200f);
 
             Material.DiffuseTextureID = DisplayCubeTexture.ID;
             Material.CameraMatrix = viewMatrix * projMatrix;
+            Material.ModelMatrix = scaleMatrix;
             Material.Render(context);
 
             CubeRenderer.Draw(context);
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            GL.Viewport(0, 0, context.Width, context.Height);
         }
 
         private void Prepare()
