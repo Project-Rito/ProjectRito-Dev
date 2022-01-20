@@ -28,9 +28,12 @@ namespace MapStudio.UI
         public const char W_ICON = '\ue00a';
         public const char ANIMATION_ICON = '\ue00a';
         public const char SEARCH_ICON = '\uf002';
+        public const char SETTINGS_ICON = '\uf013';
         public const char FILTER_ICON = '\uf0b0';
         public const char SPARK_ICON = '\uf666';
         public const char PARTICLE_ICON = '\uf0d0';
+        public const char BONE_ICON = '\uf5d7';
+        public const char STAR_ICON = '\uf005';
 
         //Font Awesome
         public const char NEW_FILE_ICON = '\uf477';
@@ -51,6 +54,7 @@ namespace MapStudio.UI
         public const char TRANSLATE_ICON = '\uf0b2';
         public const char ROTATE_ICON = '\uf2f1';
         public const char SCALE_ICON = '\uf31e';
+        public const char MULTI_GIZMO_ICON = '\uf233';
         public const char RECT_SCALE_ICON = '\uf5cb';
         public const char COPY_ICON = '\uf0c5';
         public const char PASTE_ICON = '\uf0ea';
@@ -58,6 +62,7 @@ namespace MapStudio.UI
         public const char ADD_ICON = '\uf055';
         public const char EYE_DROPPER_ICON = '\uf1fb';
         public const char DELETE_ICON = '\uf2ed';
+        public const char THUMB_RESIZE_ICON = '\uf00a';
 
         public const char DESELECT_ICON = ' ';
         public const char SELECT_ICON = ' ';
@@ -71,6 +76,7 @@ namespace MapStudio.UI
         public const char ANIM_PATH_ICON = '\uf018'; //Todo find a better icon.
 
         public const char PATH_MOVE = '\uf0b2';
+        public const char PATH_DRAW = '\uf1fc';
         public const char ERASER = '\uf12d';
         public const char PATH_CONNECT = '\uf337';
         public const char PATH_CONNECT_AUTO = '\uf126';

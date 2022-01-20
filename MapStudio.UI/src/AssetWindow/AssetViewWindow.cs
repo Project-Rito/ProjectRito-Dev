@@ -18,8 +18,7 @@ namespace MapStudio.UI
         //Only use child window scrolling
         public override ImGuiWindowFlags Flags => ImGuiWindowFlags.NoScrollbar;
 
-        float itemWidth = 50;
-        float itemHeight = 50;
+        public AssetConfig Config = new AssetConfig();
 
         const float MAX_THUMB_SIZE = 150;
         const float MIN_THUMB_SIZE = 30;
@@ -44,6 +43,7 @@ namespace MapStudio.UI
 
         private string _searchText = "";
         private bool isSearch = false;
+        private bool filterFavorites = false;
 
         private AssetFolder ActiveFolder = null;
         private AssetFolder ParentFolder = null;
@@ -59,6 +59,7 @@ namespace MapStudio.UI
         public AssetViewWindow()
         {
             //Defaults
+            AddCategory(new FavoritesCategory(this));
             AddCategory(new AssetViewFileExplorer(this));
         }
 
@@ -81,7 +82,12 @@ namespace MapStudio.UI
 
             FilteredAssets.Clear();
             Assets.Clear();
-            Assets.AddRange(ActiveCategory.Reload());
+            foreach (var asset in ActiveCategory.Reload())
+            {
+                //Setup config
+                this.Config.ApplySettings(asset);
+                Assets.Add(asset);
+            }
 
             if (ActiveCategory.IsFilterMode)
                 FilteredAssets = UpdateSearch(Assets);
@@ -96,34 +102,17 @@ namespace MapStudio.UI
                 Reload(AssetCategories.FirstOrDefault());
             }
 
-            AssetItem doubleClickedAsset = null;
             var width = ImGui.GetWindowWidth();
 
             var startPosX = ImGui.GetCursorPosX();
             ImGui.SetCursorPosX(width - 225);
-            ImGui.PushItemWidth(200);
-            if (ImGui.BeginCombo("##category", ActiveCategory.Name))
-            {
-                foreach (var category in AssetCategories)
-                {
-                    bool isSelected = category == ActiveCategory;
-                    if (ImGui.Selectable(category.Name, isSelected)) {
-                        Reload(category);
-                    }
-                    if (isSelected)
-                        ImGui.SetItemDefaultFocus();
-                }
-                ImGui.EndCombo();
-            }
-            ImGui.PopItemWidth();
+
             ImGui.SameLine();
 
             ImGui.SetCursorPosX(startPosX);
 
             if (ActiveCategory == null)
                 return;
-
-            var objects = (isSearch || ActiveCategory.IsFilterMode) ? FilteredAssets : Assets;
 
             if (ImGui.Button("<-"))
             {
@@ -138,46 +127,134 @@ namespace MapStudio.UI
             }
             ImGui.SameLine();
 
-            ImGui.PushItemWidth(100);
-            if (ImGui.SliderFloat("##thumbSize", ref itemWidth, MIN_THUMB_SIZE, MAX_THUMB_SIZE)) {
-                itemHeight = itemWidth;
-                //Make the display name recalculate based on size
-                foreach (var asset in Assets)
-                    asset.DisplayName = "";
+            DrawSearchBar(); ImGui.SameLine();
+            DrawIconMenuBar();
+
+            ImGui.Columns(2);
+            DrawCategoryList(); ImGui.NextColumn();
+            DrawListView();     ImGui.NextColumn();
+        }
+
+        private void DrawCategoryList()
+        {
+            ImGui.SetColumnWidth(0, 200);
+
+            //Category filter
+            ImGui.PushItemWidth(200);
+            foreach (var category in AssetCategories)
+            {
+                bool isSelected = category == ActiveCategory;
+                if (ImGui.Selectable(category.Name, isSelected)) {
+                    Reload(category);
+                }
+                if (isSelected)
+                    ImGui.SetItemDefaultFocus();
             }
             ImGui.PopItemWidth();
+        }
 
+        private void DrawSearchBar()
+        {
+            var width = ImGui.GetWindowWidth();
+
+            ImGui.AlignTextToFramePadding();
+            ImGui.Text(TranslationSource.GetText("SEARCH"));
             ImGui.SameLine();
 
-            //Setting for displaying objects when spawned
-            if (ImGuiHelper.InputFromBoolean(TranslationSource.GetText("FACE_CAMERA_AT_SPAWN"), GlobalSettings.Current.Asset, "FaceCameraAtSpawn"))
+            var posX = ImGui.GetCursorPosX();
+
+            //Span across entire outliner width
+            ImGui.PushItemWidth(width - posX - 150);
+            if (ImGui.InputText("##search_box", ref _searchText, 200))
             {
+                isSearch = !string.IsNullOrWhiteSpace(_searchText);
+                FilteredAssets = UpdateSearch(Assets);
             }
+            ImGui.PopItemWidth();
+        }
 
-            //Search bar
+        private void DrawIconMenuBar()
+        {
+            float itemWidth = Config.IconSize;
+            float itemHeight = Config.IconSize;
+
+            if (selectedAsset != null && selectedAsset.Favorited) {
+                ImGui.PushStyleColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 1)));
+            }
+            else {
+                ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetStyle().Colors[(int)ImGuiCol.TextDisabled]);
+            }
+            if (ImGui.Button($"  {IconManager.STAR_ICON}   "))
             {
-                //Categories can have their own set of filters to use
-                //The return for this determines if the filter list needs refreshing
-                bool filter = ActiveCategory.UpdateFilterList();
+                if (selectedAsset != null)
+                    selectedAsset.Favorited = !selectedAsset.Favorited;
+            }
+            ImGui.PopStyleColor();
+            ImGui.SameLine();
 
+            //Icon menus
+            if (IconPopup(IconManager.THUMB_RESIZE_ICON, "icon_edit")) {
+                ImGui.PushItemWidth(100);
+                if (ImGui.SliderFloat("##thumbSize", ref itemWidth, MIN_THUMB_SIZE, MAX_THUMB_SIZE))
+                {
+                    Config.IconSize = itemWidth;
+                    //Make the display name recalculate based on size
+                    foreach (var asset in Assets)
+                        asset.DisplayName = "";
+                }
+                ImGui.PopItemWidth();
+                ImGui.EndPopup();
+            }
+            ImGui.SameLine();
+            if (IconPopup(IconManager.FILTER_ICON, "filter_edit")) {
+                bool filter = ActiveCategory.UpdateFilterList();
                 if (filter) {
                     FilteredAssets = UpdateSearch(Assets);
                 }
-
-                ImGui.AlignTextToFramePadding();
-                ImGui.Text(TranslationSource.GetText("SEARCH"));
-                ImGui.SameLine();
-
-                var posX = ImGui.GetCursorPosX();
-
-                //Span across entire outliner width
-                ImGui.PushItemWidth(width - posX);
-                if (ImGui.InputText("##search_box", ref _searchText, 200)) {
-                    isSearch = !string.IsNullOrWhiteSpace(_searchText);
-                    FilteredAssets = UpdateSearch(Assets);
-                }
-                ImGui.PopItemWidth();
+                ImGui.EndPopup();
             }
+            ImGui.SameLine();
+            if (IconPopup(IconManager.SETTINGS_ICON, "asset_settings")) {
+                //Setting for displaying objects when spawned
+                if (ImGuiHelper.InputFromBoolean(TranslationSource.GetText("FACE_CAMERA_AT_SPAWN"), GlobalSettings.Current.Asset, "FaceCameraAtSpawn"))
+                {
+                }
+                ImGui.EndPopup();
+            }
+        }
+
+        private void DrawCategoryFilter()
+        {
+            //Category filter
+            ImGui.PushItemWidth(200);
+            if (ImGui.BeginCombo("##category", ActiveCategory.Name))
+            {
+                foreach (var category in AssetCategories)
+                {
+                    bool isSelected = category == ActiveCategory;
+                    if (ImGui.Selectable(category.Name, isSelected))
+                    {
+                        Reload(category);
+                    }
+                    if (isSelected)
+                        ImGui.SetItemDefaultFocus();
+                }
+                ImGui.EndCombo();
+            }
+            ImGui.PopItemWidth();
+        }
+
+        #region ListView
+
+        private void DrawListView()
+        {
+            float itemWidth = Config.IconSize;
+            float itemHeight = Config.IconSize;
+
+            var width = ImGui.GetWindowWidth() - ImGui.GetCursorPosX();
+
+            AssetItem doubleClickedAsset = null;
+            var objects = (isSearch || ActiveCategory.IsFilterMode || filterFavorites) ? FilteredAssets : Assets;
 
             //Column count based on the view size and item width for each column
             var columnCount = (int)Math.Max((width / (itemWidth)), 1);
@@ -192,6 +269,8 @@ namespace MapStudio.UI
 
             var color = ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBg];
             ImGui.PushStyleColor(ImGuiCol.ChildBg, color);
+
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0));
 
             //Slightly increate the height to account for text wrapping
             ImGuiNative.igSetNextWindowContentSize(new System.Numerics.Vector2(0.0f, rowCount * (totalItemHeight)));
@@ -210,6 +289,9 @@ namespace MapStudio.UI
                         int index = (line_i * columnCount) + j;
                         if (index >= objects.Count)
                             break;
+
+                        if (columnCount > 1)
+                            ImGui.SetColumnWidth(j, itemWidth);
 
                         var obj = objects[index];
 
@@ -231,15 +313,25 @@ namespace MapStudio.UI
 
                         var pos = ImGui.GetCursorPos();
 
-                        Vector2 itemSize = new Vector2(ImGui.GetColumnWidth(), totalItemHeight);
+                        Vector2 itemSize = new Vector2(itemWidth, totalItemHeight);
                         if (columnCount == 1)
                             ImGui.AlignTextToFramePadding();
 
-                        //ImGuiHelper.IncrementCursorPosX(-4);
-
                         if (columnCount > 1)
                         {
+                            var pos1 = ImGui.GetCursorPos();
+
                             ImGui.Image((IntPtr)icon, new Vector2(itemWidth, itemWidth));
+
+                            var pos2 = ImGui.GetCursorPos();
+                            if (obj.Favorited)
+                            {
+                                ImGui.SetCursorPos(new Vector2(pos1.X, pos1.Y ));
+                                ImGui.PushStyleColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 1)));
+                                ImGui.Text($"  {IconManager.STAR_ICON}   ");
+                                ImGui.PopStyleColor();
+                            }
+                            ImGui.SetCursorPos(pos2);
 
                             var defaultFontScale = ImGui.GetIO().FontGlobalScale;
                             ImGui.SetWindowFontScale(0.7f);
@@ -247,6 +339,7 @@ namespace MapStudio.UI
                             var w = ImGui.GetCursorPosX();
 
                             //Clamp to 0 so the text stays within the current position
+                            //Center the text on the x axis
                             ImGui.SetCursorPosX(w + MathF.Max((itemWidth - textWidth) * 0.5f, 0));
                             ImGui.Text(name);
 
@@ -304,6 +397,8 @@ namespace MapStudio.UI
                 }
                 ImGui.EndChild();
             }
+            ImGui.PopStyleVar();
+            ImGui.PopStyleColor();
 
             if (doubleClickedAsset != null)
                 doubleClickedAsset.DoubleClicked();
@@ -311,8 +406,45 @@ namespace MapStudio.UI
             if (doubleClickedAsset != null && doubleClickedAsset is AssetFolder) {
                 ReloadFromFolder((AssetFolder)doubleClickedAsset);
             }
+        }
 
-            ImGui.PopStyleColor();
+        #endregion
+
+        #region UI Helpers
+
+        private bool IconPopup(char icon, string popupName)
+        {
+            var pos = ImGui.GetCursorScreenPos();
+            if (ImGui.Button($"   {icon}   ")) {
+                ImGui.OpenPopup(popupName);
+            }
+
+            ImGui.SetNextWindowPos(new Vector2(pos.X, pos.Y + 23));
+            bool popup = ImGui.BeginPopup(popupName, ImGuiWindowFlags.AlwaysAutoResize);
+            return popup;
+        }
+
+        private void TextCentered(string text)
+        {
+            float win_width = ImGui.GetWindowSize().X;
+            float text_width = ImGui.CalcTextSize(text).X;
+
+            // calculate the indentation that centers the text on one line, relative
+            // to window left, regardless of the `ImGuiStyleVar_WindowPadding` value
+            float text_indentation = (win_width - text_width) * 0.5f;
+
+            // if text is too long to be drawn on one line, `text_indentation` can
+            // become too small or even negative, so we check a minimum indentation
+            float min_indentation = 20.0f;
+            if (text_indentation <= min_indentation)
+            {
+                text_indentation = min_indentation;
+            }
+
+            ImGui.SameLine(text_indentation);
+            ImGui.PushTextWrapPos(win_width - text_indentation);
+            ImGui.TextWrapped(text);
+            ImGui.PopTextWrapPos();
         }
 
         private string TextEplislon(string text, float textWidth, float itemWidth)
@@ -332,6 +464,10 @@ namespace MapStudio.UI
             }
             return text;
         }
+
+        #endregion
+
+        #region Asset Loading
 
         private List<AssetItem> UpdateSearch(List<AssetItem> assets)
         {
@@ -403,6 +539,8 @@ namespace MapStudio.UI
             foreach (var asset in assetItems)
                 asset.Background_LoadThumbnail();
         }
+
+        #endregion
     }
 
     public interface IAssetCategory
@@ -437,6 +575,13 @@ namespace MapStudio.UI
         /// The display name of the asset.
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string[] Categories { get; set; }
+
+        public bool Favorited = false;
 
         public object Tag { get; set; }
 
@@ -550,8 +695,7 @@ namespace MapStudio.UI
         /// <summary>
         /// Opens the file on a double click.
         /// </summary>
-        public override void DoubleClicked()
-        {
+        public override void DoubleClicked() {
             FileUtility.OpenWithDefaultProgram(FilePath);
         }
 
@@ -580,5 +724,33 @@ namespace MapStudio.UI
             Name = new DirectoryInfo(directoryPath).Name;
             Icon = MapStudio.UI.IconManager.GetTextureIcon("FOLDER");
         }
+    }
+
+    class FavoritesCategory : IAssetCategory
+    {
+        public string Name => $"Favorites";
+
+        private AssetViewWindow Window;
+        public FavoritesCategory(AssetViewWindow window) {
+            Window = window;
+        }
+
+        /// <summary>
+        /// Reloads the asset list.
+        /// </summary>
+        public List<AssetItem> Reload() {
+            return new List<AssetItem>();
+        }
+
+        /// <summary>
+        /// Gets a value to determine if filtering is in use.
+        /// </summary>
+        public bool IsFilterMode => false;
+
+        /// <summary>
+        /// Determines if the filter list needs to be updated or not.
+        /// The UI elements for filtering should be drawn in here.
+        /// </summary>
+        public bool UpdateFilterList() { return false; }
     }
 }
