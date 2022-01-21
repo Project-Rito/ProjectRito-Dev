@@ -137,11 +137,19 @@ namespace MapStudio.UI
 
         private bool GetNodePosition(NodeBase target, NodeBase parent, ref float pos, float itemHeight)
         {
+            bool HasText = parent.Header != null &&
+              parent.Header.IndexOf(_searchText, StringComparison.OrdinalIgnoreCase) >= 0;
+
+            //Search is active and node is found but is not in results so skip scrolling
+            if (isSearch && parent == target && !HasText)
+                return false;
+            //Node is found so return
             if (parent == target) {
                 return true;
             }
-
-            pos += itemHeight;
+            //Only update results for visible nodes
+            if (isSearch && HasText || !isSearch)
+                pos += itemHeight;
             if (parent.IsExpanded)
             {
                 foreach (var child in parent.Children) {
