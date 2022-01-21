@@ -289,7 +289,7 @@ namespace UKingLibrary.UI
             else
                 ImGui.Text("<NULL>");
 
-            if (value.Value is string)
+            if (value is MapData.Property<dynamic> && value.Value is string)
             {
                 ImGui.PushFont(ImGuiController.DefaultFontBold);
                 string translation = GetStringTranslation(key, value.Value);
