@@ -77,27 +77,29 @@ namespace UKingLibrary
             if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW DLC Path"), ref AocPath, HasValidAocPath))
                 Save();
 
-            string[] fieldNames = { "AocField", "MainField" };
-            if (ImGui.BeginCombo("Field Name", FieldName))
-            {
-                for (int i = 0; i < fieldNames.Length; i++)
-                {
-                    bool is_selected = (FieldName == fieldNames[i]);
-                    if (ImGui.Selectable(fieldNames[i], is_selected))
-                        FieldName = fieldNames[i];
-                    if (is_selected)
-                        ImGui.SetItemDefaultFocus();
-                }
-                ImGui.EndCombo();
-                Save();
-            }
-
+            // All of this should eventually be moved per-3D-scene
             if (ImGui.BeginMenu($"{TranslationSource.GetText("TERRAIN")}##uk_vmenu02"))
             {
-                if (ImGui.SliderInt(TranslationSource.GetText("MAX DETAIL"), ref MaxTerrainLOD, 0, 7))
+                // Desired rendered terrain
+                string[] fieldNames = { "AocField", "MainField" };
+                if (ImGui.BeginCombo(TranslationSource.GetText("FIELD_NAME"), FieldName))
+                {
+                    for (int i = 0; i < fieldNames.Length; i++)
+                    {
+                        bool is_selected = (FieldName == fieldNames[i]);
+                        if (ImGui.Selectable(fieldNames[i], is_selected))
+                            FieldName = fieldNames[i];
+                        if (is_selected)
+                            ImGui.SetItemDefaultFocus();
+                    }
+                    ImGui.EndCombo();
+                    Save();
+                }
+
+                if (ImGui.SliderInt(TranslationSource.GetText("MAX_DETAIL"), ref MaxTerrainLOD, 0, 7))
                     Save();
 #if DEBUG
-                if (ImGui.Checkbox(TranslationSource.GetText("DEBUG SECTIONS"), ref DebugTerrainSections))
+                if (ImGui.Checkbox(TranslationSource.GetText("DEBUG_SECTIONS"), ref DebugTerrainSections))
                     Save();
 #endif
                 ImGui.EndMenu();
