@@ -34,8 +34,9 @@ namespace MapStudio.UI
         /// </summary>
         public ViewerSettings Viewer { get; set; } = new ViewerSettings();
 
-        public PathSettings PathDrawer { get; set; } = new PathSettings();
-
+        /// <summary>
+        /// The global settings used by the asset window.
+        /// </summary>
         public AssetSettings Asset { get; set; } = new AssetSettings();
 
         /// <summary>
@@ -54,12 +55,14 @@ namespace MapStudio.UI
         public BoneSettings Bones { get; set; } = new BoneSettings();
 
         private GLContext _context;
+        private Camera _camera;
 
         public GlobalSettings() { Current = this; }
 
-        public GlobalSettings(GLContext context)
+        public GlobalSettings(GLContext context, Camera camera)
         {
             _context = context;
+            _camera = camera;
             Current = this;
         }
 
@@ -92,16 +95,18 @@ namespace MapStudio.UI
         /// </summary>
         public void ReloadTheme()
         {
-            if (ThemeHandler.Themes.ContainsKey(Program.Theme))
-                ThemeHandler.UpdateTheme(ThemeHandler.Themes[Program.Theme]);
+            var theme = ThemeHandler.Themes.FirstOrDefault(x => x.Name == Program.Theme);
+            if (theme != null)
+                ThemeHandler.UpdateTheme(theme);
         }
 
         /// <summary>
         /// Updates the gl context settings from the configuration file.
         /// </summary>
-        public void ReloadContext(GLContext context)
+        public void ReloadContext(GLContext context, Camera camera)
         {
             _context = context;
+            _camera = camera;
             ApplyConfiguration();
         }
 
@@ -129,14 +134,14 @@ namespace MapStudio.UI
         {
             if (_context != null)
             {
-                _context.Camera.Mode = Camera.Mode;
-                _context.Camera.IsOrthographic = Camera.IsOrthographic;
-                _context.Camera.KeyMoveSpeed = Camera.KeyMoveSpeed;
-                _context.Camera.PanSpeed = Camera.PanSpeed;
-                _context.Camera.ZoomSpeed = Camera.ZoomSpeed;
-                _context.Camera.ZNear = Camera.ZNear;
-                _context.Camera.ZFar = Camera.ZFar;
-                _context.Camera.FovDegrees = Camera.FovDegrees;
+                _camera.Mode = Camera.Mode;
+                _camera.IsOrthographic = Camera.IsOrthographic;
+                _camera.KeyMoveSpeed = Camera.KeyMoveSpeed;
+                _camera.PanSpeed = Camera.PanSpeed;
+                _camera.ZoomSpeed = Camera.ZoomSpeed;
+                _camera.ZNear = Camera.ZNear;
+                _camera.ZFar = Camera.ZFar;
+                _camera.FovDegrees = Camera.FovDegrees;
 
                 _context.EnableFog = Viewer.DisplayFog;
                 _context.EnableBloom = Viewer.DisplayBloom;
@@ -146,10 +151,10 @@ namespace MapStudio.UI
             DrawableBackground.BackgroundTop = Background.TopColor;
             DrawableBackground.BackgroundBottom = Background.BottomColor;
 
-            DrawableFloor.Display = Grid.Display;
-            DrawableFloor.GridColor = Grid.Color;
-            Toolbox.Core.Runtime.GridSettings.CellSize = Grid.CellSize;
-            Toolbox.Core.Runtime.GridSettings.CellAmount = Grid.CellCount;
+            DrawableGridFloor.Display = Grid.Display;
+            DrawableGridFloor.GridColor = Grid.Color;
+            DrawableGridFloor.CellAmount = Grid.CellCount;
+            DrawableGridFloor.CellSize = Grid.CellSize;
 
             Toolbox.Core.Runtime.DisplayBones = Bones.Display;
             Toolbox.Core.Runtime.BonePointSize = Bones.Size;
@@ -162,14 +167,14 @@ namespace MapStudio.UI
         {
             Program.Language = TranslationSource.LanguageKey;
 
-            Camera.Mode = _context.Camera.Mode;
-            Camera.IsOrthographic = _context.Camera.IsOrthographic;
-            Camera.KeyMoveSpeed = _context.Camera.KeyMoveSpeed;
-            Camera.ZoomSpeed = _context.Camera.ZoomSpeed;
-            Camera.PanSpeed = _context.Camera.PanSpeed;
-            Camera.ZNear = _context.Camera.ZNear;
-            Camera.ZFar = _context.Camera.ZFar;
-            Camera.FovDegrees = _context.Camera.FovDegrees;
+            Camera.Mode = _camera.Mode;
+            Camera.IsOrthographic = _camera.IsOrthographic;
+            Camera.KeyMoveSpeed = _camera.KeyMoveSpeed;
+            Camera.ZoomSpeed = _camera.ZoomSpeed;
+            Camera.PanSpeed = _camera.PanSpeed;
+            Camera.ZNear = _camera.ZNear;
+            Camera.ZFar = _camera.ZFar;
+            Camera.FovDegrees = _camera.FovDegrees;
 
             Viewer.DisplayBloom = _context.EnableBloom;
             Viewer.DisplayFog = _context.EnableFog;
@@ -178,8 +183,8 @@ namespace MapStudio.UI
             Background.TopColor = DrawableBackground.BackgroundTop;
             Background.BottomColor = DrawableBackground.BackgroundBottom;
 
-            Grid.Display = DrawableFloor.Display;
-            Grid.Color = DrawableFloor.GridColor;
+            Grid.Display = DrawableGridFloor.Display;
+            Grid.Color = DrawableGridFloor.GridColor;
             Grid.CellSize = Toolbox.Core.Runtime.GridSettings.CellSize;
             Grid.CellCount = Toolbox.Core.Runtime.GridSettings.CellAmount;
 
@@ -189,7 +194,7 @@ namespace MapStudio.UI
 
         public class ProgramSettings
         {
-            public string Theme { get; set; } = "DARK_THEME";
+            public string Theme { get; set; } = "DARK_BLUE_THEME";
 
             /// <summary>
             /// The language of the program.
@@ -212,38 +217,6 @@ namespace MapStudio.UI
             }
         }
 
-        public class PathSettings
-        {
-            public PathColor EnemyColor = new PathColor(new Vector3(255, 0, 0), new Vector3(255, 255, 0), new Vector3(255, 128, 0));
-            public PathColor ItemColor = new PathColor(new Vector3(0, 255, 0), new Vector3(36, 165, 36), new Vector3(0, 128, 0));
-            public PathColor GlideColor = new PathColor(new Vector3(255, 128, 0), new Vector3(255, 255, 128), new Vector3(255, 200, 0));
-            public PathColor PullColor = new PathColor(new Vector3(165, 61, 158), new Vector3(208, 158, 208), new Vector3(255, 65, 244));
-            public PathColor RailColor = new PathColor(new Vector3(170, 0, 160), new Vector3(255, 64, 255), new Vector3(255, 64, 255));
-
-            public PathColor LapColor = new PathColor(new Vector3(0, 0, 255), new Vector3(0, 0, 200), new Vector3(80, 0, 0));
-            public PathColor GravityColor = new PathColor(new Vector3(200, 0, 200), new Vector3(255, 85, 255), new Vector3(180, 0, 255));
-            public PathColor GravityCameraColor = new PathColor(new Vector3(240, 100, 255), new Vector3(255, 85, 255), new Vector3(180, 9, 255));
-
-            public PathColor SteerAssistColor = new PathColor(new Vector3(100, 100, 100), new Vector3(150, 150, 150), new Vector3(70, 70, 70));
-        }
-
-        public class PathColor
-        {
-            public Vector3 PointColor = new Vector3(0, 0, 0);
-            public Vector3 LineColor = new Vector3(0, 0, 0);
-            public Vector3 ArrowColor = new Vector3(0, 0, 0);
-
-            [JsonIgnore]
-            public EventHandler OnColorChanged;
-
-            public PathColor(Vector3 point, Vector3 line, Vector3 arrow)
-            {
-                PointColor = new Vector3(point.X / 255f, point.Y / 255f, point.Z / 255f);
-                LineColor = new Vector3(line.X / 255f, line.Y / 255f, line.Z / 255f);
-                ArrowColor = new Vector3(arrow.X / 255f, arrow.Y / 255f, arrow.Z / 255f);
-            }
-        }
-
         public class ViewerSettings
         {
             /// <summary>
@@ -260,7 +233,7 @@ namespace MapStudio.UI
         public class AssetSettings
         {
             /// <summary>
-            /// Makes 3d assets face the camera on the Y axis during a drop spawn..
+            /// Makes 3d assets face the camera on the Y axis during a drop spawn.
             /// </summary>
             public bool FaceCameraAtSpawn { get; set; } = false;
         }

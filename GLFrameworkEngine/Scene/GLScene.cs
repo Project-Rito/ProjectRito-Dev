@@ -38,6 +38,9 @@ namespace GLFrameworkEngine
 
         public EventHandler SelectionChanged;
 
+        //Use for updating UI events like outliner
+        public EventHandler SelectionUIChanged;
+
         /// <summary>
         /// Gets objects which can be transformed and edited.
         /// </summary>
@@ -109,6 +112,15 @@ namespace GLFrameworkEngine
                 file.IsSelected = false;
                 file.IsHovered = false;
             }
+
+            OnSelectionChanged(context);
+        }
+
+        public void OnSelectionChanged(GLContext context, ITransformableObject pickable)
+        {
+            //Renderable provides a tree node that can be updated
+            if (pickable != null && pickable.CanSelect && pickable is UI.IRenderNode)
+                SelectionUIChanged?.Invoke(((UI.IRenderNode)pickable).UINode, EventArgs.Empty);
 
             OnSelectionChanged(context);
         }

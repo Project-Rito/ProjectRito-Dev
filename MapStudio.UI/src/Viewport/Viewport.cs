@@ -42,7 +42,7 @@ namespace MapStudio.UI
             Pipeline.InitBuffers();
             Pipeline._context.UseSRBFrameBuffer = true;
 
-            GlobalSettings.ReloadContext(Pipeline._context);
+            GlobalSettings.ReloadContext(Pipeline._context, Pipeline._context.Camera);
             Pipeline._context.SetActive();
 
             ReloadMenus();

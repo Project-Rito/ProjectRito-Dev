@@ -102,7 +102,7 @@ namespace GLFrameworkEngine
 
             if (selectAction)
             {
-                context.Scene.OnSelectionChanged(context);
+                context.Scene.OnSelectionChanged(context, pickable);
 
                 //Update the transform handler 
                 if (context.TransformTools.ActiveActions.Count > 0)
