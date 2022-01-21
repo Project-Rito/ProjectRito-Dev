@@ -491,7 +491,14 @@ namespace MapStudio.UI
                   //  ImGuiHelper.IncrementCursorPosY(-2);
 
                 if (!isRenaming)
-                    ImGui.Text(node.Header);
+                {
+                    if (node.CustomHeaderDraw == null)
+                        ImGui.Text(node.Header);
+                    else
+                        node.CustomHeaderDraw();
+                    if (node.GetTooltip?.Invoke() != null && ImGui.IsItemHovered())
+                        ImGui.SetTooltip(node.GetTooltip());
+                }
                 else
                 {
                     var renamable = node.Tag as IRenamableNode;
