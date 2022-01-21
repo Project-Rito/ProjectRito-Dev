@@ -352,7 +352,7 @@ namespace MapStudio.UI
                             ImGui.SetCursorPos(pos2);
 
                             var defaultFontScale = ImGui.GetIO().FontGlobalScale;
-                            ImGui.SetWindowFontScale(0.7f);
+                            ImGui.SetWindowFontScale(0.8f);
 
                             var w = ImGui.GetCursorPosX();
 
@@ -615,6 +615,8 @@ namespace MapStudio.UI
         /// </summary>
         public virtual bool Visible { get; } = true;
 
+
+
         public virtual void DoubleClicked()
         {
 
@@ -772,3 +774,4 @@ namespace MapStudio.UI
         public bool UpdateFilterList() { return false; }
     }
 }
+    

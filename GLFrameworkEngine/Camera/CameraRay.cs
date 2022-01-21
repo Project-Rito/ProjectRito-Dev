@@ -29,6 +29,19 @@ namespace GLFrameworkEngine
             return intersectDist > 0f;
         }
 
+        public static Vector3 GetPlaneIntersection(int x, int y, Camera camera, Vector3 normal, Vector3 point) {
+            return GetPlaneIntersection(new Vector2(x, y), camera, normal, point);
+        }
+
+        public static Vector3 GetPlaneIntersection(Vector2 mousePos, Camera camera, Vector3 normal, Vector3 point)
+        {
+            CameraRay ray = CameraRay.PointScreenRay((int)mousePos.X, (int)mousePos.Y, camera);
+            if (ray.IntersectsPlane(normal, point, out float intersectDist))
+                return ray.Origin.Xyz + (ray.Direction * intersectDist);
+            else
+                return Vector3.Zero;
+        }
+
         public void Transform(Quaternion quat)
         {
             Origin = new Vector4(Vector3.Transform(Origin.Xyz, quat), Origin.W);

@@ -77,8 +77,6 @@ namespace GLFrameworkEngine
             if (Settings.ActiveAxis.HasFlag(TransformEngine.Axis.All))
                 plane_normal = context.Camera.InverseRotationMatrix.Row2;
 
-            settings.PlaneNormal = plane_normal;
-
             if (ray.IntersectsPlane(plane_normal, currentPosition, out float intersectDist))
             {
                 Vector3 hitPos = ray.Origin.Xyz + (ray.Direction * intersectDist);

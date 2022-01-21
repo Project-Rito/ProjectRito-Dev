@@ -13,9 +13,18 @@ namespace GLFrameworkEngine
         /// </summary>
         public float GizmoScale = 1.0f;
 
+        /// <summary>
+        /// The angle of the current rotation gizmo.
+        /// Used for the UI to draw an angle difference in the arc angle.
+        /// </summary>
+        public float RotationAngle { get; set; }
+
         public Vector3 Origin { get; set; }
 
-        public Vector3 PlaneNormal = new Vector3(0, 1, 0);
+        /// <summary>
+        /// 
+        /// </summary>
+        public Vector3 RotationStartVector { get; set; }
 
         /// <summary>
         /// Gets or sets the active axis.
@@ -32,7 +41,18 @@ namespace GLFrameworkEngine
 
         public bool CollisionDetect = true;
 
-        public Quaternion Rotation = Quaternion.Identity;
+        private Quaternion _rotation = Quaternion.Identity;
+        public Quaternion Rotation
+        {
+            get { return _rotation; }
+            set
+            {
+                _rotation = value;
+                RotationMatrix = Matrix4.CreateFromQuaternion(_rotation);
+            }
+        }
+
+        public Matrix4 RotationMatrix;
 
         public Vector3 TranslateSnapFactor { get; set; } = new Vector3(0.25f);
         public Vector3 ScaleSnapFactor { get; set; } = new Vector3(0.25f);

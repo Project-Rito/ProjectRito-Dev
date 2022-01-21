@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK;
-using OpenTK.Input;
 
 namespace GLFrameworkEngine
 {
@@ -21,7 +17,7 @@ namespace GLFrameworkEngine
         public bool IsActive { get; set; }
 
         /// <summary>
-        /// Gets or sets the scale from being dragged.
+        /// Gets or sets the rotation from being dragged.
         /// </summary>
         public Quaternion DeltaRotation = Quaternion.Identity;
 
@@ -35,8 +31,12 @@ namespace GLFrameworkEngine
         /// </summary>
         public TransformSettings Settings { get; set; }
 
-        public RotateAction(TransformSettings settings)
-        {
+        /// <summary>
+        /// The active axis.
+        /// </summary>
+        public TransformEngine.Axis Axis { get; set; }
+
+        public RotateAction(TransformSettings settings) {
             Settings = settings;
         }
 
@@ -51,12 +51,25 @@ namespace GLFrameworkEngine
 
         static readonly double eighthPI = Math.PI / 8d;
 
+        Vector3 hitPt;
+
+        double offset = 0;
+
         public int ResetTransform(GLContext context, TransformSettings settings)
         {
             OriginStart = Settings.Origin;
             //Reset position
             startMousePos = new Vector2(context.CurrentMousePoint.X, context.CurrentMousePoint.Y);
-            //Check if the object gizmo is selected
+            //Active axis vector
+            var axis = GetAxis(settings.ActiveAxis);
+            //Selected point ray when rotation gizmo is selected
+            hitPt = CameraRay.GetPlaneIntersection(startMousePos, context.Camera, axis, Settings.Origin);
+            //Direction from the current and gizmo ray
+            Vector3 dir = (hitPt - Settings.Origin).Normalized();
+            settings.RotationStartVector = dir;
+            //Current active angle (reset at 0)
+            settings.RotationAngle = 0;
+
             return 0;
         }
 
@@ -67,6 +80,32 @@ namespace GLFrameworkEngine
 
             double angle = (Math.Atan2(mousePos.X - centerPoint.X, mousePos.Y - centerPoint.Y) -
                            Math.Atan2(startMousePos.X - centerPoint.X, startMousePos.Y - centerPoint.Y));
+
+            Vector3 lastIntersection;
+            Vector3 center = Settings.Origin;
+
+            var vec = context.Camera.InverseRotationMatrix.Row2;
+            if (settings.ActiveAxis != TransformEngine.Axis.All)
+            {
+                //The axis the angle is targeting
+                Vector3 axis = GetAxis(settings.ActiveAxis);
+                //The current ray position
+                Vector3 pos = CameraRay.GetPlaneIntersection(mousePos, context.Camera, axis, Settings.Origin);
+                if (pos != Vector3.Zero)
+                {
+                    //The current ray direction from the origin
+                    Vector3 localPos = (pos - Settings.Origin).Normalized();
+                    //The hit ray direction from the origin
+                    Vector3 rotVecSrc = (hitPt - Settings.Origin).Normalized();
+                    //Perpendicular angle to check the hit angle
+                    Vector3 perpendicularVector = Vector3.Cross(rotVecSrc, axis).Normalized();
+
+                    float acosAngle = Math.Clamp(Vector3.Dot(localPos, rotVecSrc), -1, 1);
+                    angle = MathF.Acos(acosAngle);
+                    angle *= (Vector3.Dot(localPos, perpendicularVector) < 0.0f) ? 1.0f : -1.0f;
+                    settings.RotationAngle = (float)angle;
+                }
+            }
 
             if (settings.SnapTransform)
                 angle = Math.Round(angle / eighthPI) * eighthPI;
@@ -132,18 +171,36 @@ namespace GLFrameworkEngine
             Vector3 vec = GLContext.ActiveContext.Camera.InverseRotationMatrix.Row2;
             switch (Settings.ActiveAxis)
             {
-                case TransformEngine.Axis.X:
-                    vec = Vector3.UnitX;
-                    break;
-                case TransformEngine.Axis.Y:
-                    vec = Vector3.UnitY;
-                    break;
-                case TransformEngine.Axis.Z:
-                    vec = Vector3.UnitZ;
-                    break;
+                case TransformEngine.Axis.X: vec = Vector3.UnitX; break;
+                case TransformEngine.Axis.Y: vec = Vector3.UnitY; break;
+                case TransformEngine.Axis.Z: vec = Vector3.UnitZ; break;
             }
-
            return Quaternion.FromAxisAngle(vec, (float)angle);
+        }
+
+        private Vector3 GetAxis(TransformEngine.Axis axis)
+        {
+            //Unit or local axis vectors
+            if (Settings.IsLocal)
+            {
+                var rot = Settings.RotationMatrix;
+                switch (axis)
+                {
+                    case TransformEngine.Axis.X: return rot.Row0.Xyz;
+                    case TransformEngine.Axis.Y: return rot.Row1.Xyz;
+                    case TransformEngine.Axis.Z: return rot.Row2.Xyz;
+                }
+            }
+            else
+            {
+                switch (axis)
+                {
+                    case TransformEngine.Axis.X: return Vector3.UnitX;
+                    case TransformEngine.Axis.Y: return Vector3.UnitY;
+                    case TransformEngine.Axis.Z: return Vector3.UnitZ;
+                }
+            }
+            return GLContext.ActiveContext.Camera.InverseRotationMatrix.Row2;
         }
 
         public int FinishTransform()
