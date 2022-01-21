@@ -540,7 +540,7 @@ namespace MapStudio.UI
             else if (ViewportWindow.IsFocused)
             {
                 if (!isRepeat)
-                    ActiveEditor.OnKeyDown();
+                    ActiveEditor.OnKeyDown(e, ViewportWindow.Pipeline._context);
 
                 ViewportWindow.Pipeline._context.OnKeyDown(e, isRepeat);
                 if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.ShowAddContextMenu))

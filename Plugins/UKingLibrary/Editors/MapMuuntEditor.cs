@@ -239,8 +239,25 @@ namespace UKingLibrary
         public void OnMouseUp() { }
         public void OnSave(ProjectResources resources) { }
 
-        public void OnKeyDown() {
+        public void OnKeyDown(KeyEventInfo e, GLContext context) {
             GLContext.ActiveContext.Scene.BeginUndoCollection();
+
+            if (e.IsKeyDown(InputSettings.INPUT.Scene.SelectAll))
+                context.Scene.SelectAll(context);
+            if (e.IsKeyDown(InputSettings.INPUT.Scene.Undo))
+                context.Scene.Undo();
+            if (e.IsKeyDown(InputSettings.INPUT.Scene.Redo))
+                context.Scene.Redo();
+            if (e.IsKeyDown(InputSettings.INPUT.Scene.EditMode))
+                context.Scene.ToggleEditMode();
+            if (e.IsKeyDown(InputSettings.INPUT.Scene.Copy))
+                context.Scene.CopySelected();
+            if (e.IsKeyDown(InputSettings.INPUT.Scene.Paste))
+                context.Scene.PasteSelected(context);
+            if (e.IsKeyDown(InputSettings.INPUT.Scene.Create))
+                CreateAndSelect(context);
+            if (e.IsKeyDown(InputSettings.INPUT.Scene.Delete))
+                context.Scene.DeleteSelected();
 
             foreach (var mubin in MapFiles)
             {

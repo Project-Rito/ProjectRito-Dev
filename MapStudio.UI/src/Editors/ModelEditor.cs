@@ -135,7 +135,7 @@ namespace MapStudio.UI
         public void OnMouseMove() { }
         public void OnMouseDown() { }
         public void OnMouseUp() { }
-        public void OnKeyDown() { }
+        public void OnKeyDown(KeyEventInfo e, GLContext context) { }
 
         public void OnSave(ProjectResources resources)
         {
