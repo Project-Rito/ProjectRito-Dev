@@ -129,8 +129,9 @@ namespace GLFrameworkEngine
         {
             SelectionChanged?.Invoke(this, EventArgs.Empty);
 
-            if (GetSelected().Count > 0) {
-                context.TransformTools.InitAction(GetSelected());
+            var selected = GetSelected();
+            if (selected.Count > 0) {
+                context.TransformTools.InitAction(selected);
             }
             else
                 context.TransformTools.ActiveActions.Clear();
