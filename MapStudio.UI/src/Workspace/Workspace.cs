@@ -92,8 +92,10 @@ namespace MapStudio.UI
             ParentWindow = parentWindow;
             ViewportWindow.Pipeline._context.Scene.SelectionUIChanged += (o, e) =>
             {
-                if (ViewportWindow.IsFocused)
+                if (ViewportWindow.IsFocused) {
+                    Outliner.SelectedNodes.Clear();
                     ScrollToSelectedNode((NodeBase)o);
+                }
             };
 
             //Confiure the layout placements
