@@ -90,6 +90,9 @@ namespace MapStudio
                 }
             }
 
+            //Load theme files
+            ThemeHandler.Load();
+
             //Load global settings like language configuration
             GlobalSettings = GlobalSettings.Load();
             GlobalSettings.ReloadLanguage();
@@ -485,19 +488,20 @@ namespace MapStudio
                         ImGui.EndCombo();
                     }
 
-                    string theme = GlobalSettings.Program.Theme;
-                    if (ImGui.BeginCombo(TranslationSource.GetText("THEME"), TranslationSource.GetText(theme)))
+                    string currentThemeName = GlobalSettings.Program.Theme.ToString();
+                    if (ImGui.BeginCombo(TranslationSource.GetText("THEME"), TranslationSource.GetText(currentThemeName)))
                     {
                         foreach (var colorTheme in ThemeHandler.Themes)
                         {
-                            string name = TranslationSource.GetText(colorTheme.Key);
-                            bool selected = colorTheme.Key == theme;
+                            string themeName = colorTheme.Name;
+                            string name = TranslationSource.GetText(themeName);
+                            bool selected = themeName == currentThemeName;
                             if (ImGui.Selectable(name, selected))
                             {
                                 //Set the current theme instance
-                                ThemeHandler.UpdateTheme(colorTheme.Value);
+                                ThemeHandler.UpdateTheme(colorTheme);
 
-                                GlobalSettings.Program.Theme = colorTheme.Key;
+                                GlobalSettings.Program.Theme = colorTheme.Name;
                                 GlobalSettings.Save();
                             }
                             if (selected)
@@ -516,9 +520,9 @@ namespace MapStudio
                     }
                     if (ImGui.BeginMenu($"{TranslationSource.GetText("GRID")}##vmenu01"))
                     {
-                        updateSettings |= ImGui.Checkbox(TranslationSource.GetText("DISPLAY"), ref DrawableFloor.Display);
+                        updateSettings |= ImGui.Checkbox(TranslationSource.GetText("DISPLAY"), ref DrawableGridFloor.Display);
                         updateSettings |= ImGui.Checkbox(TranslationSource.GetText("SOLID"), ref DrawableInfiniteFloor.IsSolid);
-                        updateSettings |= ImGui.ColorEdit4(TranslationSource.GetText("COLOR"), ref DrawableFloor.GridColor);
+                        updateSettings |= ImGui.ColorEdit4(TranslationSource.GetText("COLOR"), ref DrawableGridFloor.GridColor);
                         updateSettings |= ImGui.InputInt(TranslationSource.GetText("GRID_COUNT"), ref Runtime.GridSettings.CellAmount);
                         updateSettings |= ImGui.InputFloat(TranslationSource.GetText("GRID_SIZE"), ref Runtime.GridSettings.CellSize);
                         ImGui.EndMenu();

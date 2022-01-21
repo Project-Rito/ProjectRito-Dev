@@ -4,27 +4,31 @@ using System.Linq;
 using System.Drawing;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using Toolbox.Core;
 
 namespace GLFrameworkEngine
 {
-    public class DrawableFloor : RenderMesh<Vector3>
+    public class DrawableGridFloor : RenderMesh<Vector3>
     {
         public static System.Numerics.Vector4 GridColor = new System.Numerics.Vector4(0.3f, 0.3f, 0.3f, 1.0f);
 
         public static int CellAmount = 10;
-        public static int CellSize = 1;
+        public static float CellSize = 1;
 
         public static bool Display = true;
 
-        public DrawableFloor() : base(Vertices, PrimitiveType.Lines)
+        private static int _cellAmount;
+        private static float _cellSize;
+
+        private StandardMaterial Material = new StandardMaterial();
+
+        public DrawableGridFloor() : base(Vertices, PrimitiveType.Lines)
         {
 
         }
 
         static Vector3[] Vertices => FillVertices(CellAmount, CellSize).ToArray();
 
-        static List<Vector3> FillVertices(int amount, int size)
+        static List<Vector3> FillVertices(int amount, float size)
         {
             var vertices = new List<Vector3>();
             for (var i = -amount; i <= amount; i++)
@@ -42,17 +46,15 @@ namespace GLFrameworkEngine
             if (pass != Pass.OPAQUE || !Display)
                 return;
 
-            var gridShaderProgram = GlobalShaders.GetShader("GRID");
-
-            if (Runtime.GridSettings.CellSize != CellSize || Runtime.GridSettings.CellAmount != CellAmount)
+            if (_cellAmount != CellAmount || CellSize != _cellSize) {
                 UpdateVertexData(Vertices);
+                _cellAmount = CellAmount;
+                _cellSize = CellSize;
+            }
 
-            control.CurrentShader = gridShaderProgram;
+            Material.Color = new Vector4(GridColor.X, GridColor.Y, GridColor.Z, GridColor.W);
+            Material.Render(control);
 
-            Matrix4 previewScale = Matrix4.CreateScale(1.0f);
-            gridShaderProgram.SetMatrix4x4("previewScale", ref previewScale);
-
-            gridShaderProgram.SetVector4("gridColor", new Vector4(GridColor.X, GridColor.Y, GridColor.Z, GridColor.W));
             this.Draw(control);
 
             GL.UseProgram(0);

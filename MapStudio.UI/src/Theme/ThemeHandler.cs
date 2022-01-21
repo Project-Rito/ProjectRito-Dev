@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Numerics;
 using ImGuiNET;
+using Newtonsoft.Json;
 
 namespace MapStudio.UI
 {
@@ -11,15 +12,9 @@ namespace MapStudio.UI
     /// </summary>
     public class ThemeHandler
     {
-        /// <summary>
-        /// A lookup for all the preset themes.
-        /// </summary>
-        public static Dictionary<string, ThemeHandler> Themes = new Dictionary<string, ThemeHandler>()
-        {
-            { "DARK_THEME", new DarkTheme() },
-            { "LIGHT_THEME", new LightTheme() },
-            { "DARK_BLUE_THEME", new DarkBlueTheme() },
-        };
+        public virtual string Name { get; set; }
+
+        public static List<ThemeHandler> Themes = new List<ThemeHandler>();
 
         public virtual Vector4 Text { get; set; }
         public virtual Vector4 WindowBg { get; set; }
@@ -53,6 +48,11 @@ namespace MapStudio.UI
         public virtual Vector4 Warning { get; set; }
 
         public static ThemeHandler Theme;
+
+        public ThemeHandler()
+        {
+ 
+        }
 
         /// <summary>
         /// Updates the current theme of the application.
@@ -93,6 +93,34 @@ namespace MapStudio.UI
             ImGui.GetStyle().Colors[(int)ImGuiCol.Button] = theme.Button;
             ImGui.GetStyle().Colors[(int)ImGuiCol.MenuBarBg] = theme.WindowBg;
         }
+
+        public static void Load()
+        {
+            string folder = $"{Toolbox.Core.Runtime.ExecutableDir}\\Lib\\Themes";
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+
+            Themes.Clear();
+            foreach (var theme in Directory.GetFiles(folder)) {
+               Themes.Add(JsonConvert.DeserializeObject<ThemeHandler>(File.ReadAllText(theme)));
+            }
+        }
+
+        public static void Save()
+        {
+            string folder = $"{Toolbox.Core.Runtime.ExecutableDir}\\Lib\\Themes";
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+
+            foreach (var theme in Themes)
+                theme.Export($"{folder}\\{theme.Name}.json");
+        }
+
+        public void Export(string fileName)
+        {
+            var json = JsonConvert.SerializeObject(this, Formatting.Indented);
+            System.IO.File.WriteAllText(fileName, json);
+        }
     }
 
     /// <summary>
@@ -100,6 +128,8 @@ namespace MapStudio.UI
     /// </summary>
     public class LightTheme : ThemeHandler
     {
+        public override string Name { get; set; } = "LIGHT_THEME";
+
         public LightTheme()
         {
             Text = new Vector4(0, 0, 0, 1.00f);
@@ -119,7 +149,7 @@ namespace MapStudio.UI
             HeaderActive = new Vector4(0.7f, 0.7f, 0.7f, 1.00f);
             SeparatorHovered = new Vector4(0.82f, 0.82f, 0.82f, 0.78f);
             SeparatorActive = new Vector4(0.53f, 0.53f, 0.53f, 1.00f);
-            Separator = new Vector4(0.45f, 0.45f, 0.45f, 1.00f);
+            Separator = new Vector4(0.85f, 0.85f, 0.85f, 1.00f);
             Tab = new Vector4(1, 1, 1, 0.86f);
             TabHovered = new Vector4(0.9f, 0.9f, 0.9f, 0.80f);
             TabActive = new Vector4(0.9f, 0.9f, 0.9f, 1.00f);
@@ -128,7 +158,7 @@ namespace MapStudio.UI
             DockingPreview = new Vector4(0.6f, 0.6f, 0.6f, 0.70f);
             DockingEmptyBg = new Vector4(0.65f, 0.65f, 0.65f, 0.70f);
             TextSelectedBg = new Vector4(0.24f, 0.45f, 0.68f, 0.35f);
-            NavHighlight = new Vector4(0.4f, 0.4f, 0.4f, 1.00f);
+            NavHighlight = new Vector4(0.4f, 0.4f, 0.4f, 0);
             Error = new Vector4(1f, 0.3f, 0.3f, 1.0f);
             Warning = new Vector4(1, 1, 0.3f, 1.0f);
         }
@@ -139,6 +169,8 @@ namespace MapStudio.UI
     /// </summary>
     public class DarkTheme : ThemeHandler
     {
+        public override string Name { get; set; } = "DARK_THEME";
+
         public DarkTheme()
         {
             Text = new Vector4(1.00f, 1.00f, 1.00f, 1.00f);
@@ -166,7 +198,7 @@ namespace MapStudio.UI
             TabUnfocusedActive = new Vector4(0.31f, 0.31f, 0.31f, 1.00f);
             DockingPreview = new Vector4(0.34f, 0.34f, 0.34f, 0.70f);
             TextSelectedBg = new Vector4(0.24f, 0.45f, 0.68f, 0.35f);
-            NavHighlight = new Vector4(0.4f, 0.4f, 0.4f, 1.00f);
+            NavHighlight = new Vector4(0.4f, 0.4f, 0.4f, 0);
             Error = new Vector4(1f, 0.3f, 0.3f, 1.0f);
             Warning = new Vector4(1, 1, 0.3f, 1.0f);
         }
@@ -177,6 +209,8 @@ namespace MapStudio.UI
     /// </summary>
     public class DarkBlueTheme : ThemeHandler
     {
+        public override string Name { get; set; } = "DARK_BLUE_THEME";
+
         public DarkBlueTheme()
         {
             Text = new Vector4(0.80f, 0.83f, 0.96f, 1.00f);
@@ -205,7 +239,7 @@ namespace MapStudio.UI
             DockingPreview = new Vector4(0.12f, 0.12f, 0.14f, 0.70f);
             DockingEmptyBg = new Vector4(0.10f, 0.10f, 0.11f, 1.00f);
             TextSelectedBg = new Vector4(0.24f, 0.45f, 0.68f, 0.35f);
-            NavHighlight = new Vector4(0.26f, 0.66f, 1.00f, 1.00f);
+            NavHighlight = new Vector4(0.26f, 0.66f, 1.00f, 0);
             Error = new Vector4(1f, 0.3f, 0.3f, 1.0f);
             Warning = new Vector4(1, 1, 0.3f, 1.0f);
         }
@@ -216,6 +250,8 @@ namespace MapStudio.UI
     /// </summary>
     public class UE4Theme : ThemeHandler
     {
+        public override string Name { get; set; } = "UE4_THEME";
+
         public UE4Theme()
         {
             Text = new Vector4(1.00f, 1.00f, 1.00f, 1.00f);
@@ -243,7 +279,7 @@ namespace MapStudio.UI
             TabUnfocusedActive = new Vector4(0.31f, 0.31f, 0.31f, 1.00f);
             DockingPreview = new Vector4(0.34f, 0.34f, 0.34f, 0.70f);
             TextSelectedBg = new Vector4(0.24f, 0.45f, 0.68f, 0.35f);
-            NavHighlight = new Vector4(0.26f, 0.66f, 1.00f, 1.00f);
+            NavHighlight = new Vector4(0.26f, 0.66f, 1.00f, 0);
             Error = new Vector4(1f, 0.3f, 0.3f, 1.0f);
             Warning = new Vector4(1, 1, 0.3f, 1.0f);
         }

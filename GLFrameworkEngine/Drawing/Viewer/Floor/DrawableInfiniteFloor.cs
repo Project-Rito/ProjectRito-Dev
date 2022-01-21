@@ -10,14 +10,21 @@ namespace GLFrameworkEngine
 {
     public class DrawableInfiniteFloor
     {
-        PlaneRenderer PlaneRender;
-
+        /// <summary>
+        /// Determines to use a solid or grid based floor.
+        /// </summary>
         public static bool IsSolid = false;
+
+        /// <summary>
+        /// Determines to use a spotlight lighting on the floor (solid only).
+        /// </summary>
         public static bool IsSpotlight = false;
+
+        PlaneRenderer PlaneRender;
 
         public void Draw(GLContext control)
         {
-            if (!DrawableFloor.Display)
+            if (!DrawableGridFloor.Display)
                 return;
 
             if (PlaneRender == null) {
@@ -36,10 +43,11 @@ namespace GLFrameworkEngine
             gridShaderProgram.SetBoolToInt("solidFloor", IsSolid);
             gridShaderProgram.SetBoolToInt("spotLight", IsSpotlight);
             gridShaderProgram.SetVector3("gridColor", new Vector3(
-                DrawableFloor.GridColor.X,
-                DrawableFloor.GridColor.Y,
-                DrawableFloor.GridColor.Z));
+                DrawableGridFloor.GridColor.X,
+                DrawableGridFloor.GridColor.Y,
+                DrawableGridFloor.GridColor.Z));
 
+            //Make sure to support transparency as the grid is a drawn quad with alpha used
             GLMaterialBlendState.Translucent.RenderBlendState();
 
             GL.Enable(EnableCap.DepthTest);
