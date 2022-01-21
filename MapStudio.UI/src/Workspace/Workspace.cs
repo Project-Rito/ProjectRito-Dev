@@ -90,10 +90,10 @@ namespace MapStudio.UI
             AssetViewWindow = new AssetViewWindow();
             ViewportWindow = new Viewport(this, settings);
             ParentWindow = parentWindow;
-            ViewportWindow.Pipeline._context.Scene.SelectionChanged += delegate
+            ViewportWindow.Pipeline._context.Scene.SelectionUIChanged += (o, e) =>
             {
                 if (ViewportWindow.IsFocused)
-                    ScrollToSelectedNode(GetSelected().FirstOrDefault());
+                    ScrollToSelectedNode((NodeBase)o);
             };
 
             //Confiure the layout placements
