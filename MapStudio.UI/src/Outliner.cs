@@ -30,6 +30,16 @@ namespace MapStudio.UI
 
         public NodeBase SelectedNode => SelectedNodes.LastOrDefault();
 
+        public void AddSelection(NodeBase node) {
+            SelectedNodes.Add(node);
+            SelectionChanged?.Invoke(node, EventArgs.Empty);
+        }
+
+        public void RemoveSelection(NodeBase node) {
+            SelectedNodes.Remove(node);
+            SelectionChanged?.Invoke(node, EventArgs.Empty);
+        }
+
         static NodeBase dragDroppedNode;
 
         const float RENAME_DELAY_TIME = 0.5f;
@@ -45,6 +55,7 @@ namespace MapStudio.UI
             return dragDroppedNode;
         }
 
+        public EventHandler SelectionChanged;
         public EventHandler BeforeDrawCallback;
 
         //Rename handling
@@ -79,6 +90,18 @@ namespace MapStudio.UI
         private int SelectedRangeIndex;
 
         public Outliner() {
+            SelectionChanged += delegate
+            {
+                if (SelectedNode == null)
+                    return;
+
+                if (SelectedNode.Tag is STBone) {
+                    Runtime.SelectedBoneIndex = ((STBone)SelectedNode.Tag).Index;
+                }
+                else
+                    Runtime.SelectedBoneIndex = -1;
+                GLFrameworkEngine.GLContext.ActiveContext.UpdateViewport = true;
+            };
         }
 
         public void UpdateScroll(float scrollX, float scrollY)
@@ -222,6 +245,9 @@ namespace MapStudio.UI
             foreach (var child in Nodes)
                 DrawNode(child, ItemHeight);
 
+            //if (isSearch && Nodes.Count > 0)
+             //   ImGui.TreePop();
+
             ImGui.EndChild();
             ImGui.PopStyleColor(2);
         }
@@ -242,7 +268,7 @@ namespace MapStudio.UI
                     SelectedIndex <= pos && pos <= SelectedRangeIndex)
                 {
                     node.IsSelected = true;
-                    SelectedNodes.Add(node);
+                    AddSelection(node);
                 }
             }
 
@@ -277,7 +303,7 @@ namespace MapStudio.UI
                 node.IsSelected = false;
         }
 
-        public void DrawNode(NodeBase node, float itemHeight)
+        public void DrawNode(NodeBase node, float itemHeight, int level = 0)
         {
             bool HasText = node.Header != null &&
                  node.Header.IndexOf(_searchText, StringComparison.OrdinalIgnoreCase) >= 0;
@@ -287,6 +313,8 @@ namespace MapStudio.UI
                 icon = IconManager.MESH_ICON;
             if (node.Tag is STGenericModel)
                 icon = IconManager.MODEL_ICON;
+            if (node.Tag is STBone)
+                icon = IconManager.BONE_ICON;
             if (!string.IsNullOrEmpty(node.Icon) && node.Icon.Length == 1)
                 icon = (char)node.Icon[0];
 
@@ -312,11 +340,11 @@ namespace MapStudio.UI
 
             //Node was selected manually outside the outliner so update the list
             if (node.IsSelected && !SelectedNodes.Contains(node))
-                SelectedNodes.Add(node);
+                AddSelection(node);
 
             //Node was deselected manually outside the outliner so update the list
             if (!node.IsSelected && SelectedNodes.Contains(node))
-                SelectedNodes.Remove(node);
+                RemoveSelection(node);
 
             if (SelectedNodes.Contains(node))
                 flags |= ImGuiTreeNodeFlags.Selected;
@@ -325,8 +353,7 @@ namespace MapStudio.UI
             {
                 //Add active file format styling. This determines what file to save.
                 //For files inside archives, it gets the parent of the file format to save.
-                bool isActiveFile = false;
-                //isActiveFile = ActiveFileFormat == node.Tag;
+                bool isActiveFile = Workspace.ActiveWorkspace.ActiveEditor == node.Tag;
 
                 bool isRenaming = node == renameNode && isNameEditing && node.Tag is IRenamableNode;
 
@@ -336,7 +363,7 @@ namespace MapStudio.UI
 
                 //Make the active file noticable
                 if (isActiveFile)
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.834f, 0.941f, 1.000f, 1.000f));
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.634f, 0.841f, 1.000f, 1.000f));
 
                 //Align the text to improve selection sizing. 
                 ImGui.AlignTextToFramePadding();
@@ -348,9 +375,10 @@ namespace MapStudio.UI
                     flags &= ~ImGuiTreeNodeFlags.SpanFullWidth;
                 }
 
-                //Load the expander or selection
-                if (isSearch)
-                    ImGui.Selectable(node.ID, flags.HasFlag(ImGuiTreeNodeFlags.Selected), ImGuiSelectableFlags.SpanAllColumns);
+                //Load the expander or leaf tree node
+                if (isSearch) {
+                    if (ImGui.TreeNodeEx(node.ID, flags, $"")) { ImGui.TreePop(); }
+                }
                 else
                     node.IsExpanded = ImGui.TreeNodeEx(node.ID, flags, $"");
 
@@ -441,7 +469,11 @@ namespace MapStudio.UI
                             ImGuiHelper.IncrementCursorPosX(5);
 
                         IconManager.DrawIcon(icon);
-                        ImGui.SameLine(); ImGuiHelper.IncrementCursorPosX(3);
+                        ImGui.SameLine();
+                        if (icon == IconManager.BONE_ICON)
+                            ImGuiHelper.IncrementCursorPosX(5);
+                        else
+                            ImGuiHelper.IncrementCursorPosX(3);
                     }
                 }
 
@@ -451,14 +483,7 @@ namespace MapStudio.UI
                   //  ImGuiHelper.IncrementCursorPosY(-2);
 
                 if (!isRenaming)
-                {
-                    if (node.CustomHeaderDraw == null)
-                        ImGui.Text(node.Header);
-                    else
-                        node.CustomHeaderDraw();
-                    if (node.GetTooltip?.Invoke() != null && ImGui.IsItemHovered())
-                        ImGui.SetTooltip(node.GetTooltip());
-                }
+                    ImGui.Text(node.Header);
                 else
                 {
                     var renamable = node.Tag as IRenamableNode;
@@ -537,8 +562,14 @@ namespace MapStudio.UI
                         }
                     }
 
+                    //Deselect node during ctrl held when already selected
+                    if (leftClicked && ImGui.GetIO().KeyCtrl && node.IsSelected)
+                    {
+                        RemoveSelection(node);
+                        node.IsSelected = false;
+                    }
                     //Click event executed on item
-                    if ((leftClicked || rightClicked) && !isToggleOpened) //Prevent selection change on toggle
+                    else if ((leftClicked || rightClicked) && !isToggleOpened) //Prevent selection change on toggle
                     {
                         //Reset all selection unless shift/control held down
                         if (!ImGui.GetIO().KeyCtrl && !ImGui.GetIO().KeyShift)
@@ -557,9 +588,9 @@ namespace MapStudio.UI
                             SelectedIndex = node.DisplayIndex;
 
                         //Add the clicked node to selection.
-                        SelectedNodes.Add(node);
+                        AddSelection(node);
                         node.IsSelected = true;
-                    }
+                    }  //Focused during a scroll using arrow keys
                     else if (nodeFocused && !isToggleOpened && !node.IsSelected)
                     {
                         if (!ImGui.GetIO().KeyCtrl && !ImGui.GetIO().KeyShift)
@@ -570,10 +601,10 @@ namespace MapStudio.UI
                         }
 
                         //Add the clicked node to selection.
-                        SelectedNodes.Add(node);
+                        AddSelection(node);
                         node.IsSelected = true;
                     }
-
+                    //Expandable hiearchy from an archive file.
                     if (leftClicked && node.IsSelected)
                     {
                         if (node is ArchiveHiearchy && node.Tag == null)
@@ -583,9 +614,9 @@ namespace MapStudio.UI
                             archiveWrapper.IsExpanded = true;
                         }
                     }
-
-                    if (leftDoubleClicked && !isToggleOpened) {
-                        SelectedNode?.OnDoubleClicked();
+                    //Double click event
+                    if (leftDoubleClicked && !isToggleOpened && node.IsSelected) {
+                        node.OnDoubleClicked();
                     }
 
                     //Update the active file format when selected. (updates dockspace layout and file menus)
@@ -600,11 +631,12 @@ namespace MapStudio.UI
                 }
             }
 
+            level++;
             if (isSearch || node.IsExpanded)
             {
                 //Todo find a better alternative to clip parents
-                //Clip only the last level
-                if (ClipNodes && node.Children.Count > 0 && node.Children[0].Children.Count == 0)
+                //Clip only the last level. Don't clip more than 3 levels to prevent clipping issues.
+                if (ClipNodes && node.Children.Count > 0 && node.Children[0].Children.Count == 0 && level < 3)
                 {
                     var children = node.Children.ToList();
                     if (isSearch)
@@ -615,13 +647,13 @@ namespace MapStudio.UI
 
                     for (int line_i = clipper.DisplayStart; line_i < clipper.DisplayEnd; line_i++) // display only visible items
                     {
-                        DrawNode(children[line_i], itemHeight);
+                        DrawNode(children[line_i], itemHeight, level);
                     }
                 }
                 else
                 {
                     foreach (var child in node.Children)
-                        DrawNode(child, itemHeight);
+                        DrawNode(child, itemHeight, level);
                 }
 
                 if (!isSearch)
