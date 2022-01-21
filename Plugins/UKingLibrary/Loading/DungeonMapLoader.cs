@@ -104,9 +104,10 @@ namespace UKingLibrary
 
         private byte[] GetMubin(string type) {
             byte[] data;
-            DungeonData.SarcData.Files.TryGetValue($"Map/CDungeon/{DungeonName}/{DungeonName}_{type}.smubin", out data);
-            DungeonData.SarcData.Files.TryGetValue($"Map/MainFieldDungeon/{DungeonName}/{DungeonName}_{type}.smubin", out data);
-            if (data != null)
+            if (DungeonData.SarcData.Files.TryGetValue($"Map/CDungeon/{DungeonName}/{DungeonName}_{type}.smubin", out data))
+                return Toolbox.Core.IO.YAZ0.Decompress(data);
+
+            if (DungeonData.SarcData.Files.TryGetValue($"Map/MainFieldDungeon/{DungeonName}/{DungeonName}_{type}.smubin", out data))
                 return Toolbox.Core.IO.YAZ0.Decompress(data);
             return null;
         }
@@ -114,11 +115,19 @@ namespace UKingLibrary
         private byte[] GetBlwp(string type)
         {
             byte[] data;
-            DungeonData.SarcData.Files.TryGetValue($"Map/CDungeon/{DungeonName}/{DungeonName}_{type}.sblwp", out data);
-            DungeonData.SarcData.Files.TryGetValue($"Map/MainFieldDungeon/{DungeonName}/{DungeonName}_{type}.sblwp", out data);
-            if (data != null)
+            if (DungeonData.SarcData.Files.TryGetValue($"Map/CDungeon/{DungeonName}/{DungeonName}_{type}.sblwp", out data))
+                return Toolbox.Core.IO.YAZ0.Decompress(data);
+
+            if (DungeonData.SarcData.Files.TryGetValue($"Map/MainFieldDungeon/{DungeonName}/{DungeonName}_{type}.sblwp", out data))
                 return Toolbox.Core.IO.YAZ0.Decompress(data);
             return null;
+        }
+
+        private byte[] TryDecompressFile(byte[] data)
+        {
+            if (data == null) return null;
+
+            return Toolbox.Core.IO.YAZ0.Decompress(data);
         }
 
         public void Save(Stream stream)
