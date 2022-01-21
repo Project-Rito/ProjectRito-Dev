@@ -119,7 +119,7 @@ namespace GLFrameworkEngine
         public void OnSelectionChanged(GLContext context, ITransformableObject pickable)
         {
             //Renderable provides a tree node that can be updated
-            if (pickable.CanSelect && pickable is UI.IRenderNode)
+            if (pickable != null && pickable.CanSelect && pickable is UI.IRenderNode)
                 SelectionUIChanged?.Invoke(((UI.IRenderNode)pickable).UINode, EventArgs.Empty);
 
             OnSelectionChanged(context);
