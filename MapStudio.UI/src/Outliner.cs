@@ -290,7 +290,7 @@ namespace MapStudio.UI
                 counter++;
             }
 
-            if (!node.IsExpanded)
+            if (!isSearch && !node.IsExpanded)
                 return;
 
             foreach (var c in node.Children)
