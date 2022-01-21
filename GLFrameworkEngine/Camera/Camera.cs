@@ -849,8 +849,12 @@ namespace GLFrameworkEngine
             var position = MouseEventInfo.FullPosition;
             var movement = new Vector2(position.X, position.Y) - previousLocation;
 
-            if ((MouseEventInfo.LeftButton == ButtonState.Pressed ||
-                MouseEventInfo.RightButton == ButtonState.Pressed) && !_camera.LockRotation)
+            if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Camera.AxisX))
+                movement.X = 0;
+            if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Camera.AxisY))
+                movement.Y = 0;
+
+            if (MouseEventInfo.RightButton == ButtonState.Pressed)
             {
                 if (KeyInfo.EventInfo.KeyCtrl)
                 {
@@ -862,15 +866,17 @@ namespace GLFrameworkEngine
 
                     _camera.TargetPosition += Vector3.Transform(_camera.InverseRotationMatrix, vec);
                 }
-                else
+                else 
                 {
-                    if (!KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Camera.AxisY))
+                    if (!_camera.LockRotation)
+                    {
                         _camera.RotationX += movement.Y * rotFactorX;
-                    if (!KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Camera.AxisX))
                         _camera.RotationY += movement.X * rotFactorY;
-
-                    //Reset direction
-                    _camera.Direction = Camera.FaceDirection.Any;
+                    }
+                    else // Use mouse movement for position instead
+                    {
+                        _camera.TargetPosition = (new Vector4(-movement.X, movement.Y, 0, 1) * _camera.ViewMatrix.Inverted()).Xyz;
+                    }
                 }
             }
         }
@@ -884,7 +890,7 @@ namespace GLFrameworkEngine
             }
             else
             {
-                float delta = MouseEventInfo.Delta * (KeyInfo.EventInfo.KeyShift ? 8 : 2) * _camera.ZoomSpeed;
+                float delta = MouseEventInfo.Delta * (KeyInfo.EventInfo.KeyShift ? 8 : 2) * _camera.ZoomSpeed * GLContext.PreviewScale;
 
                 Vector3 vec;
 
