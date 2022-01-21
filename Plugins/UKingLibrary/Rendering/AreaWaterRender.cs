@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using GLFrameworkEngine;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using Toolbox.Core;
 using Toolbox.Core.ViewModels;
 
 namespace UKingLibrary.Rendering
 {
     // Todo - have this interact with water heightmap
-    public class AreaWaterRender : EditableObject, IColorPickable, ICloneable
+    public class AreaWaterRender : EditableObject, IColorPickable, ICloneable, IFrustumCulling
     {
 
         public static bool DrawFilled = true;
@@ -29,17 +30,31 @@ namespace UKingLibrary.Rendering
              0, 0, GLContext.PreviewScale, 0,
              0, 0, 0, 1);
 
-        public AreaWaterRender(NodeBase parent, Vector4 color) : base(parent)
-        {
-            Color = color;
-        }
+        public bool EnableFrustumCulling => true;
+        public bool InFrustum { get; set; }
+
 
         public override BoundingNode BoundingNode { get; } = new BoundingNode()
         {
             Box = new BoundingBox(
-                new OpenTK.Vector3(-1, -1, -1) * GLContext.PreviewScale,
-                new OpenTK.Vector3(1, 1, 1) * GLContext.PreviewScale),
+                new OpenTK.Vector3(-1, -1, -1) * GLContext.PreviewScale / 2,
+                new OpenTK.Vector3(1, 1, 1) * GLContext.PreviewScale / 2),
         };
+
+        public bool IsInsideFrustum(GLContext context)
+        {
+            return context.Camera.InFustrum(BoundingNode);
+        }
+
+        public AreaWaterRender(NodeBase parent, Vector4 color) : base(parent)
+        {
+            //Update boundings on transform changed
+            this.Transform.TransformUpdated += delegate {
+                BoundingNode.UpdateTransform(Transform.TransformMatrix);
+            };
+            Color = color;
+        }
+
 
         public object Clone()
         {
@@ -62,7 +77,7 @@ namespace UKingLibrary.Rendering
 
         public override void DrawModel(GLContext context, Pass pass)
         {
-            if (pass != Pass.OPAQUE)
+            if (pass != Pass.OPAQUE || !this.InFrustum)
                 return;
 
             Prepare();
@@ -82,6 +97,11 @@ namespace UKingLibrary.Rendering
             //Draw lines of the region
             GL.LineWidth(1);
             OutlineRenderer.DrawSolidWithSelection(context, InitalTransform * Transform.TransformMatrix, Color, IsSelected | IsHovered);
+
+            //Draw debug boundings
+            if (Runtime.RenderBoundingBoxes)
+                this.BoundingNode.Box.DrawSolid(context, Transform.TransformMatrix, new Vector4(1, 0, 0, 1));
+
             GL.Enable(EnableCap.CullFace);
         }
 

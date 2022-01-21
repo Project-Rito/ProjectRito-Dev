@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using GLFrameworkEngine;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using Toolbox.Core;
 using Toolbox.Core.ViewModels;
 
 namespace UKingLibrary.Rendering
 {
-    public class AreaRender : EditableObject, IColorPickable, ICloneable
+    public class AreaRender : EditableObject, IColorPickable, ICloneable, IFrustumCulling
     {
         public AreaShapes AreaShape = AreaShapes.Box;
 
@@ -29,11 +30,8 @@ namespace UKingLibrary.Rendering
              0, 0, GLContext.PreviewScale, 0,
              0, 0, 0, 1);
 
-        public AreaRender(NodeBase parent, AreaShapes shape, Vector4 color) : base(parent)
-        {
-            AreaShape = shape;
-            Color = color;
-        }
+        public bool EnableFrustumCulling => true;
+        public bool InFrustum { get; set; }
 
         public override BoundingNode BoundingNode { get; } = new BoundingNode()
         {
@@ -41,6 +39,22 @@ namespace UKingLibrary.Rendering
                 new OpenTK.Vector3(-1, -1, -1) * GLContext.PreviewScale,
                 new OpenTK.Vector3(1, 1, 1) * GLContext.PreviewScale),
         };
+
+        public bool IsInsideFrustum(GLContext context)
+        {
+            return context.Camera.InFustrum(BoundingNode);
+        }
+
+        public AreaRender(NodeBase parent, AreaShapes shape, Vector4 color) : base(parent)
+        {
+            //Update boundings on transform changed
+            this.Transform.TransformUpdated += delegate {
+                BoundingNode.UpdateTransform(Transform.TransformMatrix);
+            };
+            AreaShape = shape;
+            Color = color;
+        }
+
 
         public object Clone()
         {
@@ -63,7 +77,7 @@ namespace UKingLibrary.Rendering
 
         public override void DrawModel(GLContext context, Pass pass)
         {
-            if (pass != Pass.OPAQUE)
+            if (pass != Pass.OPAQUE || !this.InFrustum)
                 return;
 
             Prepare();
@@ -96,6 +110,11 @@ namespace UKingLibrary.Rendering
                     break;
             }
             */
+
+            //Draw debug boundings
+            if (Runtime.RenderBoundingBoxes)
+                this.BoundingNode.Box.DrawSolid(context, Transform.TransformMatrix, new Vector4(1, 0, 0, 1));
+
             GL.Enable(EnableCap.CullFace);
         }
 
