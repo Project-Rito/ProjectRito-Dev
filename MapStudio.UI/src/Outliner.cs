@@ -113,7 +113,7 @@ namespace MapStudio.UI
 
         public void ScrollToSelected(NodeBase target)
         {
-            if (target == null || target.Visible)
+            if (target == null) //todo check visiblity.
                 return;
 
             //Do not scroll to displayed selected node
