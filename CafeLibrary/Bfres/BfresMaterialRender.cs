@@ -90,12 +90,12 @@ namespace CafeLibrary.Rendering
             TexSrt texSrt0 = GetParameter<TexSrt>("tex_mtx0");
             TexSrt texSrt1 = GetParameter<TexSrt>("tex_mtx1");
             TexSrt texSrt2 = GetParameter<TexSrt>("tex_mtx2");
-            float[] bake0ScaleBias = GetParameter<float[]>("gsys_bake_st0");
-            float[] bake1ScaleBias = GetParameter<float[]>("gsys_bake_st1");
-            float[] bakeLightScale = GetParameter<float[]>("gsys_bake_light_scale");
-            float[] albedoColor = GetParameter<float[]>("albedo_tex_color");
-            float[] emissionColor = GetParameter<float[]>("specular_color");
-            float[] specularColor = GetParameter<float[]>("emission_color");
+            float[] bake0ScaleBias = GetParameterArray<float>("gsys_bake_st0");
+            float[] bake1ScaleBias = GetParameterArray<float>("gsys_bake_st1");
+            float[] bakeLightScale = GetParameterArray<float>("gsys_bake_light_scale");
+            float[] albedoColor = GetParameterArray<float>("albedo_tex_color", 3);
+            float[] emissionColor = GetParameterArray<float>("emission_color", 3);
+            float[] specularColor = GetParameterArray<float>("specular_color", 3);
 
             float normalmapWeight = GetParameter<float>("normal_map_weight");
             float specularIntensity = GetParameter<float>("specular_intensity");
@@ -103,10 +103,10 @@ namespace CafeLibrary.Rendering
             float emissionIntensity = GetParameter<float>("emission_intensity");
             float transparency = GetParameter<float>("transparency");
 
-            float[] multiTexReg0 = GetParameter<float[]>("multi_tex_reg0");
-            float[] multiTexReg1 = GetParameter<float[]>("multi_tex_reg1");
-            float[] multiTexReg2 = GetParameter<float[]>("multi_tex_reg2");
-            float[] indirectMag = GetParameter<float[]>("indirect_mag");
+            float[] multiTexReg0 = GetParameterArray<float>("multi_tex_reg0");
+            float[] multiTexReg1 = GetParameterArray<float>("multi_tex_reg1");
+            float[] multiTexReg2 = GetParameterArray<float>("multi_tex_reg2");
+            float[] indirectMag = GetParameterArray<float>("indirect_mag");
 
             var mem = new System.IO.MemoryStream();
             using (var writer = new Toolbox.Core.IO.FileWriter(mem))
@@ -149,6 +149,15 @@ namespace CafeLibrary.Rendering
             if (ShaderParams.ContainsKey(name))
                 return (T)ShaderParams[name].DataValue;
             return (T)Activator.CreateInstance(typeof(T));
+        }
+
+        private T[] GetParameterArray<T>(string name, int length = 0)
+        {
+            if (AnimatedParams.ContainsKey(name))
+                return (T[])AnimatedParams[name].DataValue;
+            if (ShaderParams.ContainsKey(name))
+                return (T[])ShaderParams[name].DataValue;
+            return new T[length];
         }
 
         private float[] CalculateSRT3x4(BfresLibrary.TexSrt texSrt)
@@ -251,7 +260,7 @@ namespace CafeLibrary.Rendering
             shader.SetBoolToInt("drawDebugAreaID", BfresRender.DrawDebugAreaID);
             shader.SetInt("areaID", AreaIndex);
 
-           // UpdateMaterialBlock();
+            //UpdateMaterialBlock();
             MaterialBlock.RenderBuffer(shader.program, "ub_MaterialParams");
         }
 
@@ -375,7 +384,7 @@ namespace CafeLibrary.Rendering
                 else if (sampler == "tma")
                 {
                     shader.SetBoolToInt("hasDiffuseArray", hasTexture);
-                    if (ShaderParams.ContainsKey("texture_array_index" + i)) // It should have this... there are other ones too, maybe eventually manage that
+                    if (ShaderParams.ContainsKey("texture_array_index" + i))
                         shader.SetFloat("u_TextureArrAlbedo0_Index", (float)ShaderParams["texture_array_index" + i].DataValue);
                 }
                 else if (sampler == "_ms0")

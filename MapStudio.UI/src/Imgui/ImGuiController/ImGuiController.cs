@@ -52,7 +52,6 @@ namespace MapStudio.UI
 
             ImGui.SetCurrentContext(context);
             var io = ImGui.GetIO();
-            io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
             //Load the main font file
             unsafe
