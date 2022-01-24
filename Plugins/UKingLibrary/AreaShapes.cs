@@ -12,5 +12,6 @@ namespace UKingLibrary
         Cylinder,
         Capsule,
         Sphere,
+        Hull
     }
 }
