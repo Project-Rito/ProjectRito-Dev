@@ -27,7 +27,22 @@ void main(void)
     vec3 worldNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
 
     // Base water color
-    fragColor = vec4(0.1, 0.1, 0.25, 1);
+    if (texIndex == 0u) // Water
+        fragColor = vec4(0.1, 0.1, 0.25, 0.5);
+    if (texIndex == 1u) // Hot Water
+        fragColor = vec4(0.2, 0.2, 0.5, 0.75);
+    if (texIndex == 2u) // Poison Water
+        fragColor = vec4(0.1, 0.25, 0.1, 0.5);
+    if (texIndex == 3u) // Lava
+        fragColor = vec4(0.25, 0.1, 0.1, 0.8);
+    if (texIndex == 4u) // Cold/Ice Water
+        fragColor = vec4(0.05, 0.05, 0.125, 0.75);
+    if (texIndex == 5u) // Bog
+        fragColor = vec4(0.25, 0.25, 0.25, 0.90);
+    if (texIndex == 6u) // Clear Water
+        fragColor = vec4(0.1, 0.1, 0.1, 0.25);
+    if (texIndex == 7u) // Ocean Water
+        fragColor = vec4(0.05, 0.05, 0.25, 0.75);
 
     // Debug highlight
     if (uDebugSections)
@@ -39,6 +54,6 @@ void main(void)
 
     // Lighting
     float halfLambert = max(worldNormal.y,0.5);
-    fragColor = vec4(fragColor.rgb * halfLambert, 0.5); // Use that lighting here
+    fragColor = vec4(fragColor.rgb * halfLambert, fragColor.a); // Use that lighting here
     fragColor.rgb *= uBrightness;
 }
