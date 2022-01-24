@@ -15,15 +15,11 @@ namespace UKingLibrary.Rendering
     {
         public override bool UsePostEffects => false;
 
-        const float MAP_HEIGHT_SCALE = 0.0122075f;
+        public const float MAP_HEIGHT_SCALE = 0.0122075f;
 
-        const int MAP_TILE_LENGTH = 256;
-        const int MAP_TILE_SIZE = MAP_TILE_LENGTH * MAP_TILE_LENGTH;
-        const int INDEX_COUNT_SIDE = MAP_TILE_LENGTH - 1;
-
-        const int MAP_EXTM_TILE_LENGTH = 64;
-        const int MAP_EXTM_TILE_SIZE = MAP_EXTM_TILE_LENGTH * MAP_EXTM_TILE_LENGTH;
-        const int INDEX_EXTM_COUNT_SIDE = MAP_EXTM_TILE_LENGTH - 1;
+        public const int MAP_TILE_LENGTH = 256;
+        public const int MAP_TILE_SIZE = MAP_TILE_LENGTH * MAP_TILE_LENGTH;
+        public const int INDEX_COUNT_SIDE = MAP_TILE_LENGTH - 1;
 
         float[] TEXTURE_INDEX_MAP = new float[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 17, 18, 0, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 7, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 0, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82 };
         float[] TEXTURE_UV_MAP = new float[] { 0.1f, 0.1f, 0.05f, 0.05f, 0.1f, 0.1f, 0.04f, 0.04f, 0.05f, 0.05f, 0.1f, 0.1f, 0.05f, 0.05f, 0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f, 0.09f, 0.09f, 0.05f, 0.05f, 0.1f, 0.1f, 0.2f, 0.2f, 0.14f, 0.14f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.07f, 0.07f, 0.07f, 0.07f, 0.05f, 0.05f, 0.15f, 0.15f, 0.1f, 0.1f, 0.1f, 0.1f, 0.07f, 0.07f, 0.04f, 0.04f, 0.05f, 0.16f, 0.03f, 0.03f, 0.05f, 0.05f, 0.05f, 0.05f, 0.03f, 0.03f, 0.05f, 0.05f, 0.45f, 0.45f, 0.2f, 0.2f, 0.1f, 0.1f, 0.59f, 0.59f, 0.15f, 0.15f, 0.2f, 0.2f, 0.35f, 0.35f, 0.2f, 0.2f, 0.1f, 0.1f, 0.15f, 0.15f, 0.2f, 0.2f, 0.15f, 0.15f, 0.2f, 0.2f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.1f, 0.1f, 0.1f, 0.1f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.1f, 0.1f, 0.08f, 0.08f, 0.04f, 0.04f, 0.1f, 0.1f, 0.05f, 0.05f, 0.05f, 0.05f, 0.1f, 0.1f, 0.25f, 0.25f, 0.04f, 0.05f, 0.08f, 0.08f, 0.08f, 0.08f, 0.2f, 0.2f, 0.1f, 0.1f, 0.15f, 0.15f, 0.04f, 0.04f, 0.25f, 0.25f, 0.05f, 0.05f, 0.15f, 0.15f, 0.05f, 0.05f, 0.08f, 0.08f, 0.1f, 0.1f, 0.07f, 0.07f, 0.05f, 0.05f, 0.23f, 0.23f, 0.16f, 0.16f, 0.16f, 0.16f, 0.04f, 0.04f, 0.1f, 0.1f, 0.05f, 0.05f, 0.1f, 0.1f };

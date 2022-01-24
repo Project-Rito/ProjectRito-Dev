@@ -17,6 +17,7 @@ namespace UKingLibrary
             //Add global shaders
             GlobalShaders.AddShader("TERRAIN", "Terrain");
             GlobalShaders.AddShader("WATER", "Water");
+            GlobalShaders.AddShader("GRASS", "Grass");
 
             //Load plugin specific data. This is where the game path is stored.
             if (!PluginConfig.init)

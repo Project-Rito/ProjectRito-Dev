@@ -67,6 +67,11 @@ namespace UKingLibrary
         public List<WaterRender> WaterMeshes = new List<WaterRender>();
 
         /// <summary>
+        /// The rendered grass meshes in the scene
+        /// </summary>
+        public List<GrassRender> GrassMeshes = new List<GrassRender>();
+
+        /// <summary>
         /// Loads the terrain table.
         /// </summary>
         public void LoadTerrainTable(string fieldName)
@@ -90,7 +95,6 @@ namespace UKingLibrary
             int index = 1; // For reporting progress
 
             var sectionTilesCore = TerrainTable.GetSectionTilesByPos(lodScale, midpoint, SECTION_WIDTH);
-            
             foreach (var tile in sectionTilesCore)
             {
                 ProcessLoading.Instance.Update(((index * 25) / sectionTilesCore.Count) + 0, 100, $"Loading terrain mesh {index++} / {sectionTilesCore.Count}");
@@ -100,15 +104,15 @@ namespace UKingLibrary
                 CreateTile(tile.Value.Core, tile.Key, tileSectionScale);
             }
 
-            
+
+
             // Water
             index = 1; // For reporting progress
 
-            var sectionTilesExtra = TerrainTable.GetSectionTilesByPos(lodScale, midpoint, SECTION_WIDTH, true, false);
-
-            foreach (var tile in sectionTilesExtra)
+            var sectionTilesWater = TerrainTable.GetSectionTilesByPos(lodScale, midpoint, SECTION_WIDTH, true, false);
+            foreach (var tile in sectionTilesWater)
             {
-                ProcessLoading.Instance.Update(((index * 25) / sectionTilesExtra.Count) + 25, 100, $"Loading tile extra groups {index++} / {sectionTilesExtra.Count}");
+                ProcessLoading.Instance.Update(((index * 25) / sectionTilesWater.Count) + 25, 100, $"Loading tile water groups {index++} / {sectionTilesWater.Count}");
 
                 var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / tile.Value.Core.AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
 
@@ -119,6 +123,24 @@ namespace UKingLibrary
                 }
             }
 
+            // Grass
+            /*
+            index = 1; // For reporting progress
+
+            var sectionTilesGrass = TerrainTable.GetSectionTilesByPos(lodScale, midpoint, SECTION_WIDTH, false, true);
+            foreach (var tile in sectionTilesGrass)
+            {
+                ProcessLoading.Instance.Update(((index * 25) / sectionTilesGrass.Count) + 50, 100, $"Loading tile grass groups {index++} / {sectionTilesGrass.Count}");
+
+                var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / tile.Value.Core.AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
+
+                foreach (TSCB.TerrainAreaExtra extmData in tile.Value.Extra)
+                {
+                    if (extmData.Type == TSCB.ExtraSectionType.Grass)
+                        CreateGrassTile(tile.Value.Core, extmData, tile.Key, tileSectionScale);
+                }
+            }
+            */
             // Collision
             CreateCollisionTile(areaID, sectionID, 0);
         }
@@ -252,13 +274,45 @@ namespace UKingLibrary
 
             Toolbox.Core.StudioLogger.WriteLine($"Creating terrain tile {name} in pack {packName}...");
 
-            //Height map;
+            //Height map
             var heightBuffer = LoadTerrainFiles(packName, name, "water.extm");
 
             //Create a terrain mesh for rendering
             var meshRender = new WaterRender();
             meshRender.LoadWaterData(heightBuffer, tileSectionScale);
             WaterMeshes.Add(meshRender);
+            //Scale and place the title in the correct place
+            meshRender.Transform.Position = new Vector3(
+                tile.PositionX * SECTION_WIDTH * TILE_TO_SECTION_SCALE,
+                0,
+                tile.PositionZ * SECTION_WIDTH * TILE_TO_SECTION_SCALE) * GLContext.PreviewScale;
+            meshRender.Transform.Scale = new Vector3(1);
+            meshRender.Transform.UpdateMatrix(true);
+            meshRender.UINode.Tag = tile;
+            meshRender.UINode.Header = name;
+            meshRender.IsVisibleCallback += delegate
+            {
+                return MapMuuntEditor.ShowMapModel;
+            };
+
+            GLContext.ActiveContext.Scene.AddRenderObject(meshRender);
+        }
+
+        private void CreateGrassTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string name, float tileSectionScale)
+        {
+            string packName = GetTilePackName(name);
+
+            Toolbox.Core.StudioLogger.WriteLine($"Creating terrain tile {name} in pack {packName}...");
+
+            //Height map (Base Terrain)
+            var terrHeightBuffer = LoadTerrainFiles(packName, name, "hght");
+            //Height map (Grass)
+            var grassHeightBuffer = LoadTerrainFiles(packName, name, "grass.extm");
+
+            //Create a terrain mesh for rendering
+            var meshRender = new GrassRender();
+            meshRender.LoadGrassData(grassHeightBuffer, terrHeightBuffer, tileSectionScale);
+            GrassMeshes.Add(meshRender);
             //Scale and place the title in the correct place
             meshRender.Transform.Position = new Vector3(
                 tile.PositionX * SECTION_WIDTH * TILE_TO_SECTION_SCALE,
@@ -296,6 +350,12 @@ namespace UKingLibrary
                 mesh?.Dispose();
             }
             WaterMeshes.Clear();
+            foreach (var mesh in GrassMeshes)
+            {
+                GLFrameworkEngine.GLContext.ActiveContext.Scene.RemoveRenderObject(mesh);
+                mesh?.Dispose();
+            }
+            GrassMeshes.Clear();
         }
     }
 }

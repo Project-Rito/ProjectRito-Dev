@@ -142,7 +142,7 @@ namespace UKingLibrary
                         }
                     }
 
-                    if (percentageHasHigherDetail < 1f)
+                    if ((percentageHasHigherDetail < 1f && !ensureGrass) || percentageHasHigherDetail == 0) // We don't need low-LOD grass lol, in the meantime before stitching
                         tiles.Add(TerrainAreaFileNames[x], TerrainAreas[x]);
                 }
                 

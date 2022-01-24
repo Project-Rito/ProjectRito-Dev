@@ -11,11 +11,11 @@ using Toolbox.Core.ViewModels;
 
 namespace UKingLibrary.Rendering
 {
-    public class WaterRender : EditableObject, IFrustumCulling
+    public class GrassRender : EditableObject, IFrustumCulling
     {
         public override bool UsePostEffects => false;
 
-        const float MAP_HEIGHT_SCALE = 0.0122075f;
+        public const float MAP_HEIGHT_SCALE = 0.0122075f;
 
         public const int MAP_TILE_LENGTH = 64;
         public const int MAP_TILE_SIZE = MAP_TILE_LENGTH * MAP_TILE_LENGTH;
@@ -23,9 +23,7 @@ namespace UKingLibrary.Rendering
 
         float[] TEXTURE_INDEX_MAP = new float[] { 0, 1, 2, 3, 4, 5, 6, 7 };
 
-        RenderMesh<WaterVertex> WaterMesh;
-        static GLTexture2DArray WaterTexture_Emm;
-        static GLTexture2DArray WaterTexture_Nrm;
+        RenderMesh<GrassVertex> GrassMesh;
 
         static int[] IndexBuffer;
 
@@ -39,7 +37,7 @@ namespace UKingLibrary.Rendering
             return context.Camera.InFustrum(Bounding);
         }
 
-        public WaterRender(NodeBase parent = null) : base(null)
+        public GrassRender(NodeBase parent = null) : base(null)
         {
             IsVisible = true;
             CanSelect = false;
@@ -48,10 +46,10 @@ namespace UKingLibrary.Rendering
             };
         }
 
-        public void LoadWaterData(byte[] heightBuffer, float tileSectionScale)
+        public void LoadGrassData(byte[] heightBuffer, byte[] terrHeightBuffer, float tileSectionScale)
         {
             //Load all attribute data.
-            var positionData = GetWaterVertices(heightBuffer);
+            var positionData = GetGrassVertices(heightBuffer, terrHeightBuffer);
             var texCoords = GetTexCoords();
             //Normals calculation
             Vector3[] positions = new Vector3[positionData.Length];
@@ -74,16 +72,15 @@ namespace UKingLibrary.Rendering
             var tangents = GetTangents(positions);
             
             //Prepare the terrain vertices for rendering
-            WaterVertex[] vertices = new WaterVertex[positionData.Length];
+            GrassVertex[] vertices = new GrassVertex[positionData.Length];
             for (int i = 0; i < positionData.Length; i++)
             {
-                vertices[i] = new WaterVertex()
+                vertices[i] = new GrassVertex()
                 {
                     Position = positions[i] * GLContext.PreviewScale,
                     Normal = normals[i],
                     TangentWorld = tangents[i],
-                    TexCoords = texCoords[i],
-                    MaterialIndex = (uint)positionData[i].MaterialIndex,
+                    Color = positionData[i].Color,
                     DebugHighlight = (
                     i % MAP_TILE_LENGTH == 0 ||
                     i % MAP_TILE_LENGTH == INDEX_COUNT_SIDE ||
@@ -97,20 +94,17 @@ namespace UKingLibrary.Rendering
             Bounding.Radius = (Bounding.Box.Max - Bounding.Box.Min).Length;
 
             //Finish loading the terrain mesh
-            WaterMesh = new RenderMesh<WaterVertex>(vertices, IndexBuffer, PrimitiveType.Triangles);
-            LoadWaterTextures();
+            GrassMesh = new RenderMesh<GrassVertex>(vertices, IndexBuffer, PrimitiveType.Triangles);
         }
 
         public override void DrawModel(GLContext context, Pass pass)
         {
-            if ((WaterMesh == null || pass != Pass.TRANSPARENT || !InFrustum))
+            if ((GrassMesh == null || pass != Pass.TRANSPARENT || !InFrustum))
                 return;
 
-            var shader = GlobalShaders.GetShader("WATER");
+            var shader = GlobalShaders.GetShader("GRASS");
             context.CurrentShader = shader;
             shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
-            shader.SetTexture(WaterTexture_Emm, "texWater_Emm", 1);
-            shader.SetTexture(WaterTexture_Nrm, "texWater_Nrm", 2);
             shader.SetFloat("uBrightness", 2.0f); // Hack to fit in (normals calculation is kinda off or something)
             shader.SetBool("uDebugSections", PluginConfig.DebugTerrainSections);
 
@@ -118,14 +112,15 @@ namespace UKingLibrary.Rendering
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Disable(EnableCap.CullFace);
 
-            WaterMesh.Draw(context);
+            GrassMesh.Draw(context);
         }
 
-        private WaterVertexData[] GetWaterVertices(byte[] heightBuffer)
+        private GrassVertexData[] GetGrassVertices(byte[] grassHeightBuffer, byte[] terrHeightBuffer)
         {
 
-            WaterVertexData[] vertices = new WaterVertexData[MAP_TILE_SIZE];
-            using (var reader = new FileReader(heightBuffer))
+            GrassVertexData[] vertices = new GrassVertexData[MAP_TILE_SIZE];
+            using (var grassReader = new FileReader(grassHeightBuffer))
+            using (var terrReader = new FileReader(terrHeightBuffer))
             {
                 int vertexIndex = 0;
                 for (float y = 0; y < MAP_TILE_LENGTH; y++)
@@ -133,19 +128,17 @@ namespace UKingLibrary.Rendering
                     float normY = y / (float)INDEX_COUNT_SIDE;
                     for (float x = 0; x < MAP_TILE_LENGTH; x++)
                     {
-                        float heightValue = reader.ReadUInt16() * MAP_HEIGHT_SCALE;
-                        ushort xAxisFlowRate = reader.ReadUInt16(); // xAxisFlowRate
-                        ushort zAxisFlowRate = reader.ReadUInt16(); // zAxisFlowRate
-                        reader.ReadByte(); // materialIndex + 3
-                        byte materialIndex = reader.ReadByte(); // materialIndex
-                        //Terrain vertices range from 0 - 1
+                        // HGHTs have a 16-1 point ratio to EXTMs.. We should average HGHT points.. maybe? I'm not quite sure if they line up or not.
+                        float terrHeightValue = terrReader.ReadUInt16(((((int)y * 4) * TerrainRender.MAP_TILE_LENGTH) + ((int)x * 4)) * 2) * MAP_HEIGHT_SCALE;
+                        float grassHeightValue = grassReader.ReadByte() * MAP_HEIGHT_SCALE;
+                        float red = ((float)grassReader.ReadByte()) / 256; // R value
+                        float green = ((float)grassReader.ReadByte()) / 256; // G value
+                        float blue = ((float)grassReader.ReadByte()) / 256; // B value
 
-                        WaterVertexData vertexData = new WaterVertexData()
+                        GrassVertexData vertexData = new GrassVertexData()
                         {
-                            Translate = new Vector3(x / (float)INDEX_COUNT_SIDE - 0.5f, heightValue, normY - 0.5f),
-                            MaterialIndex = materialIndex,
-                            XAxisFlowRate = xAxisFlowRate,
-                            ZAxisFlowRate = zAxisFlowRate
+                            Translate = new Vector3(x / (float)INDEX_COUNT_SIDE - 0.5f, terrHeightValue + grassHeightValue, normY - 0.5f),
+                            Color = new Vector3(red, green, blue)
                         };
 
                         vertices[vertexIndex++] = vertexData;
@@ -155,12 +148,10 @@ namespace UKingLibrary.Rendering
             return vertices;
         }
 
-        public class WaterVertexData
+        public class GrassVertexData
         {
             public Vector3 Translate;
-            public ushort XAxisFlowRate;
-            public ushort ZAxisFlowRate;
-            public byte MaterialIndex;
+            public Vector3 Color;
         }
 
         private Vector2[] GetTexCoords()
@@ -258,64 +249,7 @@ namespace UKingLibrary.Rendering
             return vertices;
         }
 
-        private void LoadWaterTextures()
-        {
-            //Only load the terrain texture once
-            if (WaterTexture_Emm != null || WaterTexture_Nrm != null)
-                return;
-
-            Toolbox.Core.StudioLogger.WriteLine($"Loading water textures...");
-
-            //Load all 8 water textures into a 2D array. // Eventually don't hardcode this.... same with res
-            WaterTexture_Emm = GLTexture2DArray.CreateUncompressedTexture(512, 512, 8, 1, PixelInternalFormat.Rgba, PixelFormat.Bgra);
-            WaterTexture_Emm.WrapS = TextureWrapMode.Repeat;
-            WaterTexture_Emm.WrapT = TextureWrapMode.Repeat;
-            WaterTexture_Emm.MinFilter = TextureMinFilter.LinearMipmapLinear;
-
-            WaterTexture_Nrm = GLTexture2DArray.CreateUncompressedTexture(512, 512, 8, 1, PixelInternalFormat.Rgba, PixelFormat.Bgra);
-            WaterTexture_Nrm.WrapS = TextureWrapMode.Repeat;
-            WaterTexture_Nrm.WrapT = TextureWrapMode.Repeat;
-            WaterTexture_Nrm.MinFilter = TextureMinFilter.LinearMipmapLinear;
-
-            //Load the terrain data as cached images.
-            string cache = PluginConfig.GetCachePath("Images\\Terrain");
-
-            // Alb ------------------------------------------------
-            for (int i = 0; i < WaterTexture_Emm.ArrayCount; i++)
-            {
-                string tex = $"{cache}\\WaterEmm_{i}.png";
-                if (System.IO.File.Exists(tex))
-                {
-                    var image = new System.Drawing.Bitmap(tex);
-                    WaterTexture_Emm.InsertImage(image, i);
-                    image.Dispose();
-                }
-            }
-            //Update the terrain sampler parameters and generate mips.
-            WaterTexture_Emm.Bind();
-            WaterTexture_Emm.UpdateParameters();
-            WaterTexture_Emm.GenerateMipmaps();
-            WaterTexture_Emm.Unbind();
-
-            // Nrm ------------------------------------------------
-            for (int i = 0; i < WaterTexture_Nrm.ArrayCount; i++)
-            {
-                string tex = $"{cache}\\WaterNm_{i}.png";
-                if (System.IO.File.Exists(tex))
-                {
-                    var image = new System.Drawing.Bitmap(tex);
-                    WaterTexture_Nrm.InsertImage(image, i);
-                    image.Dispose();
-                }
-            }
-            //Update the terrain sampler parameters and generate mips.
-            WaterTexture_Nrm.Bind();
-            WaterTexture_Nrm.UpdateParameters();
-            WaterTexture_Nrm.GenerateMipmaps();
-            WaterTexture_Nrm.Unbind();
-        }
-
-        public struct WaterVertex
+        public struct GrassVertex
         {
             [RenderAttribute("vPosition", VertexAttribPointerType.Float, 0)]
             public Vector3 Position;
@@ -326,22 +260,18 @@ namespace UKingLibrary.Rendering
             [RenderAttribute("vTangentWorld", VertexAttribPointerType.Float, 24)]
             public Vector3 TangentWorld;
 
-            [RenderAttribute("vMaterialIndex", VertexAttribPointerType.Float, 36)]
-            public uint MaterialIndex;
-
-            [RenderAttribute("vTexCoord", VertexAttribPointerType.Float, 40)]
-            public Vector2 TexCoords;
+            [RenderAttribute("vColor", VertexAttribPointerType.Float, 36)]
+            public Vector3 Color;
 
             [RenderAttribute("vDebugHighlight", VertexAttribPointerType.Float, 48)]
             public Vector3 DebugHighlight;
 
-            public WaterVertex(Vector3 position, Vector3 normal, Vector3 tangentWorld, uint materialIndex, Vector2 texCoords, Vector3 debugHighlight)
+            public GrassVertex(Vector3 position, Vector3 normal, Vector3 tangentWorld, Vector3 color, Vector3 debugHighlight)
             {
                 Normal = normal;
                 TangentWorld = tangentWorld;
                 Position = position;
-                MaterialIndex = materialIndex;
-                TexCoords = texCoords;
+                Color = color;
                 DebugHighlight = debugHighlight;
             }
         }
