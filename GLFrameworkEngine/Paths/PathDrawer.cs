@@ -129,7 +129,7 @@ namespace GLFrameworkEngine
 
             //Draw bezier lines
             if (InterpolationMode == Interpolation.Bezier) {
-                DrawLinesBezier(ref points, ref handles);
+                GetBezierPositions(ref points, ref handles);
             }
             else //Draw linear lines from point to next point
             {
@@ -332,10 +332,10 @@ namespace GLFrameworkEngine
             return Matrix4.CreateFromAxisAngle(axis, angle);
         }
 
-        private void DrawLinesBezier(ref List<Vector3> points, ref List<Vector3> handles)
+        private void GetBezierPositions(ref List<Vector3> points, ref List<Vector3> handles)
         {
             //Create a list of points to interpolate
-            Vector3[] connectLinePositions = GetBezierPoints();
+            Vector3[] connectLinePositions = GetBezierPointBuffer();
 
             int posIndex = 0;
             for (int i = 0; i < PathPoints.Count; i++)
@@ -398,7 +398,7 @@ namespace GLFrameworkEngine
             }
         }
 
-        private Vector3[] GetBezierPoints()
+        private Vector3[] GetBezierPointBuffer()
         {
             int posIndex = 0;
 

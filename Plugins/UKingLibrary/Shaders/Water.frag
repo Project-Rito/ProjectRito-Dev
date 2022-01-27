@@ -40,7 +40,7 @@ void main(void)
     if (texIndex == 5u) // Bog
         fragColor = vec4(0.25, 0.25, 0.25, 0.90);
     if (texIndex == 6u) // Clear Water
-        fragColor = vec4(0.1, 0.1, 0.1, 0.25);
+        fragColor = vec4(0.2, 0.2, 0.5, 0.3);
     if (texIndex == 7u) // Ocean Water
         fragColor = vec4(0.05, 0.05, 0.25, 0.75);
 

@@ -101,6 +101,15 @@ namespace UKingLibrary
 
                     pathPoint.UpdateMatrices();
                 }
+                else if (RailType == "Bezier") // Make default control points
+                {
+
+                    pathPoint.ControlPoint1.LocalPosition = new OpenTK.Vector3(0) * GLContext.PreviewScale;
+
+                    pathPoint.ControlPoint2.LocalPosition = new OpenTK.Vector3(0) * GLContext.PreviewScale;
+
+                    pathPoint.UpdateMatrices();
+                }
 
                 PathRender.AddPoint(pathPoint, PathRender.PathPoints.Count);
             }
