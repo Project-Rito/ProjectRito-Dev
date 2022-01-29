@@ -101,7 +101,7 @@ namespace UKingLibrary
 
                 var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / tile.Value.Core.AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
 
-                CreateTile(tile.Value.Core, tile.Key, tileSectionScale);
+                CreateTerrainTile(tile.Value.Core, tile.Key, tileSectionScale);
             }
 
 
@@ -236,7 +236,7 @@ namespace UKingLibrary
         }
 
         //Creates a terrain mesh from a given tile
-        private void CreateTile(TSCB.TerrainAreaCore tile, string name, float tileSectionScale)
+        private void CreateTerrainTile(TSCB.TerrainAreaCore tile, string name, float tileSectionScale)
         {
             string packName = GetTilePackName(name);
 
