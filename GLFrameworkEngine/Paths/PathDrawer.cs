@@ -292,7 +292,7 @@ namespace GLFrameworkEngine
         {
             //Scale the arrow with the current point size
             Vector3 scale = new Vector3(ArrowScale);
-            scale *= PointSize;
+            scale *= LinearPointScale;
             scale *= point.CameraScale;
             if (InterpolationMode == RenderablePath.Interpolation.Bezier)
                 scale = new Vector3(0.05f);

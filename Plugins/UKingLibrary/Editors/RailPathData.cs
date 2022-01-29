@@ -38,7 +38,7 @@ namespace UKingLibrary
             RenderablePath.BezierArrowLength = 2;
             RenderablePath.BezierLineWidth = 2;
             RenderablePath.BezierPointScale = 2;
-            RenderablePath.PointSize = 2;
+            RenderablePath.LinearPointScale = 2;
 
             Properties = MapData.ValuesToProperties(properties);
             var translate = (IList<dynamic>)properties["Translate"]; // NOT the origin point - railpoints aren't relative.

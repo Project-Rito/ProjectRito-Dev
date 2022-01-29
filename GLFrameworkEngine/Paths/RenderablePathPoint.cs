@@ -238,10 +238,9 @@ namespace GLFrameworkEngine
 
             if (ParentPath.InterpolationMode == RenderablePath.Interpolation.Linear)
             {
-                float scale = 10 * RenderablePath.PointSize;
-                RaySphereSize = scale;
+                RaySphereSize = 3 * RenderablePath.LinearPointScale;
 
-                var matrix = Matrix4.CreateScale(scale * CameraScale) * Transform.TransformNoScaleMatrix;
+                var matrix = Matrix4.CreateScale(2 * RenderablePath.LinearPointScale * CameraScale) * Transform.TransformNoScaleMatrix;
 
                 SphereRender.DrawSolidWithSelection(context, matrix,
                     ParentPath.PointColor, IsSelected || IsHovered);

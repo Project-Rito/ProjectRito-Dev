@@ -93,7 +93,7 @@ namespace GLFrameworkEngine
         /// <summary>
         /// Determines the arrow size
         /// </summary>
-        public virtual float ArrowScale { get; set; } = 1;
+        public virtual float ArrowScale { get; set; } = 0.25f;
 
         /// <summary>
         /// Determines to draw the arrow in between points. Defaults to the child if disabled.
@@ -125,7 +125,7 @@ namespace GLFrameworkEngine
         public virtual Vector4 ArrowColor { get; set; } = new Vector4(1);
         public virtual Vector4 PointColor { get; set; } = new Vector4(1);
 
-        public static float PointSize  = 1;
+        public static float LinearPointScale  = 1;
 
         public static bool DisplayPointSize = true;
 
