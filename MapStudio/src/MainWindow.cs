@@ -152,9 +152,9 @@ namespace MapStudio
         {
             if (renderingFrame) return;
 
-            //When a menu is clicked, it is executured in the render loop normally
-            //Instead we may need to exeucute ouside the loop so we can update the rendering during the action
-            //This is used for the progress bar to update properly.
+            //When a menu is clicked, it is executed in the render loop normally
+            //Instead we may need to execute ouside the loop so we can update the rendering during the action
+            //This is used for the progress bar to update properly.s
             if (ExecutedMenuAction != null && !executingAction)
             {
                 executingAction = true;

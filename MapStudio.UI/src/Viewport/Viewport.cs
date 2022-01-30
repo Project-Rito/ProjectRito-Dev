@@ -691,7 +691,8 @@ namespace MapStudio.UI
             if (ImGuiController.ApplicationHasFocus)
                 context.OnMouseWheel(frameTime);
 
-            context.Camera.Controller.KeyPress(frameTime);
+            if (this.IsFocused)
+                context.Camera.Controller.KeyPress(frameTime);
         }
     }
 }
