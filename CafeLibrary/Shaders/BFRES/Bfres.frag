@@ -125,20 +125,31 @@ float GetComponent(int Type, vec4 Texture);
 vec3 getWorldNormal(vec2 texCoord0) {
     vec4 texNormal = vec4(0);
     
-    uint averageCount = 0u;
+    float averageCountRGB = 0f;
+    uint averageCountA = 0u;
     if (hasNormalMap0 == 1) {
-        texNormal += texture(u_TextureNormal0, texCoord0);
-        averageCount++;
+        vec4 tex = texture(u_TextureNormal0, texCoord0);
+        texNormal.rgb += tex.rgb * tex.a;
+        texNormal.a += tex.a;
+        averageCountRGB += tex.a;
+        averageCountA++;
     }
     if (hasNormalMap1 == 1) {
-        texNormal += texture(u_TextureNormal1, texCoord0);
-        averageCount++;
+        vec4 tex = texture(u_TextureNormal1, texCoord0);
+        texNormal.rgb += tex.rgb * tex.a;
+        texNormal.a += tex.a;
+        averageCountRGB += tex.a;
+        averageCountA++;
     }
     if (hasNormalArray == 1) {
-        texNormal += texture(u_TextureArrNormal, vec3(texCoord0, u_TextureArrNormal_Index));
-        averageCount++;
+        vec4 tex = texture(u_TextureArrNormal, vec3(texCoord0, u_TextureArrNormal_Index));
+        texNormal.rgb += tex.rgb * tex.a;
+        texNormal.a += tex.a;
+        averageCountRGB += tex.a;
+        averageCountA++;
     }
-    texNormal /= averageCount;
+    texNormal.rgb /= averageCountRGB;
+    texNormal.a /= averageCountA;
 
 
 
@@ -153,25 +164,38 @@ vec3 getWorldNormal(vec2 texCoord0) {
 vec4 getDiffuse(vec2 texCoord0) {
     vec4 diffuseMapColor = vec4(0);
 
-    uint averageCount = 0u;
+    float averageCountRGB = 0f;
+    uint averageCountA = 0u;
     if (hasDiffuseMap == 1 || (hasDiffuseArray == 0 && hasDiffuseMultiA == 0 && hasDiffuseMultiB == 0)) {
-        diffuseMapColor += texture(u_TextureAlbedo0, texCoord0);
-        averageCount++;
+        vec4 tex = texture(u_TextureAlbedo0, texCoord0);
+        diffuseMapColor.rgb += tex.rgb * tex.a;
+        diffuseMapColor.a += tex.a;
+        averageCountRGB += tex.a;
+        averageCountA++;
     }
     if (hasDiffuseArray == 1) {
-
-        diffuseMapColor += texture(u_TextureArrAlbedo, vec3(texCoord0, u_TextureArrAlbedo_Index));
-        averageCount++;
+        vec4 tex = texture(u_TextureArrAlbedo, vec3(texCoord0, u_TextureArrAlbedo_Index));
+        diffuseMapColor.rgb += tex.rgb * tex.a;
+        diffuseMapColor.a += tex.a;
+        averageCountRGB += tex.a;
+        averageCountA++;
     }
     if (hasDiffuseMultiA == 1) {
-        diffuseMapColor += texture(u_TextureMultiA, texCoord0);
-        averageCount++;
+        vec4 tex = texture(u_TextureMultiA, texCoord0);
+        diffuseMapColor.rgb += tex.rgb * tex.a;
+        diffuseMapColor.a += tex.a;
+        averageCountRGB += tex.a;
+        averageCountA++;
     }
     if (hasDiffuseMultiB == 1) {
-        diffuseMapColor += texture(u_TextureMultiB, texCoord0);
-        averageCount++;
+        vec4 tex = texture(u_TextureMultiB, texCoord0);
+        diffuseMapColor.rgb += tex.rgb * tex.a;
+        diffuseMapColor.a += tex.a;
+        averageCountRGB += tex.a;
+        averageCountA++;
     }
-    diffuseMapColor /= averageCount;
+    diffuseMapColor.rgb /= averageCountRGB;
+    diffuseMapColor.a /= averageCountA;
 
     return diffuseMapColor;
 }
