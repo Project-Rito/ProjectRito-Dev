@@ -73,14 +73,13 @@ uniform sampler2D u_TextureMultiB;    // _a2
 uniform sampler2D u_TextureIndirect;  // _a3
 
 //Array Samplers
-uniform sampler2DArray u_TextureArrAlbedo0; // tma
-uniform sampler2DArray u_TextureArrSpecMask; // tmc
+uniform sampler2DArray u_TextureArrAlbedo; // tma
+uniform sampler2DArray u_TextureArrNormal; // tmc
 
-uniform float u_TextureArrAlbedo0_Index;
+uniform float u_TextureArrAlbedo_Index;
 uniform float u_TextureArrAlpha_Index;
 uniform float u_TextureArrSpecMask_Index;
-uniform float u_TextureArrNormal0_Index;
-uniform float u_TextureArrNormal1_Index;
+uniform float u_TextureArrNormal_Index;
 
 #define enable_diffuse
 #define enable_alpha_map;
@@ -103,8 +102,11 @@ uniform float alphaRefValue;
 
 //Toggles
 uniform int hasDiffuseMap;
+uniform int hasDiffuseMultiA;
+uniform int hasDiffuseMultiB;
 uniform int hasAlphaMap;
-uniform int hasNormalMap;
+uniform int hasNormalMap0;
+uniform int hasNormalMap1;
 
 uniform int hasDiffuseArray;
 uniform int hasAlphaArray;
@@ -120,6 +122,60 @@ out vec4 fragOutput;
 
 float GetComponent(int Type, vec4 Texture);
 
+vec3 getWorldNormal(vec2 texCoord0) {
+    vec4 texNormal = vec4(0);
+    
+    uint averageCount = 0u;
+    if (hasNormalMap0 == 1) {
+        texNormal += texture(u_TextureNormal0, texCoord0);
+        averageCount++;
+    }
+    if (hasNormalMap1 == 1) {
+        texNormal += texture(u_TextureNormal1, texCoord0);
+        averageCount++;
+    }
+    if (hasNormalArray == 1) {
+        texNormal += texture(u_TextureArrNormal, vec3(texCoord0, u_TextureArrNormal_Index));
+        averageCount++;
+    }
+    texNormal /= averageCount;
+
+
+
+    vec3 N = v_NormalWorld;
+    vec3 T = v_TangentWorld.xyz;
+    vec3 BiT = cross(N, T) * texNormal.w;
+    vec3 worldNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
+
+    return worldNormal;
+}
+
+vec4 getDiffuse(vec2 texCoord0) {
+    vec4 diffuseMapColor = vec4(0);
+
+    uint averageCount = 0u;
+    if (hasDiffuseMap == 1 || (hasDiffuseArray == 0 && hasDiffuseMultiA == 0 && hasDiffuseMultiB == 0)) {
+        diffuseMapColor += texture(u_TextureAlbedo0, texCoord0);
+        averageCount++;
+    }
+    if (hasDiffuseArray == 1) {
+
+        diffuseMapColor += texture(u_TextureArrAlbedo, vec3(texCoord0, u_TextureArrAlbedo_Index));
+        averageCount++;
+    }
+    if (hasDiffuseMultiA == 1) {
+        diffuseMapColor += texture(u_TextureMultiA, texCoord0);
+        averageCount++;
+    }
+    if (hasDiffuseMultiB == 1) {
+        diffuseMapColor += texture(u_TextureMultiB, texCoord0);
+        averageCount++;
+    }
+    diffuseMapColor /= averageCount;
+
+    return diffuseMapColor;
+}
+
 void main(){
     vec2 texCoord0 = v_TexCoord0;
 
@@ -130,24 +186,12 @@ void main(){
     }
 
     // Normals
-    vec4 texNormal = vec4(1);
-    
-    if (hasNormalMap == 1)
-        texNormal = texture(u_TextureNormal0, texCoord0);
-
-    vec3 N = v_NormalWorld;
-    vec3 T = v_TangentWorld.xyz;
-    vec3 BiT = cross(N, T) * texNormal.w;
-    vec3 worldNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
+    vec3 worldNormal = getWorldNormal(texCoord0);
 
 
     // Diffuse
-    vec4 diffuseMapColor = texture(u_TextureAlbedo0, texCoord0);
-
-    if (hasDiffuseArray == 1 && hasDiffuseMap != 1) {
-        diffuseMapColor = texture(u_TextureArrAlbedo0, vec3(texCoord0, u_TextureArrAlbedo0_Index));
-    }
-
+    vec4 diffuseMapColor = getDiffuse(texCoord0);
+    
 
     // Lighting
     float halfLambert = max(worldNormal.y,0.5);

@@ -351,11 +351,16 @@ namespace CafeLibrary.Rendering
 
 
             shader.SetBoolToInt("hasDiffuseMap", false);
+            shader.SetBoolToInt("hasDiffuseMultiA", false);
+            shader.SetBoolToInt("hasDiffuseMultiB", false);
             shader.SetBoolToInt("hasDiffuseArray", false);
             shader.SetBoolToInt("hasAlphaMap", false);
-            shader.SetBoolToInt("hasNormalMap", false);
+            shader.SetBoolToInt("hasNormalMap0", false);
+            shader.SetBoolToInt("hasNormalMap1", false);
+            shader.SetBoolToInt("hasNormalArray", false);
 
             int id = 2;
+            int arrIdx = 0;
             for (int i = 0; i < this.TextureMaps?.Count; i++)
             {
                 var name = TextureMaps[i].Name;
@@ -381,11 +386,25 @@ namespace CafeLibrary.Rendering
                 {
                     shader.SetBoolToInt("hasDiffuseMap", hasTexture);
                 }
+                else if (sampler == "_a1")
+                {
+                    shader.SetBoolToInt("hasDiffuseMultiA", hasTexture);
+                }
+                else if (sampler == "_a2")
+                {
+                    shader.SetBoolToInt("hasDiffuseMultiB", hasTexture);
+                }
                 else if (sampler == "tma")
                 {
                     shader.SetBoolToInt("hasDiffuseArray", hasTexture);
-                    if (ShaderParams.ContainsKey("texture_array_index" + i))
-                        shader.SetFloat("u_TextureArrAlbedo0_Index", (float)ShaderParams["texture_array_index" + i].DataValue);
+                    if (ShaderParams.ContainsKey("texture_array_index" + arrIdx))
+                        shader.SetFloat("u_TextureArrAlbedo_Index", (float)ShaderParams["texture_array_index" + arrIdx].DataValue); arrIdx++;
+                }
+                else if (sampler == "tmc")
+                {
+                    shader.SetBoolToInt("hasNormalArray", hasTexture);
+                    if (ShaderParams.ContainsKey("texture_array_index" + arrIdx))
+                        shader.SetFloat("u_TextureArrNormal_Index", (float)ShaderParams["texture_array_index" + arrIdx].DataValue); arrIdx++;
                 }
                 else if (sampler == "_ms0")
                 {
@@ -393,13 +412,15 @@ namespace CafeLibrary.Rendering
                 }
                 else if (sampler == "_n0")
                 {
-                    shader.SetBoolToInt("hasNormalMap", hasTexture);
+                    shader.SetBoolToInt("hasNormalMap0", hasTexture);
                 }
-                
+                else if (sampler == "_n1")
+                {
+                    shader.SetBoolToInt("hasNormalMap0", hasTexture);
+                }
+
                 if (hasTexture)
                     shader.SetInt(uniformName, id++);
-
-                
             }
         }
 
@@ -408,10 +429,10 @@ namespace CafeLibrary.Rendering
             switch (sampler)
             {
                 case "_a0": return "u_TextureAlbedo0";
-                case "tma": return "u_TextureArrAlbedo0";
+                case "tma": return "u_TextureArrAlbedo";
                 case "_ms0": return "u_TextureAlpha";
                 case "_s0": return "u_TextureSpecMask";
-                case "tmc": return "u_TextureArrSpecMask"; // Looks like normal data though... kinda
+                case "tmc": return "u_TextureArrNormal"; // Looks like normal data though... kinda
                 case "_n0": return "u_TextureNormal0";
                 case "_n1": return "u_TextureNormal1";
                 case "_e0": return "u_TextureEmission0";
