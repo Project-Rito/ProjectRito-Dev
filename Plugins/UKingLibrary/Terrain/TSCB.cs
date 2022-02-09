@@ -171,7 +171,7 @@ namespace UKingLibrary
         /// <param name="t2Pos">Tile 2 translate</param>
         /// <param name="t2Scale">Tile 2 scale</param>
         /// <returns></returns>
-        private bool TileOverlapsTile(Vector2 t1Pos, float t1Scale, Vector2 t2Pos, float t2Scale)
+        public static bool TileOverlapsTile(Vector2 t1Pos, float t1Scale, Vector2 t2Pos, float t2Scale)
         {
             float t1ScaleHalf = t1Scale / 2;
             float t2ScaleHalf = t2Scale / 2;
@@ -186,6 +186,16 @@ namespace UKingLibrary
 
             return false;
         }
+        /// <summary>
+        /// Checks if tile 1 overlaps tile 2
+        /// </summary>
+        /// <param name="t1">Tile 1</param>
+        /// <param name="t2">Tile 2</param>
+        /// <returns></returns>
+        public static bool TileOverlapsTile(TerrainAreaCore t1, TerrainAreaCore t2)
+        {
+            return TileOverlapsTile(new Vector2(t1.PositionX, t1.PositionZ), t1.AreaSize, new Vector2(t2.PositionX, t2.PositionZ), t2.AreaSize);
+        }
 
         /// <summary>
         /// Checks if tile 1 is in tile 2
@@ -195,7 +205,7 @@ namespace UKingLibrary
         /// <param name="t2Pos">Tile 2 translate</param>
         /// <param name="t2Scale">Tile 2 scale</param>
         /// <returns></returns>
-        private bool TileInTile(Vector2 t1Pos, float t1Scale, Vector2 t2Pos, float t2Scale)
+        public static bool TileInTile(Vector2 t1Pos, float t1Scale, Vector2 t2Pos, float t2Scale)
         {
             if (t1Scale >= t2Scale)
                 return false; // It can't be inside if it's bigger/the same size!
@@ -212,6 +222,16 @@ namespace UKingLibrary
             }
 
             return false;
+        }
+        /// <summary>
+        /// Checks if tile 1 is in tile 2
+        /// </summary>
+        /// <param name="t1">Tile 1</param>
+        /// <param name="t2">Tile 2</param>
+        /// <returns></returns>
+        public static bool TileInTile(TerrainAreaCore t1, TerrainAreaCore t2)
+        {
+            return TileInTile(new Vector2(t1.PositionX, t1.PositionZ), t1.AreaSize, new Vector2(t2.PositionX, t2.PositionZ), t2.AreaSize);
         }
 
         public Tuple<Vector2, Vector2> GetTileGridRect(float lodScale)

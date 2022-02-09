@@ -34,6 +34,8 @@ namespace UKingLibrary
 
         public void Load(MuuntByamlPlugin plugin, MapMuuntEditor editor, Stream stream)
         {
+            FieldCollisionLoader load = new FieldCollisionLoader();
+            load.Load(new MemoryStream(YAZ0.Decompress(PluginConfig.GetContentPath("Physics/StaticCompound/MainField/A-1-0.shksc"))));
             MubinPlugin = plugin;
 
             GLFrameworkEngine.GLContext.PreviewScale = 25;

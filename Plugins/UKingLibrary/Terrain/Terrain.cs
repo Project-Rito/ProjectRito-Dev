@@ -8,6 +8,7 @@ using CafeLibrary;
 using GLFrameworkEngine;
 using MapStudio.UI;
 using UKingLibrary.Rendering;
+using Toolbox.Core.IO;
 
 namespace UKingLibrary
 {
@@ -110,16 +111,33 @@ namespace UKingLibrary
             index = 1; // For reporting progress
 
             var sectionTilesWater = TerrainTable.GetSectionTilesByPos(lodScale, midpoint, SECTION_WIDTH, true, false);
+
+
+
+            
+
+
             foreach (var tile in sectionTilesWater)
             {
                 ProcessLoading.Instance.Update(((index * 25) / sectionTilesWater.Count) + 25, 100, $"Loading tile water groups {index++} / {sectionTilesWater.Count}");
+
+
+                // Get tiles inside this
+                List<TSCB.TerrainAreaCore> insideTiles = new List<TSCB.TerrainAreaCore>();
+                foreach (var otherTile in sectionTilesWater)
+                {
+                    if (otherTile.Key == tile.Key)
+                        continue;
+                    if (TSCB.TileInTile(otherTile.Value.Core, tile.Value.Core))
+                        insideTiles.Add(otherTile.Value.Core);
+                }
 
                 var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / tile.Value.Core.AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
 
                 foreach (TSCB.TerrainAreaExtra extmData in tile.Value.Extra)
                 {
                     if (extmData.Type == TSCB.ExtraSectionType.Water)
-                        CreateWaterTile(tile.Value.Core, extmData, tile.Key, tileSectionScale);
+                        CreateWaterTile(tile.Value.Core, extmData, tile.Key, tileSectionScale, insideTiles);
                 }
             }
 
@@ -267,8 +285,8 @@ namespace UKingLibrary
 
             GLContext.ActiveContext.Scene.AddRenderObject(meshRender);
         }
-
-        private void CreateWaterTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string name, float tileSectionScale)
+        
+        private void CreateWaterTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string name, float tileSectionScale, List<TSCB.TerrainAreaCore> insideTiles)
         {
             string packName = GetTilePackName(name);
 
@@ -277,6 +295,120 @@ namespace UKingLibrary
             //Height map
             var heightBuffer = LoadTerrainFiles(packName, name, "water.extm");
 
+            float targetSize = tile.AreaSize;
+            foreach (var insideTile in insideTiles)
+            {
+                if (insideTile.AreaSize < targetSize)
+                    targetSize = insideTile.AreaSize;
+            }
+
+            int scaleRatio = (int)(tile.AreaSize / targetSize);
+
+            //Upscale height buffer... TODO: Interpolate this data
+            byte[] newHeightBuffer = new byte[heightBuffer.Length * (scaleRatio * scaleRatio)];
+            FileReader heightBufferR = new FileReader(heightBuffer);
+            FileWriter newHeightBufferW = new FileWriter(newHeightBuffer);
+            for (int z = 0; z < WaterRender.MAP_TILE_LENGTH; z++)
+            {
+                ushort[] rowHeights = new ushort[WaterRender.MAP_TILE_LENGTH];
+                ushort[] rowXAxisFlowRates = new ushort[WaterRender.MAP_TILE_LENGTH];
+                ushort[] rowZAxisFlowRates = new ushort[WaterRender.MAP_TILE_LENGTH];
+                byte[] rowUkns = new byte[WaterRender.MAP_TILE_LENGTH];
+                byte[] rowMaterialIndices = new byte[WaterRender.MAP_TILE_LENGTH];
+                for (int x = 0; x < WaterRender.MAP_TILE_LENGTH; x++)
+                {
+                    rowHeights[x] = heightBufferR.ReadUInt16();
+                    rowXAxisFlowRates[x] = heightBufferR.ReadUInt16();
+                    rowZAxisFlowRates[x] = heightBufferR.ReadUInt16();
+                    rowUkns[x] = heightBufferR.ReadByte();
+                    rowMaterialIndices[x] = heightBufferR.ReadByte();
+                }
+
+                for (int i = 0; i < scaleRatio; i++)
+                {
+                    for (int x = 0; x < WaterRender.MAP_TILE_LENGTH; x++)
+                    {
+                        for (int j = 0; j < scaleRatio; j++)
+                        {
+                            newHeightBufferW.Write(rowHeights[x]);
+                            newHeightBufferW.Write(rowXAxisFlowRates[x]);
+                            newHeightBufferW.Write(rowZAxisFlowRates[x]);
+                            newHeightBufferW.Write(rowUkns[x]);
+                            newHeightBufferW.Write(rowMaterialIndices[x]);
+                        }
+                    }
+                }
+            }
+
+            //Chop up height buffer
+            List<byte[]> tileBuffers = new List<byte[]>();
+            List<Vector2> tilePositions = new List<Vector2>();
+            for (int offsetZ = 0; offsetZ < WaterRender.MAP_TILE_LENGTH * scaleRatio; offsetZ += WaterRender.MAP_TILE_LENGTH)
+            {
+                for (int offsetX = 0; offsetX < WaterRender.MAP_TILE_LENGTH * scaleRatio; offsetX += WaterRender.MAP_TILE_LENGTH)
+                {
+                    byte[] tileBuffer = new byte[WaterRender.MAP_TILE_SIZE * 8];
+                    for (int z = 0; z < WaterRender.MAP_TILE_LENGTH; z++)
+                    {
+                        for (int x = 0; x < WaterRender.MAP_TILE_LENGTH; x++)
+                        {
+                            // Copy all 8 bytes..
+                            int index = (((offsetZ + z) * WaterRender.MAP_TILE_LENGTH) + (offsetX + x)) * 8;
+                            for (int i = 0; i < 8; i++)
+                                tileBuffer[(((z * WaterRender.MAP_TILE_LENGTH) + x) * 8) + i] = newHeightBuffer[index + i];
+                        }
+                    }
+                    tileBuffers.Add(tileBuffer);
+
+                    // Find the tile position
+                    Vector2 tilePosition = new Vector2(tile.PositionX - (tile.AreaSize / 2) + ((offsetX/WaterRender.MAP_TILE_LENGTH) * (targetSize)) + (targetSize / 2), tile.PositionZ - (tile.AreaSize / 2) + ((offsetZ/WaterRender.MAP_TILE_LENGTH) * (targetSize)) + (targetSize / 2));
+
+
+                    tilePositions.Add(tilePosition);
+                }
+            }
+
+            for (int i = 0; i < tileBuffers.Count; i++)
+            {
+                bool isInsideTile = false;
+                foreach (TSCB.TerrainAreaCore insideTile in insideTiles) {
+                    if (tilePositions[i].X == insideTile.PositionX && tilePositions[i].Y == insideTile.PositionZ)
+                    {
+                        isInsideTile = true;
+                        break;
+                    } 
+                }
+                if (isInsideTile)
+                    continue;
+
+                //Create a terrain mesh for rendering
+                var meshRender = new WaterRender();
+                meshRender.LoadWaterData(tileBuffers[i], tileSectionScale * 1/scaleRatio);
+                WaterMeshes.Add(meshRender);
+                //Scale and place the title in the correct place
+                meshRender.Transform.Position = new Vector3(
+                    tilePositions[i].X * SECTION_WIDTH * TILE_TO_SECTION_SCALE,
+                    0,
+                    tilePositions[i].Y * SECTION_WIDTH * TILE_TO_SECTION_SCALE) * GLContext.PreviewScale;
+                meshRender.Transform.Scale = new Vector3(1);
+                meshRender.Transform.UpdateMatrix(true);
+                meshRender.UINode.Tag = tile;
+                meshRender.UINode.Header = name;
+                meshRender.IsVisibleCallback += delegate
+                {
+                    return MapMuuntEditor.ShowMapModel;
+                };
+
+                GLContext.ActiveContext.Scene.AddRenderObject(meshRender);
+            }
+        }
+        /*
+        private void CreateWaterTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string name, float tileSectionScale, List<TSCB.TerrainAreaCore> insideTiles)
+        {
+            string packName = GetTilePackName(name);
+            Toolbox.Core.StudioLogger.WriteLine($"Creating terrain tile {name} in pack {packName}...");
+            //Height map
+            var heightBuffer = LoadTerrainFiles(packName, name, "water.extm");
             //Create a terrain mesh for rendering
             var meshRender = new WaterRender();
             meshRender.LoadWaterData(heightBuffer, tileSectionScale);
@@ -294,9 +426,8 @@ namespace UKingLibrary
             {
                 return MapMuuntEditor.ShowMapModel;
             };
-
             GLContext.ActiveContext.Scene.AddRenderObject(meshRender);
-        }
+        }*/
 
         private void CreateGrassTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string name, float tileSectionScale)
         {

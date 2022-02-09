@@ -216,17 +216,17 @@ namespace UKingLibrary.Rendering
             return tangents;
         }
 
-        private int[] GetIndexBuffer(int indexCountSide = INDEX_COUNT_SIDE, int tileLength = MAP_TILE_LENGTH)
+        private int[] GetIndexBuffer()
         {
-            int[] indexBuffer = new int[indexCountSide * indexCountSide * 2 * 3];// x*y, 2 triangles per square, 3 points per triangle
+            int[] indexBuffer = new int[INDEX_COUNT_SIDE * INDEX_COUNT_SIDE * 2 * 3];// x*y, 2 triangles per square, 3 points per triangle
 
             int i = 0;
-            for (int y = 0; y < indexCountSide; y++)
+            for (int y = 0; y < INDEX_COUNT_SIDE; y++)
             {
-                int indexTop = (y) * tileLength;
-                int indexBottom = (y + 1) * tileLength;
+                int indexTop = (y) * MAP_TILE_LENGTH;
+                int indexBottom = (y + 1) * MAP_TILE_LENGTH;
 
-                for (int x = 0; x < indexCountSide; x++)
+                for (int x = 0; x < INDEX_COUNT_SIDE; x++)
                 {
                     indexBuffer[i++] = indexTop;
                     indexBuffer[i++] = indexBottom;
