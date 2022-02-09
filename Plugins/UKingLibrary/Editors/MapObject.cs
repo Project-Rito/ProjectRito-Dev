@@ -20,6 +20,11 @@ namespace UKingLibrary
     public class MapObject : ActorBase, ICloneable
     {
         /// <summary>
+        /// The file this is in
+        /// </summary>
+        MapData MapFile;
+
+        /// <summary>
         /// Properties related to the object instance.
         /// </summary>
         public IDictionary<string, dynamic> Properties;
@@ -106,8 +111,10 @@ namespace UKingLibrary
         }
 
 
-        public void CreateNew(uint hashId, string unitConfigName, dynamic actorInfo, NodeBase parent)
+        public void CreateNew(uint hashId, string unitConfigName, dynamic actorInfo, NodeBase parent, MapData mapData)
         {
+            MapFile = mapData;
+
             Properties = new Dictionary<string, dynamic>();
             Properties.Add("UnitConfigName", unitConfigName);
             Properties.Add("HashId", hashId);
@@ -121,8 +128,10 @@ namespace UKingLibrary
             ReloadActor();
         }
 
-        public void CreateNew(dynamic properties, dynamic actorInfo, NodeBase parent)
+        public void CreateNew(dynamic properties, dynamic actorInfo, NodeBase parent, MapData mapData)
         {
+            MapFile = mapData;
+
             Properties = MapData.ValuesToProperties(properties);
 
             ActorInfo = actorInfo;
@@ -207,6 +216,21 @@ namespace UKingLibrary
             }
             Render.UINode.Icon = icon;
 
+            Render.AddCallback += delegate
+            {
+                AddToMap();
+            };
+
+            Render.RemoveCallback += delegate
+            {
+                RemoveFromMap();
+            };
+
+            Render.Clone += delegate
+            {
+                return ((MapObject)Clone()).Render;
+            };
+
             foreach (var property in Properties.ToList())
                 ValidateProperty(property.Key);
 
@@ -216,16 +240,18 @@ namespace UKingLibrary
 
         public object Clone()
         {
-            MapObject newObj = new MapObject();
+            MapObject clone = new MapObject();
 
             SaveTransform(); // We wanna make sure that the new actor is in the right location!
 
-            newObj.Properties = DeepCloneDictionary(Properties);
-            newObj.ActorInfo = ActorInfo;
-            newObj.Parent = Parent;
-            newObj.ReloadActor();
+            clone.Properties = DeepCloneDictionary(Properties);
+            clone.HashId = MapMuuntEditor.GetHashId(MapFile);
+            clone.ActorInfo = ActorInfo;
+            clone.Parent = Parent;
+            clone.MapFile = MapFile;
+            clone.ReloadActor();
 
-            return newObj.Render; // Ugh, I guess we have to return this because of how things are structured
+            return clone;
         }
 
         public IDictionary<string, dynamic> DeepCloneDictionary(IDictionary<string, dynamic> properties)
@@ -273,7 +299,7 @@ namespace UKingLibrary
             ReloadActor();
             //Add new render
             context.Scene.AddRenderObject(Render);
-            //Select it if previously selected
+            //Reapply everything needed
             Render.IsSelected = selected;
             Render.SourceObjectLinks = srcLinks;
             Render.DestObjectLinks = destLinks;
@@ -431,6 +457,22 @@ namespace UKingLibrary
         }
 
         /// <summary>
+        /// Adds the object to the map file
+        /// </summary>
+        public void AddToMap()
+        {
+            MapFile.Objs.Add(HashId, this);
+        }
+
+        /// <summary>
+        /// Removes the object from the map file
+        /// </summary>
+        public void RemoveFromMap()
+        {
+            MapFile.Objs.Remove(HashId);
+        }
+
+        /// <summary>
         /// Loads the object transform into the scene.
         /// </summary>
         void LoadObjectTransform()
@@ -482,11 +524,10 @@ namespace UKingLibrary
 
         private void SaveVector(string key, Vector3 value, bool isRotation = false)
         {
-            if (isRotation)
+            if (isRotation && (value.X == 0 && value.Z == 0 && value.Y != 0))
             {
                 //Single rotation on the up axis
-                if (value.X == 0 && value.Z == 0 && value.Y != 0)
-                    BymlHelper.SetValue(Properties, key, new MapData.Property<dynamic>(value.Y));
+                BymlHelper.SetValue(Properties, key, new MapData.Property<dynamic>(value.Y));
             }
             else if (value.IsUniform())
                 BymlHelper.SetValue(Properties, key, new MapData.Property<dynamic>(value.X));

@@ -85,8 +85,7 @@ namespace UKingLibrary
                     //Setup properties for editing
                     MapObject data = new MapObject();
 
-                    data.CreateNew(mapObj, actorInfo, parent);
-                    Objs.Add(data.HashId, data);
+                    data.CreateNew(mapObj, actorInfo, parent, this);
                     //Add the renderable to the viewport
                     data.AddToScene();
                 }

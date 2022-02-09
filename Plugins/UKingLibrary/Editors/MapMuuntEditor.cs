@@ -84,10 +84,12 @@ namespace UKingLibrary
             return new List<MenuItemModel>();
         }
 
-        private List<MapData> MapFiles;
+        public List<MapData> MapFiles;
 
         public void Load(List<MapData> mapFiles)
         {
+            MapFiles = mapFiles;
+
             //Allow actor objects to be loaded in the asset list
             //Todo add more profiles and add a proper tree hiearchy to asset viewer
             var profiles = new string[] {
@@ -118,8 +120,6 @@ namespace UKingLibrary
 
             ToolWindowDrawer = new MubinToolSettings();
 
-            MapFiles = mapFiles;
-
             this.Nodes.Clear();
             foreach (var map in mapFiles)
                 this.Nodes.AddRange(map.Nodes);
@@ -147,6 +147,18 @@ namespace UKingLibrary
             }
         }
 
+        public static uint GetHashId(MapData mapData)
+        {
+            int index = mapData.Objs.Count;
+            while (true)
+            {
+                uint id = Crc32.Compute($"ID{index}");
+                if (!mapData.Objs.ContainsKey(id))
+                    return id;
+                index++;
+            }
+        }
+
         public void CreateAndSelect(GLContext context)
         {
             var mapData = MapFiles.FirstOrDefault();
@@ -167,9 +179,7 @@ namespace UKingLibrary
             }
 
             var obj = new MapObject();
-            var index = mapData.Objs.Count;
-            obj.CreateNew(Crc32.Compute($"ID{index}"), "LinkTagAnd", actorInfo, parent);
-            mapData.Objs.Add(obj.HashId, obj);
+            obj.CreateNew(GetHashId(mapData), "LinkTagAnd", actorInfo, parent, mapData);
             obj.AddToScene();
 
             context.Scene.DeselectAll(context);
@@ -209,8 +219,7 @@ namespace UKingLibrary
             //Create the actor data and add it to the scene
             var obj = new MapObject();
             var index = mapData.Objs.Count;
-            obj.CreateNew(Crc32.Compute($"ID{index}"), name, actorInfo, parent);
-            mapData.Objs.Add(obj.HashId, obj);
+            obj.CreateNew(GetHashId(mapData), name, actorInfo, parent, mapData);
             //Add to the viewport scene
             obj.AddToScene();
 

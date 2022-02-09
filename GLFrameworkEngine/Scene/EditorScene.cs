@@ -6,6 +6,7 @@ namespace GLFrameworkEngine
 {
     public partial class GLScene
     {
+
         public List<EditableObject> GetEditObjects()
         {
             List<EditableObject> objects = new List<EditableObject>();
@@ -48,8 +49,7 @@ namespace GLFrameworkEngine
 
             foreach (EditableObject obj in selected)
             {
-                if (obj is ICloneable)
-                    CopiedObjects.Add(obj);
+                CopiedObjects.Add(obj);
             }
         }
 
@@ -61,9 +61,8 @@ namespace GLFrameworkEngine
             DeselectAll(context);
             foreach (var obj in CopiedObjects)
             {
-                EditableObject copy = ((ICloneable)obj).Clone() as EditableObject;
+                EditableObject copy = obj.Clone?.Invoke();
                 AddRenderObject(copy);
-
                 copy.IsSelected = true;
             }
             OnSelectionChanged(context);

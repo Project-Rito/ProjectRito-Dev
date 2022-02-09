@@ -100,6 +100,7 @@ namespace GLFrameworkEngine
 
         public EventHandler RemoveCallback;
         public EventHandler AddCallback;
+        public Func<EditableObject> Clone;
 
         public EditableObject(NodeBase parent) {
             ParentUINode = parent;
