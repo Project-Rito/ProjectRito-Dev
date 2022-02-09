@@ -45,6 +45,14 @@
       <HintPath>..\..\MapStudio\Lib\Syroot.Maths.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="HKX2">
+      <HintPath>..\..\MapStudio\Lib\HKX2.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="HKX2Builders">
+      <HintPath>..\..\MapStudio\Lib\HKX2Builders.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
