@@ -16,8 +16,8 @@ namespace MapStudio.UI
         public static void Draw(GLContext control, GLTexture colorPass,
             GLTexture bloomPass, RenderFrameArgs frameArgs)
         {
-            GL.Disable(EnableCap.Blend);
-            GL.Disable(EnableCap.CullFace);
+            GLH.Disable(EnableCap.Blend);
+            GLH.Disable(EnableCap.CullFace);
 
             var shader = GlobalShaders.GetShader("FINALHDR");
             control.CurrentShader = shader;
@@ -37,7 +37,7 @@ namespace MapStudio.UI
                 DrawableBackground.BackgroundBottom.Y,
                 DrawableBackground.BackgroundBottom.Z));
 
-            GL.ActiveTexture(TextureUnit.Texture1);
+            GLH.ActiveTexture(TextureUnit.Texture1);
             colorPass.Bind();
             shader.SetInt("uColorTex", 1);
 
@@ -49,7 +49,7 @@ namespace MapStudio.UI
             {
                 shader.SetInt("ENABLE_BLOOM", 1);
 
-                GL.ActiveTexture(TextureUnit.Texture24);
+                GLH.ActiveTexture(TextureUnit.Texture24);
                 bloomPass.Bind();
                 shader.SetInt("uBloomTex", 24);
             }
@@ -58,9 +58,9 @@ namespace MapStudio.UI
                 PlaneRender = new Plane2DRenderer(1.0f, true);
 
             PlaneRender.Draw(control);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
 
-            GL.UseProgram(0);
+            GLH.UseProgram(0);
         }
     }
 }

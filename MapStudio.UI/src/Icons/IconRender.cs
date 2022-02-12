@@ -19,11 +19,11 @@ namespace MapStudio.UI
             Framebuffer frameBuffer = new Framebuffer(FramebufferTarget.Framebuffer, width, height, PixelInternalFormat.Rgba, 1);
             frameBuffer.Bind();
 
-            GL.ClearColor(0, 0, 0, 0);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GL.Viewport(0, 0, width, height);
+            GLH.ClearColor(0, 0, 0, 0);
+            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLH.Viewport(0, 0, width, height);
 
-            GL.Disable(EnableCap.Blend);
+            GLH.Disable(EnableCap.Blend);
 
             shader.Enable();
             shader.SetBoolToInt("isSRGB", false);
@@ -33,8 +33,8 @@ namespace MapStudio.UI
             ScreenQuadRender.Draw(shader, texture.ID);
 
             //Disable shader and textures
-            GL.UseProgram(0);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.UseProgram(0);
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
 
             var image = (GLTexture2D)frameBuffer.Attachments[0];
             return image.ID;
@@ -64,11 +64,11 @@ namespace MapStudio.UI
             Framebuffer frameBuffer = new Framebuffer(FramebufferTarget.Framebuffer, width, height, PixelInternalFormat.Rgba, 1);
             frameBuffer.Bind();
 
-            GL.ClearColor(0, 0, 0, 0);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GL.Viewport(0, 0, width, height);
+            GLH.ClearColor(0, 0, 0, 0);
+            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLH.Viewport(0, 0, width, height);
 
-            GL.Disable(EnableCap.Blend);
+            GLH.Disable(EnableCap.Blend);
 
             shader.Enable();
             shader.SetBoolToInt("isSRGB", texture.IsSRGB);
@@ -81,14 +81,14 @@ namespace MapStudio.UI
                     OpenGLHelper.GetSwizzle(displayAlpha ? texture.AlphaChannel : STChannelType.One),
             };
             ((GLTexture)texture.RenderableTex).Bind();
-            GL.TexParameter(((GLTexture)texture.RenderableTex).Target, TextureParameterName.TextureSwizzleRgba, mask);
+            GLH.TexParameter(((GLTexture)texture.RenderableTex).Target, TextureParameterName.TextureSwizzleRgba, mask);
 
             //Draw the texture onto the framebuffer
             ScreenQuadRender.Draw(shader, ID);
 
             //Disable shader and textures
-            GL.UseProgram(0);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.UseProgram(0);
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
 
             var image = (GLTexture2D)frameBuffer.Attachments[0];
             return image.ID;

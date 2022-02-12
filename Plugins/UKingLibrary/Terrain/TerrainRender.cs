@@ -112,8 +112,8 @@ namespace UKingLibrary.Rendering
             shader.SetFloat("uBrightness", 2.0f); // Hack to fit in (normals calculation is kinda off or something)
             shader.SetBool("uDebugSections", PluginConfig.DebugTerrainSections);
 
-            GL.Disable(EnableCap.Blend);
-            GL.Enable(EnableCap.CullFace);
+            GLH.Disable(EnableCap.Blend);
+            GLH.Enable(EnableCap.CullFace);
 
             TerrainMesh.Draw(context);
         }

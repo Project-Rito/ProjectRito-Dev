@@ -208,7 +208,7 @@ namespace MapStudio.UI
             _context.Width = this.Width;
             _context.Height = this.Height;
 
-            GL.Enable(EnableCap.DepthTest);
+            GLH.Enable(EnableCap.DepthTest);
 
             var dir = _context.Scene.LightDirection;
 
@@ -220,23 +220,23 @@ namespace MapStudio.UI
             DrawModels();
 
             //Transfer the screen buffer to the post effects buffer (screen buffer is multi sampled)
-            GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, ScreenBuffer.ID);
-            GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, PostEffects.ID);
-            GL.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
+            GLH.BindFramebuffer(FramebufferTarget.ReadFramebuffer, ScreenBuffer.ID);
+            GLH.BindFramebuffer(FramebufferTarget.DrawFramebuffer, PostEffects.ID);
+            GLH.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
 
             FinalBuffer.Bind();
-            GL.Viewport(0, 0, Width, Height);
+            GLH.Viewport(0, 0, Width, Height);
 
-            GL.ClearColor(0, 0, 0, 1);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+            GLH.ClearColor(0, 0, 0, 1);
+            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
             
             //Draw post effects onto the final buffer
             DrawPostScreenBuffer(PostEffects, frameArgs);
 
             //Finally transfer the screen buffer depth onto the final buffer for non post processed objects
-            GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, ScreenBuffer.ID);
-            GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, FinalBuffer.ID);
-            GL.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
+            GLH.BindFramebuffer(FramebufferTarget.ReadFramebuffer, ScreenBuffer.ID);
+            GLH.BindFramebuffer(FramebufferTarget.DrawFramebuffer, FinalBuffer.ID);
+            GLH.BlitFramebuffer(0, 0, Width, Height, 0, 0, Width, Height, ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
 
             //Background
             if (frameArgs.DisplayBackground)
@@ -246,9 +246,9 @@ namespace MapStudio.UI
 
             _context.CurrentShader = null;
 
-            GL.Enable(EnableCap.CullFace);
-            GL.CullFace(CullFaceMode.Back);
-            GL.Disable(EnableCap.Blend);
+            GLH.Enable(EnableCap.CullFace);
+            GLH.CullFace(CullFaceMode.Back);
+            GLH.Disable(EnableCap.Blend);
 
             if (ShadowMainRenderer.Display)
             {
@@ -281,7 +281,7 @@ namespace MapStudio.UI
                 _context.CurrentMousePoint.X,
                _context.CurrentMousePoint.Y);
 
-            GL.Enable(EnableCap.DepthTest);
+            GLH.Enable(EnableCap.DepthTest);
 
             foreach (var anim in CameraAnimations)
                 anim.DrawPath(_context);
@@ -292,7 +292,7 @@ namespace MapStudio.UI
         public void OnResize()
         {
             // Update the opengl viewport
-            GL.Viewport(0, 0, Width, Height);
+            GLH.Viewport(0, 0, Width, Height);
 
             //Resize all the screen buffers
             ScreenBuffer?.Resize(Width, Height);
@@ -320,11 +320,11 @@ namespace MapStudio.UI
         {
             DrawGBuffer();
 
-            GL.Viewport(0, 0, Width, Height);
+            GLH.Viewport(0, 0, Width, Height);
             ScreenBuffer.Bind();
 
-            GL.ClearColor(0, 0, 0, 0);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+            GLH.ClearColor(0, 0, 0, 0);
+            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
             DrawSceneWithPostEffects();
 
@@ -389,10 +389,10 @@ namespace MapStudio.UI
             }
 
             GBuffer.Bind();
-            GL.Viewport(0, 0, Width, Height);
+            GLH.Viewport(0, 0, Width, Height);
 
-            GL.ClearColor(0, 0, 0, 0);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLH.ClearColor(0, 0, 0, 0);
+            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             foreach (var file in _context.Scene.Objects)
             {

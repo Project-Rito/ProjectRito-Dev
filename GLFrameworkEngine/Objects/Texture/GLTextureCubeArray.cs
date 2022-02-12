@@ -40,7 +40,7 @@ namespace GLFrameworkEngine
                 int mipWidth = (int)(texture.Width * Math.Pow(0.5, mip));
                 int mipHeight = (int)(texture.Height * Math.Pow(0.5, mip));
 
-                GL.TexImage3D(texture.Target, 0, texture.PixelInternalFormat,
+                GLH.TexImage3D(texture.Target, 0, texture.PixelInternalFormat,
                     mipWidth, mipHeight, texture.ArrayCount * 6, mip,
                       texture.PixelFormat, texture.PixelType, IntPtr.Zero);
             }
@@ -101,9 +101,9 @@ namespace GLFrameworkEngine
                 }
             }
 
-            GL.TexParameter(texture.Target, TextureParameterName.TextureBaseLevel, 0);
-            GL.TexParameter(texture.Target, TextureParameterName.TextureMaxLevel, 13);
-            GL.GenerateMipmap(GenerateMipmapTarget.TextureCubeMapArray);
+            GLH.TexParameter(texture.Target, TextureParameterName.TextureBaseLevel, 0);
+            GLH.TexParameter(texture.Target, TextureParameterName.TextureMaxLevel, 13);
+            GLH.GenerateMipmap(GenerateMipmapTarget.TextureCubeMapArray);
 
             texture.Unbind();
             return texture;
@@ -125,7 +125,7 @@ namespace GLFrameworkEngine
                 {
                     int mipSize = (int)(size * Math.Pow(0.5, m));
                     byte[] outputRaw = new byte[mipSize * mipSize * 4];
-                    GL.GetTextureSubImage(this.ID, m, 0, 0, i, Width, Height, 1,
+                    GLH.GetTextureSubImage(this.ID, m, 0, 0, i, Width, Height, 1,
                       PixelFormat.Rgba, PixelType.UnsignedByte, outputRaw.Length, outputRaw);
 
                     surface.mipmaps.Add(outputRaw);
@@ -162,7 +162,7 @@ namespace GLFrameworkEngine
             for (int i = 0; i < 6; i++)
             {
                 byte[] output = new byte[Width * Height * 4];
-                GL.GetTextureSubImage(this.ID, 0, 0, 0, i, Width, Height, 1,
+                GLH.GetTextureSubImage(this.ID, 0, 0, 0, i, Width, Height, 1,
                    PixelFormat.Bgra, PixelType.UnsignedByte, output.Length, output);
 
                 //Remove alpha
@@ -179,7 +179,7 @@ namespace GLFrameworkEngine
             Bind();
             byte[] output = new byte[Width * Height * 4];
 
-            GL.GetTextureSubImage((int)this.Target, 0, 0, 0, index, Width, Height, 1,
+            GLH.GetTextureSubImage((int)this.Target, 0, 0, 0, index, Width, Height, 1,
               PixelFormat.Bgra, PixelType.UnsignedByte, output.Length, output);
 
             output = SetImageData(output, true, true);

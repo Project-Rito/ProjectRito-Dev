@@ -92,15 +92,15 @@ namespace CafeLibrary.Rendering
 
             if (material.BlendState.AlphaTest)
             {
-                GL.Uniform1(GL.GetUniformLocation(programID, "PS_PUSH.alphaFunc"), alphaFunction);
+                GLH.Uniform1(GLH.GetUniformLocation(programID, "PS_PUSH.alphaFunc"), alphaFunction);
                 shader.SetFloat("PS_PUSH.alphaRef", material.BlendState.AlphaValue);
-                GL.Uniform1(GL.GetUniformLocation(programID, "PS_PUSH.needsPremultiply"), (uint)0);
+                GLH.Uniform1(GLH.GetUniformLocation(programID, "PS_PUSH.needsPremultiply"), (uint)0);
             }
             else
             {
-                GL.Uniform1(GL.GetUniformLocation(programID, "PS_PUSH.alphaFunc"), (uint)7);
+                GLH.Uniform1(GLH.GetUniformLocation(programID, "PS_PUSH.alphaFunc"), (uint)7);
                 shader.SetFloat("PS_PUSH.alphaRef", 1.0f);
-                GL.Uniform1(GL.GetUniformLocation(programID, "PS_PUSH.needsPremultiply"), (uint)0);
+                GLH.Uniform1(GLH.GetUniformLocation(programID, "PS_PUSH.needsPremultiply"), (uint)0);
             }
         }
 

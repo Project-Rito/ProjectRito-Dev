@@ -70,9 +70,9 @@ namespace UKingLibrary.Rendering
             Prepare();
 
             //Thicker picking region
-            GL.LineWidth(32);
+            GLH.LineWidth(32);
             OutlineRenderer.DrawPicking(context, this, InitalTransform * Transform.TransformMatrix);
-            GL.LineWidth(1);
+            GLH.LineWidth(1);
         }
 
         public override void DrawModel(GLContext context, Pass pass)
@@ -82,7 +82,7 @@ namespace UKingLibrary.Rendering
 
             Prepare();
 
-            GL.Disable(EnableCap.CullFace);
+            GLH.Disable(EnableCap.CullFace);
 
             //Draw a filled in region
             if (DrawFilled)
@@ -95,14 +95,14 @@ namespace UKingLibrary.Rendering
             }
 
             //Draw lines of the region
-            GL.LineWidth(1);
+            GLH.LineWidth(1);
             OutlineRenderer.DrawSolidWithSelection(context, InitalTransform * Transform.TransformMatrix, Color, IsSelected | IsHovered);
 
             //Draw debug boundings
             if (Runtime.RenderBoundingBoxes)
                 this.BoundingNode.Box.DrawSolid(context, Transform.TransformMatrix, new Vector4(1, 0, 0, 1));
 
-            GL.Enable(EnableCap.CullFace);
+            GLH.Enable(EnableCap.CullFace);
         }
 
         private void Prepare()

@@ -51,7 +51,7 @@ namespace GLFrameworkEngine
             if (PickingLineRender == null)
                 PickingLineRender = new LineRender();
 
-            GL.LineWidth(LineWidth + 5);
+            GLH.LineWidth(LineWidth + 5);
 
             var mat = new StandardMaterial();
             mat.displayOnlyVertexColors = true;
@@ -59,7 +59,7 @@ namespace GLFrameworkEngine
 
             PickingLineRender.Draw(points, colors, true);
 
-            GL.LineWidth(1);
+            GLH.LineWidth(1);
         }
 
         class LineObject : ITransformableObject
@@ -90,7 +90,7 @@ namespace GLFrameworkEngine
         public virtual void DrawModel(GLContext context, Pass pass)
         {
             if (XRayMode)
-                GL.Disable(EnableCap.DepthTest);
+                GLH.Disable(EnableCap.DepthTest);
 
             if (EditMode)
             {
@@ -118,7 +118,7 @@ namespace GLFrameworkEngine
             }
 
             if (XRayMode)
-                GL.Enable(EnableCap.DepthTest);
+                GLH.Enable(EnableCap.DepthTest);
         }
 
         public virtual void DrawLineDisplay(GLContext context, bool picking = false)
@@ -183,16 +183,16 @@ namespace GLFrameworkEngine
             }
 
             if (!EditMode && !picking)
-                GL.LineWidth(5);
+                GLH.LineWidth(5);
             else if (InterpolationMode == RenderablePath.Interpolation.Bezier)
-                GL.LineWidth(BezierLineWidth);
+                GLH.LineWidth(BezierLineWidth);
             else
-                GL.LineWidth(LineWidth);
+                GLH.LineWidth(LineWidth);
 
             if (InterpolationMode == RenderablePath.Interpolation.Bezier)
             {
                 if (picking)
-                    GL.LineWidth(30);
+                    GLH.LineWidth(30);
 
                 LineRenderer.UpdatePrimitiveType(PrimitiveType.LineStrip);
                 if (points.Count > 0)
@@ -243,13 +243,13 @@ namespace GLFrameworkEngine
 
             //DrawNormals(context);
 
-            GL.LineWidth(1);
+            GLH.LineWidth(1);
         }
 
         //For drawing directional normals to determine path twist direction
         private void DrawNormals(GLContext context)
         {
-            GL.LineWidth(1.0F);
+            GLH.LineWidth(1.0F);
 
             //Normals drawer
             float displayLength = 5.0f * RenderablePath.BezierPointScale;

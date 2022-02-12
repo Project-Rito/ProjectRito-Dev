@@ -37,9 +37,9 @@ namespace GLFrameworkEngine
 
             Prepare();
 
-            GL.Disable(EnableCap.Blend);
-            GL.Enable(EnableCap.DepthTest);
-            GL.DepthFunc(DepthFunction.Lequal);
+            GLH.Disable(EnableCap.Blend);
+            GLH.Enable(EnableCap.DepthTest);
+            GLH.DepthFunc(DepthFunction.Lequal);
 
             control.CurrentShader = defaultShaderProgram;
 
@@ -51,8 +51,8 @@ namespace GLFrameworkEngine
 
             Draw(control);
 
-            GL.UseProgram(0);
-            GL.Enable(EnableCap.CullFace);
+            GLH.UseProgram(0);
+            GLH.Enable(EnableCap.CullFace);
         }
 
         private bool Initialized = false;

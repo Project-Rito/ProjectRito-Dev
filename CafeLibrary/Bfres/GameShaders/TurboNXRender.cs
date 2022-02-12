@@ -173,23 +173,23 @@ namespace CafeLibrary.Rendering
             //Adjust mip levels
 
             CubemapManager.CubeMapTexture.Bind();
-            GL.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-            GL.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureBaseLevel, 0);
-            GL.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureMaxLevel, 13);
-            GL.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+            GLH.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GLH.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+            GLH.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureBaseLevel, 0);
+            GLH.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureMaxLevel, 13);
+            GLH.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GLH.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GLH.TexParameter(CubemapManager.CubeMapTexture.Target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
             CubemapManager.CubeMapTexture.Unbind();
 
             DiffuseLightmapTexture.Bind();
-            GL.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-            GL.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureBaseLevel, 0);
-            GL.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureMaxLevel, 2);
-            GL.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+            GLH.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GLH.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+            GLH.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureBaseLevel, 0);
+            GLH.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureMaxLevel, 2);
+            GLH.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GLH.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GLH.TexParameter(DiffuseLightmapTexture.Target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
             DiffuseLightmapTexture.Unbind();
         }
 

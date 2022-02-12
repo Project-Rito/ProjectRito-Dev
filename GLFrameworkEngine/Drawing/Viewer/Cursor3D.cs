@@ -50,14 +50,14 @@ namespace GLFrameworkEngine
             Material.ScaleByCameraDistance = true;
             Material.Render(context);
 
-            GL.Disable(EnableCap.DepthTest);
-            GL.LineWidth(1.5f);
+            GLH.Disable(EnableCap.DepthTest);
+            GLH.LineWidth(1.5f);
 
             Draw(context);
 
-            GL.Enable(EnableCap.DepthTest);
+            GLH.Enable(EnableCap.DepthTest);
 
-            GL.LineWidth(1);
+            GLH.LineWidth(1);
         }
 
         static Vector2[] GetVertices(int length)

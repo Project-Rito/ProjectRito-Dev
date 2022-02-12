@@ -7,6 +7,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Toolbox.Core;
+using GLFrameworkEngine;
 
 namespace MapStudio.UI
 {
@@ -162,11 +163,11 @@ namespace MapStudio.UI
             Util.CreateVertexBuffer("ImGui", out _vertexBuffer);
             Util.CreateElementBuffer("ImGui", out _indexBuffer);
 
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
-            GL.BufferData(BufferTarget.ArrayBuffer, _vertexBufferSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
+            GLH.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
+            GLH.BufferData(BufferTarget.ArrayBuffer, _vertexBufferSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
 
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, _indexBufferSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
+            GLH.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer);
+            GLH.BufferData(BufferTarget.ElementArrayBuffer, _indexBufferSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
 
             RecreateFontDeviceTexture();
 
@@ -203,25 +204,25 @@ void main()
 
             _shader = new Shader("ImGui", VertexSource, FragmentSource);
 
-            GL.BindVertexArray(_vertexArray);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
+            GLH.BindVertexArray(_vertexArray);
+            GLH.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
 
             //Bind index buffer
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer);
+            GLH.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
+            GLH.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer);
 
             var stride = Unsafe.SizeOf<ImDrawVert>();
 
             //Bind vertex buffer
-            GL.BindVertexArray(_vertexArray);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
+            GLH.BindVertexArray(_vertexArray);
+            GLH.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
 
-            GL.EnableVertexAttribArray(0);
-            GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, stride, 0);
-            GL.EnableVertexAttribArray(1);
-            GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 8);
-            GL.EnableVertexAttribArray(2);
-            GL.VertexAttribPointer(2, 4, VertexAttribPointerType.UnsignedByte, true, stride, 16);
+            GLH.EnableVertexAttribArray(0);
+            GLH.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, stride, 0);
+            GLH.EnableVertexAttribArray(1);
+            GLH.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 8);
+            GLH.EnableVertexAttribArray(2);
+            GLH.VertexAttribPointer(2, 4, VertexAttribPointerType.UnsignedByte, true, stride, 16);
 
             Util.CheckGLError("End of ImGui setup");
         }
@@ -387,8 +388,8 @@ void main()
                 {
                     int newSize = (int)Math.Max(_vertexBufferSize * 1.5f, vertexSize);
 
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
-                    GL.BufferData(BufferTarget.ArrayBuffer, newSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
+                    GLH.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
+                    GLH.BufferData(BufferTarget.ArrayBuffer, newSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
 
                     _vertexBufferSize = newSize;
 
@@ -400,8 +401,8 @@ void main()
                 {
                     int newSize = (int)Math.Max(_indexBufferSize * 1.5f, indexSize);
 
-                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer);
-                    GL.BufferData(BufferTarget.ElementArrayBuffer, newSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
+                    GLH.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer);
+                    GLH.BufferData(BufferTarget.ElementArrayBuffer, newSize, IntPtr.Zero, BufferUsageHint.DynamicDraw);
 
                     _indexBufferSize = newSize;
 
@@ -420,21 +421,21 @@ void main()
                 1.0f);
 
             _shader.UseShader();
-            GL.UniformMatrix4(_shader.GetUniformLocation("projection_matrix"), false, ref mvp);
-            GL.Uniform1(_shader.GetUniformLocation("in_fontTexture"), 0);
+            GLH.UniformMatrix4(_shader.GetUniformLocation("projection_matrix"), false, ref mvp);
+            GLH.Uniform1(_shader.GetUniformLocation("in_fontTexture"), 0);
             Util.CheckGLError("Projection");
 
-            GL.BindVertexArray(_vertexArray);
+            GLH.BindVertexArray(_vertexArray);
             Util.CheckGLError("VAO");
 
             draw_data.ScaleClipRects(io.DisplayFramebufferScale);
 
-            GL.Enable(EnableCap.Blend);
-            GL.Enable(EnableCap.ScissorTest);
-            GL.BlendEquation(BlendEquationMode.FuncAdd);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.Disable(EnableCap.CullFace);
-            GL.Disable(EnableCap.DepthTest);
+            GLH.Enable(EnableCap.Blend);
+            GLH.Enable(EnableCap.ScissorTest);
+            GLH.BlendEquation(BlendEquationMode.FuncAdd);
+            GLH.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GLH.Disable(EnableCap.CullFace);
+            GLH.Disable(EnableCap.DepthTest);
             Util.CheckGLError($"Render state");
 
             // Render command lists
@@ -442,12 +443,12 @@ void main()
             {
                 ImDrawListPtr cmd_list = draw_data.CmdListsRange[n];
 
-                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
-                GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, cmd_list.VtxBuffer.Size * Unsafe.SizeOf<ImDrawVert>(), cmd_list.VtxBuffer.Data);
+                GLH.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
+                GLH.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, cmd_list.VtxBuffer.Size * Unsafe.SizeOf<ImDrawVert>(), cmd_list.VtxBuffer.Data);
                 Util.CheckGLError($"Data Vert {n}");
 
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer);
-                GL.BufferSubData(BufferTarget.ElementArrayBuffer, IntPtr.Zero, cmd_list.IdxBuffer.Size * sizeof(ushort), cmd_list.IdxBuffer.Data);
+                GLH.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer);
+                GLH.BufferSubData(BufferTarget.ElementArrayBuffer, IntPtr.Zero, cmd_list.IdxBuffer.Size * sizeof(ushort), cmd_list.IdxBuffer.Data);
                 Util.CheckGLError($"Data Idx {n}");
 
                 int vtx_offset = 0;
@@ -462,22 +463,22 @@ void main()
                     }
                     else
                     {
-                        GL.ActiveTexture(TextureUnit.Texture0);
-                        GL.BindTexture(TextureTarget.Texture2D, (int)pcmd.TextureId);
+                        GLH.ActiveTexture(TextureUnit.Texture0);
+                        GLH.BindTexture(TextureTarget.Texture2D, (int)pcmd.TextureId);
                         Util.CheckGLError("Texture");
 
                         // We do _windowHeight - (int)clip.W instead of (int)clip.Y because gl has flipped Y when it comes to these coordinates
                         var clip = pcmd.ClipRect;
-                        GL.Scissor((int)clip.X, _windowHeight - (int)clip.W, (int)(clip.Z - clip.X), (int)(clip.W - clip.Y));
+                        GLH.Scissor((int)clip.X, _windowHeight - (int)clip.W, (int)(clip.Z - clip.X), (int)(clip.W - clip.Y));
                         Util.CheckGLError("Scissor");
 
                         if ((io.BackendFlags & ImGuiBackendFlags.RendererHasVtxOffset) != 0)
                         {
-                            GL.DrawElementsBaseVertex(PrimitiveType.Triangles, (int)pcmd.ElemCount, DrawElementsType.UnsignedShort, (IntPtr)(idx_offset * sizeof(ushort)), vtx_offset);
+                            GLH.DrawElementsBaseVertex(PrimitiveType.Triangles, (int)pcmd.ElemCount, DrawElementsType.UnsignedShort, (IntPtr)(idx_offset * sizeof(ushort)), vtx_offset);
                         }
                         else
                         {
-                            GL.DrawElements(BeginMode.Triangles, (int)pcmd.ElemCount, DrawElementsType.UnsignedShort, (int)pcmd.IdxOffset * sizeof(ushort));
+                            GLH.DrawElements(BeginMode.Triangles, (int)pcmd.ElemCount, DrawElementsType.UnsignedShort, (int)pcmd.IdxOffset * sizeof(ushort));
                         }
                         Util.CheckGLError("Draw");
                     }
@@ -487,13 +488,13 @@ void main()
                 vtx_offset += cmd_list.VtxBuffer.Size;
             }
 
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.ActiveTexture(TextureUnit.Texture0);
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
 
-            GL.Disable(EnableCap.Blend);
-            GL.Disable(EnableCap.ScissorTest);
+            GLH.Disable(EnableCap.Blend);
+            GLH.Disable(EnableCap.ScissorTest);
 
-            GL.BindVertexArray(0);
+            GLH.BindVertexArray(0);
         }
 
         /// <summary>

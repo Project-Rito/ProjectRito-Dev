@@ -30,7 +30,7 @@ namespace AGraphicsLibrary
             if (ProbeLighting == null || diffuseCubemap == null)
                 return null;
 
-            GL.BindTexture(TextureTarget.TextureCubeMap, 0);
+            GLH.BindTexture(TextureTarget.TextureCubeMap, 0);
 
             bool isTriLinear = true;
 
@@ -114,13 +114,13 @@ namespace AGraphicsLibrary
                 frameBuffer.Resize(size, size);
 
             frameBuffer.Bind();
-            GL.Viewport(0, 0, size, size);
+            GLH.Viewport(0, 0, size, size);
 
             //attach face to fbo as color attachment 
             for (int i = 0; i < 6; i++)
             {
                 //Each fragment output is a cubemap face
-                GL.FramebufferTexture2D(FramebufferTarget.Framebuffer,
+                GLH.FramebufferTexture2D(FramebufferTarget.Framebuffer,
                     FramebufferAttachment.ColorAttachment0 + i,
                      TextureTarget.TextureCubeMapPositiveX + i, lightmapTexID, mipLevel);
             }
@@ -132,27 +132,27 @@ namespace AGraphicsLibrary
 
             LoadUniforms(programID, shData);
 
-            GL.ActiveTexture(TextureUnit.Texture0 + 1);
+            GLH.ActiveTexture(TextureUnit.Texture0 + 1);
             normalsMap.Bind();
             shader.SetInt("sampler0", 1);
 
-            GL.ActiveTexture(TextureUnit.Texture0 + 2);
+            GLH.ActiveTexture(TextureUnit.Texture0 + 2);
             diffuseCubemap.Bind();
             shader.SetInt("sampler1", 2);
 
             //Draw once with 6 fragment outputs to form a cubemap 
-            GL.ClearColor(0, 0, 0, 1);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLH.ClearColor(0, 0, 0, 1);
+            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             ScreenQuadRender.Draw();
 
-            var errorcheck = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+            var errorcheck = GLH.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (errorcheck != FramebufferErrorCode.FramebufferComplete)
                 throw new Exception(errorcheck.ToString());
 
             frameBuffer.Unbind();
-            GL.BindTexture(TextureTarget.TextureCubeMap, 0);
-            GL.UseProgram(0);
+            GLH.BindTexture(TextureTarget.TextureCubeMap, 0);
+            GLH.UseProgram(0);
         }
 
         static UniformBlock GetBlock(string name)

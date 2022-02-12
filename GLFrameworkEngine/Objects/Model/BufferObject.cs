@@ -28,14 +28,14 @@ namespace GLFrameworkEngine
         /// </summary>
         public int DataSizeInBytes => DataStride * DataCount;
 
-        public BufferObject(BufferTarget target) : base(GL.GenBuffer())
+        public BufferObject(BufferTarget target) : base(GLH.GenBuffer())
         {
             Target = target;
         }
 
         public void Bind()
         {
-            GL.BindBuffer(Target, ID);
+            GLH.BindBuffer(Target, ID);
         }
 
         public void SetData<T>(T[] data, BufferUsageHint hint) where T : struct
@@ -44,13 +44,13 @@ namespace GLFrameworkEngine
             DataStride = Marshal.SizeOf(typeof(T));
 
             Bind();
-            GL.BufferData(Target, DataSizeInBytes, data, hint);
-            GL.BindBuffer(Target, 0);
+            GLH.BufferData(Target, DataSizeInBytes, data, hint);
+            GLH.BindBuffer(Target, 0);
         }
 
         public void Dispose()
         {
-            GL.DeleteBuffer(ID);
+            GLH.DeleteBuffer(ID);
         }
     }
 }

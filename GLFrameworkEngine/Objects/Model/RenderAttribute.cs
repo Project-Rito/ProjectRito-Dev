@@ -108,13 +108,13 @@ namespace GLFrameworkEngine
                 return;
 
             //Toggle and set the attribute
-            GL.EnableVertexAttribArray(Location);
+            GLH.EnableVertexAttribArray(Location);
             SetAttribute(Location, stride);
         }
 
         public virtual void SetAttribute(int index, int stride)
         {
-            GL.VertexAttribPointer(index, ElementCount, Type, Normalized, stride, Offset.Value);
+            GLH.VertexAttribPointer(index, ElementCount, Type, Normalized, stride, Offset.Value);
         }
 
         public static RenderAttribute[] GetAttributes<T>()

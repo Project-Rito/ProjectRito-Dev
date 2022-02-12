@@ -27,12 +27,12 @@ namespace AGraphicsLibrary
 
             Filter.Bind();
 
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer,
+            GLH.FramebufferTexture2D(FramebufferTarget.Framebuffer,
                 FramebufferAttachment.ColorAttachment0,
                 TextureTarget.Texture2D, output.ID, 0);
 
-            GL.Viewport(0, 0, control.Width, control.Height);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.Viewport(0, 0, control.Width, control.Height);
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
 
             var shader = GlobalShaders.GetShader("SHADOWPREPASS");
             shader.Enable();
@@ -43,13 +43,13 @@ namespace AGraphicsLibrary
             if (output.Width != control.Width || output.Height != control.Height)
             {
                 output.Bind();
-                GL.TexImage2D(output.Target, 0, output.PixelInternalFormat,
+                GLH.TexImage2D(output.Target, 0, output.PixelInternalFormat,
                           control.Width, control.Height, 0, output.PixelFormat, output.PixelType, IntPtr.Zero);
                 output.Unbind();
             }
 
-            GL.ClearColor(0, 0, 0, 0);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLH.ClearColor(0, 0, 0, 0);
+            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             var viewProjMatInv = control.Camera.ViewProjectionMatrix.Inverted();
             var lightVP = control.Scene.ShadowRenderer.GetLightSpaceViewProjMatrix();
@@ -68,13 +68,13 @@ namespace AGraphicsLibrary
 
             ScreenQuadRender.Draw();
 
-            GL.Flush();
+            GLH.Flush();
 
             Filter.Unbind();
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
 
-            GL.UseProgram(0);
-            GL.Viewport(0, 0, control.Width, control.Height);
+            GLH.UseProgram(0);
+            GLH.Viewport(0, 0, control.Width, control.Height);
         }
     }
 }

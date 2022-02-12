@@ -33,11 +33,11 @@ namespace GLFrameworkEngine
             //Draw the dashed alpha material
             MaskedAlpha.RenderAlphaTest();
 
-            GL.LineWidth(1.0f);
+            GLH.LineWidth(1.0f);
             mesh.UpdatePrimitiveType(primitiveType);
             mesh.Draw(context);
 
-            GL.Disable(EnableCap.AlphaTest);
+            GLH.Disable(EnableCap.AlphaTest);
         }
 
         public static void DrawFilledMask(GLContext context, Matrix4 mdlMtx,
@@ -50,14 +50,14 @@ namespace GLFrameworkEngine
 
             TranslucentBlend.RenderBlendState();
 
-            GL.DepthMask(false);
-            GL.Enable(EnableCap.CullFace);
-            GL.CullFace(CullFaceMode.Back);
+            GLH.DepthMask(false);
+            GLH.Enable(EnableCap.CullFace);
+            GLH.CullFace(CullFaceMode.Back);
 
             mesh.UpdatePrimitiveType(primitiveType);
             mesh.Draw(context);
 
-            GL.DepthMask(true);
+            GLH.DepthMask(true);
         }
     }
 }

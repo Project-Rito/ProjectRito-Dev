@@ -32,7 +32,7 @@ namespace GLFrameworkEngine
             shadowTexture.UpdateParameters();
 
             float[] borderColor = new float[4] { 1, 1, 1, 1 };
-            GL.TexParameter(shadowTexture.Target, TextureParameterName.TextureBorderColor, borderColor);
+            GLH.TexParameter(shadowTexture.Target, TextureParameterName.TextureBorderColor, borderColor);
 
             shadowTexture.Unbind();
 

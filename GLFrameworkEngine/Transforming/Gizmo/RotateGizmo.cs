@@ -122,11 +122,11 @@ namespace GLFrameworkEngine
             var shader = GlobalShaders.GetShader("GIZMO");
             context.CurrentShader = shader;
 
-            GL.Disable(EnableCap.DepthTest);
+            GLH.Disable(EnableCap.DepthTest);
 
             //Ignore the previous depth from the current drawn buffer.
             //This is to prevent depth from clipping in models.
-            GL.Clear(ClearBufferMask.DepthBufferBit);
+            GLH.Clear(ClearBufferMask.DepthBufferBit);
 
             var translateMtx = Matrix4.CreateTranslation(position);
             var scaleMtx = Matrix4.CreateScale(scale);
@@ -137,9 +137,9 @@ namespace GLFrameworkEngine
 
             if (displayGizmo)
             {
-                GL.Enable(EnableCap.LineSmooth);
-                GL.LineWidth(5);
-                GL.PushAttrib(AttribMask.DepthBufferBit);
+                GLH.Enable(EnableCap.LineSmooth);
+                GLH.LineWidth(5);
+                GLH.PushAttrib(AttribMask.DepthBufferBit);
 
                 transform = scaleMtx * translateMtx;
 
@@ -156,13 +156,13 @@ namespace GLFrameworkEngine
                     DrawAxis(context, i, isMoving && isSelected[i], isHovered[i], ref transform, _rotations[i], _colors[i]);
                 }
 
-                GL.PopAttrib();
+                GLH.PopAttrib();
 
                 if (!isMoving && !isSelected.Any(x => x))
                     GizmoCenterRender.Draw(context, position, scale, new Vector4(1));
             }
 
-            GL.LineWidth(2);
+            GLH.LineWidth(2);
 
             //Draw lines for the selected axis objects during movement
             if (isMoving && !displayGizmo)
@@ -184,10 +184,10 @@ namespace GLFrameworkEngine
                         new Vector4(1), false);
                 }
             }
-            GL.LineWidth(1);
+            GLH.LineWidth(1);
 
             context.CurrentShader = null;
-            GL.Enable(EnableCap.DepthTest);
+            GLH.Enable(EnableCap.DepthTest);
         }
 
         public void DrawOrb(GLContext context, ref Matrix4 transform, bool isMoving, bool isHovered)
@@ -198,7 +198,7 @@ namespace GLFrameworkEngine
             context.CurrentShader.SetMatrix4x4("mtxMdl", ref matrix);
             context.CurrentShader.SetVector4("selectionColor", Vector4.Zero);
 
-            GL.Enable(EnableCap.DepthTest);
+            GLH.Enable(EnableCap.DepthTest);
 
             GLMaterialBlendState.Translucent.RenderBlendState();
             context.CurrentShader.SetVector4("color", new Vector4(0.7f, 0.7f, 0.7f, 0.15f));
@@ -206,7 +206,7 @@ namespace GLFrameworkEngine
 
             GLMaterialBlendState.Opaque.RenderBlendState();
 
-            GL.Disable(EnableCap.DepthTest);
+            GLH.Disable(EnableCap.DepthTest);
 
             context.CurrentShader.SetVector4("color", new Vector4(0.4f, 0.4f, 0.4f, 1));
             CircleRenderer.Draw(context);
@@ -218,7 +218,7 @@ namespace GLFrameworkEngine
                 context.CurrentShader.SetVector4("color", new Vector4(1, 1, 0, 1));
             CircleRenderer.Draw(context);
 
-            GL.Enable(EnableCap.DepthTest);
+            GLH.Enable(EnableCap.DepthTest);
         }
 
         public void DrawAxis(GLContext context, int index, bool isMoving, bool isSelected, ref Matrix4 transform, Vector4 rotation, Vector3 color)
@@ -234,7 +234,7 @@ namespace GLFrameworkEngine
             //Draw a filled circle if in a moving action
             if (isMoving)
             {
-                GL.Disable(EnableCap.DepthTest);
+                GLH.Disable(EnableCap.DepthTest);
                 CircleRenderer.Draw(context);
 
                 var angle = context.TransformTools.TransformSettings.RotationAngle;
@@ -260,9 +260,9 @@ namespace GLFrameworkEngine
 
                 GLMaterialBlendState.TranslucentAlphaOne.RenderBlendState();
 
-                GL.Disable(EnableCap.CullFace);
+                GLH.Disable(EnableCap.CullFace);
                 CircleChangeSegmentRenderer.Draw(context);
-                GL.Enable(EnableCap.CullFace);
+                GLH.Enable(EnableCap.CullFace);
 
                 GLMaterialBlendState.Opaque.RenderBlendState();
             }

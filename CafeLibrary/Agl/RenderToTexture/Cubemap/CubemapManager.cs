@@ -115,7 +115,7 @@ namespace AGraphicsLibrary
         static void GenerateCubemap(GLContext control, GLTextureCube texture,
              CubemapCamera camera, List<GenericRenderer> models, int numMips)
         {
-            GL.BindTexture(TextureTarget.TextureCubeMap, 0);
+            GLH.BindTexture(TextureTarget.TextureCubeMap, 0);
 
             int size = CUBEMAP_UPSCALE_SIZE;
 
@@ -130,20 +130,20 @@ namespace AGraphicsLibrary
                 int mipHeight = (int)(size * Math.Pow(0.5, mip));
 
                 frameBuffer.Resize(mipWidth, mipHeight);
-                GL.Viewport(0, 0, mipWidth, mipHeight);
+                GLH.Viewport(0, 0, mipWidth, mipHeight);
 
                 for (int i = 0; i < 6; i++)
                 {
                     //First filter a normal texture 2d face
-                    GL.FramebufferTexture2D(FramebufferTarget.Framebuffer,
+                    GLH.FramebufferTexture2D(FramebufferTarget.Framebuffer,
                                    FramebufferAttachment.ColorAttachment0,
                                     TextureTarget.TextureCubeMapPositiveX + i, texture.ID, mip);
 
                     //point camera in the right direction
                     camera.SwitchToFace(i);
 
-                    GL.ClearColor(0, 0, 0, 1);
-                    GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                    GLH.ClearColor(0, 0, 0, 1);
+                    GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
                     //render scene to fbo, and therefore to the current face of the cubemap
                     foreach (var model in models)
@@ -151,15 +151,15 @@ namespace AGraphicsLibrary
                 }
             }
 
-            var errorcheck = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+            var errorcheck = GLH.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (errorcheck != FramebufferErrorCode.FramebufferComplete)
                 throw new Exception(errorcheck.ToString());
 
             frameBuffer.Dispoe();
             frameBuffer.DisposeRenderBuffer();
 
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            GL.UseProgram(0);
+            GLH.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GLH.UseProgram(0);
         }
     }
 

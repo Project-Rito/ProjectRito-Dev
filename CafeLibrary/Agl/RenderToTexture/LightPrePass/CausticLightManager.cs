@@ -75,8 +75,8 @@ namespace AGraphicsLibrary
             shader.SetFloat("fov_x", context.Camera.Fov);
             shader.SetFloat("fov_y", context.Camera.Fov);
 
-            GL.Enable(EnableCap.CullFace);
-            GL.CullFace(CullFaceMode.Back);
+            GLH.Enable(EnableCap.CullFace);
+            GLH.CullFace(CullFaceMode.Back);
         }
     }
 }

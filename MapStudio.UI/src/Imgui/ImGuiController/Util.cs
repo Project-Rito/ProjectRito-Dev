@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Graphics.OpenGL;
+using GLFrameworkEngine;
 
 namespace MapStudio.UI
 {
@@ -23,7 +24,7 @@ namespace MapStudio.UI
         {
             return;
 
-            var error = GL.GetError();
+            var error = GLH.GetError();
             if (error != ErrorCode.NoError)
             {
                 Debug.Print($"{title}: {error}");
@@ -34,38 +35,38 @@ namespace MapStudio.UI
         public static void LabelObject(ObjectLabelIdentifier objLabelIdent, int glObject, string name)
         {
             // OpenGL 3.3 doesn't have glObjectLabel as that is a 4.3 feature. So we do nothing here...
-            // GL.ObjectLabel(objLabelIdent, glObject, name.Length, name);
+            // GLH.ObjectLabel(objLabelIdent, glObject, name.Length, name);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CreateTexture(TextureTarget target, string Name, out int Texture)
         {
-            Texture = GL.GenTexture();
-            GL.BindTexture(target, Texture);
-            GL.BindTexture(target, 0);
+            Texture = GLH.GenTexture();
+            GLH.BindTexture(target, Texture);
+            GLH.BindTexture(target, 0);
             LabelObject(ObjectLabelIdentifier.Texture, Texture, $"Texture: {Name}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CreateProgram(string Name, out int Program)
         {
-            Program = GL.CreateProgram();
+            Program = GLH.CreateProgram();
             LabelObject(ObjectLabelIdentifier.Program, Program, $"Program: {Name}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CreateShader(ShaderType type, string Name, out int Shader)
         {
-            Shader = GL.CreateShader(type);
+            Shader = GLH.CreateShader(type);
             LabelObject(ObjectLabelIdentifier.Shader, Shader, $"Shader: {type}: {Name}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CreateBuffer(string Name, out int Buffer)
         {
-            Buffer = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, Buffer);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            Buffer = GLH.GenBuffer();
+            GLH.BindBuffer(BufferTarget.ArrayBuffer, Buffer);
+            GLH.BindBuffer(BufferTarget.ArrayBuffer, 0);
             LabelObject(ObjectLabelIdentifier.Buffer, Buffer, $"Buffer: {Name}");
         }
 
@@ -78,9 +79,9 @@ namespace MapStudio.UI
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CreateVertexArray(string Name, out int VAO)
         {
-            VAO = GL.GenVertexArray();
-            GL.BindVertexArray(VAO);
-            GL.BindVertexArray(0);
+            VAO = GLH.GenVertexArray();
+            GLH.BindVertexArray(VAO);
+            GLH.BindVertexArray(0);
             LabelObject(ObjectLabelIdentifier.VertexArray, VAO, $"VAO: {Name}");
         }
     }

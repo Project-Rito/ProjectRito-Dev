@@ -15,16 +15,16 @@ namespace GLFrameworkEngine
 
         public void Render()
         {
-            GL.Enable(EnableCap.CullFace);
+            GLH.Enable(EnableCap.CullFace);
 
             if (CullingMode == CullMode.None)
-                GL.Disable(EnableCap.CullFace);
+                GLH.Disable(EnableCap.CullFace);
             else if (CullingMode == CullMode.FrontAndBack)
-                GL.CullFace(CullFaceMode.FrontAndBack);
+                GLH.CullFace(CullFaceMode.FrontAndBack);
             else if (CullingMode == CullMode.Front)
-                GL.CullFace(CullFaceMode.Front);
+                GLH.CullFace(CullFaceMode.Front);
             else if (CullingMode == CullMode.Back)
-                GL.CullFace(CullFaceMode.Back);
+                GLH.CullFace(CullFaceMode.Back);
         }
 
         public enum CullMode

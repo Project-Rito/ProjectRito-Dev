@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Input;
 using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL;
 using ImGuiNET;
 using MapStudio.UI;
 using GLFrameworkEngine;
@@ -40,7 +40,7 @@ namespace MapStudio
                                 DisplayDevice.Default,
                                 3, 2, GraphicsContextFlags.Default)
         {
-            Title += $": {TranslationSource.GetText("OPENGL_VERSION")}: " + GL.GetString(StringName.Version);
+            Title += $": {TranslationSource.GetText("OPENGL_VERSION")}: " + GLH.GetString(StringName.Version);
 
             _arguments = arguments;
 
@@ -276,8 +276,8 @@ namespace MapStudio
 
             ImGui.End();
 
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            GL.Viewport(0, 0, Width, Height);
+            GLH.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GLH.Viewport(0, 0, Width, Height);
 
             _controller.Render();
 

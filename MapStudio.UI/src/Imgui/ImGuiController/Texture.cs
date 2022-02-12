@@ -9,6 +9,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GLFrameworkEngine;
 using PixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
 
 namespace MapStudio.UI
@@ -31,7 +32,7 @@ namespace MapStudio.UI
 
         static Texture()
         {
-            MaxAniso = GL.GetFloat(MAX_TEXTURE_MAX_ANISOTROPY);
+            MaxAniso = GLH.GetFloat(MAX_TEXTURE_MAX_ANISOTROPY);
         }
 
         public readonly string Name;
@@ -62,22 +63,22 @@ namespace MapStudio.UI
 
             Util.CreateTexture(TextureTarget.Texture2D, Name, out GLTexture);
 
-            GL.BindTexture(TextureTarget.Texture2D, GLTexture);
-            GL.TexStorage2D(TextureTarget2d.Texture2D, MipmapLevels, InternalFormat, Width, Height);
+            GLH.BindTexture(TextureTarget.Texture2D, GLTexture);
+            GLH.TexStorage2D(TextureTarget2d.Texture2D, MipmapLevels, InternalFormat, Width, Height);
             Util.CheckGLError("Storage2d");
 
             BitmapData data = image.LockBits(new System.Drawing.Rectangle(0, 0, Width, Height),
                 ImageLockMode.ReadOnly, global::System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             
-            GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, Width, Height, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+            GLH.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, Width, Height, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
             Util.CheckGLError("SubImage");
 
             image.UnlockBits(data);
             image.Dispose();
 
-            if (generateMipmaps) GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            if (generateMipmaps) GLH.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, MipmapLevels - 1);
+            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, MipmapLevels - 1);
 
             SetWrap(TextureCoordinate.S, TextureWrapMode.Repeat);
             SetWrap(TextureCoordinate.T, TextureWrapMode.Repeat);
@@ -105,14 +106,14 @@ namespace MapStudio.UI
             MipmapLevels = generateMipmaps == false ? 1 : (int)Math.Floor(Math.Log(Math.Max(Width, Height), 2));
 
             Util.CreateTexture(TextureTarget.Texture2D, Name, out GLTexture);
-            GL.BindTexture(TextureTarget.Texture2D, GLTexture);
-            GL.TexStorage2D(TextureTarget2d.Texture2D, MipmapLevels, InternalFormat, Width, Height);
+            GLH.BindTexture(TextureTarget.Texture2D, GLTexture);
+            GLH.TexStorage2D(TextureTarget2d.Texture2D, MipmapLevels, InternalFormat, Width, Height);
 
-            GL.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, Width, Height, PixelFormat.Bgra, PixelType.UnsignedByte, data);
+            GLH.TexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, Width, Height, PixelFormat.Bgra, PixelType.UnsignedByte, data);
 
-            if (generateMipmaps) GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            if (generateMipmaps) GLH.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, MipmapLevels - 1);
+            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, MipmapLevels - 1);
 
             SetWrap(TextureCoordinate.S, TextureWrapMode.Repeat);
             SetWrap(TextureCoordinate.T, TextureWrapMode.Repeat);
@@ -120,46 +121,46 @@ namespace MapStudio.UI
 
         public void SetMinFilter(TextureMinFilter filter)
         {
-            GL.BindTexture(TextureTarget.Texture2D, GLTexture);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)filter);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.BindTexture(TextureTarget.Texture2D, GLTexture);
+            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)filter);
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         public void SetMagFilter(TextureMagFilter filter)
         {
-            GL.BindTexture(TextureTarget.Texture2D, GLTexture);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)filter);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.BindTexture(TextureTarget.Texture2D, GLTexture);
+            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)filter);
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         public void SetAnisotropy(float level)
         {
             const TextureParameterName TEXTURE_MAX_ANISOTROPY = (TextureParameterName)0x84FE;
 
-            GL.BindTexture(TextureTarget.Texture2D, GLTexture);
-            GL.TexParameter(TextureTarget.Texture2D, TEXTURE_MAX_ANISOTROPY, Util.Clamp(level, 1, MaxAniso));
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.BindTexture(TextureTarget.Texture2D, GLTexture);
+            GLH.TexParameter(TextureTarget.Texture2D, TEXTURE_MAX_ANISOTROPY, Util.Clamp(level, 1, MaxAniso));
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         public void SetLod(int @base, int min, int max)
         {
-            GL.BindTexture(TextureTarget.Texture2D, GLTexture);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureLodBias, @base);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinLod, min);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLod, max);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.BindTexture(TextureTarget.Texture2D, GLTexture);
+            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureLodBias, @base);
+            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinLod, min);
+            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLod, max);
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         public void SetWrap(TextureCoordinate coord, TextureWrapMode mode)
         {
-            GL.BindTexture(TextureTarget.Texture2D, GLTexture);
-            GL.TexParameter(TextureTarget.Texture2D, (TextureParameterName)coord, (int)mode);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.BindTexture(TextureTarget.Texture2D, GLTexture);
+            GLH.TexParameter(TextureTarget.Texture2D, (TextureParameterName)coord, (int)mode);
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         public void Dispose()
         {
-            GL.DeleteTexture(GLTexture);
+            GLH.DeleteTexture(GLTexture);
         }
     }
 }

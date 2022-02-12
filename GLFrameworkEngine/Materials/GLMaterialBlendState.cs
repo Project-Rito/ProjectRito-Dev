@@ -76,36 +76,36 @@ namespace GLFrameworkEngine
         {
             if (DepthTest)
             {
-                GL.Enable(EnableCap.DepthTest);
-                GL.DepthFunc(DepthFunction);
-                GL.DepthMask(DepthWrite);
+                GLH.Enable(EnableCap.DepthTest);
+                GLH.DepthFunc(DepthFunction);
+                GLH.DepthMask(DepthWrite);
             }
             else
-                GL.Disable(EnableCap.DepthTest);
+                GLH.Disable(EnableCap.DepthTest);
         }
 
         public void RenderAlphaTest()
         {
             if (AlphaTest)
             {
-                GL.Enable(EnableCap.AlphaTest);
-                GL.AlphaFunc(AlphaFunction, AlphaValue);
+                GLH.Enable(EnableCap.AlphaTest);
+                GLH.AlphaFunc(AlphaFunction, AlphaValue);
             }
             else
-                GL.Disable(EnableCap.AlphaTest);
+                GLH.Disable(EnableCap.AlphaTest);
         }
 
         public void RenderBlendState()
         {
             if (BlendColor || BlendMask)
             {
-                GL.Enable(EnableCap.Blend);
-                GL.BlendFuncSeparate(ColorSrc, ColorDst, AlphaSrc, AlphaDst);
-                GL.BlendEquationSeparate(ColorOp, AlphaOp);
-                GL.BlendColor(Color.X, Color.Y, Color.Z, Color.W);
+                GLH.Enable(EnableCap.Blend);
+                GLH.BlendFuncSeparate(ColorSrc, ColorDst, AlphaSrc, AlphaDst);
+                GLH.BlendEquationSeparate(ColorOp, AlphaOp);
+                GLH.BlendColor(Color.X, Color.Y, Color.Z, Color.W);
             }
             else
-                GL.Disable(EnableCap.Blend);
+                GLH.Disable(EnableCap.Blend);
         }
     }
 }

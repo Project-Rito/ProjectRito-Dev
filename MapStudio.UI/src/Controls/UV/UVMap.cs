@@ -25,7 +25,7 @@ namespace MapStudio.UI
         {
             if (Length == 0)
             {
-                int buffer = GL.GenBuffer();
+                int buffer = GLH.GenBuffer();
                 vao = new VertexBufferObject(buffer);
                 vao.AddAttribute(0, 2, VertexAttribPointerType.Float, false, 8, 0);
                 vao.Initialize();
@@ -40,7 +40,7 @@ namespace MapStudio.UI
 
         public void Draw(UVViewport.Camera2D camera, Vector2 scale)
         {
-            GL.Disable(EnableCap.CullFace);
+            GLH.Disable(EnableCap.CullFace);
 
             var shader = GlobalShaders.GetShader("UV_WINDOW");
             shader.Enable();
@@ -56,9 +56,9 @@ namespace MapStudio.UI
 
             vao.Enable(shader);
             vao.Use();
-            GL.DrawArrays(PrimitiveType.LineLoop, 0, Points.Count);
+            GLH.DrawArrays(PrimitiveType.LineLoop, 0, Points.Count);
 
-            GL.Enable(EnableCap.CullFace);
+            GLH.Enable(EnableCap.CullFace);
         }
 
         public void UpdateVertexBuffer(int PolygonGroupIndex, int UvChannelIndex, List<STGenericMesh> genericObjects, STGenericTextureMap textureMap)
@@ -140,13 +140,13 @@ namespace MapStudio.UI
             vao.Bind();
 
             float[] data = list.ToArray();
-            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.StaticDraw);
+            GLH.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.StaticDraw);
         }
 
         private void DrawUVTriangleAndGrid(Vector2 v1, Vector2 v2, Vector2 v3, int divisions,
             System.Drawing.Color uvColor, int lineWidth, System.Drawing.Color gridColor, STGenericTextureMap textureMap)
         {
-            GL.UseProgram(0);
+            GLH.UseProgram(0);
 
             Vector2 scaleUv = new Vector2(2);
             Vector2 transUv = new Vector2(-1f);

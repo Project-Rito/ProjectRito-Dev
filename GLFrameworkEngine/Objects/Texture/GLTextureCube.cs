@@ -44,7 +44,7 @@ namespace GLFrameworkEngine
                     var width = CalculateMipDimension(texture.Width, j);
                     var height = CalculateMipDimension(texture.Height, j);
 
-                    GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, j, pixelInternalFormat,
+                    GLH.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, j, pixelInternalFormat,
                         width, height,
                         0, pixelFormat, pixelType, IntPtr.Zero);
                 }
@@ -91,21 +91,21 @@ namespace GLFrameworkEngine
 
                     if (j == 0)
                     {
-                        GL.CompressedTexImage2D(TextureTarget.TextureCubeMapPositiveX + i, j,
+                        GLH.CompressedTexImage2D(TextureTarget.TextureCubeMapPositiveX + i, j,
                             format,
                             mipWidth, mipHeight,
                             0, imageSize, surfaces[i].mipmaps[0]);
                     }
                     else if (j == 1)
                     {
-                        GL.CompressedTexImage2D(TextureTarget.TextureCubeMapPositiveX + i, j,
+                        GLH.CompressedTexImage2D(TextureTarget.TextureCubeMapPositiveX + i, j,
                             format,
                             mipWidth, mipHeight,
                             0, imageSize, surfacesMip[i].mipmaps[0]);
                     }
                     else
                     {
-                        GL.CompressedTexImage2D(TextureTarget.TextureCubeMapPositiveX + i, j,
+                        GLH.CompressedTexImage2D(TextureTarget.TextureCubeMapPositiveX + i, j,
                             format,
                             mipWidth, mipHeight,
                             0, imageSize, IntPtr.Zero);
@@ -153,14 +153,14 @@ namespace GLFrameworkEngine
 
                     if (format == InternalFormat.Rgba8)
                     {
-                        GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, j,
+                        GLH.TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, j,
                             PixelInternalFormat.Rgba,
                             mipWidth, mipHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte,
                             surface);
                     }
                     else
                     {
-                        GL.CompressedTexImage2D(TextureTarget.TextureCubeMapPositiveX + i, j,
+                        GLH.CompressedTexImage2D(TextureTarget.TextureCubeMapPositiveX + i, j,
                             format,
                             mipWidth, mipHeight,
                             0, imageSize, surface);
@@ -210,7 +210,7 @@ namespace GLFrameworkEngine
                 for (int m = 0; m < this.MipCount; m++) {
                     int mipSize = (int)(size * Math.Pow(0.5, m));
                     byte[] outputRaw = new byte[mipSize * mipSize * 4];
-                    GL.GetTexImage(TextureTarget.TextureCubeMapPositiveX + i, m,
+                    GLH.GetTexImage(TextureTarget.TextureCubeMapPositiveX + i, m,
                       PixelFormat.Bgra, PixelType.UnsignedByte, outputRaw);
 
                     surface.mipmaps.Add(outputRaw);
@@ -259,7 +259,7 @@ namespace GLFrameworkEngine
             for (int i = 0; i < 6; i++)
             {
                 byte[] outputRaw = new byte[size * size * 4];
-                GL.GetTexImage(TextureTarget.TextureCubeMapPositiveX + i, level,
+                GLH.GetTexImage(TextureTarget.TextureCubeMapPositiveX + i, level,
                   PixelFormat.Bgra, PixelType.UnsignedByte, outputRaw);
                 outputs.Add(outputRaw);
             }
@@ -272,7 +272,7 @@ namespace GLFrameworkEngine
             for (int i = 0; i < 6; i++)
             {
                 byte[] outputRaw = new byte[Width * Height * 5];
-                GL.GetTexImage(TextureTarget.TextureCubeMapPositiveX + i, level,
+                GLH.GetTexImage(TextureTarget.TextureCubeMapPositiveX + i, level,
                   PixelFormat, PixelType, outputRaw);
                 outputs.Add(outputRaw);
             }
@@ -284,7 +284,7 @@ namespace GLFrameworkEngine
             Bind();
             byte[] output = new byte[Width * Height * 4];
 
-            GL.GetTexImage(TextureTarget.TextureCubeMapPositiveX + index, 0,
+            GLH.GetTexImage(TextureTarget.TextureCubeMapPositiveX + index, 0,
                  PixelFormat.Bgra, PixelType.UnsignedByte, output);
 
             output = SetImageData(output, Width, Height, true, true);

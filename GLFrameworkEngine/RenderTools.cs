@@ -100,23 +100,23 @@ namespace GLFrameworkEngine
             -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
         };
 
-                GL.GenVertexArrays(1, out cubeVAO);
-                GL.GenBuffers(1, out cubeVBO);
-                GL.BindBuffer(BufferTarget.ArrayBuffer, cubeVBO);
-                GL.BufferData(BufferTarget.ArrayBuffer, 4 * vertices.Length, vertices, BufferUsageHint.StaticDraw);
-                GL.BindVertexArray(cubeVAO);
-                GL.EnableVertexAttribArray(0);
-                GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), (IntPtr)0);
-                GL.EnableVertexAttribArray(1);
-                GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), (IntPtr)(3 * sizeof(float)));
-                GL.EnableVertexAttribArray(2);
-                GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), (IntPtr)(6 * sizeof(float)));
-                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-                GL.BindVertexArray(0);
+                GLH.GenVertexArrays(1, out cubeVAO);
+                GLH.GenBuffers(1, out cubeVBO);
+                GLH.BindBuffer(BufferTarget.ArrayBuffer, cubeVBO);
+                GLH.BufferData(BufferTarget.ArrayBuffer, 4 * vertices.Length, vertices, BufferUsageHint.StaticDraw);
+                GLH.BindVertexArray(cubeVAO);
+                GLH.EnableVertexAttribArray(0);
+                GLH.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), (IntPtr)0);
+                GLH.EnableVertexAttribArray(1);
+                GLH.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), (IntPtr)(3 * sizeof(float)));
+                GLH.EnableVertexAttribArray(2);
+                GLH.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), (IntPtr)(6 * sizeof(float)));
+                GLH.BindBuffer(BufferTarget.ArrayBuffer, 0);
+                GLH.BindVertexArray(0);
             }
-            GL.BindVertexArray(cubeVAO);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
-            GL.BindVertexArray(0);
+            GLH.BindVertexArray(cubeVAO);
+            GLH.DrawArrays(PrimitiveType.Triangles, 0, 36);
+            GLH.BindVertexArray(0);
         }
     }
 }

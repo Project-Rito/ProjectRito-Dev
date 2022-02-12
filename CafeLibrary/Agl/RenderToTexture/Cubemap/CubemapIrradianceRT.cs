@@ -26,14 +26,14 @@ namespace AGraphicsLibrary
                  Matrix4.LookAt(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(0.0f, 0.0f, -1.0f), new Vector3(0.0f, -1.0f, 0.0f)),
             };
 
-            GL.BindTexture(TextureTarget.TextureCubeMap, 0);
+            GLH.BindTexture(TextureTarget.TextureCubeMap, 0);
 
             //Bind the cubemap's texture into a filtered quad. 
             //Bind the drawn filter to a cubemap array layer
             Framebuffer frameBuffer = new Framebuffer(FramebufferTarget.Framebuffer, size, size, PixelInternalFormat.Rgba32f);
             frameBuffer.Bind();
 
-            GL.Disable(EnableCap.Blend);
+            GLH.Disable(EnableCap.Blend);
 
             var cubemapFilter = GlobalShaders.GetShader("CUBEMAP_IRRADIANCE");
             cubemapFilter.Enable();
@@ -41,7 +41,7 @@ namespace AGraphicsLibrary
             if (cubemapOutput.MipCount > 1)
                 cubemapOutput.GenerateMipmaps();
 
-            GL.ActiveTexture(TextureUnit.Texture0 + 1);
+            GLH.ActiveTexture(TextureUnit.Texture0 + 1);
             cubemapInput.Bind();
             cubemapFilter.SetInt("environmentMap", 1);
             cubemapFilter.SetMatrix4x4("projection", ref projection);
@@ -49,50 +49,50 @@ namespace AGraphicsLibrary
             //Quick hack, draw once before rendering (first buffer not updating for some reason??)
             RenderTools.DrawCube();
 
-            GL.Disable(EnableCap.CullFace);
+            GLH.Disable(EnableCap.CullFace);
             for (int mip = 0; mip < cubemapOutput.MipCount; mip++)
             {
                 int mipWidth = (int)(size * Math.Pow(0.5, mip));
                 int mipHeight = (int)(size * Math.Pow(0.5, mip));
 
                 frameBuffer.Resize(mipWidth, mipHeight);
-                GL.Viewport(0, 0, mipWidth, mipHeight);
+                GLH.Viewport(0, 0, mipWidth, mipHeight);
 
                 for (int i = 0; i < 6; i++)
                 {
                     //attach face to fbo as color attachment 0
                     if (cubemapOutput is GLTextureCubeArray)
                     {
-                        GL.FramebufferTextureLayer(FramebufferTarget.Framebuffer,
+                        GLH.FramebufferTextureLayer(FramebufferTarget.Framebuffer,
                              FramebufferAttachment.ColorAttachment0, cubemapOutput.ID, mip, (layer * 6) + i);
                     }
                     else
                     {
-                        GL.FramebufferTexture2D(FramebufferTarget.Framebuffer,
+                        GLH.FramebufferTexture2D(FramebufferTarget.Framebuffer,
                                  FramebufferAttachment.ColorAttachment0,
                                   TextureTarget.TextureCubeMapPositiveX + i, cubemapOutput.ID, mip);
                     }
 
                     cubemapFilter.SetMatrix4x4("view", ref captureViews[i]);
 
-                    GL.ClearColor(0,0,0,1);
-                    GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                    GLH.ClearColor(0,0,0,1);
+                    GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
                     RenderTools.DrawCube();
                 }
             }
 
-            var errorcheck = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+            var errorcheck = GLH.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (errorcheck != FramebufferErrorCode.FramebufferComplete)
                 throw new Exception(errorcheck.ToString());
 
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            GL.Enable(EnableCap.CullFace);
-            GL.Enable(EnableCap.Blend);
+            GLH.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GLH.Enable(EnableCap.CullFace);
+            GLH.Enable(EnableCap.Blend);
 
             frameBuffer.Dispoe();
             frameBuffer.DisposeRenderBuffer();
 
-            GL.UseProgram(0);
+            GLH.UseProgram(0);
         }
     }
 }

@@ -133,8 +133,8 @@ namespace GLFrameworkEngine
                 new Vector2(min.X, max.Y),
             });
 
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadIdentity();
+            GLH.MatrixMode(MatrixMode.Modelview);
+            GLH.LoadIdentity();
 
             var mdlMtx = Matrix4.Identity;
 

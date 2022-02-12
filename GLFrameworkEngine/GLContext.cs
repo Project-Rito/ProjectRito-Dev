@@ -231,7 +231,7 @@ namespace GLFrameworkEngine
             {
                 if(value == null)
                 {
-                    GL.UseProgram(0);
+                    GLH.UseProgram(0);
                     return;
                 }
 

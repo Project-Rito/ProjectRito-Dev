@@ -120,10 +120,10 @@ namespace MapStudio.UI
         {
             FrameBuffer.Bind();
 
-            GL.Viewport(0, 0, Width, Height);
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadIdentity();
-            GL.MatrixMode(MatrixMode.Modelview);
+            GLH.Viewport(0, 0, Width, Height);
+            GLH.MatrixMode(MatrixMode.Projection);
+            GLH.LoadIdentity();
+            GLH.MatrixMode(MatrixMode.Modelview);
 
             if (UseOrtho)
             {
@@ -145,8 +145,8 @@ namespace MapStudio.UI
                 Camera.ProjectionMatrix = perspectiveMatrix;
             }
 
-            GL.ClearColor(0,0,0,0);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLH.ClearColor(0,0,0,0);
+            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             SetupScene();
 
             FrameBuffer.Unbind();

@@ -63,8 +63,8 @@ namespace GLFrameworkEngine
             Material.DisplaySelection = IsSelected;
             Material.Render(context);
 
-            GL.Disable(EnableCap.DepthTest);
-            GL.LineWidth(1.5f);
+            GLH.Disable(EnableCap.DepthTest);
+            GLH.LineWidth(1.5f);
 
             GLMaterialBlendState.Translucent.RenderBlendState();
 
@@ -72,9 +72,9 @@ namespace GLFrameworkEngine
 
             GLMaterialBlendState.Opaque.RenderBlendState();
 
-            GL.Enable(EnableCap.DepthTest);
+            GLH.Enable(EnableCap.DepthTest);
 
-            GL.LineWidth(1);
+            GLH.LineWidth(1);
         }
     }
 }

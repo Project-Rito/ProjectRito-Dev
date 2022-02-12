@@ -116,7 +116,7 @@ namespace CafeLibrary.Rendering
             if (pass == Pass.OPAQUE && (parentRender.IsSelected || parentRender.IsHovered))
                 DrawLineSelection(context, parentRender, parentRender.IsSelected, parentRender.IsHovered);
 
-            GL.DepthMask(true);
+            GLH.DepthMask(true);
         }
 
         public void DrawShadowModel(GLContext context, BfresRender parentRender)
@@ -211,19 +211,19 @@ namespace CafeLibrary.Rendering
 
         private void DrawFrontFaceSelection(GLContext control, bool parentSelected)
         {
-            GL.Enable(EnableCap.StencilTest);
-            GL.Clear(ClearBufferMask.StencilBufferBit);
-            GL.ClearStencil(0);
-            GL.StencilFunc(StencilFunction.Always, 0x1, 0x1);
-            GL.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
+            GLH.Enable(EnableCap.StencilTest);
+            GLH.Clear(ClearBufferMask.StencilBufferBit);
+            GLH.ClearStencil(0);
+            GLH.StencilFunc(StencilFunction.Always, 0x1, 0x1);
+            GLH.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
         }
 
         private void DrawLineSelection(GLContext control, BfresRender parentRender, bool parentSelected, bool isHovered)
         {
-            GL.Disable(EnableCap.AlphaTest);
-            GL.Disable(EnableCap.Blend);
-            GL.Enable(EnableCap.CullFace);
-            GL.CullFace(CullFaceMode.Back);
+            GLH.Disable(EnableCap.AlphaTest);
+            GLH.Disable(EnableCap.Blend);
+            GLH.Enable(EnableCap.CullFace);
+            GLH.CullFace(CullFaceMode.Back);
 
             var selectionShader = GlobalShaders.GetShader("PICKING");
             control.CurrentShader = selectionShader;
@@ -234,11 +234,11 @@ namespace CafeLibrary.Rendering
 
             //Draw lines
             {
-                GL.LineWidth(GLConstants.SelectionWidth);
-                GL.StencilFunc(StencilFunction.Equal, 0x0, 0x1);
-                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+                GLH.LineWidth(GLConstants.SelectionWidth);
+                GLH.StencilFunc(StencilFunction.Equal, 0x0, 0x1);
+                GLH.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
 
-                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+                GLH.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
                 foreach (var mesh in Meshes)
                 {
@@ -247,11 +247,11 @@ namespace CafeLibrary.Rendering
                     }
                 }
 
-                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+                GLH.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             }
 
-            GL.Disable(EnableCap.StencilTest);
-            GL.LineWidth(1);
+            GLH.Disable(EnableCap.StencilTest);
+            GLH.LineWidth(1);
         }
 
         public void DrawColorPicking(GLContext control, BfresRender parentRender)
@@ -259,7 +259,7 @@ namespace CafeLibrary.Rendering
             if (!IsVisible)
                 return;
 
-            GL.Enable(EnableCap.DepthTest);
+            GLH.Enable(EnableCap.DepthTest);
             foreach (BfresMeshRender mesh in this.Meshes)
             {
                 if (!mesh.IsVisible)
@@ -275,8 +275,8 @@ namespace CafeLibrary.Rendering
 
                 control.CurrentShader.SetInt("UseSkinning", 0);
             }
-            GL.Enable(EnableCap.CullFace);
-            GL.CullFace(CullFaceMode.Back);
+            GLH.Enable(EnableCap.CullFace);
+            GLH.CullFace(CullFaceMode.Back);
         }
 
         public void RenderMesh(GLContext context, BfresRender parentRender, BfresMeshRender mesh)
@@ -379,7 +379,7 @@ namespace CafeLibrary.Rendering
 
         private void SetModelMatrix(int programID, STSkeleton skeleton, bool useInverse = true)
         {
-            GL.Uniform1(GL.GetUniformLocation(programID, "UseSkinning"), 1);
+            GLH.Uniform1(GLH.GetUniformLocation(programID, "UseSkinning"), 1);
 
             for (int i = 0; i < skeleton.Bones.Count; i++)
             {
@@ -387,7 +387,7 @@ namespace CafeLibrary.Rendering
                 //Check if the bone is smooth skinning aswell for accuracy purposes.
                 if (useInverse)
                     transform = skeleton.Bones[i].Inverse * skeleton.Bones[i].Transform;
-                GL.UniformMatrix4(GL.GetUniformLocation(programID, String.Format("bones[{0}]", i)), false, ref transform);
+                GLH.UniformMatrix4(GLH.GetUniformLocation(programID, String.Format("bones[{0}]", i)), false, ref transform);
             }
         }
     }

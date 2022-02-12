@@ -20,7 +20,7 @@ namespace MapStudio.UI
         {
             if (Length == 0)
             {
-                int buffer = GL.GenBuffer();
+                int buffer = GLH.GenBuffer();
                 vao = new VertexBufferObject(buffer);
                 vao.AddAttribute(0, 2, VertexAttribPointerType.Float, false, 16, 0);
                 vao.AddAttribute(1, 2, VertexAttribPointerType.Float, false, 16, 8);
@@ -54,7 +54,7 @@ namespace MapStudio.UI
                 Length = 4;
 
                 float[] data = list.ToArray();
-                GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.StaticDraw);
+                GLH.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.StaticDraw);
             }
         }
 
@@ -65,7 +65,7 @@ namespace MapStudio.UI
 
             Init();
 
-            GL.Disable(EnableCap.CullFace);
+            GLH.Disable(EnableCap.CullFace);
 
             var shader = GlobalShaders.GetShader("UV_WINDOW");
             shader.Enable();
@@ -73,7 +73,7 @@ namespace MapStudio.UI
             var cameraMtx = camera.ViewMatrix * camera.ProjectionMatrix;
             shader.SetMatrix4x4("mtxCam", ref cameraMtx);
 
-            GL.ActiveTexture(TextureUnit.Texture1);
+            GLH.ActiveTexture(TextureUnit.Texture1);
             BindTexture(texture, textureMap);
             shader.SetInt("uvTexture", 1);
             shader.SetInt("hasTexture", 1);
@@ -88,7 +88,7 @@ namespace MapStudio.UI
             //Draw background
             vao.Enable(shader);
             vao.Use();
-            GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Length);
+            GLH.DrawArrays(PrimitiveType.TriangleStrip, 0, Length);
 
             //Draw main texture quad inside boundings (0, 1)
             shader.SetVector2("scale", aspectScale);
@@ -97,7 +97,7 @@ namespace MapStudio.UI
 
             vao.Enable(shader);
             vao.Use();
-            GL.DrawArrays(PrimitiveType.TriangleStrip, 0, Length);
+            GLH.DrawArrays(PrimitiveType.TriangleStrip, 0, Length);
 
             //Draw outline of boundings (0, 1)
             shader.SetInt("hasTexture", 0);
@@ -107,10 +107,10 @@ namespace MapStudio.UI
 
             vao.Enable(shader);
             vao.Use();
-            GL.LineWidth(1);
-            GL.DrawArrays(PrimitiveType.LineLoop, 0, Length);
+            GLH.LineWidth(1);
+            GLH.DrawArrays(PrimitiveType.LineLoop, 0, Length);
 
-            GL.Enable(EnableCap.CullFace);
+            GLH.Enable(EnableCap.CullFace);
         }
 
         static void BindTexture(GenericRenderer.TextureView tex, STGenericTextureMap texMap)
@@ -136,11 +136,11 @@ namespace MapStudio.UI
                 //texID = GLTextureCache.DecodedFormats[texID];
             }
 
-            GL.BindTexture(target, texID);
-            GL.TexParameter(target, TextureParameterName.TextureWrapS, (float)OpenGLHelper.WrapMode[texMap.WrapU]);
-            GL.TexParameter(target, TextureParameterName.TextureWrapT, (float)OpenGLHelper.WrapMode[texMap.WrapV]);
-            GL.TexParameter(target, TextureParameterName.TextureMinFilter, (int)OpenGLHelper.MinFilter[texMap.MinFilter]);
-            GL.TexParameter(target, TextureParameterName.TextureMagFilter, (int)OpenGLHelper.MagFilter[texMap.MagFilter]);
+            GLH.BindTexture(target, texID);
+            GLH.TexParameter(target, TextureParameterName.TextureWrapS, (float)OpenGLHelper.WrapMode[texMap.WrapU]);
+            GLH.TexParameter(target, TextureParameterName.TextureWrapT, (float)OpenGLHelper.WrapMode[texMap.WrapV]);
+            GLH.TexParameter(target, TextureParameterName.TextureMinFilter, (int)OpenGLHelper.MinFilter[texMap.MinFilter]);
+            GLH.TexParameter(target, TextureParameterName.TextureMagFilter, (int)OpenGLHelper.MagFilter[texMap.MagFilter]);
 
             int[] mask = new int[4]
               {
@@ -149,7 +149,7 @@ namespace MapStudio.UI
                         GetSwizzle(tex.BlueChannel),
                         GetSwizzle(tex.AlphaChannel),
               };
-            GL.TexParameter(target, TextureParameterName.TextureSwizzleRgba, mask);
+            GLH.TexParameter(target, TextureParameterName.TextureSwizzleRgba, mask);
         }
 
         static int GetSwizzle(STChannelType channel)

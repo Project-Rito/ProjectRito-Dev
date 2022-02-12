@@ -14,7 +14,7 @@ namespace GLFrameworkEngine
         {
             return false;
 
-           /* var error = GL.GetError();
+           /* var error = GLH.GetError();
             if (error != ErrorCode.NoError)
             {
                 Debug.Print($"{title}: {error}");

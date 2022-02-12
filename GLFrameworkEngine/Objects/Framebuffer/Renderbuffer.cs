@@ -16,7 +16,7 @@ namespace GLFrameworkEngine
         public RenderbufferStorage InternalFormat { get; private set; }
 
         public Renderbuffer(int width, int height, RenderbufferStorage internalFormat)
-            : base(GL.GenRenderbuffer())
+            : base(GLH.GenRenderbuffer())
         {
             Width = width;
             Height = height;
@@ -24,11 +24,11 @@ namespace GLFrameworkEngine
 
             // Allocate storage for the renderbuffer.
             Bind();
-            GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, internalFormat, width, height);
+            GLH.RenderbufferStorage(RenderbufferTarget.Renderbuffer, internalFormat, width, height);
         }
 
         public Renderbuffer(int width, int height, int samples, RenderbufferStorage internalFormat)
-          : base(GL.GenRenderbuffer())
+          : base(GLH.GenRenderbuffer())
         {
             Width = width;
             Height = height;
@@ -36,25 +36,25 @@ namespace GLFrameworkEngine
 
             // Allocate storage for the renderbuffer.
             Bind();
-            GL.RenderbufferStorageMultisample(RenderbufferTarget.Renderbuffer, 4,
+            GLH.RenderbufferStorageMultisample(RenderbufferTarget.Renderbuffer, 4,
                 internalFormat, width, height);
         }
 
         public void Bind() {
-            GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, ID);
+            GLH.BindRenderbuffer(RenderbufferTarget.Renderbuffer, ID);
         }
 
         public void Unbind() {
-            GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
+            GLH.BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
         }
 
         public void Attach(FramebufferAttachment attachment, Framebuffer target) {
             target.Bind();
-            GL.FramebufferRenderbuffer(target.Target, attachment, RenderbufferTarget.Renderbuffer, ID);
+            GLH.FramebufferRenderbuffer(target.Target, attachment, RenderbufferTarget.Renderbuffer, ID);
         }
 
         public void Dispose() {
-            GL.DeleteRenderbuffer(ID);
+            GLH.DeleteRenderbuffer(ID);
         }
     }
 }

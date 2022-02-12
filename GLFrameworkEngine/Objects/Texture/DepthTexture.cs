@@ -22,7 +22,7 @@ namespace GLFrameworkEngine
             // Set texture settings.
             Bind();
 
-            GL.TexImage2D(Target, 0, PixelInternalFormat, Width, Height, 0, PixelFormat, PixelType, IntPtr.Zero);
+            GLH.TexImage2D(Target, 0, PixelInternalFormat, Width, Height, 0, PixelFormat, PixelType, IntPtr.Zero);
             MagFilter = TextureMagFilter.Nearest;
             MinFilter = TextureMinFilter.Nearest;
 
@@ -31,8 +31,8 @@ namespace GLFrameworkEngine
             WrapT = TextureWrapMode.ClampToBorder;
             UpdateParameters();
 
-            GL.TexParameter(Target, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.None);
-            GL.TexParameter(Target, TextureParameterName.TextureBorderColor, new float[] { 1, 1, 1, 1 });
+            GLH.TexParameter(Target, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.None);
+            GLH.TexParameter(Target, TextureParameterName.TextureBorderColor, new float[] { 1, 1, 1, 1 });
 
             Unbind();
         }
@@ -40,7 +40,7 @@ namespace GLFrameworkEngine
         public override void Attach(FramebufferAttachment attachment, Framebuffer target)
         {
             target.Bind();
-            GL.FramebufferTexture2D(target.Target, attachment, TextureTarget.Texture2D, ID, 0);
+            GLH.FramebufferTexture2D(target.Target, attachment, TextureTarget.Texture2D, ID, 0);
         }
     }
 }

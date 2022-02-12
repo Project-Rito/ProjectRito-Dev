@@ -28,7 +28,7 @@ namespace GLFrameworkEngine
             texture.Target = TextureTarget.Texture2D;
             texture.Bind();
 
-            GL.TexImage2D(TextureTarget.Texture2D, 0, format,
+            GLH.TexImage2D(TextureTarget.Texture2D, 0, format,
                 texture.Width, texture.Height,
                 0, pixelFormat, pixelType, IntPtr.Zero);
 
@@ -51,7 +51,7 @@ namespace GLFrameworkEngine
             for (int i = 0; i < width * height * 4; i++)
                 buffer[i] = 255;
 
-            GL.TexImage2D(TextureTarget.Texture2D, 0, texture.PixelInternalFormat,
+            GLH.TexImage2D(TextureTarget.Texture2D, 0, texture.PixelInternalFormat,
                 texture.Width, texture.Height,
                 0, texture.PixelFormat, texture.PixelType, buffer);
 
@@ -81,7 +81,7 @@ namespace GLFrameworkEngine
                 offset += 4;
             }
 
-            GL.TexImage2D(TextureTarget.Texture2D, 0, texture.PixelInternalFormat,
+            GLH.TexImage2D(TextureTarget.Texture2D, 0, texture.PixelInternalFormat,
                 texture.Width, texture.Height,
                 0, texture.PixelFormat, texture.PixelType, buffer);
 
@@ -100,7 +100,7 @@ namespace GLFrameworkEngine
             texture.Target = TextureTarget.Texture2D;
             texture.Bind();
 
-            GL.TexImage2D(TextureTarget.Texture2D, 0, texture.PixelInternalFormat,
+            GLH.TexImage2D(TextureTarget.Texture2D, 0, texture.PixelInternalFormat,
                 texture.Width, texture.Height,
                 0, texture.PixelFormat, texture.PixelType, buffer);
 
@@ -160,12 +160,12 @@ namespace GLFrameworkEngine
             System.Drawing.Imaging.BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
               System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-            GL.TexImage2D(Target, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+            GLH.TexImage2D(Target, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
                 PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
 
             image.UnlockBits(data);
 
-            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            GLH.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
             Unbind();
         }
@@ -174,7 +174,7 @@ namespace GLFrameworkEngine
         {
             Bind();
 
-            GL.TexImage2D(Target, 0, PixelInternalFormat.Rgba, Width, Height, 0,
+            GLH.TexImage2D(Target, 0, PixelInternalFormat.Rgba, Width, Height, 0,
                 PixelFormat.Bgra, PixelType.UnsignedByte, image);
 
             Unbind();
@@ -208,7 +208,7 @@ namespace GLFrameworkEngine
                 int mipHeight = (int)(Height * Math.Pow(0.5, m));
 
                 byte[] outputRaw = new byte[mipWidth * mipHeight * 4];
-                GL.GetTexImage(this.Target, m,
+                GLH.GetTexImage(this.Target, m,
                   PixelFormat.Bgra, PixelType.UnsignedByte, outputRaw);
 
                 surface.mipmaps.Add(outputRaw);
@@ -261,7 +261,7 @@ namespace GLFrameworkEngine
                 :
                  System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
-            GL.ReadPixels(0, 0, Width, Height, saveAlpha ? PixelFormat.Bgra : PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+            GLH.ReadPixels(0, 0, Width, Height, saveAlpha ? PixelFormat.Bgra : PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
             bmp.UnlockBits(data);
 
             bmp.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipY);

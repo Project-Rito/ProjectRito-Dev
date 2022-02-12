@@ -38,7 +38,7 @@ namespace GLFrameworkEngine
         /// </summary>
         public void Delete()
         {
-            GL.DeleteVertexArray(vaoID);
+            GLH.DeleteVertexArray(vaoID);
         }
 
         /// <summary>
@@ -49,16 +49,16 @@ namespace GLFrameworkEngine
             if (vaoID != -1)
                 return;
 
-            GL.GenVertexArrays(1, out int vao);
-            GL.BindVertexArray(vao);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, buffer);
+            GLH.GenVertexArrays(1, out int vao);
+            GLH.BindVertexArray(vao);
+            GLH.BindBuffer(BufferTarget.ArrayBuffer, buffer);
 
             vaoID = vao;
 
             foreach (KeyValuePair<int, VertexAttribute> a in attributes)
             {
-                GL.EnableVertexAttribArray(a.Key);
-                GL.VertexAttribPointer(a.Key, a.Value.size, a.Value.type, a.Value.normalized, a.Value.stride, a.Value.offset);
+                GLH.EnableVertexAttribArray(a.Key);
+                GLH.VertexAttribPointer(a.Key, a.Value.size, a.Value.type, a.Value.normalized, a.Value.stride, a.Value.offset);
             }
 
             if (GLErrorHandler.CheckGLError()) Debugger.Break();
@@ -69,7 +69,7 @@ namespace GLFrameworkEngine
         /// </summary>
         public void Bind()
         {
-            GL.BindBuffer(BufferTarget.ArrayBuffer, buffer);
+            GLH.BindBuffer(BufferTarget.ArrayBuffer, buffer);
         }
 
         /// <summary>
@@ -78,10 +78,10 @@ namespace GLFrameworkEngine
         /// <param name="control"></param>
         public void Use()
         {
-            GL.BindVertexArray(vaoID);
+            GLH.BindVertexArray(vaoID);
 
             if (indexBuffer.HasValue)
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBuffer.Value);
+                GLH.BindBuffer(BufferTarget.ElementArrayBuffer, indexBuffer.Value);
 
             if (GLErrorHandler.CheckGLError()) Debugger.Break();
         }

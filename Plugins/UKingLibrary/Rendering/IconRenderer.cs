@@ -47,7 +47,7 @@ namespace UKingLibrary.UI
             //Target screen buffer
             Control.ScreenBuffer = Framebuffer;
 
-            GL.Enable(EnableCap.FramebufferSrgb);
+            GLH.Enable(EnableCap.FramebufferSrgb);
 
             //Setup the camera
             foreach (var drawable in drawables)
@@ -62,9 +62,9 @@ namespace UKingLibrary.UI
                 //Render out the file to the pipeline FBO
                 Framebuffer.Bind();
 
-                GL.Viewport(0, 0, Control.Width, Control.Height);
-                GL.ClearColor(1, 0, 0, 1);
-                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                GLH.Viewport(0, 0, Control.Width, Control.Height);
+                GLH.ClearColor(1, 0, 0, 1);
+                GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
                 drawable.InFrustum = true;
                 drawable.IsVisible = true;
@@ -74,7 +74,7 @@ namespace UKingLibrary.UI
                 drawable.DrawModel(Control, Pass.TRANSPARENT);
 
                 //End the frame
-                GL.Flush();
+                GLH.Flush();
                 GContext.SwapBuffers();
 
                 //Get the fbo and make the icon
@@ -91,7 +91,7 @@ namespace UKingLibrary.UI
         static void Cleanup()
         {
             Framebuffer?.Dispoe();
-            GL.Disable(EnableCap.FramebufferSrgb);
+            GLH.Disable(EnableCap.FramebufferSrgb);
             GC.Collect();
         }
     }

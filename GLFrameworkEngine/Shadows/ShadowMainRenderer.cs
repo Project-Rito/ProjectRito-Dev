@@ -83,8 +83,8 @@ namespace GLFrameworkEngine
                 shader.SetMatrix4x4("mtxLightVP", ref lightSpaceMatrix);
 
                 //Poylgon offsets can slightly improve shadow quality
-                GL.PolygonOffset(0.15f, 100);
-                GL.ClearColor(1, 1, 1, 1);
+                GLH.PolygonOffset(0.15f, 100);
+                GLH.ClearColor(1, 1, 1, 1);
 
                 foreach (var obj in context.Scene.Objects)
                 {
@@ -98,7 +98,7 @@ namespace GLFrameworkEngine
                     }
                 }
                 //Reset back to normal
-                GL.PolygonOffset(0, 0);
+                GLH.PolygonOffset(0, 0);
                 context.CurrentShader = null;
             }
             Finish();
@@ -116,12 +116,12 @@ namespace GLFrameworkEngine
             control.CurrentShader = shader;
 
             //Bottom right corner, half the viewport size.
-            GL.Viewport(control.Width / 2, 0, control.Width / 2, control.Height / 2);
+            GLH.Viewport(control.Width / 2, 0, control.Width / 2, control.Height / 2);
 
             shader.SetTexture(shadowPrepass, "screenTexture", 1);
             ScreenQuadRender.Draw();
 
-            GL.Viewport(0, 0, control.Width, control.Height);
+            GLH.Viewport(0, 0, control.Width, control.Height);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace GLFrameworkEngine
                 return;
 
             //Bottom left corner, half the viewport size.
-            GL.Viewport(0, 0, control.Width / 2, control.Height / 2);
+            GLH.Viewport(0, 0, control.Width / 2, control.Height / 2);
 
             var shader = GlobalShaders.GetShader("SHADOWQUAD");
             control.CurrentShader = shader;
@@ -141,16 +141,16 @@ namespace GLFrameworkEngine
             shader.SetTexture(GetProjectedShadow(), "depthTexture", 1);
             ScreenQuadRender.Draw();
 
-            GL.Viewport(0, 0, control.Width, control.Height);
+            GLH.Viewport(0, 0, control.Width, control.Height);
         }
 
         private void Start()
         {
-            GL.Enable(EnableCap.DepthTest);
+            GLH.Enable(EnableCap.DepthTest);
 
-            GL.Viewport(0, 0, WIDTH, HEIGHT);
+            GLH.Viewport(0, 0, WIDTH, HEIGHT);
             ShadowFrameBuffer.Bind();
-            GL.Clear(ClearBufferMask.DepthBufferBit);
+            GLH.Clear(ClearBufferMask.DepthBufferBit);
         }
 
         private void Finish() {

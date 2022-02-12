@@ -59,9 +59,9 @@ namespace AGraphicsLibrary
 
             //Force generate mipmaps to update the mip allocation so mips can be assigned.
             output.Bind();
-            GL.GenerateMipmap(GenerateMipmapTarget.TextureCubeMap);
-            GL.BindTexture(TextureTarget.TextureCubeMap, 0);
-            GL.Enable(EnableCap.TextureCubeMapSeamless);
+            GLH.GenerateMipmap(GenerateMipmapTarget.TextureCubeMap);
+            GLH.BindTexture(TextureTarget.TextureCubeMap, 0);
+            GLH.Enable(EnableCap.TextureCubeMapSeamless);
 
             if (FilterLevel0 == null)
                 Init(output.Width);
@@ -82,7 +82,7 @@ namespace AGraphicsLibrary
         static void LoadCubemapLevel(GLContext control, int size, int level, AglLightMap aglLightMap, 
             EnvironmentGraphics environmentSettings, AglLightMap.LightArea lightMapEnv, int ID, bool is2DArray)
         {
-            GL.Viewport(0, 0, size, size);
+            GLH.Viewport(0, 0, size, size);
 
             var shader = GlobalShaders.GetShader("LIGHTMAP");
             shader.Enable();
@@ -93,26 +93,26 @@ namespace AGraphicsLibrary
             {
                 if (is2DArray)
                 {
-                    GL.FramebufferTextureLayer(FramebufferTarget.Framebuffer,
+                    GLH.FramebufferTextureLayer(FramebufferTarget.Framebuffer,
                         FramebufferAttachment.ColorAttachment0 + i, ID, level, i);
                 }
                 else
                 {
-                    GL.FramebufferTexture2D(FramebufferTarget.Framebuffer,
+                    GLH.FramebufferTexture2D(FramebufferTarget.Framebuffer,
                FramebufferAttachment.ColorAttachment0 + i,
                TextureTarget.TextureCubeMapPositiveX + i, ID, level);
                 }
             }
 
-            GL.ClearColor(0, 0, 0, 0);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLH.ClearColor(0, 0, 0, 0);
+            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             ScreenQuadRender.Draw();
 
-            var errorcheck = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+            var errorcheck = GLH.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (errorcheck != FramebufferErrorCode.FramebufferComplete)
                 throw new Exception(errorcheck.ToString());
 
-            GL.UseProgram(0);
+            GLH.UseProgram(0);
         }
 
         static void UpdateUniforms(GLContext control, ShaderProgram shader, int mipLevel,
@@ -121,11 +121,11 @@ namespace AGraphicsLibrary
             if (aglLightMap.TextureLUT == null)
                 aglLightMap.Setup();
 
-            GL.ActiveTexture(TextureUnit.Texture0 + 1);
+            GLH.ActiveTexture(TextureUnit.Texture0 + 1);
             NormalsTexture.Bind();
             shader.SetInt("uNormalTex", 1);
 
-            GL.ActiveTexture(TextureUnit.Texture0 + 2);
+            GLH.ActiveTexture(TextureUnit.Texture0 + 2);
             aglLightMap.TextureLUT.Bind();
             shader.SetInt("uLutTex", 2);
 

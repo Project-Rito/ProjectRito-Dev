@@ -15,11 +15,11 @@ namespace MapStudio.UI
             GLContext glControl, int Width, int Height)
         {
             brightnessBuffer.Bind();
-            GL.Viewport(0, 0, glControl.Width, glControl.Height);
+            GLH.Viewport(0, 0, glControl.Width, glControl.Height);
 
             //Clear out the buffer
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
 
             var shader = GlobalShaders.GetShader("BLUR");
             glControl.CurrentShader = shader;
@@ -30,7 +30,7 @@ namespace MapStudio.UI
             for (int i = 0; i < amount; i++)
             {
                 brightnessBuffer.Bind();
-                GL.Viewport(0, 0, glControl.Width, glControl.Height);
+                GLH.Viewport(0, 0, glControl.Width, glControl.Height);
 
                 var radius = (amount - i - 1) * 1;
                 shader.SetVector2("direction", i % 2 == 0 ? new Vector2(radius, 0) : new Vector2(0, radius));
@@ -40,20 +40,20 @@ namespace MapStudio.UI
                 else
                     DrawBlur(glControl, (GLTexture)brightnessBuffer.Attachments[0]);
 
-                GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+                GLH.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             }
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GLH.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
 
         static void DrawBlur(GLContext control, GLTexture texture)
         {
-            GL.ActiveTexture(TextureUnit.Texture0);
+            GLH.ActiveTexture(TextureUnit.Texture0);
             texture.Bind();
             control.CurrentShader.SetInt("image", 0);
 
             GLFrameworkEngine.ScreenQuadRender.Draw();
 
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GLH.BindTexture(TextureTarget.Texture2D, 0);
         }
     }
 }

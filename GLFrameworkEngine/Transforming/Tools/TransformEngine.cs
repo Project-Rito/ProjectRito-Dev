@@ -523,9 +523,9 @@ namespace GLFrameworkEngine
             mat.ModelMatrix = Matrix4.CreateTranslation(this.TransformSettings.Origin);
             mat.Render(context);
 
-            GL.LineWidth(10);
+            GLH.LineWidth(10);
             LineNormal.Draw(new Vector3(), TransformSettings.PlaneNormal * 300, Vector4.One, true);
-            GL.LineWidth(1);*/
+            GLH.LineWidth(1);*/
 
             if (ActiveActions.Count == 0) {
                 InitAction(context.Scene.GetSelected());
@@ -608,7 +608,7 @@ namespace GLFrameworkEngine
             var mdlMtx = Matrix4.Identity;
             context.CurrentShader.SetMatrix4x4(GLConstants.ViewProjMatrix, ref mdlMtx);
 
-            GL.Disable(EnableCap.DepthTest);
+            GLH.Disable(EnableCap.DepthTest);
 
             var start = context.WorldToScreen(TransformSettings.Origin);
             var end = new Vector2(context.CurrentMousePoint.X, context.CurrentMousePoint.Y);
@@ -624,7 +624,7 @@ namespace GLFrameworkEngine
 
             DrawDashedOutline(context, mdlMtx, start, end, LineTransform);
 
-            GL.Enable(EnableCap.DepthTest);
+            GLH.Enable(EnableCap.DepthTest);
         }
 
         static void DrawDashedOutline(GLContext context, Matrix4 mdlMtx, Vector2 start, Vector2 end, LineRender render)
@@ -635,13 +635,13 @@ namespace GLFrameworkEngine
             dashMaterial.ModelMatrix = mdlMtx;
             dashMaterial.Render(context);
 
-            GL.Enable(EnableCap.AlphaTest);
-            GL.AlphaFunc(AlphaFunction.Gequal, 0.5F);
+            GLH.Enable(EnableCap.AlphaTest);
+            GLH.AlphaFunc(AlphaFunction.Gequal, 0.5F);
 
-            GL.LineWidth(1.0f);
+            GLH.LineWidth(1.0f);
             render.Draw(start, end, new Vector4(1), true);
 
-            GL.Disable(EnableCap.AlphaTest);
+            GLH.Disable(EnableCap.AlphaTest);
         }
 
         private void ReloadPreviousTransforms()

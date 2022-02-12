@@ -46,7 +46,7 @@ void main()
 {
     //Create tex coords
 	vec3 ndc = clipSpacePos.xyz / clipSpacePos.w; //perspective divide/normalize
-    vec2 texCoord  = (ndc.xy / 2.0 + 0.5); //ndc is -1 to 1 in GL. scale for 0 to 1
+    vec2 texCoord  = (ndc.xy / 2.0 + 0.5); //ndc is -1 to 1 in GLH. scale for 0 to 1
     texCoord = vec2(texCoord.x, 1.0 - texCoord.y);
 
     //Setup lighting

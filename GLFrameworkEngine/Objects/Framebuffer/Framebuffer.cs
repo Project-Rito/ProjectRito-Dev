@@ -19,7 +19,7 @@ namespace GLFrameworkEngine
 
         public List<IFramebufferAttachment> Attachments { get; }
 
-        public Framebuffer(FramebufferTarget framebufferTarget) : base(GL.GenFramebuffer()) {
+        public Framebuffer(FramebufferTarget framebufferTarget) : base(GLH.GenFramebuffer()) {
             Target = framebufferTarget;
             Attachments = new List<IFramebufferAttachment>();
         }
@@ -60,15 +60,15 @@ namespace GLFrameworkEngine
         }
 
         public void Bind() {
-            GL.BindFramebuffer(Target, ID);
+            GLH.BindFramebuffer(Target, ID);
         }
 
         public void Unbind() {
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GLH.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
 
         public void Dispoe() {
-            GL.DeleteFramebuffer(ID);
+            GLH.DeleteFramebuffer(ID);
         }
 
         public void Resize(int width, int height)
@@ -81,7 +81,7 @@ namespace GLFrameworkEngine
                 {
                     var tex = (GLTexture2D)attatchment;
                     tex.Bind();
-                    GL.TexImage2D(tex.Target, 0, tex.PixelInternalFormat,
+                    GLH.TexImage2D(tex.Target, 0, tex.PixelInternalFormat,
                         Width, Height, 0, tex.PixelFormat, tex.PixelType, IntPtr.Zero);
                     tex.Unbind();
                 }
@@ -89,7 +89,7 @@ namespace GLFrameworkEngine
                 {
                     var tex = (DepthTexture)attatchment;
                     tex.Bind();
-                    GL.TexImage2D(tex.Target, 0, tex.PixelInternalFormat,
+                    GLH.TexImage2D(tex.Target, 0, tex.PixelInternalFormat,
                         Width, Height, 0, tex.PixelFormat, tex.PixelType, IntPtr.Zero);
                     tex.Unbind();
                 }
@@ -97,7 +97,7 @@ namespace GLFrameworkEngine
                 {
                     var buffer = (Renderbuffer)attatchment;
                     buffer.Bind();
-                    GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, buffer.InternalFormat, Width, Height);
+                    GLH.RenderbufferStorage(RenderbufferTarget.Renderbuffer, buffer.InternalFormat, Width, Height);
                     buffer.Unbind();
                 }
             }
@@ -113,19 +113,19 @@ namespace GLFrameworkEngine
         public void SetDrawBuffers(params DrawBuffersEnum[] drawBuffers)
         {
             Bind();
-            GL.DrawBuffers(drawBuffers.Length, drawBuffers);
+            GLH.DrawBuffers(drawBuffers.Length, drawBuffers);
         }
 
         public void SetReadBuffer(ReadBufferMode readBufferMode)
         {
             Bind();
-            GL.ReadBuffer(readBufferMode);
+            GLH.ReadBuffer(readBufferMode);
         }
 
         public FramebufferErrorCode GetStatus()
         {
             Bind();
-            return GL.CheckFramebufferStatus(Target);
+            return GLH.CheckFramebufferStatus(Target);
         }
 
         public void AddAttachment(FramebufferAttachment attachmentPoint, IFramebufferAttachment attachment)

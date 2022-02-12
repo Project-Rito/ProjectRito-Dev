@@ -21,12 +21,12 @@ namespace GLFrameworkEngine
 
         public UniformBlock()
         {
-            GL.GenBuffers(1, out ID);
+            GLH.GenBuffers(1, out ID);
         }
 
         public UniformBlock(int index)
         {
-            GL.GenBuffers(1, out ID);
+            GLH.GenBuffers(1, out ID);
             Index = index;
         }
 
@@ -115,12 +115,12 @@ namespace GLFrameworkEngine
             if (ID == -1)
                 return;
 
-            GL.BindBuffer(BufferTarget.UniformBuffer, ID);
+            GLH.BindBuffer(BufferTarget.UniformBuffer, ID);
         }
 
         public void RenderBuffer(int programID, string name, int binding = -1)
         {
-            var index = GL.GetUniformBlockIndex(programID, name);
+            var index = GLH.GetUniformBlockIndex(programID, name);
             RenderBuffer(programID, index, binding);
         }
 
@@ -131,8 +131,8 @@ namespace GLFrameworkEngine
 
             binding = binding != -1 ? binding : index;
 
-            GL.UniformBlockBinding(programID, index, binding);
-            GL.BindBufferBase(BufferRangeTarget.UniformBuffer, binding, ID);
+            GLH.UniformBlockBinding(programID, index, binding);
+            GLH.BindBufferBase(BufferRangeTarget.UniformBuffer, binding, ID);
 
             UpdateBufferData();
         }
@@ -144,8 +144,8 @@ namespace GLFrameworkEngine
 
             int binding = Index;
 
-            GL.UniformBlockBinding(programID, Index, binding);
-            GL.BindBufferBase(BufferRangeTarget.UniformBuffer, binding, ID);
+            GLH.UniformBlockBinding(programID, Index, binding);
+            GLH.BindBufferBase(BufferRangeTarget.UniformBuffer, binding, ID);
         }
 
         public void UpdateBufferData()
@@ -157,13 +157,13 @@ namespace GLFrameworkEngine
             var buffer = Buffer.ToArray();
 
             Bind();
-            GL.BufferData(BufferTarget.UniformBuffer, buffer.Length, buffer, BufferUsageHint);
-            GL.BindBuffer(BufferTarget.UniformBuffer, 0);
+            GLH.BufferData(BufferTarget.UniformBuffer, buffer.Length, buffer, BufferUsageHint);
+            GLH.BindBuffer(BufferTarget.UniformBuffer, 0);
         }
 
         public void Dispose()
         {
-            GL.DeleteBuffer(ID);
+            GLH.DeleteBuffer(ID);
             Buffer.Clear();
         }
     }

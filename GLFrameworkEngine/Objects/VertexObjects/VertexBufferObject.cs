@@ -87,7 +87,7 @@ namespace GLFrameworkEngine
             if (_disposed || ID != -1)
                 return;
 
-            GL.GenVertexArrays(1, out int vao);
+            GLH.GenVertexArrays(1, out int vao);
             ID = vao;
             Bind();
 
@@ -98,14 +98,14 @@ namespace GLFrameworkEngine
         {
             if (_disposed) return;
 
-            GL.BindVertexArray(ID);
+            GLH.BindVertexArray(ID);
             EnableAttributes(shader, attributes, bufferList.ToArray());
 
             if (instancedBuffer != null) {
                 EnableAttributes(shader, attributesInstanced, instancedBuffer.Value);
             }
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            GL.BindVertexArray(0);
+            GLH.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GLH.BindVertexArray(0);
         }
 
         private void EnableAttributes(ShaderProgram shader, Dictionary<object, VertexAttribute> attributes, params int[] bufferIDs)
@@ -121,18 +121,18 @@ namespace GLFrameworkEngine
                 if (location == -1)
                     continue;
 
-                GL.EnableVertexAttribArray(location);
-                GL.BindBuffer(BufferTarget.ArrayBuffer, bufferIDs[a.Value.bufferIndex]);
+                GLH.EnableVertexAttribArray(location);
+                GLH.BindBuffer(BufferTarget.ArrayBuffer, bufferIDs[a.Value.bufferIndex]);
 
                 if (a.Value.type == VertexAttribPointerType.Int)
-                    GL.VertexAttribIPointer(location, a.Value.size, VertexAttribIntegerType.Int, a.Value.stride, new System.IntPtr(a.Value.offset));
+                    GLH.VertexAttribIPointer(location, a.Value.size, VertexAttribIntegerType.Int, a.Value.stride, new System.IntPtr(a.Value.offset));
                 else
-                    GL.VertexAttribPointer(location, a.Value.size, a.Value.type, a.Value.normalized, a.Value.stride, a.Value.offset);
+                    GLH.VertexAttribPointer(location, a.Value.size, a.Value.type, a.Value.normalized, a.Value.stride, a.Value.offset);
 
                 if (a.Value.instance)
-                    GL.VertexAttribDivisor(location, a.Value.divisor);
+                    GLH.VertexAttribDivisor(location, a.Value.divisor);
                 else
-                    GL.VertexAttribDivisor(location, 0);
+                    GLH.VertexAttribDivisor(location, 0);
             }
         }
 
@@ -140,7 +140,7 @@ namespace GLFrameworkEngine
         {
             foreach (KeyValuePair<object, VertexAttribute> a in attributes)
             {
-                GL.BindBuffer(BufferTarget.ArrayBuffer, bufferIDs[a.Value.bufferIndex]);
+                GLH.BindBuffer(BufferTarget.ArrayBuffer, bufferIDs[a.Value.bufferIndex]);
 
                 int location = -1;
                 if (a.Key is string)
@@ -151,7 +151,7 @@ namespace GLFrameworkEngine
                 if (location == -1)
                     continue;
 
-                GL.DisableVertexAttribArray(location);
+                GLH.DisableVertexAttribArray(location);
             }
         }
 
@@ -163,28 +163,28 @@ namespace GLFrameworkEngine
             if (instancedBuffer != null) {
                 DisableAttributes(shader, attributesInstanced, instancedBuffer.Value);
             }
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GLH.BindBuffer(BufferTarget.ArrayBuffer, 0);
         }
 
         public void BindVertexArray()
         {
-            GL.BindVertexArray(ID);
+            GLH.BindVertexArray(ID);
         }
 
         public void Bind()
         {
             if (_disposed) return;
 
-            GL.BindVertexArray(ID);
+            GLH.BindVertexArray(ID);
         }
 
         public void Use()
         {
             if (_disposed) return;
 
-            GL.BindVertexArray(ID);
+            GLH.BindVertexArray(ID);
             if (indexBuffer.HasValue)
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBuffer.Value);
+                GLH.BindBuffer(BufferTarget.ElementArrayBuffer, indexBuffer.Value);
         }
 
         public void Dispose()
@@ -192,13 +192,13 @@ namespace GLFrameworkEngine
             if (bufferList == null)
                 return;
 
-            GL.DeleteVertexArray(ID);
+            GLH.DeleteVertexArray(ID);
             foreach (var buffer in bufferList)
-                GL.DeleteBuffer(buffer);
+                GLH.DeleteBuffer(buffer);
             if (indexBuffer.HasValue)
-                GL.DeleteBuffer(indexBuffer.Value);
+                GLH.DeleteBuffer(indexBuffer.Value);
             if (instancedBuffer.HasValue)
-                GL.DeleteBuffer(instancedBuffer.Value);
+                GLH.DeleteBuffer(instancedBuffer.Value);
 
             _disposed = true;
             ID = -1;

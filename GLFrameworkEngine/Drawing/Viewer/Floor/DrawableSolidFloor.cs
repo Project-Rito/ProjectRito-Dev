@@ -52,7 +52,7 @@ namespace GLFrameworkEngine
             Material.Render(control);
             this.Draw(control);
 
-            GL.UseProgram(0);
+            GLH.UseProgram(0);
         }
     }
 }

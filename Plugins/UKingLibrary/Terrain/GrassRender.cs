@@ -108,9 +108,9 @@ namespace UKingLibrary.Rendering
             shader.SetFloat("uBrightness", 2.0f); // Hack to fit in (normals calculation is kinda off or something)
             shader.SetBool("uDebugSections", PluginConfig.DebugTerrainSections);
 
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.Disable(EnableCap.CullFace);
+            GLH.Enable(EnableCap.Blend);
+            GLH.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GLH.Disable(EnableCap.CullFace);
 
             GrassMesh.Draw(context);
         }
