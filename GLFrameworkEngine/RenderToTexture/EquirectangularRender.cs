@@ -37,20 +37,20 @@ namespace GLFrameworkEngine
             Framebuffer frameBuffer = new Framebuffer(FramebufferTarget.Framebuffer, width, height);
             frameBuffer.Bind();
 
-            GLH.Disable(EnableCap.Blend);
+            GLL.Disable(EnableCap.Blend);
 
             shader.Enable();
             shader.SetBoolToInt("is_array", texture is GLTextureCubeArray);
 
             if (texture is GLTextureCubeArray)
             {
-                GLH.ActiveTexture(TextureUnit.Texture1);
+                GLL.ActiveTexture(TextureUnit.Texture1);
                 texture.Bind();
                 shader.SetInt("dynamic_texture_array", 1);
             }
             else
             {
-                GLH.ActiveTexture(TextureUnit.Texture1);
+                GLL.ActiveTexture(TextureUnit.Texture1);
                 texture.Bind();
                 shader.SetInt("dynamic_texture", 1);
             }
@@ -61,15 +61,15 @@ namespace GLFrameworkEngine
                 int mipHeight = (int)(height * Math.Pow(0.5, i));
                 frameBuffer.Resize(mipWidth, mipHeight);
 
-                GLH.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
+                GLL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
                     textureOutput.ID, i);
 
                 shader.SetInt("arrayLevel", arrayLevel);
                 shader.SetInt("mipLevel", mipLevel);
 
-                GLH.ClearColor(0, 0, 0, 0);
-                GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-                GLH.Viewport(0, 0, mipWidth, mipHeight);
+                GLL.ClearColor(0, 0, 0, 0);
+                GLL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                GLL.Viewport(0, 0, mipWidth, mipHeight);
 
                 //Draw the texture onto the framebuffer
                 ScreenQuadRender.Draw();

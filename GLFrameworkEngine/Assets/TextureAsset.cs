@@ -32,11 +32,11 @@ namespace GLFrameworkEngine
             Framebuffer frameBuffer = new Framebuffer(FramebufferTarget.Framebuffer, width, height);
             frameBuffer.Bind();
 
-            GLH.ClearColor(0, 0, 0, 0);
-            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GLH.Viewport(0, 0, width, height);
+            GLL.ClearColor(0, 0, 0, 0);
+            GLL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLL.Viewport(0, 0, width, height);
 
-            GLH.Disable(EnableCap.Blend);
+            GLL.Disable(EnableCap.Blend);
 
             shader.Enable();
 
@@ -44,8 +44,8 @@ namespace GLFrameworkEngine
             ScreenQuadRender.Draw(shader, RenderableTex.ID);
 
             //Disable shader and textures
-            GLH.UseProgram(0);
-            GLH.BindTexture(TextureTarget.Texture2D, 0);
+            GLL.UseProgram(0);
+            GLL.BindTexture(TextureTarget.Texture2D, 0);
 
             var thumbnail = frameBuffer.ReadImagePixels(true);
             thumbnail.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipY);

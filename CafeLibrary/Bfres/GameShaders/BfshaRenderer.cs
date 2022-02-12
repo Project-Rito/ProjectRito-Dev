@@ -460,8 +460,8 @@ namespace CafeLibrary.Rendering
 
         public void SetTextureUniforms(GLContext control, ShaderProgram shader, STGenericMaterial mat)
         {
-            GLH.ActiveTexture(TextureUnit.Texture0 + 1);
-            GLH.BindTexture(TextureTarget.Texture2D, RenderTools.defaultTex.ID);
+            GLL.ActiveTexture(TextureUnit.Texture0 + 1);
+            GLL.BindTexture(TextureTarget.Texture2D, RenderTools.defaultTex.ID);
 
             int id = 1;
 
@@ -496,7 +496,7 @@ namespace CafeLibrary.Rendering
                     var texture = GetExternalTexture(control, sampler);
                     if (texture != null)
                     {
-                        GLH.ActiveTexture(TextureUnit.Texture0 + id);
+                        GLL.ActiveTexture(TextureUnit.Texture0 + id);
                         texture.Bind();
                         SetTexture(shader, locationInfo.VertexLocation, locationInfo.FragmentLocation, ref id);
                     }
@@ -515,8 +515,8 @@ namespace CafeLibrary.Rendering
                 SetTexture(shader, locationInfo.VertexLocation, locationInfo.FragmentLocation, ref id);
             }
 
-            GLH.ActiveTexture(TextureUnit.Texture0);
-            GLH.BindTexture(TextureTarget.Texture2D, 0);
+            GLL.ActiveTexture(TextureUnit.Texture0);
+            GLL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         public virtual GLTexture GetExternalTexture(GLContext control, string sampler)

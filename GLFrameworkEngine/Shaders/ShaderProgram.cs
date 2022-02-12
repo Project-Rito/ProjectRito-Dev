@@ -34,24 +34,24 @@ namespace GLFrameworkEngine
 
         public ShaderProgram(Shader[] shaders)
         {
-            program = GLH.CreateProgram();
+            program = GLL.CreateProgram();
             LoadSource(shaders);
         }
 
         public ShaderProgram()
         {
-            program = GLH.CreateProgram();
+            program = GLL.CreateProgram();
         }
 
         public ShaderProgram(Shader vertexShader, Shader fragmentShader)
         {
-            program = GLH.CreateProgram();
+            program = GLL.CreateProgram();
             LoadSource(vertexShader, fragmentShader);
         }
 
         public ShaderProgram(byte[] binaryData, BinaryFormat format)
         {
-            program = GLH.CreateProgram();
+            program = GLL.CreateProgram();
             LoadBinary(binaryData, format);
         }
 
@@ -89,17 +89,17 @@ namespace GLFrameworkEngine
         {
             // Number of supported binary formats.
             int binaryFormatCount;
-            GLH.GetInteger(GetPName.NumProgramBinaryFormats, out binaryFormatCount);
+            GLL.GetInteger(GetPName.NumProgramBinaryFormats, out binaryFormatCount);
 
             // Get all supported formats.
             int[] binaryFormats = new int[binaryFormatCount];
-            GLH.GetInteger(GetPName.ProgramBinaryFormats, binaryFormats);
+            GLL.GetInteger(GetPName.ProgramBinaryFormats, binaryFormats);
 
             if (binaryFormats.Contains((int)format))
             {
                 try
                 {
-                    GLH.ProgramBinary(program, format, binaryData, binaryData.Length);
+                    GLL.ProgramBinary(program, format, binaryData, binaryData.Length);
                 }
                 catch (AccessViolationException)
                 {
@@ -120,7 +120,7 @@ namespace GLFrameworkEngine
         /// </summary>
         public void Link()
         {
-            GLH.LinkProgram(program);
+            GLL.LinkProgram(program);
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace GLFrameworkEngine
         /// </summary>
         public void Enable()
         {
-            GLH.UseProgram(program);
+            GLL.UseProgram(program);
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace GLFrameworkEngine
         /// </summary>
         public void Disable()
         {
-            GLH.UseProgram(0);
+            GLL.UseProgram(0);
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace GLFrameworkEngine
             foreach (var shader in shaders)
                 shader.Dispose();
 
-            GLH.DeleteProgram(program);
+            GLL.DeleteProgram(program);
         }
 
         /// <summary>
@@ -155,8 +155,8 @@ namespace GLFrameworkEngine
         /// </summary>
         public void SetTexture2D(string uniform, int id, int slot)
         {
-            GLH.ActiveTexture(TextureUnit.Texture0 + slot);
-            GLH.BindTexture(TextureTarget.Texture2D, id);
+            GLL.ActiveTexture(TextureUnit.Texture0 + slot);
+            GLL.BindTexture(TextureTarget.Texture2D, id);
             this.SetInt(uniform, slot);
         }
 
@@ -165,7 +165,7 @@ namespace GLFrameworkEngine
         /// </summary>
         public void SetTexture(GLTexture tex, string uniform, int slot)
         {
-            GLH.ActiveTexture(TextureUnit.Texture0 + slot);
+            GLL.ActiveTexture(TextureUnit.Texture0 + slot);
             tex.Bind();
             this.SetInt(uniform, slot);
         }
@@ -181,31 +181,31 @@ namespace GLFrameworkEngine
         public void SetVector4(string name, Vector4 value)
         {
             if (uniforms.ContainsKey(name))
-                GLH.Uniform4(uniforms[name], value);
+                GLL.Uniform4(uniforms[name], value);
         }
 
         public void SetVector3(string name, Vector3 value)
         {
             if (uniforms.ContainsKey(name))
-                GLH.Uniform3(uniforms[name], value);
+                GLL.Uniform3(uniforms[name], value);
         }
 
         public void SetVector2(string name, Vector2 value)
         {
             if (uniforms.ContainsKey(name))
-                GLH.Uniform2(uniforms[name], value);
+                GLL.Uniform2(uniforms[name], value);
         }
 
         public void SetFloat(string name, float value)
         {
             if (uniforms.ContainsKey(name))
-                GLH.Uniform1(uniforms[name], value);
+                GLL.Uniform1(uniforms[name], value);
         }
 
         public void SetInt(string name, int value)
         {
             if (uniforms.ContainsKey(name))
-                GLH.Uniform1(uniforms[name], value);
+                GLL.Uniform1(uniforms[name], value);
         }
 
         public void SetBool(string name, bool value)
@@ -213,7 +213,7 @@ namespace GLFrameworkEngine
             int intValue = value == true ? 1 : 0;
 
             if (uniforms.ContainsKey(name))
-                GLH.Uniform1(uniforms[name], intValue);
+                GLL.Uniform1(uniforms[name], intValue);
         }
 
         public void SetBoolToInt(string name, bool value)
@@ -222,21 +222,21 @@ namespace GLFrameworkEngine
                 return;
 
             if (value)
-                GLH.Uniform1(uniforms[name], 1);
+                GLL.Uniform1(uniforms[name], 1);
             else
-                GLH.Uniform1(this[name], 0);
+                GLL.Uniform1(this[name], 0);
         }
 
         public void SetColor(string name, System.Drawing.Color color)
         {
             if (uniforms.ContainsKey(name))
-                GLH.Uniform4(uniforms[name], color.R, color.G, color.B, color.A);
+                GLL.Uniform4(uniforms[name], color.R, color.G, color.B, color.A);
         }
 
         public void SetMatrix4x4(string name, ref Matrix4 value, bool transpose = false)
         {
             if (uniforms.ContainsKey(name))
-                GLH.UniformMatrix4(uniforms[name], transpose, ref value);
+                GLL.UniformMatrix4(uniforms[name], transpose, ref value);
         }
 
         public int this[string name]
@@ -248,11 +248,11 @@ namespace GLFrameworkEngine
         {
             uniforms.Clear();
 
-            GLH.GetProgram(program, GetProgramParameterName.ActiveUniforms, out activeAttributeCount);
+            GLL.GetProgram(program, GetProgramParameterName.ActiveUniforms, out activeAttributeCount);
             for (int i = 0; i < activeAttributeCount; i++)
             {
-                string name = GLH.GetActiveUniform(program, i, out int size, out ActiveUniformType type);
-                int location = GLH.GetUniformLocation(program, name);
+                string name = GLL.GetActiveUniform(program, i, out int size, out ActiveUniformType type);
+                int location = GLL.GetUniformLocation(program, name);
 
                 // Overwrite existing vertex attributes.
                 uniforms[name] = location;
@@ -263,11 +263,11 @@ namespace GLFrameworkEngine
         {
             attributes.Clear();
 
-            GLH.GetProgram(program, GetProgramParameterName.ActiveAttributes, out activeAttributeCount);
+            GLL.GetProgram(program, GetProgramParameterName.ActiveAttributes, out activeAttributeCount);
             for (int i = 0; i < activeAttributeCount; i++)
             {
-                string name = GLH.GetActiveAttrib(program, i, out int size, out ActiveAttribType type);
-                int location = GLH.GetAttribLocation(program, name);
+                string name = GLL.GetActiveAttrib(program, i, out int size, out ActiveAttribType type);
+                int location = GLL.GetAttribLocation(program, name);
 
                 // Overwrite existing vertex attributes.
                 attributes[name] = location;
@@ -286,13 +286,13 @@ namespace GLFrameworkEngine
         public void EnableVertexAttributes()
         {
             foreach (KeyValuePair<string, int> attrib in attributes)
-                GLH.EnableVertexAttribArray(attrib.Value);
+                GLL.EnableVertexAttribArray(attrib.Value);
         }
 
         public void DisableVertexAttributes()
         {
             foreach (KeyValuePair<string, int> attrib in attributes)
-                GLH.DisableVertexAttribArray(attrib.Value);
+                GLL.DisableVertexAttribArray(attrib.Value);
         }
 
         public void SaveBinary(string fileName)
@@ -304,9 +304,9 @@ namespace GLFrameworkEngine
 
         private void CreateBinary(out byte[] binaryData, out BinaryFormat format)
         {
-            GLH.GetProgram(program, (GetProgramParameterName)GL_PROGRAM_BINARY_MAX_LENGTH, out int size);
+            GLL.GetProgram(program, (GetProgramParameterName)GL_PROGRAM_BINARY_MAX_LENGTH, out int size);
             binaryData = new byte[size];
-            GLH.GetProgramBinary(program, size, out _, out format, binaryData);
+            GLL.GetProgramBinary(program, size, out _, out format, binaryData);
         }
 
         public virtual void OnCompiled() { }
@@ -315,18 +315,18 @@ namespace GLFrameworkEngine
         {
             foreach (Shader shader in shaders)
             {
-                GLH.AttachShader(program, shader.id);
+                GLL.AttachShader(program, shader.id);
             }
 
             //Before linking, attach feedback varyings
             TransformFeedbackVaryings(program);
 
-            GLH.LinkProgram(program);
+            GLL.LinkProgram(program);
             foreach (var shader in shaders)
             {
                 Console.WriteLine($"{shader.type.ToString("g")}:");
 
-                string log = GLH.GetShaderInfoLog(shader.id);
+                string log = GLL.GetShaderInfoLog(shader.id);
                 Console.WriteLine(log);
             }
             LoadAttributes(program);
@@ -341,7 +341,7 @@ namespace GLFrameworkEngine
                 return;
 
             string[] varyings = this.FeedbackVaryings;
-            GLH.TransformFeedbackVaryings(program, varyings.Length, varyings, TransformFeedbackMode.SeparateAttribs);
+            GLL.TransformFeedbackVaryings(program, varyings.Length, varyings, TransformFeedbackMode.SeparateAttribs);
         }
     }
 
@@ -349,9 +349,9 @@ namespace GLFrameworkEngine
     {
         public Shader(string src, ShaderType type)
         {
-            id = GLH.CreateShader(type);
-            GLH.ShaderSource(id, src);
-            GLH.CompileShader(id);
+            id = GLL.CreateShader(type);
+            GLL.ShaderSource(id, src);
+            GLL.CompileShader(id);
             this.type = type;
         }
 
@@ -359,20 +359,20 @@ namespace GLFrameworkEngine
         {
             string source = "";
 
-            GLH.GetShader(id, ShaderParameter.ShaderSourceLength, out int length);
+            GLL.GetShader(id, ShaderParameter.ShaderSourceLength, out int length);
             if (length != 0)
-                GLH.GetShaderSource(id, length, out _, out source);
+                GLL.GetShaderSource(id, length, out _, out source);
             return source;
         }
 
         public string GetInfoLog()
         {
-            return GLH.GetShaderInfoLog(id);
+            return GLL.GetShaderInfoLog(id);
         }
 
         public void Dispose()
         {
-            GLH.DeleteShader(id);
+            GLL.DeleteShader(id);
         }
 
         public ShaderType type;

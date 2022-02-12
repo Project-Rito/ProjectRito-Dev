@@ -59,7 +59,7 @@ namespace MapStudio.UI
                 DefaultShaderProgram = new ShaderProgram(
                     new FragmentShader(frag), new VertexShader(vert));
 
-                int buffer = GLH.GenBuffer();
+                int buffer = GLL.GenBuffer();
                 vao = new VertexBufferObject(buffer);
                 vao.AddAttribute(0, 2, VertexAttribPointerType.Float, false, 16, 0);
                 vao.AddAttribute(1, 2, VertexAttribPointerType.Float, false, 16, 8);
@@ -93,7 +93,7 @@ namespace MapStudio.UI
                 Length = 4;
 
                 float[] data = list.ToArray();
-                GLH.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.StaticDraw);
+                GLL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.StaticDraw);
             }
             else
             {
@@ -106,24 +106,24 @@ namespace MapStudio.UI
         {
             Initialize(control);
 
-            GLH.MatrixMode(MatrixMode.Modelview);
-            GLH.LoadIdentity();
+            GLL.MatrixMode(MatrixMode.Modelview);
+            GLL.LoadIdentity();
 
             control.CurrentShader = DefaultShaderProgram;
 
             DefaultShaderProgram.SetFloat("exposure", 1.0f);
 
-            GLH.ActiveTexture(TextureUnit.Texture23);
+            GLL.ActiveTexture(TextureUnit.Texture23);
             screen.Bind();
             DefaultShaderProgram.SetInt("scene", 23);
 
-            GLH.ActiveTexture(TextureUnit.Texture24);
+            GLL.ActiveTexture(TextureUnit.Texture24);
             brightnessTexture.Bind();
             DefaultShaderProgram.SetInt("bloomBlur", 24);
 
             vao.Enable(DefaultShaderProgram);
             vao.Use();
-            GLH.DrawArrays(PrimitiveType.QuadStrip, 0, Length);
+            GLL.DrawArrays(PrimitiveType.QuadStrip, 0, Length);
         }
     }
 }

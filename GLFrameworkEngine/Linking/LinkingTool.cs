@@ -165,7 +165,7 @@ namespace GLFrameworkEngine
             });
 
             //Connection render
-            GLH.LineWidth(5);
+            GLL.LineWidth(5);
 
             var mat = new LinkRenderMaterial();
             if (hasDest)
@@ -179,14 +179,14 @@ namespace GLFrameworkEngine
             LinkRender.UpdatePrimitiveType(PrimitiveType.LineLoop);
             LinkRender.Draw(context);
 
-            GLH.LineWidth(1);
+            GLL.LineWidth(1);
 
-            GLH.PointSize(10);
+            GLL.PointSize(10);
 
             LinkRender.UpdatePrimitiveType(PrimitiveType.Points);
             LinkRender.Draw(context);
 
-            GLH.PointSize(1);
+            GLL.PointSize(1);
         }
     }
 

@@ -49,17 +49,17 @@ namespace CafeLibrary.Rendering
             //Seal objects draw ontop of meshes so offset them
             if (IsSealPass)
             {
-                GLH.Enable(EnableCap.PolygonOffsetFill);
-                GLH.PolygonOffset(-1, 1f);
+                GLL.Enable(EnableCap.PolygonOffsetFill);
+                GLL.PolygonOffset(-1, 1f);
             }
             else
             {
-                GLH.Disable(EnableCap.PolygonOffsetFill);
+                GLL.Disable(EnableCap.PolygonOffsetFill);
             }
 
             Draw(shader, displayLOD);
 
-            GLH.Disable(EnableCap.PolygonOffsetFill);
+            GLL.Disable(EnableCap.PolygonOffsetFill);
         }
 
         public int GetDisplayLevel(GLContext context, BfresRender render)
@@ -79,12 +79,12 @@ namespace CafeLibrary.Rendering
             //Seal objects draw ontop of meshes so offset them
             if (IsSealPass)
             {
-                GLH.Enable(EnableCap.PolygonOffsetFill);
-                GLH.PolygonOffset(-1, 1f);
+                GLL.Enable(EnableCap.PolygonOffsetFill);
+                GLL.PolygonOffset(-1, 1f);
             }
             else
             {
-                GLH.Disable(EnableCap.PolygonOffsetFill);
+                GLL.Disable(EnableCap.PolygonOffsetFill);
             }
 
             customvao.Enable(shader);
@@ -95,7 +95,7 @@ namespace CafeLibrary.Rendering
             else
                 DrawSubMesh();
 
-            GLH.Disable(EnableCap.PolygonOffsetFill);
+            GLL.Disable(EnableCap.PolygonOffsetFill);
         }
 
         public void Draw(ShaderProgram shader, int displayLOD = 0)
@@ -112,27 +112,27 @@ namespace CafeLibrary.Rendering
         private void DrawModelWireframe(ShaderProgram shader, int displayLOD = 0)
         {
             // use vertex color for wireframe color
-            GLH.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-            GLH.Enable(EnableCap.LineSmooth);
-            GLH.LineWidth(1.5f);
+            GLL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            GLL.Enable(EnableCap.LineSmooth);
+            GLL.LineWidth(1.5f);
             DrawSubMesh(displayLOD);
-            GLH.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            GLL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
         }
 
         private void DrawSubMesh(int displayLOD = 0)
         {
             BfresPolygonGroupRender polygonGroup = LODMeshes[displayLOD];
-            GLH.DrawElements(OpenGLHelper.PrimitiveTypes[polygonGroup.PrimitiveType],
+            GLL.DrawElements(OpenGLHelper.PrimitiveTypes[polygonGroup.PrimitiveType],
                (int)polygonGroup.FaceCount, polygonGroup.DrawElementsType, polygonGroup.Offset);
 
             ResourceTracker.NumDrawCalls += 1;
             ResourceTracker.NumDrawTriangles += (polygonGroup.FaceCount / 3);
 
             //Reset to default depth settings after draw
-            GLH.Enable(EnableCap.DepthTest);
-            GLH.DepthFunc(DepthFunction.Lequal);
-            GLH.DepthRange(0.0, 1.0);
-            GLH.DepthMask(true);
+            GLL.Enable(EnableCap.DepthTest);
+            GLL.DepthFunc(DepthFunction.Lequal);
+            GLL.DepthRange(0.0, 1.0);
+            GLL.DepthMask(true);
         }
 
         public void InitVertexBuffer(List<BfresGLLoader.VaoAttribute> attributes, byte[] bufferData, byte[] indices)
@@ -144,7 +144,7 @@ namespace CafeLibrary.Rendering
 
             //Load vaos
             int[] buffers = new int[2];
-            GLH.GenBuffers(2, buffers);
+            GLL.GenBuffers(2, buffers);
 
             int indexBuffer = buffers[0];
             int vaoBuffer = buffers[1];
@@ -152,13 +152,13 @@ namespace CafeLibrary.Rendering
             vao = new VertexBufferObject(vaoBuffer, indexBuffer);
             customvao = new VertexBufferObject(vaoBuffer, indexBuffer);
 
-            GLH.BindBuffer(BufferTarget.ElementArrayBuffer, indexBuffer);
-            GLH.BufferData(BufferTarget.ElementArrayBuffer, indices.Length, indices, BufferUsageHint.StaticDraw);
-            GLH.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+            GLL.BindBuffer(BufferTarget.ElementArrayBuffer, indexBuffer);
+            GLL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length, indices, BufferUsageHint.StaticDraw);
+            GLL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
-            GLH.BindBuffer(BufferTarget.ArrayBuffer, vaoBuffer);
-            GLH.BufferData(BufferTarget.ArrayBuffer, bufferData.Length, bufferData, BufferUsageHint.StaticDraw);
-            GLH.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GLL.BindBuffer(BufferTarget.ArrayBuffer, vaoBuffer);
+            GLL.BufferData(BufferTarget.ArrayBuffer, bufferData.Length, bufferData, BufferUsageHint.StaticDraw);
+            GLL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 
             UpdateVaoAttributes();
         }

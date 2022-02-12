@@ -56,8 +56,8 @@ namespace GLFrameworkEngine
 
             if (DiffuseTextureID != -1)
             {
-                GLH.ActiveTexture(TextureUnit.Texture0 + 1);
-                GLH.BindTexture(TextureTarget.Texture2D, DiffuseTextureID);
+                GLL.ActiveTexture(TextureUnit.Texture0 + 1);
+                GLL.BindTexture(TextureTarget.Texture2D, DiffuseTextureID);
                 context.CurrentShader.SetInt("textureMap", 1);
                 context.CurrentShader.SetInt("hasTextures", 1);
             }

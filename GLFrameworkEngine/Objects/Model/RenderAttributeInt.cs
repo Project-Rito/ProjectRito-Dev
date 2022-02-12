@@ -27,7 +27,7 @@ namespace GLFrameworkEngine
 
         public override void SetAttribute(int index, int stride)
         {
-            GLH.VertexAttribIPointer(index, ElementCount, (VertexAttribIntegerType)Type, stride, new System.IntPtr(Offset.Value));
+            GLL.VertexAttribIPointer(index, ElementCount, (VertexAttribIntegerType)Type, stride, new System.IntPtr(Offset.Value));
         }
     }
 }

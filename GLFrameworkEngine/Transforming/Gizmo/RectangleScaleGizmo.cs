@@ -74,7 +74,7 @@ namespace GLFrameworkEngine
             if (ConeRenderer == null)
                 Init();
 
-            GLH.Disable(EnableCap.DepthTest);
+            GLL.Disable(EnableCap.DepthTest);
 
             var translationMtx = Matrix4.CreateTranslation(position);
             var scaleMtx = Matrix4.CreateScale(scale);
@@ -98,7 +98,7 @@ namespace GLFrameworkEngine
             for (int i = 0; i < faceOrigins.Length; i++)
                 DrawAxisArrow(context, scaleMtx, transform, isHovered[i], _rotations[i], faceOrigins[i]);
             context.CurrentShader = null;
-            GLH.Enable(EnableCap.DepthTest);
+            GLL.Enable(EnableCap.DepthTest);
         }
 
         //Draws lines in the center of the edges of the bounding rectangle
@@ -118,17 +118,17 @@ namespace GLFrameworkEngine
             for (int i = 0; i < 4; i++)
             points.Add(bottom[i] + (top[i] - bottom[i]) * new Vector3(1, 0.5f, 1));
 
-            GLH.LineWidth(2);
+            GLL.LineWidth(2);
             LineRender.Draw(points, true);
 
             points.Clear();
             for (int i = 0; i < 4; i++)
                 points.Add(left[i] + (right[i] - left[i]) * new Vector3(0.5f, 1, 1));
 
-            GLH.LineWidth(2);
+            GLL.LineWidth(2);
             LineRender.Draw(points, true);
 
-            GLH.LineWidth(1);
+            GLL.LineWidth(1);
         }
 
         private void DrawAxisArrow(GLContext context, Matrix4 scaleMtx, Matrix4 transform, bool hovered, Vector4 rotation, Vector3 point)

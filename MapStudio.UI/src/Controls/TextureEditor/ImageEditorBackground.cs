@@ -22,7 +22,7 @@ namespace MapStudio.UI
         {
             if (Length == 0)
             {
-                int buffer = GLH.GenBuffer();
+                int buffer = GLL.GenBuffer();
                 vao = new VertexBufferObject(buffer);
                 vao.AddAttribute(0, 2, VertexAttribPointerType.Float, false, 16, 0);
                 vao.AddAttribute(1, 2, VertexAttribPointerType.Float, false, 16, 8);
@@ -56,7 +56,7 @@ namespace MapStudio.UI
                 Length = 4;
 
                 float[] data = list.ToArray();
-                GLH.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.StaticDraw);
+                GLL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.StaticDraw);
             }
         }
 
@@ -73,7 +73,7 @@ namespace MapStudio.UI
             var cameraMtx = Matrix4.CreateScale(100) * camera.ProjectionMatrix;
             shader.SetMatrix4x4("mtxCam", ref cameraMtx);
 
-            GLH.Disable(EnableCap.Blend);
+            GLL.Disable(EnableCap.Blend);
 
             DrawBackground(shader);
 
@@ -103,7 +103,7 @@ namespace MapStudio.UI
             shader.SetFloat("height", texture.Height);
             shader.SetInt("currentMipLevel", 0);
 
-            GLH.ActiveTexture(TextureUnit.Texture1);
+            GLL.ActiveTexture(TextureUnit.Texture1);
             BindTexture(texture);
             shader.SetInt("textureInput", 1);
             shader.SetInt("hasTexture", 1);
@@ -111,17 +111,17 @@ namespace MapStudio.UI
             //Draw background
             vao.Enable(shader);
             vao.Use();
-            GLH.DrawArrays(PrimitiveType.TriangleStrip, 0, Length);
+            GLL.DrawArrays(PrimitiveType.TriangleStrip, 0, Length);
         }
 
         static void DrawBackground(ShaderProgram shader)
         {
             var backgroundTexture = IconManager.GetTextureIcon("CHECKERBOARD");
 
-            GLH.ActiveTexture(TextureUnit.Texture1);
-            GLH.BindTexture(TextureTarget.Texture2D, backgroundTexture);
-            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+            GLL.ActiveTexture(TextureUnit.Texture1);
+            GLL.BindTexture(TextureTarget.Texture2D, backgroundTexture);
+            GLL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+            GLL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
             shader.SetInt("backgroundTexture", 1);
 
             shader.SetVector2("scale", new Vector2(30));
@@ -132,7 +132,7 @@ namespace MapStudio.UI
             //Draw background
             vao.Enable(shader);
             vao.Use();
-            GLH.DrawArrays(PrimitiveType.TriangleStrip, 0, Length);
+            GLL.DrawArrays(PrimitiveType.TriangleStrip, 0, Length);
         }
 
         static Vector3 UpdateAspectScale(Vector3 scale, int width, int height, STGenericTexture tex)
@@ -174,11 +174,11 @@ namespace MapStudio.UI
             }
 
             //Fixed mip layer with nearest setting
-            GLH.BindTexture(target, texID);
-            GLH.TexParameter(target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GLH.TexParameter(target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-            GLH.TexParameter(target, TextureParameterName.TextureMaxLod, (int)15);
-            GLH.TexParameter(target, TextureParameterName.TextureMinLod, (int)mipLevel);
+            GLL.BindTexture(target, texID);
+            GLL.TexParameter(target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GLL.TexParameter(target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GLL.TexParameter(target, TextureParameterName.TextureMaxLod, (int)15);
+            GLL.TexParameter(target, TextureParameterName.TextureMinLod, (int)mipLevel);
 
             int[] mask = new int[4] { (int)All.Red, (int)All.Green, (int)All.Blue, (int)All.Alpha };
             if (ImageEditor.UseChannelComponents)
@@ -194,7 +194,7 @@ namespace MapStudio.UI
                 };
             }
 
-            GLH.TexParameter(target, TextureParameterName.TextureSwizzleRgba, mask);
+            GLL.TexParameter(target, TextureParameterName.TextureSwizzleRgba, mask);
         }
     }
 }

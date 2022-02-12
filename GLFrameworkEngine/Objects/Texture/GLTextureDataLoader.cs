@@ -91,7 +91,7 @@ namespace GLFrameworkEngine
         {
             int imageSize = GLFormatHelper.CalculateImageSize(width, height, format);
 
-            GLH.CompressedTexImage2D(TextureTarget.Texture2D, mipLevel,
+            GLL.CompressedTexImage2D(TextureTarget.Texture2D, mipLevel,
                 format, width, height, 0, imageSize, data);
         }
 
@@ -99,37 +99,37 @@ namespace GLFrameworkEngine
         {
             int imageSize = GLFormatHelper.CalculateImageSize(width, height, format);
 
-            GLH.CompressedTexImage3D(target, mipLevel,
+            GLL.CompressedTexImage3D(target, mipLevel,
                 format, width, height, depth, 0, imageSize * depth, data);
         }
 
         static void LoadImage2D(int mipLevel, int width, int height, GLFormatHelper.PixelFormatInfo formatInfo, byte[] data)
         {
-            GLH.TexImage2D(TextureTarget.Texture2D, mipLevel, formatInfo.InternalFormat, width, height, 0,
+            GLL.TexImage2D(TextureTarget.Texture2D, mipLevel, formatInfo.InternalFormat, width, height, 0,
                   formatInfo.Format, formatInfo.Type, data);
         }
 
         static void LoadImage2D(int mipLevel, int width, int height, GLFormatHelper.PixelFormatInfo formatInfo, IntPtr data)
         {
-            GLH.TexImage2D(TextureTarget.Texture2D, mipLevel, formatInfo.InternalFormat, width, height, 0,
+            GLL.TexImage2D(TextureTarget.Texture2D, mipLevel, formatInfo.InternalFormat, width, height, 0,
                   formatInfo.Format, formatInfo.Type, data);
         }
 
         static void LoadImage3D(TextureTarget target, int mipLevel, int depth, int width, int height, GLFormatHelper.PixelFormatInfo formatInfo, byte[] data)
         {
-            GLH.TexImage3D(target, mipLevel, formatInfo.InternalFormat, width, height, depth, 0,
+            GLL.TexImage3D(target, mipLevel, formatInfo.InternalFormat, width, height, depth, 0,
               formatInfo.Format, formatInfo.Type, data);
         }
 
         static void LoadImage3D(TextureTarget target, int mipLevel, int depth, int width, int height, GLFormatHelper.PixelFormatInfo formatInfo, IntPtr data)
         {
-            GLH.TexImage3D(target, mipLevel, formatInfo.InternalFormat, width, height, depth, 0,
+            GLL.TexImage3D(target, mipLevel, formatInfo.InternalFormat, width, height, depth, 0,
                  formatInfo.Format, formatInfo.Type, data);
         }
 
         static void LoadImageCubemap2D(int mipLevel, int array, int width, int height, GLFormatHelper.PixelFormatInfo formatInfo, byte[] data)
         {
-            GLH.TexImage2D(TextureTarget.TextureCubeMapPositiveX + array, mipLevel, formatInfo.InternalFormat, width, height, 0,
+            GLL.TexImage2D(TextureTarget.TextureCubeMapPositiveX + array, mipLevel, formatInfo.InternalFormat, width, height, 0,
                   formatInfo.Format, formatInfo.Type, data);
         }
 
@@ -137,7 +137,7 @@ namespace GLFrameworkEngine
         {
             int imageSize = GLFormatHelper.CalculateImageSize(width, height, format);
 
-            GLH.CompressedTexImage2D(TextureTarget.TextureCubeMapPositiveX + array, mipLevel,
+            GLL.CompressedTexImage2D(TextureTarget.TextureCubeMapPositiveX + array, mipLevel,
                 format, width, height, 0, imageSize, data);
         }
     }

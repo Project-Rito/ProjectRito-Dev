@@ -50,8 +50,8 @@ namespace GLFrameworkEngine
             //Make sure to support transparency as the grid is a drawn quad with alpha used
             GLMaterialBlendState.Translucent.RenderBlendState();
 
-            GLH.Enable(EnableCap.DepthTest);
-            GLH.DepthFunc(DepthFunction.Lequal);
+            GLL.Enable(EnableCap.DepthTest);
+            GLL.DepthFunc(DepthFunction.Lequal);
 
             PlaneRender.Draw(control);
 

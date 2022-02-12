@@ -23,24 +23,24 @@ namespace GLFrameworkEngine
             Framebuffer frameBuffer = new Framebuffer(FramebufferTarget.Framebuffer, width, height, PixelInternalFormat.Rgba16f, 1);
             frameBuffer.Bind();
 
-            GLH.Disable(EnableCap.Blend);
+            GLL.Disable(EnableCap.Blend);
 
             shader.Enable();
 
-            GLH.ActiveTexture(TextureUnit.Texture1);
-            GLH.BindTexture(TextureTarget.Texture3D, textureID);
+            GLL.ActiveTexture(TextureUnit.Texture1);
+            GLL.BindTexture(TextureTarget.Texture3D, textureID);
             shader.SetInt("dynamic_texture_array", 1);
 
-            GLH.ClearColor(0, 0, 0, 0);
-            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GLH.Viewport(0, 0, width, height);
+            GLL.ClearColor(0, 0, 0, 0);
+            GLL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLL.Viewport(0, 0, width, height);
 
             //Draw the texture onto the framebuffer
             ScreenQuadRender.Draw();
 
             //Disable shader and textures
-            GLH.UseProgram(0);
-            GLH.BindTexture(TextureTarget.Texture3D, 0);
+            GLL.UseProgram(0);
+            GLL.BindTexture(TextureTarget.Texture3D, 0);
 
             var image = (GLTexture2D)frameBuffer.Attachments[0];
             ID = image.ID;

@@ -21,7 +21,7 @@ namespace GLFrameworkEngine
         {
             if (Length == 0)
             {
-                int buffer = GLH.GenBuffer();
+                int buffer = GLL.GenBuffer();
                 vao = new VertexBufferObject(buffer);
                 vao.AddAttribute(0, 2, VertexAttribPointerType.Float, false, 16, 0);
                 vao.AddAttribute(1, 2, VertexAttribPointerType.Float, false, 16, 8);
@@ -56,9 +56,9 @@ namespace GLFrameworkEngine
 
                 float[] data = list.ToArray();
 
-                GLH.BindBuffer(BufferTarget.ArrayBuffer, buffer);
-                GLH.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.StaticDraw);
-                GLH.BindBuffer(BufferTarget.ArrayBuffer, 0);
+                GLL.BindBuffer(BufferTarget.ArrayBuffer, buffer);
+                GLL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.StaticDraw);
+                GLL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             }
         }
 
@@ -66,32 +66,32 @@ namespace GLFrameworkEngine
         {
             Init();
 
-            GLH.MatrixMode(MatrixMode.Modelview);
-            GLH.LoadIdentity();
+            GLL.MatrixMode(MatrixMode.Modelview);
+            GLL.LoadIdentity();
 
-            GLH.ActiveTexture(TextureUnit.Texture1);
-            GLH.BindTexture(TextureTarget.Texture2D, textureID);
+            GLL.ActiveTexture(TextureUnit.Texture1);
+            GLL.BindTexture(TextureTarget.Texture2D, textureID);
             shader.SetInt("screenTexture", 1);
 
-            GLH.Enable(EnableCap.CullFace);
-            GLH.Enable(EnableCap.DepthTest);
-            GLH.CullFace(CullFaceMode.Back);
+            GLL.Enable(EnableCap.CullFace);
+            GLL.Enable(EnableCap.DepthTest);
+            GLL.CullFace(CullFaceMode.Back);
 
             vao.Enable(shader);
             vao.Use();
-            GLH.DrawArrays(PrimitiveType.TriangleStrip, 0, Length);
+            GLL.DrawArrays(PrimitiveType.TriangleStrip, 0, Length);
         }
 
         public static void Draw()
         {
             Init();
 
-            GLH.MatrixMode(MatrixMode.Modelview);
-            GLH.LoadIdentity();
+            GLL.MatrixMode(MatrixMode.Modelview);
+            GLL.LoadIdentity();
 
             vao.Enable(null);
             vao.Use();
-            GLH.DrawArrays(PrimitiveType.TriangleStrip, 0, Length);
+            GLL.DrawArrays(PrimitiveType.TriangleStrip, 0, Length);
         }
     }
 }

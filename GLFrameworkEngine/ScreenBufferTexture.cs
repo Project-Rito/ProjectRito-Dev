@@ -33,11 +33,11 @@ namespace GLFrameworkEngine
             if (Filter == null)
                 Init();
 
-            GLH.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GLL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
             Filter.Bind();
-            GLH.Viewport(0, 0, control.Width, control.Height);
-            GLH.BindTexture(TextureTarget.Texture2D, 0);
+            GLL.Viewport(0, 0, control.Width, control.Height);
+            GLL.BindTexture(TextureTarget.Texture2D, 0);
 
             var shader = GlobalShaders.GetShader("SCREEN");
             shader.Enable();
@@ -48,29 +48,29 @@ namespace GLFrameworkEngine
             if (Filter.Width != control.Width || Filter.Height != control.Height)
                 Filter.Resize(control.Width, control.Height);
 
-            GLH.ClearColor(0,0,0,0);
-            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLL.ClearColor(0,0,0,0);
+            GLL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             ScreenQuadRender.Draw(shader, texture.ID);
             ScreenBuffer = (GLTexture2D)Filter.Attachments[0];
 
-            GLH.Flush();
+            GLL.Flush();
 
             Filter.Unbind();
-            GLH.BindTexture(TextureTarget.Texture2D, 0);
+            GLL.BindTexture(TextureTarget.Texture2D, 0);
 
-            GLH.UseProgram(0);
+            GLL.UseProgram(0);
 
             ScreenBuffer.Bind();
-            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
-            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
-            GLH.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, 0);
-            GLH.BindTexture(TextureTarget.Texture2D, 0);
+            GLL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+            GLL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GLL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GLL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
+            GLL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, 0);
+            GLL.BindTexture(TextureTarget.Texture2D, 0);
 
             control.ScreenBuffer.Bind();
-            GLH.Viewport(0, 0, control.Width, control.Height);
+            GLL.Viewport(0, 0, control.Width, control.Height);
         }
     }
 }

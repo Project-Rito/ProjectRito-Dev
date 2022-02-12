@@ -45,7 +45,7 @@ namespace GLFrameworkEngine
                     int mipWidth = (int)(texture.Width * Math.Pow(0.5, mip));
                     int mipHeight = (int)(texture.Height * Math.Pow(0.5, mip));
 
-                    GLH.TexImage3D(texture.Target, array, texture.PixelInternalFormat,
+                    GLL.TexImage3D(texture.Target, array, texture.PixelInternalFormat,
                         mipWidth, mipHeight, texture.ArrayCount, mip,
                           texture.PixelFormat, texture.PixelType, IntPtr.Zero);
                 }
@@ -77,7 +77,7 @@ namespace GLFrameworkEngine
                 offset += 4;
             }
 
-            GLH.TexImage3D(texture.Target, 0, texture.PixelInternalFormat,
+            GLL.TexImage3D(texture.Target, 0, texture.PixelInternalFormat,
                 texture.Width, texture.Height, count,
                 0, texture.PixelFormat, texture.PixelType, buffer);
 
@@ -102,13 +102,13 @@ namespace GLFrameworkEngine
             texture.Width = (int)dds.Width; texture.Height = (int)dds.Height;
             texture.Bind();
 
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureBaseLevel, 0);
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureMaxLevel, 13);
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureBaseLevel, 0);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureMaxLevel, 13);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
 
             InternalFormat format = InternalFormat.Rgba8;
 
@@ -131,14 +131,14 @@ namespace GLFrameworkEngine
                 var surface = ByteUtils.CombineArray(levels.ToArray());
                 if (format == InternalFormat.Rgba8)
                 {
-                    GLH.TexImage3D(TextureTarget.Texture2DArray, j,
+                    GLL.TexImage3D(TextureTarget.Texture2DArray, j,
                         PixelInternalFormat.Rgba,
                         mipWidth, mipHeight, (int)dds.ArrayCount, 0, PixelFormat.Bgra, PixelType.UnsignedByte,
                         surface);
                 }
                 else
                 {
-                    GLH.CompressedTexImage3D(TextureTarget.Texture2DArray, j,
+                    GLL.CompressedTexImage3D(TextureTarget.Texture2DArray, j,
                         format,
                         mipWidth, mipHeight, (int)dds.ArrayCount,
                         0, imageSize, surface);
@@ -199,13 +199,13 @@ namespace GLFrameworkEngine
             texture.Width = (int)dds[0].Width; texture.Height = (int)dds[0].Height;
             texture.Bind();
 
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureBaseLevel, 0);
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureMaxLevel, 1);
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-            GLH.TexParameter(texture.Target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureBaseLevel, 0);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureMaxLevel, 1);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GLL.TexParameter(texture.Target, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
 
             InternalFormat format = InternalFormat.Rgba8;
             for (int j = 0; j < dds.Length; j++)
@@ -227,14 +227,14 @@ namespace GLFrameworkEngine
                 var surface = ByteUtils.CombineArray(levels.ToArray());
                 if (format == InternalFormat.Rgba8)
                 {
-                    GLH.TexImage3D(TextureTarget.Texture2DArray, j,
+                    GLL.TexImage3D(TextureTarget.Texture2DArray, j,
                         PixelInternalFormat.Rgba,
                         mipWidth, mipHeight, (int)dds[0].ArrayCount, 0, PixelFormat.Bgra, PixelType.UnsignedByte,
                         surface);
                 }
                 else
                 {
-                    GLH.CompressedTexImage3D(TextureTarget.Texture2DArray, j,
+                    GLL.CompressedTexImage3D(TextureTarget.Texture2DArray, j,
                         format,
                         mipWidth, mipHeight, (int)dds[0].ArrayCount,
                         0, imageSize, surface);
@@ -268,14 +268,14 @@ namespace GLFrameworkEngine
                 var internalFormat = GLFormatHelper.ConvertCompressedFormat(format, true);
                 int imageSize = GLFormatHelper.CalculateImageSize(width, height, internalFormat);
 
-                GLH.CompressedTexImage3D(TextureTarget.Texture2DArray, 0,
+                GLL.CompressedTexImage3D(TextureTarget.Texture2DArray, 0,
                 internalFormat, width, height, 1, 0, imageSize, data);
             }
             else
             {
                 var formatInfo = GLFormatHelper.ConvertPixelFormat(format);
 
-                GLH.TexImage3D(Target, 0, formatInfo.InternalFormat, width, height, 1, 0,
+                GLL.TexImage3D(Target, 0, formatInfo.InternalFormat, width, height, 1, 0,
                       formatInfo.Format, formatInfo.Type, data);
             }
         }
@@ -284,7 +284,7 @@ namespace GLFrameworkEngine
         {
             Bind();
 
-            GLH.TexSubImage3D(Target, 0, 0, 0, level, this.Width, this.Height, 1,
+            GLL.TexSubImage3D(Target, 0, 0, 0, level, this.Width, this.Height, 1,
                    this.PixelFormat, this.PixelType, buffer);
 
             Unbind();
@@ -297,7 +297,7 @@ namespace GLFrameworkEngine
             System.Drawing.Imaging.BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
               System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-            GLH.TexSubImage3D(Target, 0, 0, 0, level, this.Width, this.Height, 1,
+            GLL.TexSubImage3D(Target, 0, 0, 0, level, this.Width, this.Height, 1,
                 this.PixelFormat, this.PixelType, data.Scan0);
 
             image.UnlockBits(data);
@@ -312,12 +312,12 @@ namespace GLFrameworkEngine
             System.Drawing.Imaging.BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
               System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-            GLH.TexImage3D(Target, level, PixelInternalFormat.Rgba, data.Width, data.Height, count, 0,
+            GLL.TexImage3D(Target, level, PixelInternalFormat.Rgba, data.Width, data.Height, count, 0,
                   OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
 
             image.UnlockBits(data);
 
-            GLH.GenerateMipmap(GenerateMipmapTarget.Texture2DArray);
+            GLL.GenerateMipmap(GenerateMipmapTarget.Texture2DArray);
 
             Unbind();
         }
@@ -326,7 +326,7 @@ namespace GLFrameworkEngine
         {
             Bind();
 
-            GLH.TexImage3D(Target, 0, PixelInternalFormat.Rgba, Width, Height, 1, 0,
+            GLL.TexImage3D(Target, 0, PixelInternalFormat.Rgba, Width, Height, 1, 0,
            OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, image);
 
             Unbind();
@@ -346,7 +346,7 @@ namespace GLFrameworkEngine
             for (int i = 0; i < this.ArrayCount; i++)
             {
                 byte[] output = new byte[Width * Height * 4];
-                GLH.GetTextureSubImage(this.ID, 0, 0, 0, i, Width, Height, 1,
+                GLL.GetTextureSubImage(this.ID, 0, 0, 0, i, Width, Height, 1,
                     PixelFormat.Bgra, PixelType.UnsignedByte, output.Length, output);
 
                 var bitmap = BitmapImageHelper.CreateBitmap(output, Width, Height);
@@ -372,7 +372,7 @@ namespace GLFrameworkEngine
                     int mipH = (int)(this.Height * Math.Pow(0.5, m));
 
                     byte[] outputRaw = new byte[mipW * mipH * 4];
-                    GLH.GetTextureSubImage(this.ID, m, 0, 0, i, mipW, mipH, 1,
+                    GLL.GetTextureSubImage(this.ID, m, 0, 0, i, mipW, mipH, 1,
                      PixelFormat.Rgba, PixelType.UnsignedByte, outputRaw.Length, outputRaw);
 
                     surface.mipmaps.Add(outputRaw);

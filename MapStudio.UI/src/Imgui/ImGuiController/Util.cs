@@ -24,7 +24,7 @@ namespace MapStudio.UI
         {
             return;
 
-            var error = GLH.GetError();
+            var error = GLL.GetError();
             if (error != ErrorCode.NoError)
             {
                 Debug.Print($"{title}: {error}");
@@ -41,32 +41,32 @@ namespace MapStudio.UI
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CreateTexture(TextureTarget target, string Name, out int Texture)
         {
-            Texture = GLH.GenTexture();
-            GLH.BindTexture(target, Texture);
-            GLH.BindTexture(target, 0);
+            Texture = GLL.GenTexture();
+            GLL.BindTexture(target, Texture);
+            GLL.BindTexture(target, 0);
             LabelObject(ObjectLabelIdentifier.Texture, Texture, $"Texture: {Name}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CreateProgram(string Name, out int Program)
         {
-            Program = GLH.CreateProgram();
+            Program = GLL.CreateProgram();
             LabelObject(ObjectLabelIdentifier.Program, Program, $"Program: {Name}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CreateShader(ShaderType type, string Name, out int Shader)
         {
-            Shader = GLH.CreateShader(type);
+            Shader = GLL.CreateShader(type);
             LabelObject(ObjectLabelIdentifier.Shader, Shader, $"Shader: {type}: {Name}");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CreateBuffer(string Name, out int Buffer)
         {
-            Buffer = GLH.GenBuffer();
-            GLH.BindBuffer(BufferTarget.ArrayBuffer, Buffer);
-            GLH.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            Buffer = GLL.GenBuffer();
+            GLL.BindBuffer(BufferTarget.ArrayBuffer, Buffer);
+            GLL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             LabelObject(ObjectLabelIdentifier.Buffer, Buffer, $"Buffer: {Name}");
         }
 
@@ -79,9 +79,9 @@ namespace MapStudio.UI
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void CreateVertexArray(string Name, out int VAO)
         {
-            VAO = GLH.GenVertexArray();
-            GLH.BindVertexArray(VAO);
-            GLH.BindVertexArray(0);
+            VAO = GLL.GenVertexArray();
+            GLL.BindVertexArray(VAO);
+            GLL.BindVertexArray(0);
             LabelObject(ObjectLabelIdentifier.VertexArray, VAO, $"VAO: {Name}");
         }
     }

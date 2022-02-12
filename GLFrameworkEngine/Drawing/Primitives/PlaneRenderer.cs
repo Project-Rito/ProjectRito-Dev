@@ -18,8 +18,8 @@ namespace GLFrameworkEngine
             var shader = GlobalShaders.GetShader("BILLBOARD");
             context.CurrentShader = shader;
 
-            GLH.ActiveTexture(TextureUnit.Texture0 + 1);
-            GLH.BindTexture(TextureTarget.Texture2D, textureID);
+            GLL.ActiveTexture(TextureUnit.Texture0 + 1);
+            GLL.BindTexture(TextureTarget.Texture2D, textureID);
             shader.SetInt("textureMap", 1);
             shader.SetInt("useTexture", 1);
 

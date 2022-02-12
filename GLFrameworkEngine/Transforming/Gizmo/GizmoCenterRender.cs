@@ -30,17 +30,17 @@ namespace GLFrameworkEngine
             Material.ScaleByCameraDistance = true;
             Material.Render(context);
 
-            GLH.DepthMask(false);
-            GLH.Enable(EnableCap.CullFace);
-            GLH.CullFace(CullFaceMode.Back);
+            GLL.DepthMask(false);
+            GLL.Enable(EnableCap.CullFace);
+            GLL.CullFace(CullFaceMode.Back);
 
-            GLH.LineWidth(1.5f);
+            GLL.LineWidth(1.5f);
 
             Instance.Draw(context);
 
-            GLH.DepthMask(true);
+            GLL.DepthMask(true);
 
-            GLH.LineWidth(1);
+            GLL.LineWidth(1);
         }
     }
 }

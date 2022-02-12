@@ -63,7 +63,7 @@ namespace GLFrameworkEngine
         {
             if (PositionPathRender == null) Init();
 
-            GLH.LineWidth(3);
+            GLL.LineWidth(3);
 
             var points = GetPositionKeyedPath();
             var targetPoints = GetTargetPositionKeyedPath();
@@ -77,7 +77,7 @@ namespace GLFrameworkEngine
             DrawPath(context, PositionPathRender, points, new Vector4(1, 0, 0, 1));
             DrawPath(context, TargetPositionPathRender, targetPoints, new Vector4(0, 1, 0, 1));
 
-            GLH.LineWidth(1);
+            GLL.LineWidth(1);
         }
 
         private void DrawCamera(GLContext context, Matrix4 transform)

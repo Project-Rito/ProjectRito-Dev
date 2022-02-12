@@ -18,7 +18,7 @@ namespace AGraphicsLibrary
 
         static void Init(int volumeIndex)
         {
-            GLH.GenBuffers(1, out vertexBuffer);
+            GLL.GenBuffers(1, out vertexBuffer);
 
             vao = new VertexArrayObject(vertexBuffer);
             vao.AddAttribute(0, 3, VertexAttribPointerType.Float, false, Vertex.SIZE, 0);
@@ -38,7 +38,7 @@ namespace AGraphicsLibrary
             Vertices = InitProbes(volume).ToArray();
 
             vao.Bind();
-            GLH.BufferData<Vertex>(BufferTarget.ArrayBuffer, Vertex.SIZE * Vertices.Length, Vertices, BufferUsageHint.StaticDraw);
+            GLL.BufferData<Vertex>(BufferTarget.ArrayBuffer, Vertex.SIZE * Vertices.Length, Vertices, BufferUsageHint.StaticDraw);
         }
 
         public static void Draw(GLContext context)
@@ -54,9 +54,9 @@ namespace AGraphicsLibrary
 
             vao.Use();
 
-            GLH.PointSize(5);
-            GLH.DrawArrays(PrimitiveType.Points, 0, Vertices.Length);
-            GLH.PointSize(1);
+            GLL.PointSize(5);
+            GLL.DrawArrays(PrimitiveType.Points, 0, Vertices.Length);
+            GLL.PointSize(1);
         }
 
         static List<Vertex> InitProbes(ProbeVolume volume)

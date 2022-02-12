@@ -24,8 +24,8 @@ namespace MapStudio.UI
                 Init();
 
             Filter.Bind();
-            GLH.Viewport(0, 0, control.Width, control.Height);
-            GLH.BindTexture(TextureTarget.Texture2D, 0);
+            GLL.Viewport(0, 0, control.Width, control.Height);
+            GLL.BindTexture(TextureTarget.Texture2D, 0);
 
             var shader = GlobalShaders.GetShader("BLOOM_EXTRACT");
             shader.Enable();
@@ -34,19 +34,19 @@ namespace MapStudio.UI
             if (Filter.Width != control.Width || Filter.Height != control.Height)
                 Filter.Resize(control.Width, control.Height);
 
-            GLH.ClearColor(System.Drawing.Color.Black);
-            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLL.ClearColor(System.Drawing.Color.Black);
+            GLL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             ScreenQuadRender.Draw(shader, colorTexture.ID);
             var screenBuffer = (GLTexture2D)Filter.Attachments[0];
 
-            GLH.Flush();
+            GLL.Flush();
 
             Filter.Unbind();
-            GLH.BindTexture(TextureTarget.Texture2D, 0);
+            GLL.BindTexture(TextureTarget.Texture2D, 0);
 
-            GLH.UseProgram(0);
-            GLH.Viewport(0, 0, control.Width, control.Height);
+            GLL.UseProgram(0);
+            GLL.Viewport(0, 0, control.Width, control.Height);
 
             return screenBuffer;
         }

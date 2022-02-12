@@ -21,11 +21,11 @@ namespace AGraphicsLibrary
             var shader = GlobalShaders.GetShader("LIGHTPREPASS");
             shader.Enable();
 
-            GLH.ActiveTexture(TextureUnit.Texture0 + 1);
+            GLL.ActiveTexture(TextureUnit.Texture0 + 1);
             gbuffer.Bind();
             shader.SetInt("normalsTexture", 1);
 
-            GLH.ActiveTexture(TextureUnit.Texture0 + 2);
+            GLL.ActiveTexture(TextureUnit.Texture0 + 2);
             linearDepth.Bind();
             shader.SetInt("depthTexture", 2);
 
@@ -58,12 +58,12 @@ namespace AGraphicsLibrary
                     pointLights[i].Color = new Vector4(1, 0, 0, 1);
                 }
 
-                GLH.Uniform4(GLH.GetUniformLocation(programID, $"pointLights[{i}].uColor"), pointLights[i].Color);
-                GLH.Uniform3(GLH.GetUniformLocation(programID, $"pointLights[{i}].uPosition"), pointLights[i].Position);
+                GLL.Uniform4(GLL.GetUniformLocation(programID, $"pointLights[{i}].uColor"), pointLights[i].Color);
+                GLL.Uniform3(GLL.GetUniformLocation(programID, $"pointLights[{i}].uPosition"), pointLights[i].Position);
             }
 
-            GLH.ClearColor(0, 0, 0, 0);
-            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLL.ClearColor(0, 0, 0, 0);
+            GLL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             ScreenQuadRender.Draw();
         }

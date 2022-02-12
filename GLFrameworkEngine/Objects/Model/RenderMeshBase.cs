@@ -51,11 +51,11 @@ namespace GLFrameworkEngine
 
             if (isSelected)
             {
-                GLH.Enable(EnableCap.StencilTest);
-                GLH.Clear(ClearBufferMask.StencilBufferBit);
-                GLH.ClearStencil(0);
-                GLH.StencilFunc(StencilFunction.Always, 0x1, 0x1);
-                GLH.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
+                GLL.Enable(EnableCap.StencilTest);
+                GLL.Clear(ClearBufferMask.StencilBufferBit);
+                GLL.ClearStencil(0);
+                GLL.StencilFunc(StencilFunction.Always, 0x1, 0x1);
+                GLL.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
 
                 context.CurrentShader.SetVector4(GLConstants.SelectionColorUniform, new OpenTK.Vector4(GLConstants.SelectColor.Xyz, 0.5f));
             }
@@ -68,20 +68,20 @@ namespace GLFrameworkEngine
 
             if (isSelected)
             {
-                GLH.Disable(EnableCap.Blend);
+                GLL.Disable(EnableCap.Blend);
 
                 context.CurrentShader.SetVector4(GLConstants.SelectionColorUniform, GLConstants.SelectOutlineColor);
 
-                GLH.LineWidth(GLConstants.SelectionWidth);
-                GLH.StencilFunc(StencilFunction.Equal, 0x0, 0x1);
-                GLH.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+                GLL.LineWidth(GLConstants.SelectionWidth);
+                GLL.StencilFunc(StencilFunction.Equal, 0x0, 0x1);
+                GLL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
 
-                GLH.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+                GLL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
                 Draw(context);
-                GLH.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+                GLL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
 
-                GLH.Disable(EnableCap.StencilTest);
-                GLH.LineWidth(2);
+                GLL.Disable(EnableCap.StencilTest);
+                GLL.LineWidth(2);
             }
         }
 
@@ -93,8 +93,8 @@ namespace GLFrameworkEngine
             standard.DisplaySelection = isSelected;
             standard.Render(context);
 
-            GLH.Enable(EnableCap.CullFace);
-            GLH.CullFace(CullFaceMode.Back);
+            GLL.Enable(EnableCap.CullFace);
+            GLL.CullFace(CullFaceMode.Back);
 
             DrawWithSelection(context, isSelected);
         }
@@ -177,28 +177,28 @@ namespace GLFrameworkEngine
         }
 
         private void DrawArrays(int count, int offset = 0) {
-            GLH.DrawArrays(primitiveType, offset, count);
+            GLL.DrawArrays(primitiveType, offset, count);
 
             ResourceTracker.NumDrawCalls += 1;
             ResourceTracker.NumDrawTriangles += count;
         }
 
         private void DrawElements(int count, int offset = 0) {
-            GLH.DrawElements(primitiveType, count, DrawElementsType.UnsignedInt, offset);
+            GLL.DrawElements(primitiveType, count, DrawElementsType.UnsignedInt, offset);
 
             ResourceTracker.NumDrawCalls += 1;
             ResourceTracker.NumDrawTriangles += count;
         }
 
         private void DrawArraysInstanced(int count, int instanceCount, int offset = 0) {
-            GLH.DrawArraysInstanced(primitiveType, offset, count, instanceCount);
+            GLL.DrawArraysInstanced(primitiveType, offset, count, instanceCount);
 
             ResourceTracker.NumDrawCalls += 1;
             ResourceTracker.NumDrawTriangles += count;
         }
 
         private void DrawElementsInstanced(int count, int instanceCount, int offset = 0) {
-            GLH.DrawElements(primitiveType, count, DrawElementsType.UnsignedInt, offset);
+            GLL.DrawElements(primitiveType, count, DrawElementsType.UnsignedInt, offset);
 
             ResourceTracker.NumDrawCalls += 1;
             ResourceTracker.NumDrawTriangles += count;

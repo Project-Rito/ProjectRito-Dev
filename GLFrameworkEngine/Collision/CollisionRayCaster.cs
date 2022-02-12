@@ -43,7 +43,7 @@ namespace GLFrameworkEngine
             mat.HalfLambertShading = true;
             mat.Render(context);
 
-            GLH.Enable(EnableCap.DepthTest);
+            GLL.Enable(EnableCap.DepthTest);
 
             MeshRender.Draw(context);
         }

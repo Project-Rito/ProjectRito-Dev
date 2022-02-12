@@ -40,7 +40,7 @@ namespace GLFrameworkEngine
         public PixelFormat PixelFormat { get; internal set; }
         public PixelType PixelType { get; internal set; }
 
-        public GLTexture() : base(GLH.GenTexture())
+        public GLTexture() : base(GLL.GenTexture())
         {
             Target = TextureTarget.Texture2D;
             WrapS = TextureWrapMode.ClampToEdge;
@@ -50,9 +50,9 @@ namespace GLFrameworkEngine
             MagFilter = TextureMagFilter.Linear;
             PixelInternalFormat = PixelInternalFormat.Rgba;
 
-            GLH.TexParameter(Target, TextureParameterName.TextureLodBias, 0);
-            GLH.TexParameter(Target, TextureParameterName.TextureMinLod, 0);
-            GLH.TexParameter(Target, TextureParameterName.TextureMaxLod, 14);
+            GLL.TexParameter(Target, TextureParameterName.TextureLodBias, 0);
+            GLL.TexParameter(Target, TextureParameterName.TextureMinLod, 0);
+            GLL.TexParameter(Target, TextureParameterName.TextureMaxLod, 14);
 
             UpdateParameters();
         }
@@ -60,34 +60,34 @@ namespace GLFrameworkEngine
         public void GenerateMipmaps()
         {
             Bind();
-            GLH.GenerateMipmap((GenerateMipmapTarget)Target);
+            GLL.GenerateMipmap((GenerateMipmapTarget)Target);
         }
 
         public void Bind() {
-            GLH.BindTexture(Target, ID);
+            GLL.BindTexture(Target, ID);
         }
 
         public void Unbind() {
-            GLH.BindTexture(Target, 0);
+            GLL.BindTexture(Target, 0);
         }
 
         public void Dispose() {
-            GLH.DeleteTexture(ID);
+            GLL.DeleteTexture(ID);
         }
 
         public virtual void Attach(FramebufferAttachment attachment, Framebuffer target)
         {
             target.Bind();
-            GLH.FramebufferTexture(target.Target, attachment, ID, 0);
+            GLL.FramebufferTexture(target.Target, attachment, ID, 0);
         }
 
         public void UpdateParameters()
         {
-            GLH.TexParameter(Target, TextureParameterName.TextureMagFilter, (int)MagFilter);
-            GLH.TexParameter(Target, TextureParameterName.TextureMinFilter, (int)MinFilter);
-            GLH.TexParameter(Target, TextureParameterName.TextureWrapS, (int)WrapS);
-            GLH.TexParameter(Target, TextureParameterName.TextureWrapT, (int)WrapT);
-            GLH.TexParameter(Target, TextureParameterName.TextureWrapR, (int)WrapR);
+            GLL.TexParameter(Target, TextureParameterName.TextureMagFilter, (int)MagFilter);
+            GLL.TexParameter(Target, TextureParameterName.TextureMinFilter, (int)MinFilter);
+            GLL.TexParameter(Target, TextureParameterName.TextureWrapS, (int)WrapS);
+            GLL.TexParameter(Target, TextureParameterName.TextureWrapT, (int)WrapT);
+            GLL.TexParameter(Target, TextureParameterName.TextureWrapR, (int)WrapR);
         }
 
         public virtual void SaveDDS(string fileName)
@@ -167,12 +167,12 @@ namespace GLFrameworkEngine
             }
 
             if (texture.MipCount > 1 && texture.Platform.OutputFormat != TexFormat.BC5_SNORM)
-                GLH.GenerateMipmap((GenerateMipmapTarget)Target);
+                GLL.GenerateMipmap((GenerateMipmapTarget)Target);
             else
             {
                 //Set level to base only
-                GLH.TexParameter(Target, TextureParameterName.TextureBaseLevel, 0);
-                GLH.TexParameter(Target, TextureParameterName.TextureMaxLevel, 0);
+                GLL.TexParameter(Target, TextureParameterName.TextureBaseLevel, 0);
+                GLL.TexParameter(Target, TextureParameterName.TextureMaxLevel, 0);
             }
 
             Unbind();

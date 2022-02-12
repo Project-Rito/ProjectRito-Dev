@@ -331,22 +331,22 @@ namespace CafeLibrary.Rendering
 
         public virtual void SetRenderState()
         {
-            GLH.Enable(EnableCap.CullFace);
+            GLL.Enable(EnableCap.CullFace);
 
             if (CullFront && CullBack)
-                GLH.CullFace(CullFaceMode.FrontAndBack);
+                GLL.CullFace(CullFaceMode.FrontAndBack);
             else if (CullFront)
-                GLH.CullFace(CullFaceMode.Front);
+                GLL.CullFace(CullFaceMode.Front);
             else if (CullBack)
-                GLH.CullFace(CullFaceMode.Back);
+                GLL.CullFace(CullFaceMode.Back);
             else
-                GLH.Disable(EnableCap.CullFace);
+                GLL.Disable(EnableCap.CullFace);
         }
 
         public virtual void SetTextureUniforms(GLContext control, ShaderProgram shader)
         {
-            GLH.ActiveTexture(TextureUnit.Texture0 + 1);
-            GLH.BindTexture(TextureTarget.Texture2D, RenderTools.defaultTex.ID);
+            GLL.ActiveTexture(TextureUnit.Texture0 + 1);
+            GLL.BindTexture(TextureTarget.Texture2D, RenderTools.defaultTex.ID);
             shader.SetInt("u_TextureAlbedo0", 1); // Attach default texture
 
 
@@ -375,9 +375,9 @@ namespace CafeLibrary.Rendering
                     continue;
 
                 // Unbind stuff
-                GLH.ActiveTexture(TextureUnit.Texture0 + id);
-                GLH.BindTexture(TextureTarget.Texture2D, 0);
-                GLH.BindTexture(TextureTarget.Texture2DArray, 0);
+                GLL.ActiveTexture(TextureUnit.Texture0 + id);
+                GLL.BindTexture(TextureTarget.Texture2D, 0);
+                GLL.BindTexture(TextureTarget.Texture2DArray, 0);
 
                 var binded = BindTexture(shader, GetTextures(), TextureMaps[i], name, id);
                 bool hasTexture = binded != null;
@@ -461,7 +461,7 @@ namespace CafeLibrary.Rendering
             if (name == null)
                 return null;
 
-            GLH.ActiveTexture(TextureUnit.Texture0 + id);
+            GLL.ActiveTexture(TextureUnit.Texture0 + id);
 
             if (textures.ContainsKey(name))
             {
@@ -490,14 +490,14 @@ namespace CafeLibrary.Rendering
 
             var target = ((GLTexture)texture.RenderTexture).Target;
 
-            GLH.BindTexture(target, texture.RenderTexture.ID);
-            GLH.TexParameter(target, TextureParameterName.TextureWrapS, (int)OpenGLHelper.WrapMode[textureMap.WrapU]);
-            GLH.TexParameter(target, TextureParameterName.TextureWrapT, (int)OpenGLHelper.WrapMode[textureMap.WrapV]);
-            GLH.TexParameter(target, TextureParameterName.TextureMinFilter, (int)OpenGLHelper.MinFilter[textureMap.MinFilter]);
-            GLH.TexParameter(target, TextureParameterName.TextureMagFilter, (int)OpenGLHelper.MagFilter[textureMap.MagFilter]);
-            GLH.TexParameter(target, TextureParameterName.TextureLodBias, textureMap.LODBias);
-            GLH.TexParameter(target, TextureParameterName.TextureMaxLod, textureMap.MaxLOD);
-            GLH.TexParameter(target, TextureParameterName.TextureMinLod, textureMap.MinLOD);
+            GLL.BindTexture(target, texture.RenderTexture.ID);
+            GLL.TexParameter(target, TextureParameterName.TextureWrapS, (int)OpenGLHelper.WrapMode[textureMap.WrapU]);
+            GLL.TexParameter(target, TextureParameterName.TextureWrapT, (int)OpenGLHelper.WrapMode[textureMap.WrapV]);
+            GLL.TexParameter(target, TextureParameterName.TextureMinFilter, (int)OpenGLHelper.MinFilter[textureMap.MinFilter]);
+            GLL.TexParameter(target, TextureParameterName.TextureMagFilter, (int)OpenGLHelper.MagFilter[textureMap.MagFilter]);
+            GLL.TexParameter(target, TextureParameterName.TextureLodBias, textureMap.LODBias);
+            GLL.TexParameter(target, TextureParameterName.TextureMaxLod, textureMap.MaxLOD);
+            GLL.TexParameter(target, TextureParameterName.TextureMinLod, textureMap.MinLOD);
 
             int[] mask = new int[4]
             {
@@ -506,7 +506,7 @@ namespace CafeLibrary.Rendering
                     OpenGLHelper.GetSwizzle(texture.BlueChannel),
                     OpenGLHelper.GetSwizzle(texture.AlphaChannel),
             };
-            GLH.TexParameter(target, TextureParameterName.TextureSwizzleRgba, mask);
+            GLL.TexParameter(target, TextureParameterName.TextureSwizzleRgba, mask);
             return (GLTexture)texture.RenderTexture;
         }
     }

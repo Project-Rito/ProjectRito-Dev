@@ -29,7 +29,7 @@ namespace AGraphicsLibrary
 
         public static void CreateColorLookupTexture(GLTexture3D output)
         {
-            GLH.BindTexture(output.Target, 0);
+            GLL.BindTexture(output.Target, 0);
 
             int LUT_SIZE = output.Width;
 
@@ -40,13 +40,13 @@ namespace AGraphicsLibrary
 
             for (int i = 0; i < 8; i++)
             {
-                GLH.FramebufferTextureLayer(FramebufferTarget.Framebuffer,
+                GLL.FramebufferTextureLayer(FramebufferTarget.Framebuffer,
                     FramebufferAttachment.ColorAttachment0 + i, output.ID, 0, i);
             }
 
-            GLH.Viewport(0, 0, LUT_SIZE, LUT_SIZE);
-            GLH.ClearColor(0, 0, 0, 0);
-            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLL.Viewport(0, 0, LUT_SIZE, LUT_SIZE);
+            GLL.ClearColor(0, 0, 0, 0);
+            GLL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             var shader = GlobalShaders.GetShader("COLOR_CORRECTION");
             shader.Enable();
@@ -55,9 +55,9 @@ namespace AGraphicsLibrary
             ScreenQuadRender.Draw();
             Filter.Unbind();
 
-            GLH.UseProgram(0);
+            GLL.UseProgram(0);
 
-            var errorcheck = GLH.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+            var errorcheck = GLL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (errorcheck != FramebufferErrorCode.FramebufferComplete)
                 throw new Exception(errorcheck.ToString());
         }
@@ -91,8 +91,8 @@ namespace AGraphicsLibrary
                     float w = CurveHelper.Interpolate(curves[3], time);
 
                     Vector4 curveValues = new Vector4(x, y, z, w);
-                    GLH.Uniform4(GLH.GetUniformLocation(shader.program, $"uCurve0[{j}]"), curveValues);
-                    GLH.Uniform4(GLH.GetUniformLocation(shader.program, $"uCurve1[{j}]"), curveValues);
+                    GLL.Uniform4(GLL.GetUniformLocation(shader.program, $"uCurve0[{j}]"), curveValues);
+                    GLL.Uniform4(GLL.GetUniformLocation(shader.program, $"uCurve1[{j}]"), curveValues);
 
                     time += amount;
                 }

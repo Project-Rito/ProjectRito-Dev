@@ -109,8 +109,8 @@ namespace GLFrameworkEngine
                     context.TransformTools.OnMouseDown(context, true);
             }
 
-            GLH.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            GLH.Viewport(0, 0, context.Width, context.Height);
+            GLL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GLL.Viewport(0, 0, context.Width, context.Height);
         }
     }
 }

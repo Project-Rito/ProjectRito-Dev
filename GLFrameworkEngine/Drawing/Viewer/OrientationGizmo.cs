@@ -24,8 +24,8 @@ namespace GLFrameworkEngine
         {
             Prepare();
 
-            GLH.Clear(ClearBufferMask.DepthBufferBit);
-            GLH.Enable(EnableCap.DepthTest);
+            GLL.Clear(ClearBufferMask.DepthBufferBit);
+            GLL.Enable(EnableCap.DepthTest);
             //Smaller view space (15% of the screen)
             var width = (int)(context.Width * 0.15f);
             var height = (int)(context.Height * 0.15f);
@@ -47,7 +47,7 @@ namespace GLFrameworkEngine
 
             CubeRenderer.Draw(context);
 
-            GLH.BindTexture(TextureTarget.Texture2D, 0);
+            GLL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         private void Prepare()

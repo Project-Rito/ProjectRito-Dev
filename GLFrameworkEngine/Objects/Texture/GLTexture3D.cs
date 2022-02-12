@@ -31,7 +31,7 @@ namespace GLFrameworkEngine
             texture.Target = TextureTarget.Texture3D;
             texture.Bind();
 
-            GLH.TexImage3D(TextureTarget.Texture3D, 0, format,
+            GLL.TexImage3D(TextureTarget.Texture3D, 0, format,
                 texture.Width, texture.Height, texture.Depth,
                 0, pixelFormat, pixelType, IntPtr.Zero);
 
@@ -65,7 +65,7 @@ namespace GLFrameworkEngine
             Bind();
 
             byte[] data = new byte[Width * Height * Depth * 4];
-            GLH.GetTexImage(Target, 0, PixelFormat.Bgra, PixelType.UnsignedByte, data);
+            GLL.GetTexImage(Target, 0, PixelFormat.Bgra, PixelType.UnsignedByte, data);
 
             Unbind();
 

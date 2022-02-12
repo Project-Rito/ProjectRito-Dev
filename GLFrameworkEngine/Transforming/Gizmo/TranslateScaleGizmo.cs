@@ -150,7 +150,7 @@ namespace GLFrameworkEngine
             var shader = GlobalShaders.GetShader("GIZMO");
             context.CurrentShader = shader;
 
-            GLH.Disable(EnableCap.DepthTest);
+            GLL.Disable(EnableCap.DepthTest);
 
             var translateMtx = Matrix4.CreateTranslation(position);
             var scaleMtx = Matrix4.CreateScale(scale);
@@ -197,12 +197,12 @@ namespace GLFrameworkEngine
                 DrawDebugBoundings(context, transform);
 
             context.CurrentShader = null;
-            GLH.Enable(EnableCap.DepthTest);
+            GLL.Enable(EnableCap.DepthTest);
         }
 
         public void DrawDebugBoundings(GLContext context, Matrix4 transform)
         {
-            GLH.Disable(EnableCap.DepthTest);
+            GLL.Disable(EnableCap.DepthTest);
 
             context.CurrentShader = GlobalShaders.GetShader("GIZMO");
             context.CurrentShader.SetMatrix4x4("mtxMdl", ref transform);
@@ -264,14 +264,14 @@ namespace GLFrameworkEngine
 
             GLMaterialBlendState.Opaque.RenderBlendState();
 
-            GLH.LineWidth(2);
+            GLL.LineWidth(2);
 
             context.CurrentShader.SetVector4("color", new Vector4(color, 1f));
             context.CurrentShader.SetMatrix4x4("mtxMdl", ref output);
 
             PlaneLinesRender.Draw(context);
 
-            GLH.LineWidth(1);
+            GLL.LineWidth(1);
         }
 
         private Vector3 GetSelectedAxisVector3(int axis)

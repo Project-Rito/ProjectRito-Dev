@@ -6,7 +6,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace GLFrameworkEngine
 {
-    public class GLH : GL
+    public class GLL : GL
     {
         // Variables to enable/disable layer features
         public static bool EnableInstancing = false;

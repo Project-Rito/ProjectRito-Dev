@@ -40,7 +40,7 @@ namespace MapStudio
                                 DisplayDevice.Default,
                                 3, 2, GraphicsContextFlags.Default)
         {
-            Title += $": {TranslationSource.GetText("OPENGL_VERSION")}: " + GLH.GetString(StringName.Version);
+            Title += $": {TranslationSource.GetText("OPENGL_VERSION")}: " + GLL.GetString(StringName.Version);
 
             _arguments = arguments;
 
@@ -276,8 +276,8 @@ namespace MapStudio
 
             ImGui.End();
 
-            GLH.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-            GLH.Viewport(0, 0, Width, Height);
+            GLL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GLL.Viewport(0, 0, Width, Height);
 
             _controller.Render();
 

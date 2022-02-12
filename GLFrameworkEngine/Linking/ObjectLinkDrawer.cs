@@ -70,10 +70,10 @@ namespace GLFrameworkEngine
             }
 
             if (points.Count > 0) {
-                GLH.LineWidth(LINE_WIDTH);
+                GLL.LineWidth(LINE_WIDTH);
                 LineRender.UpdateVertexData(points.ToArray(), BufferUsageHint.DynamicDraw);
                 LineRender.Draw(context);
-                GLH.LineWidth(1);
+                GLL.LineWidth(1);
             }
         }
 

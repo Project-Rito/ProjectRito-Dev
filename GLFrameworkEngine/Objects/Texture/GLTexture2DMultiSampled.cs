@@ -21,7 +21,7 @@ namespace GLFrameworkEngine
             texture.Target = TextureTarget.Texture2DMultisample;
             texture.Bind();
 
-            GLH.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample,
+            GLL.TexImage2DMultisample(TextureTargetMultisample.Texture2DMultisample,
                 numSamples, format, texture.Width, texture.Height, true);
 
             texture.UpdateParameters();
@@ -32,7 +32,7 @@ namespace GLFrameworkEngine
         public override void Attach(FramebufferAttachment attachment, Framebuffer target)
         {
             target.Bind();
-            GLH.FramebufferTexture2D(target.Target, attachment, TextureTarget.Texture2DMultisample , ID, 0);
+            GLL.FramebufferTexture2D(target.Target, attachment, TextureTarget.Texture2DMultisample , ID, 0);
         }
     }
 }

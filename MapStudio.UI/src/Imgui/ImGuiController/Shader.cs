@@ -42,27 +42,27 @@ namespace MapStudio.UI
         }
         public void UseShader()
         {
-            GLH.UseProgram(Program);
+            GLL.UseProgram(Program);
         }
 
         public void Dispose()
         {
             if (Initialized)
             {
-                GLH.DeleteProgram(Program);
+                GLL.DeleteProgram(Program);
                 Initialized = false;
             }
         }
 
         public UniformFieldInfo[] GetUniforms()
         {
-            GLH.GetProgram(Program, GetProgramParameterName.ActiveUniforms, out int UnifromCount);
+            GLL.GetProgram(Program, GetProgramParameterName.ActiveUniforms, out int UnifromCount);
 
             UniformFieldInfo[] Uniforms = new UniformFieldInfo[UnifromCount];
 
             for (int i = 0; i < UnifromCount; i++)
             {
-                string Name = GLH.GetActiveUniform(Program, i, out int Size, out ActiveUniformType Type);
+                string Name = GLL.GetActiveUniform(Program, i, out int Size, out ActiveUniformType Type);
 
                 UniformFieldInfo FieldInfo;
                 FieldInfo.Location = GetUniformLocation(Name);
@@ -81,7 +81,7 @@ namespace MapStudio.UI
         {
             if (UniformToLocation.TryGetValue(uniform, out int location) == false)
             {
-                location = GLH.GetUniformLocation(Program, uniform);
+                location = GLL.GetUniformLocation(Program, uniform);
                 UniformToLocation.Add(uniform, location);
 
                 if (location == -1)
@@ -104,21 +104,21 @@ namespace MapStudio.UI
             }
 
             foreach (var shader in Shaders)
-                GLH.AttachShader(Program, shader);
+                GLL.AttachShader(Program, shader);
 
-            GLH.LinkProgram(Program);
+            GLL.LinkProgram(Program);
 
-            GLH.GetProgram(Program, GetProgramParameterName.LinkStatus, out int Success);
+            GLL.GetProgram(Program, GetProgramParameterName.LinkStatus, out int Success);
             if (Success == 0)
             {
-                string Info = GLH.GetProgramInfoLog(Program);
+                string Info = GLL.GetProgramInfoLog(Program);
                 Debug.WriteLine($"GLH.LinkProgram had info log [{name}]:\n{Info}");
             }
 
             foreach (var Shader in Shaders)
             {
-                GLH.DetachShader(Program, Shader);
-                GLH.DeleteShader(Shader);
+                GLL.DetachShader(Program, Shader);
+                GLL.DeleteShader(Shader);
             }
 
             Initialized = true;
@@ -129,13 +129,13 @@ namespace MapStudio.UI
         private int CompileShader(string name, ShaderType type, string source)
         {
             Util.CreateShader(type, name, out int Shader);
-            GLH.ShaderSource(Shader, source);
-            GLH.CompileShader(Shader);
+            GLL.ShaderSource(Shader, source);
+            GLL.CompileShader(Shader);
 
-            GLH.GetShader(Shader, ShaderParameter.CompileStatus, out int success);
+            GLL.GetShader(Shader, ShaderParameter.CompileStatus, out int success);
             if (success == 0)
             {
-                string Info = GLH.GetShaderInfoLog(Shader);
+                string Info = GLL.GetShaderInfoLog(Shader);
                 Debug.WriteLine($"GLH.CompileShader for shader '{Name}' [{type}] had info log:\n{Info}");
             }
             

@@ -28,8 +28,8 @@ namespace GLFrameworkEngine
             byte[] pixels = new byte[imageSizeInBytes];
 
             // Read the pixels from the framebuffer. PNG uses the BGRA format. 
-            GLH.ReadBuffer(bufferMode);
-            GLH.ReadPixels(0, 0, width, height, PixelFormat.Bgra, PixelType.UnsignedByte, pixels);
+            GLL.ReadBuffer(bufferMode);
+            GLL.ReadPixels(0, 0, width, height, PixelFormat.Bgra, PixelType.UnsignedByte, pixels);
 
             if (!saveAlpha)
                 SetAlphaToWhite(width, height, 4, pixels);

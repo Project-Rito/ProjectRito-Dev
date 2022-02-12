@@ -198,7 +198,7 @@ namespace MapStudio.UI
         public static void LoadTextureFile(string filePath, int width, int height, bool forceUpdate = false)
         {
             if (forceUpdate && Icons.ContainsKey(filePath)) {
-                GLH.DeleteTexture(Icons[filePath]);
+                GLL.DeleteTexture(Icons[filePath]);
                 Icons.Remove(filePath);
             }
 

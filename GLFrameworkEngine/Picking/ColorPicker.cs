@@ -110,8 +110,8 @@ namespace GLFrameworkEngine
 
             uint pickingColor = 0;
 
-            GLH.Flush();
-            GLH.ReadPixels((int)position.X, (int)position.Y, 1, 1, PixelFormat.Rgba, PixelType.UnsignedByte, ref pickingColor);
+            GLL.Flush();
+            GLL.ReadPixels((int)position.X, (int)position.Y, 1, 1, PixelFormat.Rgba, PixelType.UnsignedByte, ref pickingColor);
 
             pickingBuffer.Unbind();
 
@@ -125,23 +125,23 @@ namespace GLFrameworkEngine
         {
             Prepare(context.Width, context.Height);
 
-            GLH.PushAttrib(AttribMask.AllAttribBits);
+            GLL.PushAttrib(AttribMask.AllAttribBits);
 
             //Draw the pickable objects. Drawn IDs will be passed into ColorPassIDs
             foreach (var drawable in drawables)
                 drawable.DrawColorPicking(context);
 
-            GLH.PopAttrib();
+            GLL.PopAttrib();
 
-            GLH.Flush();
+            GLL.Flush();
 
             int width  = (int)(endPoint.X - startPoint.X);
             int height = (int)(endPoint.Y - startPoint.Y);
 
             uint[] pickingColor = new uint[width * height];
 
-            GLH.UseProgram(0);
-            GLH.ReadPixels((int)startPoint.X, (int)startPoint.Y, width, height, PixelFormat.Rgba, PixelType.UnsignedByte, pickingColor);
+            GLL.UseProgram(0);
+            GLL.ReadPixels((int)startPoint.X, (int)startPoint.Y, width, height, PixelFormat.Rgba, PixelType.UnsignedByte, pickingColor);
 
             pickingBuffer.Unbind();
 
@@ -163,9 +163,9 @@ namespace GLFrameworkEngine
             Init(width, height);
 
             pickingBuffer.Bind();
-            GLH.Viewport(0, 0, width, height);
-            GLH.ClearColor(1, 0, 0, 1);
-            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLL.Viewport(0, 0, width, height);
+            GLL.ClearColor(1, 0, 0, 1);
+            GLL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             ColorPassIDs.Clear();
             pickingIndex = 1;
@@ -175,7 +175,7 @@ namespace GLFrameworkEngine
         {
             var camera = context.Camera;
 
-            GLH.ReadPixels((int)position.X, (int)position.Y, 1, 1, PixelFormat.DepthComponent, PixelType.Float, ref Depth);
+            GLL.ReadPixels((int)position.X, (int)position.Y, 1, 1, PixelFormat.DepthComponent, PixelType.Float, ref Depth);
 
             //Get normalized depth for z depth
             if (Depth == 1.0f)

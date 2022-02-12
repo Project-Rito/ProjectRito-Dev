@@ -160,7 +160,7 @@ namespace CafeLibrary.Rendering
             base.DrawModel(control, pass);
 
             //Make sure cubemaps can look seamless in lower mip levels
-            GLH.Enable(EnableCap.TextureCubeMapSeamless);
+            GLL.Enable(EnableCap.TextureCubeMapSeamless);
 
             if (DebugShaderRender.DebugRendering != DebugShaderRender.DebugRender.Default || DrawDebugAreaID)
                 control.CurrentShader = GlobalShaders.GetShader("DEBUG");
@@ -185,12 +185,12 @@ namespace CafeLibrary.Rendering
          //  if (Runtime.RenderBoundingBoxes)
              //   DrawBoundings(control);
 
-            GLH.Enable(EnableCap.CullFace);
-            GLH.CullFace(CullFaceMode.Back);
+            GLL.Enable(EnableCap.CullFace);
+            GLL.CullFace(CullFaceMode.Back);
 
-            GLH.DepthMask(true);
-            GLH.Disable(EnableCap.AlphaTest);
-            GLH.Disable(EnableCap.Blend);
+            GLL.DepthMask(true);
+            GLL.Disable(EnableCap.AlphaTest);
+            GLL.Disable(EnableCap.Blend);
         }
 
         /// <summary>
@@ -247,7 +247,7 @@ namespace CafeLibrary.Rendering
                 Matrix4 transform = Transform.TransformMatrix;
                 bounding.UpdateTransform(transform);
 
-                GLH.LineWidth(2);
+                GLL.LineWidth(2);
 
                 var bnd = bounding.Box;
                 foreach (BfresMeshRender mesh in model.Meshes) {

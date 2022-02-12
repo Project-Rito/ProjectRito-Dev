@@ -56,22 +56,22 @@ namespace GLFrameworkEngine
             Matrix4 mtxProj = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(90), 1.0f, 1.0f, 1000f);
             Matrix4 viewProj = mtxProj * viewMatrix;
 
-            GLH.UseProgram(shader.program);
+            GLL.UseProgram(shader.program);
             shader.SetMatrix4x4("mtxCam", ref viewProj);
             shader.SetMatrix4x4("mtxMdl", ref modelMatrix);
             shader.SetVector3("camPosition", control.Camera.TargetPosition);
             shader.SetVector2("iResolution", new Vector2(control.Width, control.Height));
             shader.SetInt("materialRenderDisplay", 1);
 
-            GLH.ClearColor(0, 0, 0, 0);
-            GLH.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GLH.Viewport(0, 0, width, height);
+            GLL.ClearColor(0, 0, 0, 0);
+            GLL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GLL.Viewport(0, 0, width, height);
 
             //Render material data onto a textured sphere
             Render(control, shader, mesh);
  
-            GLH.Enable(EnableCap.Blend);
-            GLH.BlendFuncSeparate(
+            GLL.Enable(EnableCap.Blend);
+            GLL.BlendFuncSeparate(
                 BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha,
                 BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
 
@@ -90,8 +90,8 @@ namespace GLFrameworkEngine
             shader.SetInt("materialRenderDisplay", 0);
 
             //Disable shader and textures
-            GLH.UseProgram(0);
-            GLH.BindTexture(TextureTarget.Texture2D, 0);
+            GLL.UseProgram(0);
+            GLL.BindTexture(TextureTarget.Texture2D, 0);
 
             var thumbnail = frameBuffer.ReadImagePixels(true);
 
