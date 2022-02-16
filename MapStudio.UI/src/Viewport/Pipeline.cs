@@ -326,7 +326,10 @@ namespace MapStudio.UI
             GLL.ClearColor(0, 0, 0, 0);
             GLL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
+            GLL.EnableInstancing = true;
             DrawSceneWithPostEffects();
+            GLL.EnableInstancing = false;
+            GLL.EndFrame();
 
             foreach (var actor in StudioSystem.Instance.Actors)
                 actor.Draw(_context);

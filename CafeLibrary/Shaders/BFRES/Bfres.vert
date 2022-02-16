@@ -34,6 +34,9 @@ layout (location = 8) in vec4 vTangent;
 layout (location = 9) in vec4 vBitangent;
 layout (location = 10) in vec2 vTexCoord3;
 
+uniform bool GLL_IEnabled;
+uniform mat4 GLL_IMtxMdls[32];
+
 uniform mat4 mtxMdl;
 uniform mat4 mtxCam;
 
@@ -92,8 +95,12 @@ vec3 skinNRM(vec3 nr, ivec4 index)
 }
 
 void main(){
+    mat4 transform = mtxMdl;
+    if (GLL_IEnabled)
+        transform = GLL_IMtxMdls[gl_InstanceID];
+
     vec4 worldPosition = vec4(vPosition.xyz, 1);
-    vec3 normal = normalize(mat3(mtxMdl) * vNormal.xyz);
+    vec3 normal = normalize(mat3(transform) * vNormal.xyz);
 
     //Vertex Rigging
     if (UseSkinning == 1) //Animated object using the skeleton
@@ -103,7 +110,7 @@ void main(){
         //Apply skinning to vertex position and normal
 	    if (SkinCount > 0) {
 		    worldPosition = skin(worldPosition.xyz, index);
-		    normal = normalize(mat3(mtxMdl) * (skinNRM(vNormal.xyz, index)).xyz);
+		    normal = normalize(mat3(transform) * (skinNRM(vNormal.xyz, index)).xyz);
         }
         //Single bind models that have no skinning to the bone they are mapped to
         else if (SkinCount == 0)
@@ -113,7 +120,7 @@ void main(){
         }
     }
 
-    vec3 fragPosition = (mtxMdl * worldPosition).xyz;
+    vec3 fragPosition = (transform * worldPosition).xyz;
     gl_Position = mtxCam * vec4(fragPosition, 1);
 
     v_PositionWorld = fragPosition.xyz;

@@ -56,11 +56,11 @@ namespace MapStudio.UI
 
         public UniformFieldInfo[] GetUniforms()
         {
-            GLL.GetProgram(Program, GetProgramParameterName.ActiveUniforms, out int UnifromCount);
+            GLL.GetProgram(Program, GetProgramParameterName.ActiveUniforms, out int UniformCount);
 
-            UniformFieldInfo[] Uniforms = new UniformFieldInfo[UnifromCount];
+            UniformFieldInfo[] Uniforms = new UniformFieldInfo[UniformCount];
 
-            for (int i = 0; i < UnifromCount; i++)
+            for (int i = 0; i < UniformCount; i++)
             {
                 string Name = GLL.GetActiveUniform(Program, i, out int Size, out ActiveUniformType Type);
 
