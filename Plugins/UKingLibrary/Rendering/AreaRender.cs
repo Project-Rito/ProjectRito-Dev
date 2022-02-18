@@ -75,7 +75,7 @@ namespace UKingLibrary.Rendering
             GL.LineWidth(1);
         }
 
-        public override void DrawModel(GLContext context, Pass pass)
+        public override void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
         {
             if (pass != Pass.OPAQUE || !this.InFrustum)
                 return;

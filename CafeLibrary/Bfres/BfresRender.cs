@@ -150,14 +150,14 @@ namespace CafeLibrary.Rendering
         bool drawnOnce = false;
 
         /// <summary>
-        /// Draws the model using a normal material pass.
+        /// Draws the model using a normal material pass. Supports instancing.
         /// </summary>
-        public override void DrawModel(GLContext control, Pass pass)
+        public override void DrawModel(GLContext control, Pass pass, List<GLTransform> transforms = null)
         {
             if (!InFrustum || !IsVisible)
                 return;
 
-            base.DrawModel(control, pass);
+            base.DrawModel(control, pass, transforms);
 
             //Make sure cubemaps can look seamless in lower mip levels
             GL.Enable(EnableCap.TextureCubeMapSeamless);
@@ -176,7 +176,7 @@ namespace CafeLibrary.Rendering
             Transform.UpdateMatrix();
             foreach (BfresModelRender model in Models)
                 if (model.IsVisible)
-                    model.Draw(control, pass, this);
+                    model.Draw(control, pass, this, new List<GLTransform> { Transform});
 
             //Draw debug boundings
             if (Runtime.RenderBoundingBoxes)
@@ -197,28 +197,28 @@ namespace CafeLibrary.Rendering
         /// Draws the projected shadow model in light space.
         /// </summary>
         /// <param name="control"></param>
-        public override void DrawShadowModel(GLContext control)
+        public override void DrawShadowModel(GLContext control, List<GLTransform> transforms)
         {
             if (!IsVisible)
                 return;
 
             foreach (BfresModelRender model in Models)
                 if (model.IsVisible)
-                    model.DrawShadowModel(control, this);
+                    model.DrawShadowModel(control, this, transforms);
         }
 
-        public override void DrawCubeMapScene(GLContext control)
+        public override void DrawCubeMapScene(GLContext control, List<GLTransform> transforms)
         {
             foreach (BfresModelRender model in Models)
                 if (model.IsVisible)
-                    model.DrawCubemapModel(control, this);
+                    model.DrawCubemapModel(control, this, transforms);
         }
 
         /// <summary>
         /// Draw gbuffer pass for storing normals and depth information
         /// </summary>
         /// <param name="control"></param>
-        public override void DrawGBuffer(GLContext control)
+        public override void DrawGBuffer(GLContext control, List<GLTransform> transforms)
         {
             if (!InFrustum || !IsVisible)
                 return;
@@ -226,7 +226,7 @@ namespace CafeLibrary.Rendering
             foreach (BfresModelRender model in Models)
             {
                 if (model.IsVisible)
-                    model.DrawGBuffer(control, this);
+                    model.DrawGBuffer(control, this, transforms);
             }
         }
 

@@ -99,7 +99,7 @@ namespace UKingLibrary.Rendering
             LoadTerrainTextures();
         }
 
-        public override void DrawModel(GLContext context, Pass pass)
+        public override void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
         {
             if ((TerrainMesh == null || pass != Pass.OPAQUE || !InFrustum))
                 return;

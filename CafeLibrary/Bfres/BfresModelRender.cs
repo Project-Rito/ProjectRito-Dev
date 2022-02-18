@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using GLFrameworkEngine;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
@@ -74,7 +75,7 @@ namespace CafeLibrary.Rendering
                 MeshInFrustum[i] = IsMeshInFustrum(context, render, Meshes[i]);
         }
 
-        public void Draw(GLContext context, Pass pass, BfresRender parentRender)
+        public void Draw(GLContext context, Pass pass, BfresRender parentRender, List<GLTransform> transforms)
         {
             if (!IsVisible)
                 return;
@@ -84,7 +85,7 @@ namespace CafeLibrary.Rendering
                 DrawFrontFaceSelection(context, parentRender.IsSelected);
 
             if (DebugShaderRender.DebugRendering != DebugShaderRender.DebugRender.Default) {
-                DrawMeshes(context, parentRender, pass, RenderPass.DEBUG);
+                DrawMeshes(context, parentRender, pass, RenderPass.DEBUG, transforms);
             }
             else
             {
@@ -92,7 +93,7 @@ namespace CafeLibrary.Rendering
                     if (pass != mesh.Pass || !mesh.IsVisible || mesh.UseColorBufferPass)
                         continue;
 
-                    RenderMesh(context, parentRender, mesh);
+                    RenderMesh(context, parentRender, mesh, transforms);
                 }
 
                 /* if (Meshes.Where(x => x.UseColorBufferPass).ToList().Count > 0)
@@ -114,21 +115,21 @@ namespace CafeLibrary.Rendering
             DefaultBlendState.RenderDepthTest();
 
             if (pass == Pass.OPAQUE && (parentRender.IsSelected || parentRender.IsHovered))
-                DrawLineSelection(context, parentRender, parentRender.IsSelected, parentRender.IsHovered);
+                DrawLineSelection(context, parentRender, parentRender.IsSelected, parentRender.IsHovered, transforms);
 
             GL.DepthMask(true);
         }
 
-        public void DrawShadowModel(GLContext context, BfresRender parentRender)
+        public void DrawShadowModel(GLContext context, BfresRender parentRender, List<GLTransform> transforms = null)
         {
             if (!IsVisible)
                 return;
 
-            DrawMeshes(context, parentRender, Pass.OPAQUE, RenderPass.SHADOW_DYNAMIC);
-            DrawMeshes(context, parentRender, Pass.TRANSPARENT, RenderPass.SHADOW_DYNAMIC);
+            DrawMeshes(context, parentRender, Pass.OPAQUE, RenderPass.SHADOW_DYNAMIC, transforms);
+            DrawMeshes(context, parentRender, Pass.TRANSPARENT, RenderPass.SHADOW_DYNAMIC, transforms);
         }
 
-        public void DrawCubemapModel(GLContext context, BfresRender parentRender)
+        public void DrawCubemapModel(GLContext context, BfresRender parentRender, List<GLTransform> transforms = null)
         {
             if (!IsVisible)
                 return;
@@ -137,27 +138,27 @@ namespace CafeLibrary.Rendering
                 if (!mesh.IsCubeMap && !mesh.RenderInCubeMap)
                     continue;
 
-                RenderMesh(context, parentRender, mesh);
+                RenderMesh(context, parentRender, mesh, transforms);
             }
         }
 
-        public void DrawGBuffer(GLContext context, BfresRender parentRender)
+        public void DrawGBuffer(GLContext context, BfresRender parentRender, List<GLTransform> transforms = null)
         {
             if (!IsVisible)
                 return;
 
-            DrawMeshes(context, parentRender, Pass.OPAQUE, RenderPass.GBUFFER);
-            DrawMeshes(context, parentRender, Pass.TRANSPARENT, RenderPass.GBUFFER);
+            DrawMeshes(context, parentRender, Pass.OPAQUE, RenderPass.GBUFFER, transforms);
+            DrawMeshes(context, parentRender, Pass.TRANSPARENT, RenderPass.GBUFFER, transforms);
         }
 
-        public void DrawColorBufferPass(GLContext context, BfresRender parentRender)
+        public void DrawColorBufferPass(GLContext context, BfresRender parentRender, List<GLTransform> transforms = null)
         {
             if (!Meshes.Any(x => x.UseColorBufferPass))
                 return;
 
             //Draw objects that use the color buffer texture
-            DrawMeshes(context, parentRender, Pass.OPAQUE, RenderPass.COLOR_COPY);
-            DrawMeshes(context, parentRender, Pass.TRANSPARENT, RenderPass.COLOR_COPY);
+            DrawMeshes(context, parentRender, Pass.OPAQUE, RenderPass.COLOR_COPY, transforms);
+            DrawMeshes(context, parentRender, Pass.TRANSPARENT, RenderPass.COLOR_COPY, transforms);
         }
 
         enum RenderPass
@@ -169,7 +170,7 @@ namespace CafeLibrary.Rendering
             GBUFFER,
         }
 
-        private void DrawMeshes(GLContext context, BfresRender parentRender, Pass pass, RenderPass renderMode)
+        private void DrawMeshes(GLContext context, BfresRender parentRender, Pass pass, RenderPass renderMode, List<GLTransform> transforms)
         {
             foreach (var mesh in Meshes)
             {
@@ -188,7 +189,7 @@ namespace CafeLibrary.Rendering
                     {
                         ((BfresMaterialRender)mesh.MaterialAsset).RenderShadowMaterial(context);
 
-                        DrawMesh(context.CurrentShader, parentRender, mesh, false);
+                        DrawMesh(context.CurrentShader, parentRender, mesh, transforms, false);
                         ResourceTracker.NumShadowDrawCalls += mesh.LODMeshes[0].DrawCalls.Count;
                     }
                 }
@@ -202,10 +203,10 @@ namespace CafeLibrary.Rendering
                     context.CurrentShader.SetBoolToInt("DrawAreaID", BfresRender.DrawDebugAreaID);
                     context.CurrentShader.SetInt("AreaIndex", ((BfresMaterialRender)mesh.MaterialAsset).AreaIndex);
 
-                    DrawMesh(context.CurrentShader, parentRender, mesh);
+                    DrawMesh(context.CurrentShader, parentRender, mesh, transforms);
                 }
                 else
-                    RenderMesh(context, parentRender, mesh);
+                    RenderMesh(context, parentRender, mesh, transforms);
             }
         }
 
@@ -218,7 +219,7 @@ namespace CafeLibrary.Rendering
             GL.StencilOp(StencilOp.Keep, StencilOp.Replace, StencilOp.Replace);
         }
 
-        private void DrawLineSelection(GLContext control, BfresRender parentRender, bool parentSelected, bool isHovered)
+        private void DrawLineSelection(GLContext control, BfresRender parentRender, bool parentSelected, bool isHovered, List<GLTransform> transforms)
         {
             GL.Disable(EnableCap.AlphaTest);
             GL.Disable(EnableCap.Blend);
@@ -243,7 +244,7 @@ namespace CafeLibrary.Rendering
                 foreach (var mesh in Meshes)
                 {
                     if ((mesh.IsSelected || isHovered || parentSelected) && mesh.IsVisible) {
-                        DrawMesh(selectionShader, parentRender, mesh);
+                        DrawMesh(selectionShader, parentRender, mesh, transforms);
                     }
                 }
 
@@ -254,7 +255,7 @@ namespace CafeLibrary.Rendering
             GL.LineWidth(1);
         }
 
-        public void DrawColorPicking(GLContext control, BfresRender parentRender)
+        public void DrawColorPicking(GLContext control, BfresRender parentRender, List<GLTransform> transforms = null)
         {
             if (!IsVisible)
                 return;
@@ -271,7 +272,7 @@ namespace CafeLibrary.Rendering
                 if (control.ColorPicker.PickingMode == ColorPicker.SelectionMode.Mesh)
                     control.ColorPicker.SetPickingColor(mesh, control.CurrentShader);
 
-                DrawMesh(control.CurrentShader, parentRender, mesh);
+                DrawMesh(control.CurrentShader, parentRender, mesh, transforms);
 
                 control.CurrentShader.SetInt("UseSkinning", 0);
             }
@@ -279,7 +280,7 @@ namespace CafeLibrary.Rendering
             GL.CullFace(CullFaceMode.Back);
         }
 
-        public void RenderMesh(GLContext context, BfresRender parentRender, BfresMeshRender mesh)
+        public void RenderMesh(GLContext context, BfresRender parentRender, BfresMeshRender mesh, List<GLTransform> transforms)
         {
             if (mesh.MaterialAsset is BfshaRenderer && !BfresRender.DrawDebugAreaID) {
                 DrawCustomShaderRender(context, parentRender, mesh, 0);
@@ -289,24 +290,24 @@ namespace CafeLibrary.Rendering
                 context.CurrentShader = BfresRender.DefaultShader;
 
                 ((BfresMaterialRender)mesh.MaterialAsset).RenderDefaultMaterials(context, parentRender.Transform, context.CurrentShader, mesh);
-                DrawMesh(context.CurrentShader, parentRender, mesh, true);
+                DrawMesh(context.CurrentShader, parentRender, mesh, transforms, true);
             }
         }
 
-        public void DrawSolid(GLContext context, BfresRender parentRender, BfresMeshRender mesh)
+        public void DrawSolid(GLContext context, BfresRender parentRender, BfresMeshRender mesh, int instanceCount)
         {
             var mat = new StandardMaterial();
             mat.Color = new Vector4(1, 0, 0, 1);
             mat.ModelMatrix = parentRender.Transform.TransformMatrix;
             mat.Render(context);
-            mesh.Draw(context.CurrentShader);
+            mesh.Draw(context.CurrentShader, instanceCount);
         }
 
-        private void DrawCustomShaderRender(GLContext context, BfresRender parentRender, BfresMeshRender mesh, int stage = 0)
+        private void DrawCustomShaderRender(GLContext context, BfresRender parentRender, BfresMeshRender mesh, int instanceCount, int stage = 0)
         {
             var materialAsset = ((TurboNXRender)mesh.MaterialAsset);
             if (!materialAsset.HasValidProgram) {
-                DrawSolid(context, parentRender, mesh);
+                DrawSolid(context, parentRender, mesh, instanceCount);
                 return;
             }
 
@@ -324,10 +325,10 @@ namespace CafeLibrary.Rendering
             ((BfshaRenderer)mesh.MaterialAsset).Render(context, parentRender.Transform, materialAsset.Shader, mesh);
 
             //Draw the mesh
-            mesh.DrawCustom(context.CurrentShader);
+            mesh.DrawCustom(context.CurrentShader, instanceCount);
         }
 
-        private void DrawMesh(ShaderProgram shader, BfresRender parentRender, BfresMeshRender mesh, bool usePolygonOffset = false)
+        private void DrawMesh(ShaderProgram shader, BfresRender parentRender, BfresMeshRender mesh, List<GLTransform> transforms, bool usePolygonOffset = false)
         {
             if (!MeshInFrustum[mesh.Index])
                 return;
@@ -337,10 +338,16 @@ namespace CafeLibrary.Rendering
             if (mesh.VertexSkinCount > 0 && enableSkinning)
                 SetModelMatrix(shader.program, ModelData.Skeleton, mesh.VertexSkinCount > 1);
 
-            var worldTransform = parentRender.Transform.TransformMatrix * ModelTransform;
+            List<Matrix4> worldTransforms = new List<Matrix4>(transforms.Count);
+            for (int i = 0; i < transforms.Count; i++)
+            {
+                worldTransforms.Add(transforms[i].TransformMatrix * ModelTransform);
+            }
             var transform = this.ModelData.Skeleton.Bones[mesh.BoneIndex].Transform;
+            float[] worldTransformFloatArr = MemoryMarshal.Cast<Matrix4, float>(worldTransforms.ToArray()).ToArray();
+
             shader.SetMatrix4x4("RigidBindTransform", ref transform);
-            shader.SetMatrix4x4("mtxMdl", ref worldTransform);
+            shader.SetMatrix4x4("mtxMdl[0]", worldTransformFloatArr);
             shader.SetInt("SkinCount", mesh.VertexSkinCount);
             shader.SetInt("UseSkinning", enableSkinning ? 1 : 0);
             if (parentRender.CanSelect)
@@ -355,9 +362,9 @@ namespace CafeLibrary.Rendering
 
             //Draw the mesh
             if (usePolygonOffset)
-                mesh.DrawWithPolygonOffset(shader, lod);
+                mesh.DrawWithPolygonOffset(shader, transforms.Count, lod);
             else
-                mesh.Draw(shader, lod);
+                mesh.Draw(shader, transforms.Count, lod);
 
             shader.SetVector4(GLConstants.SelectionColorUniform, Vector4.Zero);
         }

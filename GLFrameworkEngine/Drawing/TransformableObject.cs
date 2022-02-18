@@ -51,7 +51,7 @@ namespace GLFrameworkEngine
             CubeRenderer.DrawPicking(context, this, Transform.TransformMatrix);
         }
 
-        public override void DrawModel(GLContext context, Pass pass)
+        public override void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
         {
             if (pass != Pass.OPAQUE || !this.InFrustum)
                 return;

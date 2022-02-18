@@ -141,7 +141,7 @@ namespace GLFrameworkEngine
             }
         }
 
-        public override void DrawModel(GLContext context, Pass pass)
+        public override void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
         {
             if (pass != Material.Pass || !IsVisible)
                 return;

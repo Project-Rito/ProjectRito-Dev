@@ -97,7 +97,7 @@ namespace UKingLibrary.Rendering
             GrassMesh = new RenderMesh<GrassVertex>(vertices, IndexBuffer, PrimitiveType.Triangles);
         }
 
-        public override void DrawModel(GLContext context, Pass pass)
+        public override void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
         {
             if ((GrassMesh == null || pass != Pass.TRANSPARENT || !InFrustum))
                 return;

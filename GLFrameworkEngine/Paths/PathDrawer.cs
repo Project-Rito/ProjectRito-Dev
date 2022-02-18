@@ -87,7 +87,7 @@ namespace GLFrameworkEngine
             }
         }
 
-        public virtual void DrawModel(GLContext context, Pass pass)
+        public virtual void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
         {
             if (XRayMode)
                 GL.Disable(EnableCap.DepthTest);
