@@ -177,7 +177,7 @@ namespace GLFrameworkEngine
                 LineMaterial.Color = LineColor;
 
                 if ((IsSelected || IsHovered) && !EditMode)
-                    LineMaterial.Color = GLConstants.SelectColor;
+                    LineMaterial.Color = new Vector4(GLConstants.SelectColor.Xyz, 1);
 
                 LineMaterial.Render(context);
             }
