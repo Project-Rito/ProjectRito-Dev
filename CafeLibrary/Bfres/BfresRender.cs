@@ -154,6 +154,8 @@ namespace CafeLibrary.Rendering
             if (drawable is not BfresRender)
                 return false;
 
+            if (((BfresRender)drawable).Name != Name)
+                return false;
             if (((BfresRender)drawable).InFrustum != InFrustum)
                 return false;
             if (((BfresRender)drawable).IsVisible != IsVisible)
@@ -164,32 +166,13 @@ namespace CafeLibrary.Rendering
                 return false;
             if (((BfresRender)drawable).IsSelected != IsSelected)
                 return false;
-            if ((((BfresRender)drawable).Models.Count != Models.Count))
+            if (((BfresRender)drawable).DebugShading != DebugShading)
                 return false;
             for (int i = 0; i < Models.Count; i++)
             {
-                if (Models[i].Name != ((BfresRender)drawable).Models[i].Name)
-                    return false;
                 if (Models[i].IsVisible != ((BfresRender)drawable).Models[i].IsVisible)
                     return false;
             };
-            if ((((BfresRender)drawable).Textures.Count != Textures.Count))
-                return false;
-            foreach (var key in Textures.Keys)
-            {
-                if (!((BfresRender)drawable).Textures.ContainsKey(key))
-                    return false;
-            }
-            if ((((BfresRender)drawable).SkeletalAnimations.Count != SkeletalAnimations.Count))
-                return false;
-            for (int i = 0; i < SkeletalAnimations.Count; i++)
-            {
-                if (SkeletalAnimations[i].Name != ((BfresRender)drawable).SkeletalAnimations[i].Name)
-                    return false;
-            };
-            if (((BfresRender)drawable).DebugShading != DebugShading)
-                return false;
-
             return true;
         }
 
