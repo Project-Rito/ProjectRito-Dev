@@ -21,6 +21,8 @@ namespace GLFrameworkEngine
         {
         }
 
+        public virtual bool UpdateInstanceGroup { get; set; }
+
         public virtual bool GroupsWith(IInstanceDrawable drawable)
         {
             return false;

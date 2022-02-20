@@ -13,7 +13,20 @@ namespace UKingLibrary
     {
         public string Name;
 
-        public Vector4 Color = new Vector4(1, 1, 1, 1);
+        private Vector4 _color = Vector4.One;
+        public Vector4 Color
+        {
+            get
+            {
+                return _color;
+            }
+            set
+            {
+                if (_color != value)
+                    UpdateInstanceGroup = true;
+                _color = value;
+            }
+        }
 
         static GLTexture LinkTagAndTexture = null;
         static GLTexture LinkTagNAndTexture = null;
@@ -29,7 +42,37 @@ namespace UKingLibrary
         StandardInstancedMaterial Material = new StandardInstancedMaterial();
 
         public bool EnableFrustumCulling => true;
-        public bool InFrustum { get; set; }
+        private bool _inFrustum;
+        public bool InFrustum
+        {
+            get
+            {
+                return _inFrustum;
+            }
+            set
+            {
+                if (_inFrustum != value)
+                    UpdateInstanceGroup = true;
+                _inFrustum = value;
+            }
+        }
+
+        private bool _isSelected;
+        public override bool IsSelected
+        {
+            get
+            {
+                return _isSelected;
+            }
+            set
+            {
+                if (_isSelected != value)
+                    UpdateInstanceGroup = true;
+                _isSelected = value;
+            }
+        }
+
+        public bool UpdateInstanceGroup { get; set; }
 
         public BoundingNode Boundings = new BoundingNode()
         {
@@ -43,6 +86,12 @@ namespace UKingLibrary
 
         public TagRender(string name, NodeBase parent) : base(parent)
         {
+            UpdateInstanceGroup = true;
+            VisibilityChanged += (object sender, EventArgs e) =>
+            {
+                UpdateInstanceGroup = true;
+            };
+
             Name = name;
             //Update boundings on transform changed
             this.Transform.TransformUpdated += delegate {

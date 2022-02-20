@@ -346,6 +346,7 @@ namespace MapStudio.UI
             }
         }
 
+        private List<List<IInstanceDrawable>> instanceGroups = new List<List<IInstanceDrawable>>();
         private void DrawSceneWithPostEffects()
         {
             foreach (var obj in _context.Scene.Objects)
@@ -357,11 +358,14 @@ namespace MapStudio.UI
                 }
             }
 
-            List<List<IInstanceDrawable>> instanceGroups = new List<List<IInstanceDrawable>>();
-
+            foreach (var group in instanceGroups)
+                group.RemoveAll(file => file.UpdateInstanceGroup);
+            instanceGroups.RemoveAll(group => group.Count == 0);
             foreach (var file in _context.Scene.Objects)
             {
                 if (!(file is IInstanceDrawable))
+                    continue;
+                if (!((IInstanceDrawable)file).UpdateInstanceGroup)
                     continue;
 
                 if (file.IsVisible && file is EditableObject && ((EditableObject)file).UsePostEffects)
@@ -405,11 +409,15 @@ namespace MapStudio.UI
                 file.DrawModel(_context, Pass.TRANSPARENT);
             }
 
-            List<List<IInstanceDrawable>> instanceGroups = new List<List<IInstanceDrawable>>();
 
+            foreach (var group in instanceGroups)
+                group.RemoveAll(file => file.UpdateInstanceGroup);
+            instanceGroups.RemoveAll(group => group.Count == 0);
             foreach (var file in _context.Scene.Objects)
             {
                 if (!(file is IInstanceDrawable))
+                    continue;
+                if (!((IInstanceDrawable)file).UpdateInstanceGroup)
                     continue;
 
                 if (!file.IsVisible || file is EditableObject && ((EditableObject)file).UsePostEffects)

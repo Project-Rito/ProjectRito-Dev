@@ -9,6 +9,7 @@ namespace GLFrameworkEngine
     public interface IInstanceDrawable
     {
         GLTransform Transform { get; set; }
+        bool UpdateInstanceGroup { get; set; }
 
         void DrawModel(GLContext control, Pass pass, List<GLTransform> transforms = null);
 

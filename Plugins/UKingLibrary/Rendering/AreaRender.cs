@@ -13,12 +13,51 @@ namespace UKingLibrary.Rendering
 {
     public class AreaRender : EditableObject, IInstanceColorPickable, ICloneable, IFrustumCulling, IInstanceDrawable
     {
-        public AreaShapes AreaShape = AreaShapes.Box;
+        public AreaShapes _areaShape = AreaShapes.Box;
+        public AreaShapes AreaShape
+        {
+            get
+            {
+                return _areaShape;
+            }
+            set
+            {
+                if (_areaShape != value)
+                    UpdateInstanceGroup = true;
+                _areaShape = value;
+            }
+        }
 
         public static bool DrawFilled = true;
 
-        public Vector4 Color = Vector4.One;
-        public Vector4 FillColor = new Vector4(0.4f, 0.7f, 1.0f, 0.3f);
+        private Vector4 _color = Vector4.One;
+        public Vector4 Color 
+        {
+            get
+            {
+                return _color;
+            }
+            set
+            {
+                if (_color != value)
+                    UpdateInstanceGroup = true;
+                _color = value;
+            }
+        }
+        private Vector4 _fillColor = new Vector4(0.4f, 0.7f, 1.0f, 0.3f);
+        public Vector4 FillColor
+        {
+            get
+            {
+                return _fillColor;
+            }
+            set
+            {
+                if (_fillColor != value)
+                    UpdateInstanceGroup = true;
+                _fillColor = value;
+            }
+        }
 
         RenderMesh<VertexPositionNormal> OutlineRenderer = null;
         RenderMesh<VertexPositionNormal> FillRenderer = null;
@@ -31,7 +70,37 @@ namespace UKingLibrary.Rendering
              0, 0, 0, 1);
 
         public bool EnableFrustumCulling => true;
-        public bool InFrustum { get; set; }
+        private bool _inFrustum;
+        public bool InFrustum 
+        { 
+            get 
+            { 
+                return _inFrustum; 
+            } 
+            set 
+            {
+                if (_inFrustum != value)
+                    UpdateInstanceGroup = true;
+                _inFrustum = value;
+            } 
+        }
+
+        private bool _isSelected;
+        public override bool IsSelected
+        {
+            get
+            {
+                return _isSelected;
+            }
+            set
+            {
+                if (_isSelected != value)
+                    UpdateInstanceGroup = true;
+                _isSelected = value;
+            }
+        }
+
+        public bool UpdateInstanceGroup { get; set; }
 
         public override BoundingNode BoundingNode { get; } = new BoundingNode()
         {
@@ -47,6 +116,12 @@ namespace UKingLibrary.Rendering
 
         public AreaRender(NodeBase parent, AreaShapes shape, Vector4 color) : base(parent)
         {
+            UpdateInstanceGroup = true;
+            VisibilityChanged += (object sender, EventArgs e) =>
+            {
+                UpdateInstanceGroup = true;
+            };
+
             //Update boundings on transform changed
             this.Transform.TransformUpdated += delegate {
                 BoundingNode.UpdateTransform(Transform.TransformMatrix);

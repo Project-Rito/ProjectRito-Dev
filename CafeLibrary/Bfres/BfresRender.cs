@@ -39,6 +39,8 @@ namespace CafeLibrary.Rendering
             }
         }
 
+        public override bool UpdateInstanceGroup { get; set; }
+
         private BoundingNode _boundingNode;
         public override BoundingNode BoundingNode => _boundingNode;
 
@@ -51,6 +53,35 @@ namespace CafeLibrary.Rendering
         public static ShaderProgram DefaultShader => GlobalShaders.GetShader("BFRES", "BFRES/Bfres");
 
         public bool StayInFrustum = false;
+        private bool _inFrustum;
+        public override bool InFrustum
+        {
+            get
+            {
+                return _inFrustum;
+            }
+            set
+            {
+                if (_inFrustum != value)
+                    UpdateInstanceGroup = true;
+                _inFrustum = value;
+            }
+        }
+
+        private bool _isSelected;
+        public override bool IsSelected
+        {
+            get
+            {
+                return _isSelected;
+            }
+            set
+            {
+                if (_isSelected != value)
+                    UpdateInstanceGroup = true;
+                _isSelected = value;
+            }
+        }
 
         public bool UseDrawDistance { get; set; }
 
@@ -75,7 +106,13 @@ namespace CafeLibrary.Rendering
 
         public EventHandler OnRenderInitialized;
 
-        public BfresRender(string filePath, NodeBase parent = null) : base(parent) {
+        public BfresRender(string filePath, NodeBase parent = null) : base(parent)
+        {
+            UpdateInstanceGroup = true;
+            VisibilityChanged += (object sender, EventArgs e) =>
+            {
+                UpdateInstanceGroup = true;
+            };
 
             if (YAZ0.IsCompressed(filePath))
                 UpdateModelFromFile(new System.IO.MemoryStream(YAZ0.Decompress(filePath)), filePath);
@@ -85,11 +122,19 @@ namespace CafeLibrary.Rendering
 
         public BfresRender(System.IO.Stream stream, string filePath, NodeBase parent = null) : base(parent)
         {
+            UpdateInstanceGroup = true;
+            VisibilityChanged += (object sender, EventArgs e) =>
+            {
+                UpdateInstanceGroup = true;
+            };
+
             UpdateModelFromFile(stream, filePath);
         }
 
         public bool UpdateModelFromFile(System.IO.Stream stream, string name)
         {
+            UpdateInstanceGroup = true;
+
             Name = name;
 
             if (name.Contains("course"))
@@ -118,6 +163,8 @@ namespace CafeLibrary.Rendering
         /// </summary>
         public virtual void ToggleMeshes(string name, bool toggle)
         {
+            UpdateInstanceGroup = true;
+
             foreach (var model in Models) {
                 foreach (BfresMeshRender mesh in model.MeshList) {
                     if (mesh.Name == name)
@@ -149,6 +196,7 @@ namespace CafeLibrary.Rendering
 
         bool drawnOnce = false;
 
+
         public override bool GroupsWith(IInstanceDrawable drawable)
         {
             if (drawable is not BfresRender)
@@ -160,13 +208,7 @@ namespace CafeLibrary.Rendering
                 return false;
             if (((BfresRender)drawable).IsVisible != IsVisible)
                 return false;
-            if (((BfresRender)drawable).UsePostEffects != UsePostEffects)
-                return false;
-            if (((BfresRender)drawable).UsePostEffects != UsePostEffects)
-                return false;
             if (((BfresRender)drawable).IsSelected != IsSelected)
-                return false;
-            if (((BfresRender)drawable).DebugShading != DebugShading)
                 return false;
             for (int i = 0; i < Models.Count; i++)
             {
