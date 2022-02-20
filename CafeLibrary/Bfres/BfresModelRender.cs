@@ -357,8 +357,8 @@ namespace CafeLibrary.Rendering
                 else if (parentRender.IsHovered || mesh.IsHovered)
                     shader.SetVector4(GLConstants.SelectionColorUniform, GLConstants.HoveredColor);
             }
- 
-            int lod = mesh.GetDisplayLevel(GLContext.ActiveContext, parentRender);            
+
+            int lod = 0; //mesh.GetDisplayLevel(GLContext.ActiveContext, parentRender); // TODO: Figure out how to make this support instancing. Is reducing GPU load worth splitting into another draw call?
 
             //Draw the mesh
             if (usePolygonOffset)
