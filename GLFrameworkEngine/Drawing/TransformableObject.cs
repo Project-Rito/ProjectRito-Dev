@@ -96,6 +96,8 @@ namespace GLFrameworkEngine
                 return false;
             if (((TransformableObject)drawable).IsVisible != IsVisible)
                 return false;
+            if (((TransformableObject)drawable).IsSelected != IsSelected)
+                return false;
             if (((TransformableObject)drawable).Color != Color)
                 return false;
             if (((TransformableObject)drawable).DrawCube != DrawCube)
@@ -145,7 +147,7 @@ namespace GLFrameworkEngine
                 Material.ModelMatrices = modelMatrices;
                 Material.Render(context);
 
-                CubeRenderer.DrawWithSelection(context, IsSelected || IsHovered);
+                CubeRenderer.DrawWithSelection(context, IsSelected || IsHovered, transforms.Count);
             }
             else //axis line drawer
             {
@@ -158,7 +160,7 @@ namespace GLFrameworkEngine
                     new Vector4(0, 0, 1, 1),
                 };
 
-                Boundings.Box.DrawSolid(context, Matrix4.Identity, sel ? GLConstants.SelectColor : Vector4.One);
+                Boundings.Box.DrawSolid(context, Matrix4.Identity, sel ? GLConstants.SelectColor : Vector4.One, transforms.Count);
 
                 var solid = new StandardInstancedMaterial();
                 solid.hasVertexColors = true;

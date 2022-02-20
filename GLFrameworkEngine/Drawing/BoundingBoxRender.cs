@@ -23,15 +23,15 @@ namespace GLFrameworkEngine
             this.UpdateVertexData(GetVertices(min, max));
         }
 
-        static BoundingBoxRender BoudingRender;
+        static BoundingBoxRender BoundingRender;
 
-        public static void Draw(GLContext context, Vector3 min, Vector3 max)
+        public static void Draw(GLContext context, Vector3 min, Vector3 max, int instanceCount = 1)
         {
-            if (BoudingRender == null)
-                BoudingRender = new BoundingBoxRender(min, max);
+            if (BoundingRender == null)
+                BoundingRender = new BoundingBoxRender(min, max);
 
-            BoudingRender.Update(min, max);
-            BoudingRender.Draw(context);
+            BoundingRender.Update(min, max);
+            BoundingRender.DrawInstanced(context, instanceCount);
         }
 
         public static int[] Indices = new int[]
