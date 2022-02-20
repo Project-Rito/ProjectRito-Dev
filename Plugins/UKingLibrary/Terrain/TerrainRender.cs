@@ -11,7 +11,7 @@ using Toolbox.Core.ViewModels;
 
 namespace UKingLibrary.Rendering
 {
-    public class TerrainRender : EditableObject, IFrustumCulling
+    public class TerrainRender : EditableObject, IFrustumCulling, IColorPickable
     {
         public override bool UsePostEffects => false;
 
@@ -97,6 +97,19 @@ namespace UKingLibrary.Rendering
             //Finish loading the terrain mesh
             TerrainMesh = new RenderMesh<TerrainVertex>(vertices, IndexBuffer, PrimitiveType.Triangles);
             LoadTerrainTextures();
+        }
+
+        public void DrawColorPicking(GLContext context)
+        {
+            context.CurrentShader = GlobalShaders.GetShader("PICKING");
+            context.ColorPicker.SetPickingColor(this, context.CurrentShader);
+            var transformMatrix = Transform.TransformMatrix;
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref transformMatrix);
+
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.DepthTest);
+
+            TerrainMesh.Draw(context);
         }
 
         public override void DrawModel(GLContext context, Pass pass)
