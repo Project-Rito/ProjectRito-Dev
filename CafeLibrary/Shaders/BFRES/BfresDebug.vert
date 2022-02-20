@@ -11,7 +11,7 @@ in vec4 vBoneWeight;
 in vec3 vTangent;
 in vec3 vBitangent;
 
-uniform mat4 mtxMdl;
+uniform mat4[32] mtxMdl;
 uniform mat4 mtxCam;
 uniform mat4 mtxLightVP;
 
@@ -105,7 +105,7 @@ float BoneWeightDisplay(ivec4 index)
 
 void main(){
     vec4 worldPosition = vec4(vPosition.xyz, 1);
-    normal = normalize(mat3(mtxMdl) * vNormal.xyz);
+    normal = normalize(mat3(mtxMdl[gl_InstanceID]) * vNormal.xyz);
 
     //Vertex Rigging
     if (UseSkinning == 1) //Animated object using the skeleton
@@ -124,7 +124,7 @@ void main(){
         }
     }
 
-    vec3 fragPosition = (mtxMdl * worldPosition).xyz;
+    vec3 fragPosition = (mtxMdl[gl_InstanceID] * worldPosition).xyz;
     gl_Position = mtxCam*vec4(fragPosition, 1);
 
     float totalWeight = BoneWeightDisplay(vBoneIndex);

@@ -20,7 +20,7 @@ namespace GLFrameworkEngine
             context.CurrentShader = GlobalShaders.GetShader("LINE_DASHED");
             context.CurrentShader.SetVector4("color", Color);
             context.CurrentShader.SetMatrix4x4("mtxCam", ref MatrixCamera);
-            context.CurrentShader.SetMatrix4x4("mtxMdl", ref ModelMatrix);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref ModelMatrix);
 
             context.CurrentShader.SetVector2("viewport_size", new Vector2(context.Width, context.Height));
             context.CurrentShader.SetFloat("dash_factor", DashFactor);

@@ -58,7 +58,7 @@ namespace GLFrameworkEngine
 
             GL.UseProgram(shader.program);
             shader.SetMatrix4x4("mtxCam", ref viewProj);
-            shader.SetMatrix4x4("mtxMdl", ref modelMatrix);
+            shader.SetMatrix4x4(GLConstants.ModelMatrix, ref modelMatrix);
             shader.SetVector3("camPosition", control.Camera.TargetPosition);
             shader.SetVector2("iResolution", new Vector2(control.Width, control.Height));
             shader.SetInt("materialRenderDisplay", 1);

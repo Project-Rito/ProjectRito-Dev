@@ -5,7 +5,7 @@ layout (location = 1) in vec3 vNormal;
 out int instanceID;
 out vec3 normal;
 
-uniform mat4 mtxMdl;
+uniform mat4[32] mtxMdl;
 uniform mat4 mtxCam;
 
 layout (std140) uniform ProbeSHBuffer {

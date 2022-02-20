@@ -8,8 +8,7 @@ namespace GLFrameworkEngine
     public class GLConstants
     {
         //Common Constants
-        public const string ModelMatrix = "mtxMdl";
-        public const string ModelMatrixInstanced = "mtxMdl[0]";
+        public const string ModelMatrix = "mtxMdl[0]";
         public const string ViewMatrix = "mtxView";
         public const string ProjMatrix = "mtxProj";
         public const string ViewProjMatrix = "mtxCam";

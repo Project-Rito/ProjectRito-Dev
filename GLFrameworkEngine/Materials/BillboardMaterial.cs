@@ -49,7 +49,7 @@ namespace GLFrameworkEngine
             context.CurrentShader = GlobalShaders.GetShader("BILLBOARD");
             context.CurrentShader.SetVector4("color", Color);
             context.CurrentShader.SetBoolToInt("useTexture", TextureID != -1);
-            context.CurrentShader.SetMatrix4x4("mtxMdl", ref ModelMatrix);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref ModelMatrix);
             context.CurrentShader.SetMatrix4x4("mtxView", ref mtxView);
             context.CurrentShader.SetMatrix4x4("mtxProj", ref mtxProj);
             context.CurrentShader.SetVector3("scale", new Vector3(Scale * CameraScale));

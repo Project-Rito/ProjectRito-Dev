@@ -41,7 +41,7 @@ namespace GLFrameworkEngine
         {
             context.CurrentShader = GlobalShaders.GetShader("PICKING");
             context.ColorPicker.SetPickingColor(pickable, context.CurrentShader);
-            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrixInstanced, ref modelMatrix);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref modelMatrix);
 
             Draw(context);
         }
@@ -51,7 +51,7 @@ namespace GLFrameworkEngine
 
             context.CurrentShader = GlobalShaders.GetShader("PICKING");
             context.ColorPicker.SetPickingColor(pickable, context.CurrentShader);
-            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrixInstanced, modelMatricesFloatArr);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, modelMatricesFloatArr);
 
             Draw(context);
         }

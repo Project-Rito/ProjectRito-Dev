@@ -33,7 +33,6 @@ namespace GLFrameworkEngine
             Matrix4 mtxCam = CameraMatrix;
             if (_cameraMatrix == Matrix4.Zero)
                 mtxCam = context.Camera.ViewProjectionMatrix;
-
             context.CurrentShader = GlobalShaders.GetShader("BASIC");
             context.CurrentShader.SetVector4("color", Color);
             context.CurrentShader.SetBoolToInt("halfLambert", HalfLambertShading);

@@ -114,7 +114,7 @@ namespace GLFrameworkEngine
 
             var transform = Matrix4.CreateTranslation(position);
 
-            shader.SetMatrix4x4("mtxMdl", ref transform);
+            shader.SetMatrix4x4(GLConstants.ModelMatrix, ref transform);
             shader.SetVector4("color", new Vector4(1));
 
             CubeRenderer.Draw(context);

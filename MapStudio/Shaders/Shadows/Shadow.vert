@@ -13,7 +13,7 @@ in vec3 vBitangent;
 
 out vec2 f_texcoord0;
 
-uniform mat4 mtxMdl;
+uniform mat4[32] mtxMdl;
 uniform mat4 mtxCam;
 uniform mat4 mtxLightVP;
 
@@ -59,6 +59,6 @@ void main(){
         }
     }
 
-    gl_Position = mtxLightVP * mtxMdl * worldPosition;
+    gl_Position = mtxLightVP * mtxMdl[gl_InstanceID] * worldPosition;
    f_texcoord0 = vTexCoord0;
 }

@@ -141,7 +141,7 @@ namespace GLFrameworkEngine
             if (hovered)
                 context.CurrentShader.SetVector4("color", new Vector4(1, 1, 0, 1.0f));
 
-            context.CurrentShader.SetMatrix4x4("mtxMdl", ref output);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref output);
 
             SphereRender.Draw(context);
         }

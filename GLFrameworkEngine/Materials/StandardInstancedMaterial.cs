@@ -37,12 +37,12 @@ namespace GLFrameworkEngine
 
             float[] modelMatricesFloatArr = MemoryMarshal.Cast<Matrix4, float>(ModelMatrices.ToArray()).ToArray();
 
-            context.CurrentShader = GlobalShaders.GetShader("BASIC_INSTANCED");
+            context.CurrentShader = GlobalShaders.GetShader("BASIC");
             context.CurrentShader.SetVector4("color", Color);
             context.CurrentShader.SetBoolToInt("halfLambert", HalfLambertShading);
             context.CurrentShader.SetBoolToInt("hasVertexColors", hasVertexColors);
             context.CurrentShader.SetBoolToInt("displayVertexColors", displayOnlyVertexColors);
-            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrixInstanced, modelMatricesFloatArr);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, modelMatricesFloatArr);
             context.CurrentShader.SetMatrix4x4(GLConstants.ViewProjMatrix, ref mtxCam);
             context.CurrentShader.SetVector4("highlight_color", Vector4.Zero);
             context.CurrentShader.SetInt("hasTextures", 0);
