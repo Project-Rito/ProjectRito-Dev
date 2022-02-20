@@ -12,7 +12,7 @@ using Toolbox.Core.ViewModels;
 
 namespace CafeLibrary.Rendering
 {
-    public class BfresRender : GenericRendererInstanced, IInstanceColorPickable, ITransformableObject, IInstanceDrawable
+    public class BfresRender : GenericRendererInstanced, IInstanceColorPickable, ITransformableObject
     {
         public const float LOD_LEVEL_1_DISTANCE = 1000;
         public const float LOD_LEVEL_2_DISTANCE = 10000;
@@ -149,7 +149,7 @@ namespace CafeLibrary.Rendering
 
         bool drawnOnce = false;
 
-        public bool GroupsWith(IInstanceDrawable drawable)
+        public override bool GroupsWith(IInstanceDrawable drawable)
         {
             if (drawable is not BfresRender)
                 return false;
@@ -192,16 +192,11 @@ namespace CafeLibrary.Rendering
 
             return true;
         }
-        /*
-        public override void DrawModel(GLContext control, Pass pass)
-        {
-            DrawModel(control, pass, new List<GLTransform> { Transform });
-        }
-        */
+
         /// <summary>
         /// Draws the model using a normal material pass. Supports instancing.
         /// </summary>
-        public void DrawModel(GLContext control, Pass pass, List<GLTransform> transforms)
+        public override void DrawModel(GLContext control, Pass pass, List<GLTransform> transforms)
         {
             if (!IsVisible || !InFrustum)
                 return;

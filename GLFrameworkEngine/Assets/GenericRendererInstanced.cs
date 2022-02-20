@@ -10,7 +10,7 @@ using Toolbox.Core.ViewModels;
 
 namespace GLFrameworkEngine
 {
-    public class GenericRendererInstanced : GenericRenderer
+    public class GenericRendererInstanced : GenericRenderer, IInstanceDrawable
     {
 
         public GenericRendererInstanced() : base(null)
@@ -19,6 +19,16 @@ namespace GLFrameworkEngine
 
         public GenericRendererInstanced(NodeBase parent) : base(parent)
         {
+        }
+
+        public virtual bool GroupsWith(IInstanceDrawable drawable)
+        {
+            return false;
+        }
+
+        public virtual void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms)
+        {
+
         }
 
         public virtual void DrawColorIDPass(GLContext control, List<GLTransform> transforms = null)
