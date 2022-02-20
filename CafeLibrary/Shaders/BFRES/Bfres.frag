@@ -125,7 +125,7 @@ float GetComponent(int Type, vec4 Texture);
 vec3 getWorldNormal(vec2 texCoord0) {
     vec4 texNormal = vec4(0);
     
-    float averageCountRGB = 0f;
+    float averageCountRGB = 0.f;
     uint averageCountA = 0u;
     if (hasNormalMap0 == 1) {
         vec4 tex = texture(u_TextureNormal0, texCoord0);
@@ -164,7 +164,7 @@ vec3 getWorldNormal(vec2 texCoord0) {
 vec4 getDiffuse(vec2 texCoord0) {
     vec4 diffuseMapColor = vec4(0);
 
-    float averageCountRGB = 0f;
+    float averageCountRGB = 0.f;
     uint averageCountA = 0u;
     if (hasDiffuseMap == 1 || (hasDiffuseArray == 0 && hasDiffuseMultiA == 0 && hasDiffuseMultiB == 0)) {
         vec4 tex = texture(u_TextureAlbedo0, texCoord0);
