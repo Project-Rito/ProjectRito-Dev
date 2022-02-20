@@ -109,32 +109,32 @@ namespace GLFrameworkEngine
 
         }
 
-        public virtual void DrawColorIDPass(GLContext control, List<GLTransform> transforms = null)
+        public virtual void DrawColorIDPass(GLContext control)
         {
 
         }
 
-        public virtual void DrawShadowModel(GLContext control, List<GLTransform> transforms = null)
+        public virtual void DrawShadowModel(GLContext control)
         {
 
         }
 
-        public virtual void DrawGBuffer(GLContext control, List<GLTransform> transforms = null)
+        public virtual void DrawGBuffer(GLContext control)
         {
 
         }
 
-        public virtual void DrawCaustics(GLContext control, GLTexture gbuffer, GLTexture linearDepth, List<GLTransform> transforms = null)
+        public virtual void DrawCaustics(GLContext control, GLTexture gbuffer, GLTexture linearDepth)
         {
 
         }
 
-        public virtual void DrawCubeMapScene(GLContext control, List<GLTransform> transforms = null)
+        public virtual void DrawCubeMapScene(GLContext control)
         {
 
         }
 
-        public virtual void DrawSelection(GLContext control, List<GLTransform> transforms = null)
+        public virtual void DrawSelection(GLContext control)
         {
 
         }

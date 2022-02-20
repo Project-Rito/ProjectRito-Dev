@@ -242,7 +242,7 @@ namespace GLFrameworkEngine
         public void SetMatrix4x4(string name, float[] value, bool transpose = false)
         {
             if (uniforms.ContainsKey(name))
-                GL.UniformMatrix4(uniforms[name], value.Length, transpose, value);
+                GL.UniformMatrix4(uniforms[name], value.Length / 16, transpose, value);
         }
 
         public int this[string name]

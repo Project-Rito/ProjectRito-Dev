@@ -88,7 +88,7 @@ namespace GLFrameworkEngine
             CameraRenderer.Camera = context.Camera;
 
             CameraRenderer.Update(context.Camera);
-            CameraRenderer.DrawSolid(context, CameraRenderer.Transform, new Vector4(0, 0, 0, 1));
+            CameraRenderer.DrawSolid(context, new List<Matrix4> { CameraRenderer.Transform }, new Vector4(0, 0, 0, 1));
 
             context.CurrentShader = null;
         }

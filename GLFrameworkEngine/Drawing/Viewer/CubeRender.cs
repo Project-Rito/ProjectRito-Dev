@@ -33,7 +33,7 @@ namespace GLFrameworkEngine
             this.UpdateVertexData(GetCubeVertices(10));
         }
 
-        public void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
+        public void DrawModel(GLContext context, Pass pass)
         {
             if (pass != Pass.OPAQUE) //Only want to draw in opaque pass
                 return;

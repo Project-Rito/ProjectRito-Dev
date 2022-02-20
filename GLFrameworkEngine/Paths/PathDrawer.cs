@@ -87,7 +87,7 @@ namespace GLFrameworkEngine
             }
         }
 
-        public virtual void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
+        public virtual void DrawModel(GLContext context, Pass pass)
         {
             if (XRayMode)
                 GL.Disable(EnableCap.DepthTest);
@@ -321,7 +321,7 @@ namespace GLFrameworkEngine
 
             //Draw the cone with a solid shader
             Matrix4 modelMatrix = offsetMat * Matrix4.CreateScale(scale) * rotation * translateMat;
-            ConeRenderer.DrawSolid(context, rot * modelMatrix, ArrowColor);
+            ConeRenderer.DrawSolid(context, new List<Matrix4> { rot * modelMatrix }, ArrowColor);
         }
 
         static Matrix4 RotationFromTo(Vector3 start, Vector3 end)

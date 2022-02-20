@@ -36,6 +36,7 @@ namespace GLFrameworkEngine
             ShaderPaths.Add("UV_WINDOW", "Editor\\UVWindow");
             ShaderPaths.Add("EFFECTS_DEFAULT", "Effects\\Default");
             ShaderPaths.Add("BASIC", "Generic\\Basic");
+            ShaderPaths.Add("BASIC_INSTANCED", "Generic\\BasicInstanced");
             ShaderPaths.Add("LINE", "Generic\\Line");
             ShaderPaths.Add("LINE_DASHED", "Generic\\LineDashed");
             ShaderPaths.Add("TEXTURE_ICON", "Interface\\TextureIcon");

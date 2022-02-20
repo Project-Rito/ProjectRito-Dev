@@ -10,7 +10,7 @@ namespace GLFrameworkEngine
     {
         bool IsVisible { get; set; }
 
-        void DrawModel(GLContext control, Pass pass, List<GLTransform> transforms = null);
+        void DrawModel(GLContext control, Pass pass);
 
         void Dispose();
     }

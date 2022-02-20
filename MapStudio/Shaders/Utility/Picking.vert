@@ -7,7 +7,7 @@ layout (location = 15) in float vFaceIndex;
 
 out float faceIndex;
 
-uniform mat4 mtxMdl;
+uniform mat4[32] mtxMdl;
 uniform mat4 mtxCam;
 
 // Skinning uniforms
@@ -51,6 +51,6 @@ void main(){
 		    worldPosition = skin(worldPosition.xyz, index);
     }
 
-    gl_Position = mtxCam * mtxMdl * worldPosition;
+    gl_Position = mtxCam * mtxMdl[gl_InstanceID] * worldPosition;
     faceIndex = vFaceIndex;
 }

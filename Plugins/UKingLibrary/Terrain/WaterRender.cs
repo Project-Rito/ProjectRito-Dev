@@ -101,7 +101,7 @@ namespace UKingLibrary.Rendering
             LoadWaterTextures();
         }
 
-        public override void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
+        public override void DrawModel(GLContext context, Pass pass)
         {
             if ((WaterMesh == null || pass != Pass.TRANSPARENT || !InFrustum))
                 return;

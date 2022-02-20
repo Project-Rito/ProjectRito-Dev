@@ -12,7 +12,7 @@ using Toolbox.Core.ViewModels;
 
 namespace CafeLibrary.Rendering
 {
-    public class BfresRender : GenericRenderer, IColorPickable, ITransformableObject
+    public class BfresRender : GenericRendererInstanced, IInstanceColorPickable, ITransformableObject, IInstanceDrawable
     {
         public const float LOD_LEVEL_1_DISTANCE = 1000;
         public const float LOD_LEVEL_2_DISTANCE = 10000;
@@ -149,15 +149,68 @@ namespace CafeLibrary.Rendering
 
         bool drawnOnce = false;
 
+        public bool GroupsWith(IInstanceDrawable drawable)
+        {
+            if (drawable is not BfresRender)
+                return false;
+
+            if (((BfresRender)drawable).InFrustum != InFrustum)
+                return false;
+            if (((BfresRender)drawable).IsVisible != IsVisible)
+                return false;
+            if (((BfresRender)drawable).UsePostEffects != UsePostEffects)
+                return false;
+            if (((BfresRender)drawable).UsePostEffects != UsePostEffects)
+                return false;
+            if (((BfresRender)drawable).IsSelected != IsSelected)
+                return false;
+            if ((((BfresRender)drawable).Models.Count != Models.Count))
+                return false;
+            for (int i = 0; i < Models.Count; i++)
+            {
+                if (Models[i].Name != ((BfresRender)drawable).Models[i].Name)
+                    return false;
+                if (Models[i].IsVisible != ((BfresRender)drawable).Models[i].IsVisible)
+                    return false;
+            };
+            if ((((BfresRender)drawable).Textures.Count != Textures.Count))
+                return false;
+            foreach (var key in Textures.Keys)
+            {
+                if (!((BfresRender)drawable).Textures.ContainsKey(key))
+                    return false;
+            }
+            if ((((BfresRender)drawable).SkeletalAnimations.Count != SkeletalAnimations.Count))
+                return false;
+            for (int i = 0; i < SkeletalAnimations.Count; i++)
+            {
+                if (SkeletalAnimations[i].Name != ((BfresRender)drawable).SkeletalAnimations[i].Name)
+                    return false;
+            };
+            if (((BfresRender)drawable).DebugShading != DebugShading)
+                return false;
+
+            return true;
+        }
+        /*
+        public override void DrawModel(GLContext control, Pass pass)
+        {
+            DrawModel(control, pass, new List<GLTransform> { Transform });
+        }
+        */
         /// <summary>
         /// Draws the model using a normal material pass. Supports instancing.
         /// </summary>
-        public override void DrawModel(GLContext control, Pass pass, List<GLTransform> transforms = null)
+        public void DrawModel(GLContext control, Pass pass, List<GLTransform> transforms)
         {
-            if (!InFrustum || !IsVisible)
+            if (!IsVisible || !InFrustum)
                 return;
 
-            base.DrawModel(control, pass, transforms);
+            // Use default transform if none is supplied
+            if (transforms == null)
+                transforms = new List<GLTransform>() { Transform };
+
+            base.DrawModel(control, pass);
 
             //Make sure cubemaps can look seamless in lower mip levels
             GL.Enable(EnableCap.TextureCubeMapSeamless);
@@ -176,7 +229,7 @@ namespace CafeLibrary.Rendering
             Transform.UpdateMatrix();
             foreach (BfresModelRender model in Models)
                 if (model.IsVisible)
-                    model.Draw(control, pass, this, new List<GLTransform> { Transform});
+                    model.Draw(control, pass, this, transforms);
 
             //Draw debug boundings
             if (Runtime.RenderBoundingBoxes)
@@ -260,11 +313,19 @@ namespace CafeLibrary.Rendering
             }
         }
 
+        [Obsolete("Deprecated. Prefer the instanced version.")]
+        public void DrawColorPicking(GLContext context) {
+            if (!InFrustum || !IsVisible)
+                return;
+
+            DrawColorPicking(context, new List<GLTransform> { Transform });
+        }
+
         /// <summary>
-        /// Draws the model in the color picking pass.
+        /// Draws the model in the color picking pass. Supports instancing.
         /// </summary>
-        /// <param name="control"></param>
-        public void DrawColorPicking(GLContext control)
+        /// <param name="context"></param>
+        public void DrawColorPicking(GLContext context, List<GLTransform> transforms)
         {
             if (!InFrustum || !IsVisible)
                 return;
@@ -272,15 +333,15 @@ namespace CafeLibrary.Rendering
             Transform.UpdateMatrix();
 
             var shader = GlobalShaders.GetShader("PICKING");
-            control.CurrentShader = shader;
+            context.CurrentShader = shader;
 
-            if (control.ColorPicker.PickingMode == ColorPicker.SelectionMode.Object)
-                control.ColorPicker.SetPickingColor(this, shader);
+            if (context.ColorPicker.PickingMode == ColorPicker.SelectionMode.Object)
+                context.ColorPicker.SetPickingColor(this, shader);
 
             foreach (BfresModelRender model in Models)
             {
                 if (model.IsVisible)
-                    model.DrawColorPicking(control, this);
+                    model.DrawColorPicking(context, this, transforms);
             }
         }
 

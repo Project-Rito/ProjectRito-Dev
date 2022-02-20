@@ -11,7 +11,7 @@ using Toolbox.Core.ViewModels;
 
 namespace UKingLibrary.Rendering
 {
-    public class AreaRender : EditableObject, IColorPickable, ICloneable, IFrustumCulling
+    public class AreaRender : EditableObject, IInstanceColorPickable, ICloneable, IFrustumCulling, IInstanceDrawable
     {
         public AreaShapes AreaShape = AreaShapes.Box;
 
@@ -65,38 +65,77 @@ namespace UKingLibrary.Rendering
             return null;
         }
 
-        public void DrawColorPicking(GLContext context)
+        /// <summary>
+        /// Determines if this area should be in the same instance group as another render
+        /// </summary>
+        public bool GroupsWith(IInstanceDrawable drawable)
         {
+            if (!(drawable is AreaRender))
+                return false;
+
+            if (((AreaRender)drawable).InFrustum != InFrustum)
+                return false;
+            if (((AreaRender)drawable).Color != Color)
+                return false;
+            if (((AreaRender)drawable).AreaShape != AreaShape)
+                return false;
+            if (((AreaRender)drawable).IsSelected != IsSelected)
+                return false;
+
+            return true;
+        }
+
+        [Obsolete("Deprecated. Prefer the instanced version.")]
+        public void DrawColorPicking(GLContext context) {
+            DrawColorPicking(context, new List<GLTransform> { Transform });
+        }
+
+        public void DrawColorPicking(GLContext context, List<GLTransform> transforms)
+        {
+            List<Matrix4> modelMatrices = new List<Matrix4>(transforms.Count);
+            foreach (var transform in transforms)
+                modelMatrices.Add(InitalTransform * transform.TransformMatrix);
+
             Prepare();
 
             //Thicker picking region
             GL.LineWidth(32);
-            OutlineRenderer.DrawPicking(context, this, InitalTransform * Transform.TransformMatrix);
+            OutlineRenderer.DrawPicking(context, this, modelMatrices);
             GL.LineWidth(1);
         }
 
-        public override void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
+        public override void DrawModel(GLContext context, Pass pass)
+        {
+
+        }
+
+        public void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms)
         {
             if (pass != Pass.OPAQUE || !this.InFrustum)
                 return;
 
+            
+            List<Matrix4> modelMatrices = new List<Matrix4>(transforms.Count);
+            foreach (var transform in transforms)
+                modelMatrices.Add(InitalTransform * transform.TransformMatrix);
+
             Prepare();
 
             GL.Disable(EnableCap.CullFace);
-
+            
             //Draw a filled in region
             if (DrawFilled)
             {
                 GLMaterialBlendState.TranslucentAlphaOne.RenderBlendState();
                 GLMaterialBlendState.TranslucentAlphaOne.RenderDepthTest();
-                FillRenderer.DrawSolid(context, InitalTransform * Transform.TransformMatrix, new Vector4(Color.Xyz, 0.1f));
+                FillRenderer.DrawSolid(context, modelMatrices, new Vector4(Color.Xyz, 0.1f));
                 GLMaterialBlendState.Opaque.RenderBlendState();
                 GLMaterialBlendState.Opaque.RenderDepthTest();
             }
 
             //Draw lines of the region
             GL.LineWidth(1);
-            OutlineRenderer.DrawSolidWithSelection(context, InitalTransform * Transform.TransformMatrix, Color, IsSelected | IsHovered);
+            OutlineRenderer.DrawSolidWithSelection(context, modelMatrices, Color, IsSelected | IsHovered);
             /*
             switch (AreaShape)
             {
@@ -126,7 +165,6 @@ namespace UKingLibrary.Rendering
             {
                 if (FillRenderer == null)
                     FillRenderer = new SphereRender(1, 10, 10);
-
             }
             else
             {

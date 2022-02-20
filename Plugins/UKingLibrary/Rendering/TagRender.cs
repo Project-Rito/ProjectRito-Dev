@@ -9,7 +9,7 @@ using OpenTK;
 
 namespace UKingLibrary
 {
-    public class TagRender : EditableObject, IColorPickable, IFrustumCulling
+    public class TagRender : EditableObject, IInstanceColorPickable, IFrustumCulling, IInstanceDrawable
     {
         public string Name;
 
@@ -26,7 +26,7 @@ namespace UKingLibrary
         static GLTexture EventTagTexture = null;
 
         UVCubeRenderer CubeRenderer = null;
-        StandardMaterial Material = new StandardMaterial();
+        StandardInstancedMaterial Material = new StandardInstancedMaterial();
 
         public bool EnableFrustumCulling => true;
         public bool InFrustum { get; set; }
@@ -52,26 +52,60 @@ namespace UKingLibrary
             ReloadTexture();
         }
 
-        public void DrawColorPicking(GLContext context)
+        public bool GroupsWith(IInstanceDrawable drawable)
         {
-            Prepare();
+            if (!(drawable is TagRender))
+                return false;
 
-            CubeRenderer.DrawPicking(context, this, Transform.TransformMatrix);
+            if ((((TagRender)drawable).InFrustum != InFrustum))
+                return false;
+            if ((((TagRender)drawable).IsVisible != IsVisible))
+                return false;
+            if ((((TagRender)drawable).IsSelected != IsSelected))
+                return false;
+            if (((TagRender)drawable).Color != Color)
+                return false;
+            if (((TagRender)drawable).Name != Name)
+                return false;
+
+            return true;
         }
 
-        public override void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
+        [Obsolete("Deprecated. Prefer the instanced version.")]
+        public void DrawColorPicking(GLContext context)
+        {
+            DrawColorPicking(context, new List<GLTransform> { Transform });
+        }
+        public void DrawColorPicking(GLContext context, List<GLTransform> transforms)
+        {
+            List<Matrix4> modelMatrices = new List<Matrix4>(transforms.Count);
+            foreach (var transform in transforms)
+                modelMatrices.Add(transform.TransformMatrix);
+
+            Prepare();
+
+            CubeRenderer.DrawPicking(context, this, modelMatrices);
+        }
+
+        public override void DrawModel(GLContext context, Pass pass) { }
+
+        public void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms)
         {
             if (pass != Pass.OPAQUE || !this.InFrustum)
                 return;
+
+            List<Matrix4> modelMatrices = new List<Matrix4>(transforms.Count);
+            foreach (var transform in transforms)
+                modelMatrices.Add(transform.TransformMatrix);
 
             Prepare();
 
             Material.DisplaySelection = IsSelected | IsHovered;
             Material.HalfLambertShading = false;
-            Material.ModelMatrix = Transform.TransformMatrix;
+            Material.ModelMatrices = modelMatrices;
             Material.Render(context);
 
-            CubeRenderer.DrawWithSelection(context, IsSelected || IsHovered);
+            CubeRenderer.DrawWithSelection(context, IsSelected || IsHovered, transforms.Count);
         }
 
         private void ReloadTexture()

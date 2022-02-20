@@ -115,7 +115,7 @@ namespace GLFrameworkEngine
             return null;
         }
 
-        public virtual void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
+        public virtual void DrawModel(GLContext context, Pass pass)
         {
             DrawCallback?.Invoke(this, EventArgs.Empty);
 

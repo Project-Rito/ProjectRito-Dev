@@ -348,13 +348,50 @@ namespace MapStudio.UI
 
         private void DrawSceneWithPostEffects()
         {
-            foreach (var file in _context.Scene.Objects)
-                if (file.IsVisible && file is EditableObject && ((EditableObject)file).UsePostEffects)
-                    file.DrawModel(_context, Pass.OPAQUE);
+            foreach (var obj in _context.Scene.Objects)
+            {
+                if (obj.IsVisible && obj is EditableObject && ((EditableObject)obj).UsePostEffects)
+                {
+                    obj.DrawModel(_context, Pass.OPAQUE);
+                    obj.DrawModel(_context, Pass.TRANSPARENT);
+                }
+            }
+
+            List<List<IInstanceDrawable>> instanceGroups = new List<List<IInstanceDrawable>>();
 
             foreach (var file in _context.Scene.Objects)
+            {
+                if (!(file is IInstanceDrawable))
+                    continue;
+
                 if (file.IsVisible && file is EditableObject && ((EditableObject)file).UsePostEffects)
-                    file.DrawModel(_context, Pass.TRANSPARENT);
+                {
+                    bool foundGroup = false;
+                    foreach (List<IInstanceDrawable> group in instanceGroups)
+                    {
+                        if (group.Count == 32) // Put in a new group if this one is full.
+                            continue;
+                        if (((IInstanceDrawable)file).GroupsWith(group[0]))
+                        {
+                            group.Add((IInstanceDrawable)file);
+                            foundGroup = true;
+                            break;
+                        }
+                    }
+                    if (!foundGroup)
+                        instanceGroups.Add(new List<IInstanceDrawable>() { (IInstanceDrawable)file });
+                }
+            }
+
+            foreach (var group in instanceGroups)
+            {
+                List<GLTransform> transforms = new List<GLTransform>(group.Count);
+                foreach (var file in group)
+                    transforms.Add(file.Transform);
+
+                group[0].DrawModel(_context, Pass.OPAQUE, transforms);
+                group[0].DrawModel(_context, Pass.TRANSPARENT, transforms);
+            }
         }
 
         private void DrawSceneNoPostEffects()
@@ -365,13 +402,43 @@ namespace MapStudio.UI
                     continue;
 
                 file.DrawModel(_context, Pass.OPAQUE);
+                file.DrawModel(_context, Pass.TRANSPARENT);
             }
+
+            List<List<IInstanceDrawable>> instanceGroups = new List<List<IInstanceDrawable>>();
+
             foreach (var file in _context.Scene.Objects)
             {
-                if (!file.IsVisible || file is EditableObject && ((EditableObject)file).UsePostEffects)
+                if (!(file is IInstanceDrawable))
                     continue;
 
-                file.DrawModel(_context, Pass.TRANSPARENT);
+                if (!file.IsVisible || file is EditableObject && ((EditableObject)file).UsePostEffects)
+                    continue;
+                bool foundGroup = false;
+                foreach (List<IInstanceDrawable> group in instanceGroups)
+                {
+                    if (group.Count == 32) // Put in a new group if this one is full.
+                        continue;
+
+                    if (((IInstanceDrawable)file).GroupsWith(group[0]))
+                    {
+                        group.Add((IInstanceDrawable)file);
+                        foundGroup = true;
+                        break;
+                    }
+                }
+                if (!foundGroup)
+                    instanceGroups.Add(new List<IInstanceDrawable>() { (IInstanceDrawable)file });
+            }
+
+            foreach (var group in instanceGroups)
+            {
+                List<GLTransform> transforms = new List<GLTransform>(group.Count);
+                foreach (var file in group)
+                    transforms.Add(file.Transform);
+
+                group[0].DrawModel(_context, Pass.OPAQUE, transforms);
+                group[0].DrawModel(_context, Pass.TRANSPARENT, transforms);
             }
         }
 

@@ -41,7 +41,7 @@ namespace GLFrameworkEngine
             Transform.UpdateMatrix(true);
         }
 
-        public void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms = null)
+        public void DrawModel(GLContext context, Pass pass)
         {
             if (pass != Pass.OPAQUE)
                 return;

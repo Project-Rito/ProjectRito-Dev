@@ -347,7 +347,7 @@ namespace CafeLibrary.Rendering
             float[] worldTransformFloatArr = MemoryMarshal.Cast<Matrix4, float>(worldTransforms.ToArray()).ToArray();
 
             shader.SetMatrix4x4("RigidBindTransform", ref transform);
-            shader.SetMatrix4x4("mtxMdl[0]", worldTransformFloatArr);
+            shader.SetMatrix4x4(GLConstants.ModelMatrixInstanced, worldTransformFloatArr);
             shader.SetInt("SkinCount", mesh.VertexSkinCount);
             shader.SetInt("UseSkinning", enableSkinning ? 1 : 0);
             if (parentRender.CanSelect)
