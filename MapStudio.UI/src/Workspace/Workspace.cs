@@ -65,14 +65,31 @@ namespace MapStudio.UI
         //Editors
         public List<IEditor> Editors = new List<IEditor>();
 
-        public IEditor ActiveEditor { get; set; }
+        private FileEditor _activeEditor;
 
-        Outliner Outliner { get; set; }
-        Viewport ViewportWindow { get; set; }
-        PropertyWindow PropertyWindow { get; set; }
-        ConsoleWindow ConsoleWindow { get; set; }
-        AssetViewWindow AssetViewWindow { get; set; }
-        ToolWindow ToolWindow { get; set; }
+        /// <summary>
+        /// Represents the active file for editing.
+        /// </summary>
+        public FileEditor ActiveEditor
+        {
+            get { return _activeEditor; }
+            set
+            {
+                if (_activeEditor != value)
+                {
+                    _activeEditor = value;
+                    ReloadEditors();
+                }
+            }
+        }
+
+        public Outliner Outliner { get; set; }
+        public Viewport ViewportWindow { get; set; }
+        public PropertyWindow PropertyWindow { get; set; }
+        public ConsoleWindow ConsoleWindow { get; set; }
+        public AssetViewWindow AssetViewWindow { get; set; }
+        public ToolWindow ToolWindow { get; set; }
+        public DockWindow HelpWindow { get; set; }
 
         public List<Window> Windows = new List<Window>();
         public List<DockWindow> DockedWindows = new List<DockWindow>();
@@ -89,6 +106,8 @@ namespace MapStudio.UI
             ConsoleWindow = new ConsoleWindow();
             AssetViewWindow = new AssetViewWindow();
             ViewportWindow = new Viewport(this, settings);
+            HelpWindow = new DockWindow();
+
             ParentWindow = parentWindow;
             ViewportWindow.Pipeline._context.Scene.SelectionUIChanged += (o, e) =>
             {
@@ -173,10 +192,10 @@ namespace MapStudio.UI
 
         }
 
-        public bool LoadFileFormat(string filePath, bool isProject = false)
+        public FileEditor LoadFileFormat(string filePath, bool isProject = false)
         {
             if (!File.Exists(filePath))
-                return false;
+                return null;
 
             if (!isProject)
                 Resources.ProjectFile.WorkingDirectory = Path.GetDirectoryName(filePath);
@@ -185,8 +204,14 @@ namespace MapStudio.UI
             if (fileFormat == null)
             {
                 StudioLogger.WriteError(string.Format(TranslationSource.GetText("ERROR_FILE_UNSUPPORTED"), filePath));
-                return false;
+                return null;
             }
+            //File must be an editor. Todo I need to find a more intutive way for this to work.
+            var editor = fileFormat as FileEditor;
+            if (editor == null)
+                return null;
+
+            ActiveEditor = editor;
 
             //Add the file to the project resources
             Resources.AddFile(fileFormat);
@@ -197,25 +222,54 @@ namespace MapStudio.UI
 
             StudioLogger.WriteLine(string.Format(TranslationSource.GetText("LOADING_FILE"), filePath));
 
-            if (fileFormat is ICustomFileEditor)
-            {
-                var editor = ((ICustomFileEditor)fileFormat).Editor;
-                Editors.Add(editor);
-                ActiveEditor = editor;
-            } //Default file type to the model editor
-            else if (fileFormat is IModelFormat)
-            {
-                var modelEditor = new ModelEditor();
-                Editors.Add(modelEditor);
-                ActiveEditor = modelEditor;
-
-                modelEditor.ImportAsset(filePath);
-            }
+            SetupActiveEditor(editor);
 
             InitEditors(filePath);
             LoadProjectResources();
 
-            return true;
+            return editor;
+        }
+
+        public void SetupActiveEditor(FileEditor editor)
+        {
+            //Add nodes to outliner
+            Outliner.Nodes.Add(editor.Root);
+
+            //Init the gl scene
+            editor.Scene.Init();
+
+            //Viewport on selection changed
+            editor.Scene.SelectionUIChanged = null;
+            editor.Scene.SelectionUIChanged += (o, e) =>
+            {
+                if (o == null)
+                {
+                    return;
+                }
+
+                if (ViewportWindow.IsFocused)
+                {
+                    if (!KeyInfo.EventInfo.KeyCtrl && !!KeyInfo.EventInfo.KeyShift)
+                        Outliner.DeselectAll();
+                    ScrollToSelectedNode((NodeBase)o);
+                }
+
+                if (!Outliner.SelectedNodes.Contains((NodeBase)o))
+                {
+                    Outliner.AddSelection((NodeBase)o);
+                }
+
+                //Update the property window.
+                //This also updated in the outliner but the outliner doesn't have to be present this way
+                if (o != null)
+                    PropertyWindow.SelectedObject = (NodeBase)o;
+            };
+            GLContext.ActiveContext.Scene = editor.Scene;
+
+            //Set active file format
+            editor.SetActive();
+            //Update editor viewport menus
+            ReloadViewportMenu();
         }
 
         public void DrawMenu()
@@ -324,11 +378,20 @@ namespace MapStudio.UI
             if (ActiveEditor == null)
                 return;
 
-            Outliner.Nodes.Clear();
-            Outliner.Nodes.AddRange(ActiveEditor.Nodes);
-
+            PropertyWindow.SelectedObject = null;
             Outliner.FilterMenuItems = ActiveEditor.GetFilterMenuItems();
-            ToolWindow.ToolDrawer = ActiveEditor.ToolWindowDrawer;
+
+            ActiveEditor.SetActive();
+
+            var docks = ActiveEditor.PrepareDocks();
+            //A key to check if the existing layout changed
+            string key = string.Join("", docks.Select(x => x.ToString()));
+            string currentKey = string.Join("", DockedWindows.Select(x => x.ToString()));
+            if (key != currentKey)
+            {
+                DockedWindows = docks;
+                UpdateDockLayout = true;
+            }
         }
 
         /// <summary>
@@ -379,9 +442,17 @@ namespace MapStudio.UI
 
         private void SaveFileData(IFileFormat fileFormat, string filePath)
         {
+            string name = Path.GetFileName(filePath);
+
+            ProcessLoading.Instance.IsLoading = true;
+            ProcessLoading.Instance.Update(0, 100, $"Saving {name}", "Saving");
+
             //Save current file
             Toolbox.Core.IO.STFileSaver.SaveFileFormat(fileFormat, filePath);
             StudioLogger.WriteLine(string.Format(TranslationSource.GetText("SAVED_FILE"), filePath));
+
+            ProcessLoading.Instance.Update(100, 100, $"Saving {name}", "Saving");
+            ProcessLoading.Instance.IsLoading = false;
 
             TinyFileDialog.MessageBoxInfoOk($"File {filePath} has been saved!");
 
@@ -411,7 +482,6 @@ namespace MapStudio.UI
         private void SaveEditorData(bool isProject)
         {
             //Apply editor data
-            ActiveEditor.OnSave(Resources);
             if (isProject)
             {
                 Resources.ProjectFile.OutlierScroll = Outliner.ScrollY;
@@ -540,7 +610,7 @@ namespace MapStudio.UI
             else if (ViewportWindow.IsFocused)
             {
                 if (!isRepeat)
-                    ActiveEditor.OnKeyDown(e, ViewportWindow.Pipeline._context);
+                    ActiveEditor.OnKeyDown(e);
 
                 ViewportWindow.Pipeline._context.OnKeyDown(e, isRepeat);
                 if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.ShowAddContextMenu))
@@ -552,17 +622,17 @@ namespace MapStudio.UI
         /// The mouse down event for when the mouse has been pressed down.
         /// Used to perform editor shortcuts.
         /// </summary>
-        public void OnMouseDown()
+        public void OnMouseDown(MouseEventInfo mouseInfo)
         {
-            ActiveEditor.OnMouseDown();
+            ActiveEditor.OnMouseDown(mouseInfo);
         }
 
         /// <summary>
         /// The mouse move event for when the mouse has been moved around.
         /// </summary>
-        public void OnMouseMove()
+        public void OnMouseMove(MouseEventInfo mouseInfo)
         {
-            ActiveEditor.OnMouseMove();
+            ActiveEditor.OnMouseMove(mouseInfo);
         }
 
         private bool init = false;

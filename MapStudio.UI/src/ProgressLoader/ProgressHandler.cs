@@ -41,23 +41,27 @@ namespace MapStudio.UI
         /// </summary>
         public EventHandler OnUpdated;
 
+        public string Title = "";
+
         public ProcessLoading() {
             Instance = this;
         }
 
-        public void UpdateIncrease(int amount, string process)
+        public void UpdateIncrease(int amount, string process, string title = "Loading")
         {
             ProcessAmount += amount;
             ProcessName = process;
             OnUpdated?.Invoke(this, EventArgs.Empty);
+            Title = title;
         }
 
-        public void Update(int amount, int total, string process)
+        public void Update(int amount, int total, string process, string title = "Loading")
         {
             ProcessAmount = amount;
             ProcessTotal = total;
             ProcessName = process;
             OnUpdated?.Invoke(this, EventArgs.Empty);
+            Title = title;
         }
     }
 }

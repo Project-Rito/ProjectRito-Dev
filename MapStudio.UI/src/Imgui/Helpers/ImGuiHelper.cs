@@ -54,6 +54,24 @@ namespace MapStudio.UI
             }
         }
 
+        public static void BoldTextLabel(string key, string label)
+        {
+            ImGuiHelper.BeginBoldText();
+            ImGui.Text($"{key}:");
+            ImGuiHelper.EndBoldText();
+
+            ImGui.SameLine();
+            ImGui.TextColored(ImGui.GetStyle().Colors[(int)ImGuiCol.Text], label);
+        }
+
+        public static void BeginBoldText() {
+            ImGui.PushFont(ImGuiController.DefaultFontBold);
+        }
+
+        public static void EndBoldText() {
+            ImGui.PopFont();
+        }
+
         public static void IncrementCursorPosX(float amount) {
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + amount);
         }

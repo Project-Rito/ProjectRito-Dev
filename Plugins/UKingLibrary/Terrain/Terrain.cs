@@ -262,7 +262,7 @@ namespace UKingLibrary
             meshRender.UINode.Header = name;
             meshRender.IsVisibleCallback += delegate
             {
-                return MapMuuntEditor.ShowMapModel;
+                return MapData.ShowMapModel;
             };
 
             GLContext.ActiveContext.Scene.AddRenderObject(meshRender);
@@ -292,7 +292,7 @@ namespace UKingLibrary
             meshRender.UINode.Header = name;
             meshRender.IsVisibleCallback += delegate
             {
-                return MapMuuntEditor.ShowMapModel;
+                return MapData.ShowMapModel;
             };
 
             GLContext.ActiveContext.Scene.AddRenderObject(meshRender);
@@ -324,7 +324,7 @@ namespace UKingLibrary
             meshRender.UINode.Header = name;
             meshRender.IsVisibleCallback += delegate
             {
-                return MapMuuntEditor.ShowMapModel;
+                return MapData.ShowMapModel;
             };
 
             GLContext.ActiveContext.Scene.AddRenderObject(meshRender);

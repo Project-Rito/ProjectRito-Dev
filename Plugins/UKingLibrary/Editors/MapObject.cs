@@ -43,6 +43,8 @@ namespace UKingLibrary
         /// </summary>
         public EditableObject Render;
 
+        UKingEditor ParentEditor;
+
         /// <summary>
         /// The name of the object actor.
         /// </summary>
@@ -105,11 +107,10 @@ namespace UKingLibrary
         public List<LinkInstance> SourceLinks = new List<LinkInstance>();
         public List<LinkInstance> DestLinks = new List<LinkInstance>();
 
-        public MapObject()
+        public MapObject(UKingEditor editor)
         {
-
+            ParentEditor = editor;
         }
-
 
         public void CreateNew(uint hashId, string unitConfigName, dynamic actorInfo, NodeBase parent, MapData mapData)
         {
@@ -194,9 +195,9 @@ namespace UKingLibrary
             Render.IsVisibleCallback += delegate
             {
                 if (Render is BfresRender)
-                    return MapMuuntEditor.ShowVisibleActors;
+                    return MapData.ShowVisibleActors;
                 else
-                    return MapMuuntEditor.ShowInvisibleActors;
+                    return MapData.ShowInvisibleActors;
             };
 
             ((EditableObjectNode)Render.UINode).UIProperyDrawer += delegate
@@ -240,12 +241,12 @@ namespace UKingLibrary
 
         public object Clone()
         {
-            MapObject clone = new MapObject();
+            MapObject clone = new MapObject(ParentEditor);
 
             SaveTransform(); // We wanna make sure that the new actor is in the right location!
 
             clone.Properties = DeepCloneDictionary(Properties);
-            clone.HashId = MapMuuntEditor.GetHashId(MapFile);
+            clone.HashId = UKingEditor.GetHashId(MapFile);
             clone.ActorInfo = ActorInfo;
             clone.Parent = Parent;
             clone.MapFile = MapFile;
@@ -442,18 +443,18 @@ namespace UKingLibrary
         /// Adds the object to the current scene.
         /// </summary>
         public void AddToScene() {
-            GLContext.ActiveContext.Scene.AddRenderObject(Render);
+            ParentEditor.AddRender(Render);
             //Add the actor to the animation player
-            Workspace.ActiveWorkspace.StudioSystem.AddActor(this);
+            ParentEditor.Workspace.StudioSystem.AddActor(this);
         }
 
         /// <summary>
         /// Removes the object from the current scene.
         /// </summary>
         public void RemoveFromScene() {
-            GLContext.ActiveContext.Scene.RemoveRenderObject(Render);
+            ParentEditor.RemoveRender(Render);
             //Remove the actor from the animation player
-            Workspace.ActiveWorkspace.StudioSystem.RemoveActor(this);
+            ParentEditor.Workspace.StudioSystem.RemoveActor(this);
         }
 
         /// <summary>

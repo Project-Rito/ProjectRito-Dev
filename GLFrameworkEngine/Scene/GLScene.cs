@@ -56,6 +56,15 @@ namespace GLFrameworkEngine
             return GetSelectableObjects().Where(x => x.IsSelected).ToList();
         }
 
+        public void Init()
+        {
+            if (Cursor3D != null)
+                return;
+
+            ShadowRenderer = new ShadowMainRenderer();
+            Cursor3D = new Cursor3D();
+        }
+
         public void SetCursor(GLContext context, int x, int y)
         {
             if (Cursor3D == null)

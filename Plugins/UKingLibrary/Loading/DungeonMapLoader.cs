@@ -14,25 +14,24 @@ namespace UKingLibrary
 {
     public class DungeonMapLoader
     {
-        public MuuntByamlPlugin MubinPlugin;
-
-        List<MapData> MapFiles = new List<MapData>();
+        public List<MapData> MapFiles = new List<MapData>();
 
         public SARC DungeonData;
 
         public ProdInfo ClusteringInstances;
         public ProdInfo TeraTreeInstances;
 
+        public BfresRender MapRender;
+
         public static Dictionary<string, dynamic> Actors = new Dictionary<string, dynamic>();
 
         private string DungeonName;
 
-        public void Load(MuuntByamlPlugin plugin, MapMuuntEditor editor, Stream stream)
+        public void Load(UKingEditor editor, string fileName, Stream stream)
         {
             GLFrameworkEngine.GLContext.PreviewScale = 25;
 
-            MubinPlugin = plugin;
-            DungeonName = Path.GetFileNameWithoutExtension(plugin.FileInfo.FileName);
+            DungeonName = Path.GetFileNameWithoutExtension(fileName);
 
             //Load dungeon data
             DungeonData = new SARC();
@@ -55,16 +54,14 @@ namespace UKingLibrary
             //Static and dynamic actors
             var staticFile = GetMubin("Static");
             if (staticFile != null)
-                MapFiles.Add(new MapData(new MemoryStream(GetMubin("Static")), $"{DungeonName}_Static.smubin"));
+                MapFiles.Add(new MapData(new MemoryStream(GetMubin("Static")), editor, $"{DungeonName}_Static.smubin"));
             var dynamicFile = GetMubin("Dynamic");
             if (dynamicFile != null)
-                MapFiles.Add(new MapData(new MemoryStream(GetMubin("Dynamic")), $"{DungeonName}_Dynamic.smubin"));
+                MapFiles.Add(new MapData(new MemoryStream(GetMubin("Dynamic")), editor, $"{DungeonName}_Dynamic.smubin"));
 
             if (dynamicFile == null && staticFile == null)
                 StudioLogger.WriteErrorException("yeah umm... can't really find any mubins....");
 
-            //Load into muunt editor
-            editor.Load(MapFiles);
             //editor.LoadProd(ClusteringInstances, $"{DungeonName}_Clustering.sblwp");
             //editor.LoadProd(TeraTreeInstances, $"{DungeonName}_TeraTree.sblwp");
 
@@ -72,14 +69,12 @@ namespace UKingLibrary
             var dungeonModel = GetModel();
             if (dungeonModel != null)
             {
-                var render = new BfresRender(new MemoryStream(GetModel()), $"DgnMrgPrt_{DungeonName}.sbfres", null);
-                render.Textures = BfresLoader.GetTextures(new MemoryStream(GetTexture()));
-                render.CanSelect = false;
-                GLFrameworkEngine.GLContext.ActiveContext.Scene.AddRenderObject(render);
-
-                render.IsVisibleCallback += delegate
+                MapRender = new BfresRender(new MemoryStream(GetModel()), $"DgnMrgPrt_{DungeonName}.sbfres", null);
+                MapRender.Textures = BfresLoader.GetTextures(new MemoryStream(GetTexture()));
+                MapRender.CanSelect = false;
+                MapRender.IsVisibleCallback += delegate
                 {
-                    return MapMuuntEditor.ShowMapModel;
+                    return MapData.ShowMapModel;
                 };
             }
         }
@@ -137,6 +132,9 @@ namespace UKingLibrary
 
         public void Dispose()
         {
+            foreach (var file in MapFiles)
+                file?.Dispose();
+            MapRender?.Dispose();
         }
     }
 }

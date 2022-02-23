@@ -15,8 +15,6 @@ namespace UKingLibrary
 {
     public class FieldMapLoader
     {
-        public MuuntByamlPlugin MubinPlugin;
-
         public List<MapData> MapFiles = new List<MapData>();
         public SARC TitleBG;
         public Terrain Terrain;
@@ -32,15 +30,12 @@ namespace UKingLibrary
 
         static string SectionName;
 
-        public void Load(MuuntByamlPlugin plugin, MapMuuntEditor editor, Stream stream)
+        public void Load(UKingEditor editor, string fileName, Stream stream)
         {
-            MubinPlugin = plugin;
-
             GLFrameworkEngine.GLContext.PreviewScale = 25;
 
             ProcessLoading.Instance.Update(0, 100, "Loading map files");
 
-            string fileName = plugin.FileInfo.FileName;
             SectionName = fileName.Substring(0, 3);
 
             bool IsDungeon = fileName.Contains("Dungeon");
@@ -54,16 +49,12 @@ namespace UKingLibrary
 
             GlobalData.LoadActorDatabase();
 
-            var mapData = new MapData(stream, plugin.FileInfo.FileName);
+            var mapData = new MapData(stream, editor, fileName);
             MapFiles.Add(mapData);
-
-            editor.Load(MapFiles);
-            //LoadProdInfo(editor);
-
             Workspace.ActiveWorkspace.Windows.Add(new ActorLinkNodeUI());
         }
 
-        private void LoadProdInfo(MapMuuntEditor editor)
+        private void LoadProdInfo(UKingEditor editor)
         {
             TreeInstancesInfo = new ProdInfo(new MemoryStream(GetTreeProdInfo()));
             editor.LoadProd(TreeInstancesInfo, $"{SectionName}_TeraTree.sblwb");
@@ -150,6 +141,8 @@ namespace UKingLibrary
         public void Dispose()
         {
             Terrain?.Dispose();
+            foreach (var file in MapFiles)
+                file?.Dispose();
         }
     }
 }

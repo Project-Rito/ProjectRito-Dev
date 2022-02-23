@@ -12,37 +12,43 @@ namespace UKingLibrary
 {
     public class MapData
     {
+        public static bool ShowVisibleActors = true;
+        public static bool ShowInvisibleActors = true;
+        public static bool ShowMapModel = true;
+        public static bool ShowActorLinks = true;
+
         public Dictionary<uint, MapObject> Objs = new Dictionary<uint, MapObject>();
         public Dictionary<uint, RailPathData> Rails = new Dictionary<uint, RailPathData>();
 
-        public List<NodeBase> Nodes = new List<NodeBase>();
+        public NodeBase RootNode = new NodeBase();
 
         public NodeBase ObjectFolder = new NodeBase(TranslationSource.GetText("OBJECTS"));
         public NodeBase RailFolder = new NodeBase(TranslationSource.GetText("RAIL_PATHS"));
 
         BymlFileData Byaml;
 
+        UKingEditor ParentEditor;
+
         public MapData() { }
 
-        public MapData(Stream stream, string fileName) {
-            Load(stream, fileName);
+        public MapData(Stream stream, UKingEditor editor, string fileName) {
+            Load(stream, editor, fileName);
         }
 
-        public void Load(Stream stream, string fileName) {
-            Load(ByamlFile.LoadN(stream), fileName);
+        public void Load(Stream stream, UKingEditor editor, string fileName) {
+            Load(ByamlFile.LoadN(stream), editor, fileName);
         }
 
-        public void Load(BymlFileData byaml, string fileName)
+        public void Load(BymlFileData byaml, UKingEditor editor, string fileName)
         {
             Byaml = byaml;
+            ParentEditor = editor;
 
             Dictionary<string, NodeBase> nodeFolders = new Dictionary<string, NodeBase>();
 
-            NodeBase folder = new NodeBase(fileName);
-            folder.AddChild(ObjectFolder);
-            folder.AddChild(RailFolder);
-
-            Nodes.Add(folder);
+            RootNode = new NodeBase(fileName);
+            RootNode.AddChild(ObjectFolder);
+            RootNode.AddChild(RailFolder);
 
             int numObjs = byaml.RootNode["Objs"].Count;
 
@@ -83,7 +89,7 @@ namespace UKingLibrary
                     }
 
                     //Setup properties for editing
-                    MapObject data = new MapObject();
+                    MapObject data = new MapObject(editor);
 
                     data.CreateNew(mapObj, actorInfo, parent, this);
                     //Add the renderable to the viewport

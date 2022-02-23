@@ -747,8 +747,8 @@ namespace MapStudio
                 {
                     Workspace workspace = new Workspace(this.GlobalSettings, Workspaces.Count, this);
                     workspace.Name = Path.GetFileName(filePath);
-                    bool loaded = workspace.LoadFileFormat(filePath);
-                    if (!loaded)
+                    var editor = workspace.LoadFileFormat(filePath);
+                    if (editor == null)
                     {
                         ProcessLoading.IsLoading = false;
                         ForceFocused = true;
