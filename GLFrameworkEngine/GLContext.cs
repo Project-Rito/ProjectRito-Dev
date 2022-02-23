@@ -337,9 +337,9 @@ namespace GLFrameworkEngine
 
         public void OnKeyDown(KeyEventInfo e, bool isRepeat)
         {
-            SelectionTools.OnKeyDown(this);
-            TransformTools.OnKeyDown(this);
-            Scene.OnKeyDown(e, this);
+            SelectionTools.OnKeyDown(e, this);
+            TransformTools.OnKeyDown(e, this);
+            Scene.OnKeyDown(e, this, isRepeat);
 
             if (!isRepeat)
                 Camera.KeyPress();

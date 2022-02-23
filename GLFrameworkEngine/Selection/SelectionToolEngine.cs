@@ -14,15 +14,15 @@ namespace GLFrameworkEngine
         SelectionBox SelectionBox = null;
         SelectionCircle SelectionCircle = null;
 
-        public void OnKeyDown(GLContext context)
+        public void OnKeyDown(KeyEventInfo e, GLContext context)
         {
             if (IsActive)
                 return;
 
             //Shortcuts for selection tools
-            if (!KeyInfo.EventInfo.KeyCtrl && KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.SelectionBox))
+            if (!e.KeyCtrl && e.IsKeyDown(InputSettings.INPUT.Scene.SelectionBox))
                 SelectionBox = new SelectionBox();
-            if (!KeyInfo.EventInfo.KeyCtrl && KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.SelectionCircle))
+            if (!e.KeyCtrl && e.IsKeyDown(InputSettings.INPUT.Scene.SelectionCircle))
             {
                 SelectionCircle = new SelectionCircle();
                 SelectionCircle?.Start(context,
