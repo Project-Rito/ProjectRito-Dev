@@ -67,6 +67,8 @@ namespace MapStudio
 
             //Disable the docking buttons
             ImGui.GetStyle().WindowMenuButtonPosition = ImGuiDir.None;
+            //Direct click on drag elements
+            ImGui.GetIO().ConfigDragClickToInputText = true;
 
             //Enable docking support
             ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable;
