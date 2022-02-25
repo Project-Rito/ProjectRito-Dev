@@ -44,7 +44,7 @@ namespace UKingLibrary
                 SectionIDs = GetSectionIndex(SectionName);
                 CacheBackgroundFiles();
 
-                Terrain.LoadTerrainSection((int)SectionIDs.X, (int)SectionIDs.Y, PluginConfig.MaxTerrainLOD);
+                Terrain.LoadTerrainSection((int)SectionIDs.X, (int)SectionIDs.Y, editor, PluginConfig.MaxTerrainLOD);
             }
 
             GlobalData.LoadActorDatabase();
