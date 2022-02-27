@@ -129,6 +129,36 @@ namespace UKingLibrary
             return relativePath;
         }
 
+        /// <summary>
+        /// Gets all content paths in an array ordered from base to extension
+        /// </summary>
+        public static string[] GetContentPaths(string relativePath)
+        {
+            List<string> relativePaths = new List<string>(1);
+
+            //Mod content
+            foreach (string modPath in ModPaths)
+            {
+                if (File.Exists($"{modPath}\\aoc\\0010\\{relativePath}")) relativePaths.Add($"{modPath}\\aoc\\0010\\{relativePath}");
+                if (File.Exists($"{modPath}\\aoc\\0011\\{relativePath}")) relativePaths.Add($"{modPath}\\aoc\\0011\\{relativePath}");
+                if (File.Exists($"{modPath}\\aoc\\0012\\{relativePath}")) relativePaths.Add($"{modPath}\\aoc\\0012\\{relativePath}");
+
+                if (File.Exists($"{modPath}\\content\\{relativePath}")) relativePaths.Add($"{modPath}\\content\\{relativePath}");
+            }
+
+            //DLC content
+            if (File.Exists($"{AocPath}\\0010\\{relativePath}")) relativePaths.Add($"{AocPath}\\0010\\{relativePath}");
+            if (File.Exists($"{AocPath}\\0011\\{relativePath}")) relativePaths.Add($"{AocPath}\\0011\\{relativePath}");
+            if (File.Exists($"{AocPath}\\0012\\{relativePath}")) relativePaths.Add($"{AocPath}\\0012\\{relativePath}");
+            //Update content
+            if (File.Exists($"{UpdatePath}\\{relativePath}")) relativePaths.Add($"{UpdatePath}\\{relativePath}");
+            //Base game content
+            if (File.Exists($"{GamePath}\\{relativePath}")) relativePaths.Add($"{GamePath}\\{relativePath}");
+
+            relativePath.Reverse();
+            return relativePaths.ToArray();
+        }
+
         public static string GetCachePath(string relativePath)
         {
             return $"{Toolbox.Core.Runtime.ExecutableDir}\\Cache\\{PluginName}\\{relativePath}";

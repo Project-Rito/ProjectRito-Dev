@@ -16,13 +16,16 @@ namespace UKingLibrary
             MapStudio.UI.ProcessLoading.Instance.Update(60, 100, "Loading actor database");
 
             //Todo cache these somewhere to load as decompressed next time
-            var path = PluginConfig.GetContentPath("Actor\\ActorInfo.product.sbyml");
-            var decompressed = Toolbox.Core.IO.YAZ0.Decompress(path);
-            var actorData = ByamlFile.LoadN(new MemoryStream(decompressed));
-
-            foreach (IDictionary<string, dynamic> actorInfo in actorData.RootNode["Actors"])
+            var paths = PluginConfig.GetContentPaths("Actor\\ActorInfo.product.sbyml");
+            foreach (var path in paths)
             {
-                Actors.Add((string)actorInfo["name"], actorInfo);
+                var decompressed = Toolbox.Core.IO.YAZ0.Decompress(path);
+                var actorData = ByamlFile.LoadN(new MemoryStream(decompressed));
+
+                foreach (IDictionary<string, dynamic> actorInfo in actorData.RootNode["Actors"])
+                {
+                    Actors[(string)actorInfo["name"]] = actorInfo;
+                }
             }
         }
     }
