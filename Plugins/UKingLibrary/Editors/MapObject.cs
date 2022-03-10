@@ -514,11 +514,11 @@ namespace UKingLibrary
         /// </summary>
         void SaveTransform()
         {
-            if (Render.Transform.Position != Vector3.Zero)
+            //if (Render.Transform.Position != Vector3.Zero)
                 SaveVector("Translate", Render.Transform.Position / GLContext.PreviewScale);
-            if (Render.Transform.RotationEuler != Vector3.Zero)
+            //if (Render.Transform.RotationEuler)
                 SaveVector("Rotate", Render.Transform.RotationEuler, true);
-            if (Render.Transform.Scale != Vector3.Zero)
+            //if (Render.Transform.Scale != Vector3.Zero)
                 SaveVector("Scale", Render.Transform.Scale);
         }
 

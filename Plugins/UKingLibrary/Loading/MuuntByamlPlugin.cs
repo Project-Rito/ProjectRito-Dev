@@ -29,6 +29,7 @@ namespace UKingLibrary
 
         FieldMapLoader FieldMapLoader;
         DungeonMapLoader DungeonLoader;
+        FieldCollisionLoader FieldCollisionLoader;
 
         public bool Identify(File_Info fileInfo, Stream stream) {
             //Just load maps from checking the smubin extension atm.
@@ -37,6 +38,20 @@ namespace UKingLibrary
 
         public void Load(Stream stream)
         {
+            FieldCollisionLoader = new FieldCollisionLoader();
+            
+            /* HKX2 testing code
+            var cStream = File.Open("A-1-1.shksc", FileMode.Open);
+            FieldCollisionLoader.Load(cStream);
+            var shapes = FieldCollisionLoader.GetShapes(19687114);
+            foreach (var shape in shapes)
+            {
+                FieldCollisionLoader.AddShape(shape, System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(-3824.655f, 392.795f, -3590.277f)), 4246760621);
+            }
+            cStream.Seek(0, SeekOrigin.Begin);
+            FieldCollisionLoader.Save(cStream);
+            */
+
             Workspace.ActiveWorkspace.ActiveEditor = Editor;
 
             if (FileInfo.Extension == ".pack")
