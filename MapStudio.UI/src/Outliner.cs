@@ -772,15 +772,14 @@ namespace MapStudio.UI
                 return;
             }
 
-            if (item.MenuItems.Count > 0)
+            if (item.MenuItems?.Count > 0)
             {
-                bool menuItem = ImGui.MenuItem(item.Header, "", true);
-                var hovered = ImGui.IsItemHovered();
 
-                if (menuItem && hovered)
+                if (ImGui.BeginMenu(item.Header))
                 {
-                    foreach (var c in item.MenuItems)
-                        LoadMenuItem(c);
+                    foreach (var child in item.MenuItems)
+                        LoadMenuItem(child);
+
                     ImGui.EndMenu();
                 }
             }
