@@ -86,7 +86,7 @@ namespace GLFrameworkEngine
             return color / 255.0f;
         }
 
-        private void Init(int width, int height)
+        private void InitBuffer(int width, int height)
         {
             if (pickingBuffer == null)
                 pickingBuffer = new Framebuffer(FramebufferTarget.Framebuffer, width, height, PixelInternalFormat.Rgba, 1);
@@ -160,7 +160,7 @@ namespace GLFrameworkEngine
 
         private void Prepare(int width, int height)
         {
-            Init(width, height);
+            InitBuffer(width, height);
 
             pickingBuffer.Bind();
             GL.Viewport(0, 0, width, height);

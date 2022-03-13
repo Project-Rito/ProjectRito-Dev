@@ -11,14 +11,53 @@ using Toolbox.Core.ViewModels;
 
 namespace UKingLibrary.Rendering
 {
-    public class AreaRender : EditableObject, IColorPickable, ICloneable, IFrustumCulling
+    public class AreaRender : EditableObject, IInstanceColorPickable, ICloneable, IFrustumCulling, IInstanceDrawable
     {
-        public AreaShapes AreaShape = AreaShapes.Box;
+        public AreaShapes _areaShape = AreaShapes.Box;
+        public AreaShapes AreaShape
+        {
+            get
+            {
+                return _areaShape;
+            }
+            set
+            {
+                if (_areaShape != value)
+                    UpdateInstanceGroup = true;
+                _areaShape = value;
+            }
+        }
 
         public static bool DrawFilled = true;
 
-        public Vector4 Color = Vector4.One;
-        public Vector4 FillColor = new Vector4(0.4f, 0.7f, 1.0f, 0.3f);
+        private Vector4 _color = Vector4.One;
+        public Vector4 Color 
+        {
+            get
+            {
+                return _color;
+            }
+            set
+            {
+                if (_color != value)
+                    UpdateInstanceGroup = true;
+                _color = value;
+            }
+        }
+        private Vector4 _fillColor = new Vector4(0.4f, 0.7f, 1.0f, 0.3f);
+        public Vector4 FillColor
+        {
+            get
+            {
+                return _fillColor;
+            }
+            set
+            {
+                if (_fillColor != value)
+                    UpdateInstanceGroup = true;
+                _fillColor = value;
+            }
+        }
 
         RenderMesh<VertexPositionNormal> OutlineRenderer = null;
         RenderMesh<VertexPositionNormal> FillRenderer = null;
@@ -31,7 +70,37 @@ namespace UKingLibrary.Rendering
              0, 0, 0, 1);
 
         public bool EnableFrustumCulling => true;
-        public bool InFrustum { get; set; }
+        private bool _inFrustum;
+        public bool InFrustum 
+        { 
+            get 
+            { 
+                return _inFrustum; 
+            } 
+            set 
+            {
+                if (_inFrustum != value)
+                    UpdateInstanceGroup = true;
+                _inFrustum = value;
+            } 
+        }
+
+        private bool _isSelected;
+        public override bool IsSelected
+        {
+            get
+            {
+                return _isSelected;
+            }
+            set
+            {
+                if (_isSelected != value)
+                    UpdateInstanceGroup = true;
+                _isSelected = value;
+            }
+        }
+
+        public bool UpdateInstanceGroup { get; set; }
 
         public override BoundingNode BoundingNode { get; } = new BoundingNode()
         {
@@ -47,6 +116,12 @@ namespace UKingLibrary.Rendering
 
         public AreaRender(NodeBase parent, AreaShapes shape, Vector4 color) : base(parent)
         {
+            UpdateInstanceGroup = true;
+            VisibilityChanged += (object sender, EventArgs e) =>
+            {
+                UpdateInstanceGroup = true;
+            };
+
             //Update boundings on transform changed
             this.Transform.TransformUpdated += delegate {
                 BoundingNode.UpdateTransform(Transform.TransformMatrix);
@@ -65,38 +140,77 @@ namespace UKingLibrary.Rendering
             return null;
         }
 
-        public void DrawColorPicking(GLContext context)
+        /// <summary>
+        /// Determines if this area should be in the same instance group as another render
+        /// </summary>
+        public bool GroupsWith(IInstanceDrawable drawable)
         {
+            if (!(drawable is AreaRender))
+                return false;
+
+            if (((AreaRender)drawable).InFrustum != InFrustum)
+                return false;
+            if (((AreaRender)drawable).Color != Color)
+                return false;
+            if (((AreaRender)drawable).AreaShape != AreaShape)
+                return false;
+            if (((AreaRender)drawable).IsSelected != IsSelected)
+                return false;
+
+            return true;
+        }
+
+        [Obsolete("Deprecated. Prefer the instanced version.")]
+        public void DrawColorPicking(GLContext context) {
+            DrawColorPicking(context, new List<GLTransform> { Transform });
+        }
+
+        public void DrawColorPicking(GLContext context, List<GLTransform> transforms)
+        {
+            List<Matrix4> modelMatrices = new List<Matrix4>(transforms.Count);
+            foreach (var transform in transforms)
+                modelMatrices.Add(InitalTransform * transform.TransformMatrix);
+
             Prepare();
 
             //Thicker picking region
             GL.LineWidth(32);
-            OutlineRenderer.DrawPicking(context, this, InitalTransform * Transform.TransformMatrix);
+            OutlineRenderer.DrawPicking(context, this, modelMatrices);
             GL.LineWidth(1);
         }
 
         public override void DrawModel(GLContext context, Pass pass)
         {
+
+        }
+
+        public void DrawModel(GLContext context, Pass pass, List<GLTransform> transforms)
+        {
             if (pass != Pass.OPAQUE || !this.InFrustum)
                 return;
+
+            
+            List<Matrix4> modelMatrices = new List<Matrix4>(transforms.Count);
+            foreach (var transform in transforms)
+                modelMatrices.Add(InitalTransform * transform.TransformMatrix);
 
             Prepare();
 
             GL.Disable(EnableCap.CullFace);
-
+            
             //Draw a filled in region
             if (DrawFilled)
             {
                 GLMaterialBlendState.TranslucentAlphaOne.RenderBlendState();
                 GLMaterialBlendState.TranslucentAlphaOne.RenderDepthTest();
-                FillRenderer.DrawSolid(context, InitalTransform * Transform.TransformMatrix, new Vector4(Color.Xyz, 0.1f));
+                FillRenderer.DrawSolid(context, modelMatrices, new Vector4(Color.Xyz, 0.1f));
                 GLMaterialBlendState.Opaque.RenderBlendState();
                 GLMaterialBlendState.Opaque.RenderDepthTest();
             }
 
             //Draw lines of the region
             GL.LineWidth(1);
-            OutlineRenderer.DrawSolidWithSelection(context, InitalTransform * Transform.TransformMatrix, Color, IsSelected | IsHovered);
+            OutlineRenderer.DrawSolidWithSelection(context, modelMatrices, Color, IsSelected | IsHovered);
             /*
             switch (AreaShape)
             {
@@ -126,7 +240,6 @@ namespace UKingLibrary.Rendering
             {
                 if (FillRenderer == null)
                     FillRenderer = new SphereRender(1, 10, 10);
-
             }
             else
             {

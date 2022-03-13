@@ -7,6 +7,7 @@ using Toolbox.Core.ViewModels;
 using MapStudio.UI;
 using Toolbox.Core;
 using ByamlExt.Byaml;
+using CafeLibrary.Rendering;
 
 namespace UKingLibrary
 {

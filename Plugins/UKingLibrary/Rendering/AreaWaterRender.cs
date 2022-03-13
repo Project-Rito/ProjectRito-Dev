@@ -89,14 +89,14 @@ namespace UKingLibrary.Rendering
             {
                 GLMaterialBlendState.TranslucentAlphaOne.RenderBlendState();
                 GLMaterialBlendState.TranslucentAlphaOne.RenderDepthTest();
-                FillRenderer.DrawSolid(context, InitalTransform * Transform.TransformMatrix, new Vector4(Color.Xyz, 0.1f));
+                FillRenderer.DrawSolid(context, new List<Matrix4> { InitalTransform * Transform.TransformMatrix }, new Vector4(Color.Xyz, 0.1f));
                 GLMaterialBlendState.Opaque.RenderBlendState();
                 GLMaterialBlendState.Opaque.RenderDepthTest();
             }
 
             //Draw lines of the region
             GL.LineWidth(1);
-            OutlineRenderer.DrawSolidWithSelection(context, InitalTransform * Transform.TransformMatrix, Color, IsSelected | IsHovered);
+            OutlineRenderer.DrawSolidWithSelection(context, new List<Matrix4> { InitalTransform * Transform.TransformMatrix }, Color, IsSelected | IsHovered);
 
             //Draw debug boundings
             if (Runtime.RenderBoundingBoxes)

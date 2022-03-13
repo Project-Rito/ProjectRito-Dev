@@ -244,7 +244,7 @@ namespace GLFrameworkEngine
                 //Update standard camera matrices
                 var mtxMdl = Camera.ModelMatrix;
                 var mtxCam = Camera.ViewProjectionMatrix;
-                shader.SetMatrix4x4("mtxMdl", ref mtxMdl);
+                shader.SetMatrix4x4(GLConstants.ModelMatrix, ref mtxMdl);
                 shader.SetMatrix4x4("mtxCam", ref mtxCam);
             }
         }

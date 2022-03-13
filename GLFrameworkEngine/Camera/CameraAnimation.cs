@@ -88,7 +88,7 @@ namespace GLFrameworkEngine
             CameraRenderer.Camera = context.Camera;
 
             CameraRenderer.Update(context.Camera);
-            CameraRenderer.DrawSolid(context, CameraRenderer.Transform, new Vector4(0, 0, 0, 1));
+            CameraRenderer.DrawSolid(context, new List<Matrix4> { CameraRenderer.Transform }, new Vector4(0, 0, 0, 1));
 
             context.CurrentShader = null;
         }
@@ -114,7 +114,7 @@ namespace GLFrameworkEngine
 
             var transform = Matrix4.CreateTranslation(position);
 
-            shader.SetMatrix4x4("mtxMdl", ref transform);
+            shader.SetMatrix4x4(GLConstants.ModelMatrix, ref transform);
             shader.SetVector4("color", new Vector4(1));
 
             CubeRenderer.Draw(context);

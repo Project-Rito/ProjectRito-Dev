@@ -13,7 +13,7 @@ out vec3 v_TangentWorld;
 flat out uint texIndex;
 out vec3 v_DebugHighlight;
 
-uniform mat4 mtxMdl;
+uniform mat4[32] mtxMdl;
 uniform mat4 mtxCam;
 
 void main()
@@ -26,5 +26,5 @@ void main()
 
     v_DebugHighlight = vDebugHighlight;
 
-    gl_Position = mtxCam * mtxMdl * vec4(vPosition, 1.0);
+    gl_Position = mtxCam * mtxMdl[gl_InstanceID] * vec4(vPosition, 1.0);
 }

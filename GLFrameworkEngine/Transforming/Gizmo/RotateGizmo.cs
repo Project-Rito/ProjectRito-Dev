@@ -174,7 +174,7 @@ namespace GLFrameworkEngine
 
                     context.CurrentShader.SetVector4("color", new Vector4(_colors[i], 1.0f));
                     context.CurrentShader.SetVector4("selectionColor", Vector4.Zero);
-                    context.CurrentShader.SetMatrix4x4("mtxMdl", ref transform);
+                    context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref transform);
 
                     if (LineRenders[i] == null) LineRenders[i] = new LineRender();
 
@@ -195,7 +195,7 @@ namespace GLFrameworkEngine
             var matrix = Matrix4.CreateScale(2) * new Matrix4(context.Camera.InverseRotationMatrix) * transform;
             var matrix2 = Matrix4.CreateScale(2.5f) * new Matrix4(context.Camera.InverseRotationMatrix) * transform;
 
-            context.CurrentShader.SetMatrix4x4("mtxMdl", ref matrix);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref matrix);
             context.CurrentShader.SetVector4("selectionColor", Vector4.Zero);
 
             GL.Enable(EnableCap.DepthTest);
@@ -211,7 +211,7 @@ namespace GLFrameworkEngine
             context.CurrentShader.SetVector4("color", new Vector4(0.4f, 0.4f, 0.4f, 1));
             CircleRenderer.Draw(context);
 
-            context.CurrentShader.SetMatrix4x4("mtxMdl", ref matrix2);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref matrix2);
 
             context.CurrentShader.SetVector4("color", new Vector4(1, 1, 1, 1));
             if (isHovered)
@@ -227,7 +227,7 @@ namespace GLFrameworkEngine
             var scaleMatrix = Matrix4.CreateScale(2);
             var matrix = scaleMatrix * rotationMatrix * transform;
 
-            context.CurrentShader.SetMatrix4x4("mtxMdl", ref matrix);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref matrix);
             context.CurrentShader.SetVector4("color", new Vector4(color, 1.0f));
             context.CurrentShader.SetVector4("selectionColor", Vector4.Zero);
 
@@ -253,7 +253,7 @@ namespace GLFrameworkEngine
                 transform = transform.ClearRotation();
                 matrix = scaleMatrix * transform;
 
-                context.CurrentShader.SetMatrix4x4("mtxMdl", ref matrix);
+                context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref matrix);
 
                 context.CurrentShader.SetVector4("color", new Vector4(1, 0, 0, 0.6f));
                 CircleChangeSegmentRenderer.SetCustomSegment(angleStartVec, axis, angle, 32);

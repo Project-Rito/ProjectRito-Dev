@@ -25,9 +25,9 @@ void main()
 	if (halfLambert == 1)
 	{
 		float halfLambert = dot(f_normal, difLightDirection) * 0.5 + 0.5;
-		fragColor.rgb *= vec3(halfLambert); 
+		fragColor.rgb *= vec3(halfLambert);
 	}
-	if (highlight_color.w > 0.0)
+	if (highlight_color.a > 0.0)
 	{
 		//Highlight intensity for object selection
 		float hc_a   = highlight_color.w;

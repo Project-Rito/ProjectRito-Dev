@@ -92,7 +92,7 @@ namespace GLFrameworkEngine
                     {
                         //Assign the model space of each render in the shadow shader
                         var mtxMdl = ((GenericRenderer)obj).Transform.TransformMatrix;
-                        shader.SetMatrix4x4("mtxMdl", ref mtxMdl);
+                        shader.SetMatrix4x4(GLConstants.ModelMatrix, ref mtxMdl);
                         //Draw the shadow model pass
                         ((GenericRenderer)obj).DrawShadowModel(context);
                     }

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
+using System.Runtime.InteropServices;
 
 namespace GLFrameworkEngine
 {
-    public class StandardMaterial
+    public class StandardInstancedMaterial
     {
         public bool DisplaySelection = false;
 
@@ -16,7 +17,7 @@ namespace GLFrameworkEngine
         public bool hasVertexColors = false;
         public bool displayOnlyVertexColors = false;
 
-        public Matrix4 ModelMatrix = Matrix4.Identity;
+        public List<Matrix4> ModelMatrices = new List<Matrix4> { Matrix4.Identity };
         public Matrix4 CameraMatrix
         {
             get { return _cameraMatrix; }
@@ -33,12 +34,15 @@ namespace GLFrameworkEngine
             Matrix4 mtxCam = CameraMatrix;
             if (_cameraMatrix == Matrix4.Zero)
                 mtxCam = context.Camera.ViewProjectionMatrix;
+
+            float[] modelMatricesFloatArr = MemoryMarshal.Cast<Matrix4, float>(ModelMatrices.ToArray()).ToArray();
+
             context.CurrentShader = GlobalShaders.GetShader("BASIC");
             context.CurrentShader.SetVector4("color", Color);
             context.CurrentShader.SetBoolToInt("halfLambert", HalfLambertShading);
             context.CurrentShader.SetBoolToInt("hasVertexColors", hasVertexColors);
             context.CurrentShader.SetBoolToInt("displayVertexColors", displayOnlyVertexColors);
-            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref ModelMatrix);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, modelMatricesFloatArr);
             context.CurrentShader.SetMatrix4x4(GLConstants.ViewProjMatrix, ref mtxCam);
             context.CurrentShader.SetVector4("highlight_color", Vector4.Zero);
             context.CurrentShader.SetInt("hasTextures", 0);

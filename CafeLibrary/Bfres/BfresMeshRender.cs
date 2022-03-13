@@ -44,7 +44,7 @@ namespace CafeLibrary.Rendering
 
         public void DrawColorPicking(GLContext control) { }
 
-        public void DrawWithPolygonOffset(ShaderProgram shader, int displayLOD = 0)
+        public void DrawWithPolygonOffset(ShaderProgram shader, int instanceCount, int displayLOD = 0)
         {
             //Seal objects draw ontop of meshes so offset them
             if (IsSealPass)
@@ -57,7 +57,7 @@ namespace CafeLibrary.Rendering
                 GL.Disable(EnableCap.PolygonOffsetFill);
             }
 
-            Draw(shader, displayLOD);
+            Draw(shader, instanceCount, displayLOD);
 
             GL.Disable(EnableCap.PolygonOffsetFill);
         }
@@ -74,7 +74,7 @@ namespace CafeLibrary.Rendering
             return 0;
         }
 
-        public void DrawCustom(ShaderProgram shader)
+        public void DrawCustom(ShaderProgram shader, int instanceCount)
         {
             //Seal objects draw ontop of meshes so offset them
             if (IsSealPass)
@@ -91,39 +91,39 @@ namespace CafeLibrary.Rendering
             customvao.Use();
 
             if (Runtime.RenderSettings.Wireframe)
-                DrawModelWireframe(shader);
+                DrawModelWireframe(shader, instanceCount);
             else
-                DrawSubMesh();
+                DrawSubMesh(instanceCount);
 
             GL.Disable(EnableCap.PolygonOffsetFill);
         }
 
-        public void Draw(ShaderProgram shader, int displayLOD = 0)
+        public void Draw(ShaderProgram shader, int instanceCount, int displayLOD = 0)
         {
             vao.Enable(shader);
             vao.Use();
 
             if (Runtime.RenderSettings.Wireframe)
-                DrawModelWireframe(shader, displayLOD);
+                DrawModelWireframe(shader, instanceCount, displayLOD);
             else
-                DrawSubMesh(displayLOD);
+                DrawSubMesh(instanceCount, displayLOD);
         }
 
-        private void DrawModelWireframe(ShaderProgram shader, int displayLOD = 0)
+        private void DrawModelWireframe(ShaderProgram shader, int instanceCount, int displayLOD = 0)
         {
             // use vertex color for wireframe color
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
             GL.Enable(EnableCap.LineSmooth);
             GL.LineWidth(1.5f);
-            DrawSubMesh(displayLOD);
+            DrawSubMesh(instanceCount, displayLOD);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
         }
 
-        private void DrawSubMesh(int displayLOD = 0)
+        private void DrawSubMesh(int instanceCount, int displayLOD = 0)
         {
             BfresPolygonGroupRender polygonGroup = LODMeshes[displayLOD];
-            GL.DrawElements(OpenGLHelper.PrimitiveTypes[polygonGroup.PrimitiveType],
-               (int)polygonGroup.FaceCount, polygonGroup.DrawElementsType, polygonGroup.Offset);
+            GL.DrawElementsInstanced(OpenGLHelper.PrimitiveTypes[polygonGroup.PrimitiveType],
+               (int)polygonGroup.FaceCount, polygonGroup.DrawElementsType, (IntPtr)polygonGroup.Offset, instanceCount);
 
             ResourceTracker.NumDrawCalls += 1;
             ResourceTracker.NumDrawTriangles += (polygonGroup.FaceCount / 3);

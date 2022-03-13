@@ -5,7 +5,7 @@ layout(location = 2) in vec2 vTexCoord;
 
 uniform vec3 scale;
 
-uniform mat4 mtxMdl;
+uniform mat4[32] mtxMdl;
 uniform mat4 mtxCam;
 uniform mat4 mtxView;
 uniform mat4 mtxProj;
@@ -19,7 +19,7 @@ void main()
     //Toggle verticle view rotation on the Y axis
     bool vertical = true;
 
-    mat4 modelView = mtxView * mtxMdl;
+    mat4 modelView = mtxView * mtxMdl[gl_InstanceID];
 
     //Remove the rotations from the model view matrix and re add the model scale
     //The billboard will instead use the view rotation.

@@ -12,7 +12,7 @@ using Toolbox.Core.ViewModels;
 
 namespace CafeLibrary.Rendering
 {
-    public class BfresRender : GenericRenderer, IColorPickable, ITransformableObject
+    public class BfresRender : GenericRendererInstanced, IInstanceColorPickable, ITransformableObject
     {
         public const float LOD_LEVEL_1_DISTANCE = 1000;
         public const float LOD_LEVEL_2_DISTANCE = 10000;
@@ -39,6 +39,8 @@ namespace CafeLibrary.Rendering
             }
         }
 
+        public override bool UpdateInstanceGroup { get; set; }
+
         private BoundingNode _boundingNode;
         public override BoundingNode BoundingNode => _boundingNode;
 
@@ -51,6 +53,35 @@ namespace CafeLibrary.Rendering
         public static ShaderProgram DefaultShader => GlobalShaders.GetShader("BFRES", "BFRES/Bfres");
 
         public bool StayInFrustum = false;
+        private bool _inFrustum;
+        public override bool InFrustum
+        {
+            get
+            {
+                return _inFrustum;
+            }
+            set
+            {
+                if (_inFrustum != value)
+                    UpdateInstanceGroup = true;
+                _inFrustum = value;
+            }
+        }
+
+        private bool _isSelected;
+        public override bool IsSelected
+        {
+            get
+            {
+                return _isSelected;
+            }
+            set
+            {
+                if (_isSelected != value)
+                    UpdateInstanceGroup = true;
+                _isSelected = value;
+            }
+        }
 
         public bool UseDrawDistance { get; set; }
 
@@ -75,7 +106,13 @@ namespace CafeLibrary.Rendering
 
         public EventHandler OnRenderInitialized;
 
-        public BfresRender(string filePath, NodeBase parent = null) : base(parent) {
+        public BfresRender(string filePath, NodeBase parent = null) : base(parent)
+        {
+            UpdateInstanceGroup = true;
+            VisibilityChanged += (object sender, EventArgs e) =>
+            {
+                UpdateInstanceGroup = true;
+            };
 
             if (YAZ0.IsCompressed(filePath))
                 UpdateModelFromFile(new System.IO.MemoryStream(YAZ0.Decompress(filePath)), filePath);
@@ -85,11 +122,19 @@ namespace CafeLibrary.Rendering
 
         public BfresRender(System.IO.Stream stream, string filePath, NodeBase parent = null) : base(parent)
         {
+            UpdateInstanceGroup = true;
+            VisibilityChanged += (object sender, EventArgs e) =>
+            {
+                UpdateInstanceGroup = true;
+            };
+
             UpdateModelFromFile(stream, filePath);
         }
 
         public bool UpdateModelFromFile(System.IO.Stream stream, string name)
         {
+            UpdateInstanceGroup = true;
+
             Name = name;
 
             if (name.Contains("course"))
@@ -118,6 +163,8 @@ namespace CafeLibrary.Rendering
         /// </summary>
         public virtual void ToggleMeshes(string name, bool toggle)
         {
+            UpdateInstanceGroup = true;
+
             foreach (var model in Models) {
                 foreach (BfresMeshRender mesh in model.MeshList) {
                     if (mesh.Name == name)
@@ -149,13 +196,39 @@ namespace CafeLibrary.Rendering
 
         bool drawnOnce = false;
 
-        /// <summary>
-        /// Draws the model using a normal material pass.
-        /// </summary>
-        public override void DrawModel(GLContext control, Pass pass)
+
+        public override bool GroupsWith(IInstanceDrawable drawable)
         {
-            if (!InFrustum || !IsVisible)
+            if (drawable is not BfresRender)
+                return false;
+
+            if (((BfresRender)drawable).Name != Name)
+                return false;
+            if (((BfresRender)drawable).InFrustum != InFrustum)
+                return false;
+            if (((BfresRender)drawable).IsVisible != IsVisible)
+                return false;
+            if (((BfresRender)drawable).IsSelected != IsSelected)
+                return false;
+            for (int i = 0; i < Models.Count; i++)
+            {
+                if (Models[i].IsVisible != ((BfresRender)drawable).Models[i].IsVisible)
+                    return false;
+            };
+            return true;
+        }
+
+        /// <summary>
+        /// Draws the model using a normal material pass. Supports instancing.
+        /// </summary>
+        public override void DrawModel(GLContext control, Pass pass, List<GLTransform> transforms)
+        {
+            if (!IsVisible || !InFrustum)
                 return;
+
+            // Use default transform if none is supplied
+            if (transforms == null)
+                transforms = new List<GLTransform>() { Transform };
 
             base.DrawModel(control, pass);
 
@@ -176,7 +249,7 @@ namespace CafeLibrary.Rendering
             Transform.UpdateMatrix();
             foreach (BfresModelRender model in Models)
                 if (model.IsVisible)
-                    model.Draw(control, pass, this);
+                    model.Draw(control, pass, this, transforms);
 
             //Draw debug boundings
             if (Runtime.RenderBoundingBoxes)
@@ -197,28 +270,28 @@ namespace CafeLibrary.Rendering
         /// Draws the projected shadow model in light space.
         /// </summary>
         /// <param name="control"></param>
-        public override void DrawShadowModel(GLContext control)
+        public override void DrawShadowModel(GLContext control, List<GLTransform> transforms)
         {
             if (!IsVisible)
                 return;
 
             foreach (BfresModelRender model in Models)
                 if (model.IsVisible)
-                    model.DrawShadowModel(control, this);
+                    model.DrawShadowModel(control, this, transforms);
         }
 
-        public override void DrawCubeMapScene(GLContext control)
+        public override void DrawCubeMapScene(GLContext control, List<GLTransform> transforms)
         {
             foreach (BfresModelRender model in Models)
                 if (model.IsVisible)
-                    model.DrawCubemapModel(control, this);
+                    model.DrawCubemapModel(control, this, transforms);
         }
 
         /// <summary>
         /// Draw gbuffer pass for storing normals and depth information
         /// </summary>
         /// <param name="control"></param>
-        public override void DrawGBuffer(GLContext control)
+        public override void DrawGBuffer(GLContext control, List<GLTransform> transforms)
         {
             if (!InFrustum || !IsVisible)
                 return;
@@ -226,7 +299,7 @@ namespace CafeLibrary.Rendering
             foreach (BfresModelRender model in Models)
             {
                 if (model.IsVisible)
-                    model.DrawGBuffer(control, this);
+                    model.DrawGBuffer(control, this, transforms);
             }
         }
 
@@ -260,11 +333,19 @@ namespace CafeLibrary.Rendering
             }
         }
 
+        [Obsolete("Deprecated. Prefer the instanced version.")]
+        public void DrawColorPicking(GLContext context) {
+            if (!InFrustum || !IsVisible)
+                return;
+
+            DrawColorPicking(context, new List<GLTransform> { Transform });
+        }
+
         /// <summary>
-        /// Draws the model in the color picking pass.
+        /// Draws the model in the color picking pass. Supports instancing.
         /// </summary>
-        /// <param name="control"></param>
-        public void DrawColorPicking(GLContext control)
+        /// <param name="context"></param>
+        public void DrawColorPicking(GLContext context, List<GLTransform> transforms)
         {
             if (!InFrustum || !IsVisible)
                 return;
@@ -272,15 +353,15 @@ namespace CafeLibrary.Rendering
             Transform.UpdateMatrix();
 
             var shader = GlobalShaders.GetShader("PICKING");
-            control.CurrentShader = shader;
+            context.CurrentShader = shader;
 
-            if (control.ColorPicker.PickingMode == ColorPicker.SelectionMode.Object)
-                control.ColorPicker.SetPickingColor(this, shader);
+            if (context.ColorPicker.PickingMode == ColorPicker.SelectionMode.Object)
+                context.ColorPicker.SetPickingColor(this, shader);
 
             foreach (BfresModelRender model in Models)
             {
                 if (model.IsVisible)
-                    model.DrawColorPicking(control, this);
+                    model.DrawColorPicking(context, this, transforms);
             }
         }
 

@@ -54,7 +54,7 @@ namespace AGraphicsLibrary
             shBlock.RenderBuffer(programID, "ProbeSHBuffer");
             probeInfoBlock.RenderBuffer(programID, "ProbeInfo");
 
-            SphereRender.DrawInstance(shader, numDraw);
+            SphereRender.DrawInstanced(shader, numDraw);
         }
 
         static void UpdateUniforms()

@@ -182,7 +182,7 @@ namespace GLFrameworkEngine
 
                     context.CurrentShader.SetVector4("color", new Vector4(_colors[i], 1.0f));
                     context.CurrentShader.SetVector4("selectionColor", Vector4.Zero);
-                    context.CurrentShader.SetMatrix4x4("mtxMdl", ref transform);
+                    context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref transform);
 
                     if (LineRenders[i] == null) LineRenders[i] = new LineRender();
 
@@ -205,7 +205,7 @@ namespace GLFrameworkEngine
             GL.Disable(EnableCap.DepthTest);
 
             context.CurrentShader = GlobalShaders.GetShader("GIZMO");
-            context.CurrentShader.SetMatrix4x4("mtxMdl", ref transform);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref transform);
 
             for (int i = 0; i < AxisOjects.Count; i++) {
                 DrawDebugBoundings(context, AxisOjects[i], Vector3.One);
@@ -231,14 +231,14 @@ namespace GLFrameworkEngine
             if (isSelected)
                 context.CurrentShader.SetVector4("selectionColor", new Vector4(1, 1, 0, 1));
 
-            context.CurrentShader.SetMatrix4x4("mtxMdl", ref output);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref output);
             CylinderRenderer.Draw(context);
 
             translateMtx = Matrix4.CreateTranslation(endPosition);
             rotate = Matrix4.CreateFromAxisAngle(rotation.Xyz, MathHelper.DegreesToRadians(rotation.W));
             output = rotate90 * rotate * translateMtx * transform;
 
-            context.CurrentShader.SetMatrix4x4("mtxMdl", ref output);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref output);
             if (IsScale)
                 CubeRenderer.Draw(context);
             else
@@ -259,7 +259,7 @@ namespace GLFrameworkEngine
             GLMaterialBlendState.TranslucentAlphaOne.RenderBlendState();
 
             context.CurrentShader.SetVector4("color", new Vector4(color, 0.2f));
-            context.CurrentShader.SetMatrix4x4("mtxMdl", ref output);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref output);
             PlaneRender.Draw(context);
 
             GLMaterialBlendState.Opaque.RenderBlendState();
@@ -267,7 +267,7 @@ namespace GLFrameworkEngine
             GL.LineWidth(2);
 
             context.CurrentShader.SetVector4("color", new Vector4(color, 1f));
-            context.CurrentShader.SetMatrix4x4("mtxMdl", ref output);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref output);
 
             PlaneLinesRender.Draw(context);
 

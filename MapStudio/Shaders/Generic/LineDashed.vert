@@ -2,7 +2,7 @@
 
 layout(location = 0) in vec3 vPosition;
 
-uniform mat4 mtxMdl;
+uniform mat4[32] mtxMdl;
 uniform mat4 mtxCam;
 uniform mat4 mtxView;
 uniform mat4 mtxProj;
@@ -14,7 +14,7 @@ out vec2 stipple_pos;
 
 void main()
 {
-    gl_Position  = mtxCam*mtxMdl*vec4(vPosition.xyz, 1.0);
+    gl_Position  = mtxCam*mtxMdl[gl_InstanceID]*vec4(vPosition.xyz, 1.0);
 
     stipple_start = stipple_pos = (gl_Position .xy / gl_Position .w);
 }
