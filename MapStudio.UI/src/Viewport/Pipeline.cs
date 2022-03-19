@@ -367,28 +367,33 @@ namespace MapStudio.UI
                     continue;
                 if (!((IInstanceDrawable)file).UpdateInstanceGroup)
                     continue;
+                ((IInstanceDrawable)file).UpdateInstanceGroup = false;
+                if (!file.IsVisible)
+                    continue;
 
-                if (file.IsVisible && file is EditableObject && ((EditableObject)file).UsePostEffects)
+                if (file is IFrustumCulling)
+                    if (!((IFrustumCulling)file).InFrustum)
+                        continue;
+                bool foundGroup = false;
+                foreach (List<IInstanceDrawable> group in instanceGroups)
                 {
-                    bool foundGroup = false;
-                    foreach (List<IInstanceDrawable> group in instanceGroups)
+                    if (group.Count == 32) // Put in a new group if this one is full.
+                        continue;
+                    if (((IInstanceDrawable)file).GroupsWith(group[0]))
                     {
-                        if (group.Count == 32) // Put in a new group if this one is full.
-                            continue;
-                        if (((IInstanceDrawable)file).GroupsWith(group[0]))
-                        {
-                            group.Add((IInstanceDrawable)file);
-                            foundGroup = true;
-                            break;
-                        }
+                        group.Add((IInstanceDrawable)file);
+                        foundGroup = true;
+                        break;
                     }
-                    if (!foundGroup)
-                        instanceGroups.Add(new List<IInstanceDrawable>() { (IInstanceDrawable)file });
                 }
+                if (!foundGroup)
+                    instanceGroups.Add(new List<IInstanceDrawable>() { (IInstanceDrawable)file });
             }
 
             foreach (var group in instanceGroups)
             {
+                if (group[0] is EditableObject && !((EditableObject)group[0]).UsePostEffects)
+                    continue;
                 List<GLTransform> transforms = new List<GLTransform>(group.Count);
                 foreach (var file in group)
                     transforms.Add(file.Transform);
@@ -419,9 +424,13 @@ namespace MapStudio.UI
                     continue;
                 if (!((IInstanceDrawable)file).UpdateInstanceGroup)
                     continue;
+                ((IInstanceDrawable)file).UpdateInstanceGroup = false;
 
-                if (!file.IsVisible || file is EditableObject && ((EditableObject)file).UsePostEffects)
+                if (!file.IsVisible)
                     continue;
+                if (file is IFrustumCulling)
+                    if (!((IFrustumCulling)file).InFrustum)
+                        continue;
                 bool foundGroup = false;
                 foreach (List<IInstanceDrawable> group in instanceGroups)
                 {
@@ -441,6 +450,8 @@ namespace MapStudio.UI
 
             foreach (var group in instanceGroups)
             {
+                if (group[0] is EditableObject && ((EditableObject)group[0]).UsePostEffects)
+                    continue;
                 List<GLTransform> transforms = new List<GLTransform>(group.Count);
                 foreach (var file in group)
                     transforms.Add(file.Transform);

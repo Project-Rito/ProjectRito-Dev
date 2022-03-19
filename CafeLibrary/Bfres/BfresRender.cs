@@ -204,8 +204,6 @@ namespace CafeLibrary.Rendering
 
             if (((BfresRender)drawable).Name != Name)
                 return false;
-            if (((BfresRender)drawable).InFrustum != InFrustum)
-                return false;
             if (((BfresRender)drawable).IsVisible != IsVisible)
                 return false;
             if (((BfresRender)drawable).IsSelected != IsSelected)
