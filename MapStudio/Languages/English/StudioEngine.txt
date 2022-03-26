@@ -17,6 +17,7 @@ PREVIEW - Preview
 VALUE - Value
 EDIT - Edit
 ADD - Add
+ADD_NEW - Add New
 CREATE - Create
 REMOVE - Remove
 HINT - Hint

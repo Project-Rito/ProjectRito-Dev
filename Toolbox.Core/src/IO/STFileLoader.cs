@@ -72,6 +72,12 @@ namespace Toolbox.Core.IO
                 Console.WriteLine(ex.ToString());
             }
 
+            // If not compressed:
+            stream.Position = streamStartPos;
+            settings.CompressedSize = (uint)stream.Length;
+            settings.Stream = stream;
+            settings.DecompressedSize = (uint)stream.Length;
+
             return settings;
         }
 

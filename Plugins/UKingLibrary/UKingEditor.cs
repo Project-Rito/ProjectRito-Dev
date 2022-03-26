@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.IO;
+using Newtonsoft.Json;
 using MapStudio.UI;
 using Toolbox.Core;
 using GLFrameworkEngine;
+using CafeLibrary;
+using Toolbox.Core.IO;
 using Toolbox.Core.ViewModels;
 using Toolbox.Core.Hashes.Cryptography;
 using UKingLibrary.UI;
@@ -15,8 +17,8 @@ namespace UKingLibrary
 {
     public class UKingEditor : FileEditor, IFileFormat, IDisposable
     {
-        public string[] Description => new string[] { "Compressed Map Unit Binary" };
-        public string[] Extension => new string[] { "*.smubin", ".pack" };
+        public string[] Description => new string[] { "Field Map Data for Breath of the Wild" };
+        public string[] Extension => new string[] { ".json" };
 
         /// <summary>
         /// Whether or not the file can be saved.
@@ -28,17 +30,30 @@ namespace UKingLibrary
         /// </summary>
         public File_Info FileInfo { get; set; }
 
-        //Current map muunt files
-        List<MapData> MapFiles;
+        UKingEditorConfig EditorConfig;
+
+        NodeFolder MapFolder;
+
+        public Terrain Terrain;
+        public SARC TitleBG;
 
         //Editor loaders
-        FieldMapLoader FieldMapLoader;
+        public List<FieldMapLoader> FieldLoaders = new List<FieldMapLoader>();
+
+
+
         DungeonMapLoader DungeonLoader;
 
         public bool Identify(File_Info fileInfo, Stream stream)
         {
-            //Just load maps from checking the smubin extension atm.
-            return fileInfo.Extension == ".smubin" || fileInfo.Extension == ".pack";
+            if (fileInfo.Extension == ".json")
+            {
+                string json = File.ReadAllText(fileInfo.FilePath);
+                var ukingEditorFile = JsonConvert.DeserializeObject<UKingEditorConfig>(json);
+                if (ukingEditorFile.IsValid)
+                    return true;
+            }
+            return false;
         }
 
         public UKingEditor() 
@@ -47,16 +62,50 @@ namespace UKingLibrary
 
         public void Load(Stream stream)
         {
+            stream.Seek(0, SeekOrigin.Begin);
+            string json = new StreamReader(stream).ReadToEnd();
+            EditorConfig = JsonConvert.DeserializeObject<UKingEditorConfig>(json);
+
             ToolWindowDrawer = new MubinToolSettings();
 
-            Root.Header = FileInfo.FileName;
+            Root.Header = "UKingFieldEditor";
+
+            SetupContextMenus();
+            
+
             Root.Children.Clear();
-            if (FileInfo.Extension == ".pack")
-                LoadDungeon(FileInfo.FileName, stream);
-            else
-                LoadField(FileInfo.FileName, stream);
+
+            MapFolder = new NodeFolder { Header = "Map" };
+            Root.AddChild(MapFolder);
+
+            CacheBackgroundFiles();
+
+            foreach (var fieldName in EditorConfig.OpenMapUnits.Keys)
+            {
+                foreach (var muPath in EditorConfig.OpenMapUnits[fieldName])
+                {
+                    string fullPath = Path.GetFullPath(muPath, Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"aoc/0010/Map/{fieldName}/"), FileInfo.FolderPath));
+                    string fileName = Path.GetFileName(muPath);
+                    if (!File.Exists(fullPath))
+                        continue;
+                    LoadFieldMuunt(fieldName, fileName, STFileLoader.TryDecompressFile(File.Open(fullPath, FileMode.Open), fileName).Stream);
+                }
+            }
 
             LoadAssetList();
+        }
+
+        private void SetupContextMenus()
+        {
+            List<MenuItemModel> loadSectionMenuItems = new List<MenuItemModel>(GlobalData.SectionNames.Length);
+            foreach (var SectionName in GlobalData.SectionNames)
+            {
+                loadSectionMenuItems.Add(new MenuItemModel(SectionName, () => { LoadSection("MainField", SectionName); }));
+            }
+            Root.ContextMenus.Add(new MenuItemModel("Load Section")
+            {
+                MenuItems = loadSectionMenuItems
+            });
         }
 
         private void LoadAssetList()
@@ -100,7 +149,6 @@ namespace UKingLibrary
             //Load file data
             DungeonLoader = new DungeonMapLoader();
             DungeonLoader.Load(this, fileName, stream);
-            MapFiles = DungeonLoader.MapFiles;
 
             //Add objects
             foreach (var map in DungeonLoader.MapFiles)
@@ -112,13 +160,59 @@ namespace UKingLibrary
             this.AddRender(DungeonLoader.MapRender);
         }
 
-        private void LoadField(string fileName, Stream stream)
+        private void LoadSection(string fieldName, string sectionName)
         {
-            FieldMapLoader = new FieldMapLoader();
-            FieldMapLoader.Load(this, fileName, stream);
-            MapFiles = FieldMapLoader.MapFiles;
-            foreach (var map in FieldMapLoader.MapFiles)
-                Root.AddChild(map.RootNode);
+            string[] endings = { "Static", "Dynamic" };
+
+            foreach (var ending in endings)
+            {
+                string path = PluginConfig.GetContentPath($"Map/{fieldName}/{sectionName}/{sectionName}_{ending}.smubin");
+                if (!File.Exists(path))
+                    return;
+                string fileName = Path.GetFileName(path);
+                var stream = STFileLoader.TryDecompressFile(File.Open(path, FileMode.Open), fileName).Stream;
+
+                EditorConfig.OpenMapUnits.TryAdd(fieldName, new List<string>());
+                EditorConfig.OpenMapUnits[fieldName].Add($"{fileName.Substring(0, 3)}/{fileName}");
+
+                LoadFieldMuunt(fieldName, fileName, stream);
+            }
+        }
+
+        private void LoadFieldMuunt(string fieldName, string fileName, Stream stream)
+        {
+            MapFolder.TryAddChild(new NodeFolder {
+                Header = fieldName,
+                ContextMenus = new List<MenuItemModel>() 
+                {
+                    new MenuItemModel("Open Viewport", () => { Workspace.Windows.Add(new Viewport(Workspace, GlobalSettings.Current)); })
+                }
+            });
+            NodeBase fieldFolder = MapFolder.FolderChildren[fieldName];
+
+            FieldMapLoader loader = new FieldMapLoader();
+            MapData mapData = loader.Load(this, fileName, stream);
+            FieldLoaders.Add(loader);
+            fieldFolder.AddChild(mapData.RootNode);
+
+            bool terrLoaded = false;
+            foreach (var node in MapFolder.Children)
+            {
+                if (node.Header == fileName)
+                    continue;
+                if (node.Header.Substring(0, 3) == fileName.Substring(0, 3))
+                {
+                    terrLoaded = true;
+                    break;
+                }
+            }
+
+            if (!terrLoaded)
+            {
+                var terrSectionID = GetSectionIndex(fileName.Substring(0, 3));
+
+                Terrain.LoadTerrainSection((int)terrSectionID.X, (int)terrSectionID.Y, this, PluginConfig.MaxTerrainLOD);
+            }
         }
 
         //Todo prod should probably be a seperate FileEditor instance
@@ -146,11 +240,72 @@ namespace UKingLibrary
 
         public void Save(Stream stream)
         {
+            //string json = File.ReadAllText(FileInfo.FilePath);
+            string json = JsonConvert.SerializeObject(EditorConfig);
+            stream.Position = 0;
+            using (StreamWriter writer = new StreamWriter(stream))
+            {
+                writer.Write(json);
+            }
             //Save the editor data
-            if (DungeonLoader != null)
-                DungeonLoader.Save(stream);
-            else
-                FieldMapLoader.Save(stream);
+            foreach (var fieldLoader in FieldLoaders) {
+                string fieldName = fieldLoader.MapFile.RootNode.Parent.Header;
+                string fileName = fieldLoader.MapFile.RootNode.Header;
+                string sectionName = fileName.Substring(0, 3);
+                string outPath = Path.GetFullPath(Path.Join(Path.GetDirectoryName(FileInfo.FilePath), $"{EditorConfig.FolderName}/aoc/0010/Map/{fieldName}/{sectionName}/{fileName}"));
+
+                var bymlStream = new MemoryStream();
+                fieldLoader.Save(bymlStream);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+                var outStream = File.Open(outPath, FileMode.OpenOrCreate, FileAccess.Write);
+                outStream.Write(YAZ0.Compress(bymlStream.ReadAllBytes()));
+                outStream.SetLength(outStream.Position);
+            }
+        }
+
+        private Vector2 GetSectionIndex(string mapName)
+        {
+            string[] values = mapName.Split("-");
+            int sectionID = values[0][0] - 'A' - 1;
+            int sectionRegion = int.Parse(values[1]);
+            return new Vector2(sectionID, sectionRegion);
+        }
+
+        private void CacheBackgroundFiles()
+        {
+            {
+                // Where to cache to
+                string cache = PluginConfig.GetCachePath($"Images\\Terrain");
+                if (!Directory.Exists(cache))
+                {
+
+                    // Get the data from the bfres
+                    string path = PluginConfig.GetContentPath("Model\\Terrain.Tex1.sbfres");
+                    var texs = CafeLibrary.Rendering.BfresLoader.GetTextures(path);
+                    if (texs == null)
+                        return;
+
+                    Directory.CreateDirectory(cache); // Ensure that our cache folder exists
+                    foreach (var tex in texs)
+                    {
+                        string outputPath = $"{cache}\\{tex.Key}";
+                        if (tex.Value.RenderTexture is GLTexture2D)
+                            ((GLTexture2D)tex.Value.RenderTexture).Save(outputPath);
+                        else
+                            ((GLTexture2DArray)tex.Value.RenderTexture).Save(outputPath);
+                    }
+                }
+            }
+            {
+                Terrain = new Terrain();
+                Terrain.LoadTerrainTable(PluginConfig.FieldName);
+            }
+            {
+                var path = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
+                TitleBG = new SARC();
+                TitleBG.Load(File.OpenRead(path));
+            }
         }
 
         public override List<MenuItemModel> GetViewportMenuIcons()
@@ -192,7 +347,7 @@ namespace UKingLibrary
             if (!(item.Tag is IDictionary<string, dynamic>))
                 return;
 
-            var mapData = MapFiles.FirstOrDefault();
+            var mapData = FieldLoaders.FirstOrDefault().MapFile;
 
             //Actor data attached to map object assets
             var actorInfo = item.Tag as IDictionary<string, dynamic>;
@@ -241,7 +396,7 @@ namespace UKingLibrary
 
         public void CreateAndSelect(GLContext context)
         {
-            var mapData = MapFiles.FirstOrDefault();
+            var mapData = FieldLoaders.FirstOrDefault().MapFile;
 
             var actorInfo = GlobalData.Actors["LinkTagAnd"] as IDictionary<string, dynamic>;
             string profile = actorInfo.ContainsKey("profile") ? (string)actorInfo["profile"] : null;
@@ -276,8 +431,9 @@ namespace UKingLibrary
         {
             if (DungeonLoader != null)
                 DungeonLoader.Dispose();
-            if (FieldMapLoader != null)
-                FieldMapLoader.Dispose();
+            Terrain?.Dispose();
+            foreach (var fieldLoader in FieldLoaders)
+                fieldLoader?.Dispose();
         }
 
         public static uint GetHashId(MapData mapData)

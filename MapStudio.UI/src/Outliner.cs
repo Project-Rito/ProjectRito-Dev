@@ -23,6 +23,7 @@ namespace MapStudio.UI
         public bool IsFocused = false;
 
         public List<MenuItemModel> ContextMenu = new List<MenuItemModel>();
+        public static MenuItemModel NewItemContextMenu = new MenuItemModel("ADD_NEW");
         public List<MenuItemModel> FilterMenuItems = new List<MenuItemModel>();
 
         public List<NodeBase> Nodes = new List<NodeBase>();
@@ -114,10 +115,6 @@ namespace MapStudio.UI
         public void ScrollToSelected(NodeBase target)
         {
             if (target == null) //todo check visiblity.
-                return;
-
-            //Do not scroll to displayed selected node
-            if (SelectedNodes.Contains(target))
                 return;
 
             //Expand parents if necessary
@@ -258,6 +255,16 @@ namespace MapStudio.UI
 
             ImGui.EndChild();
             ImGui.PopStyleColor(2);
+            /*
+            if (ImGui.BeginPopupContextItem("##OUTLINER_POPUP", ImGuiPopupFlags.MouseButtonRight))
+            {
+                foreach (var menuItem in ContextMenu)
+                {
+                    ImGuiHelper.LoadMenuItem(menuItem);
+                }
+                ImGuiHelper.LoadMenuItem(NewItemContextMenu);
+                ImGui.EndPopup();
+            }*/
         }
 
         private void SetupNodes(NodeBase node)
@@ -707,11 +714,6 @@ namespace MapStudio.UI
         {
             foreach (var item in node.ContextMenus)
                 LoadMenuItem(item);
-
-            foreach (var menuItem in ContextMenu)
-            {
-                ImGuiHelper.LoadMenuItem(menuItem);
-            }
 
             if (node.Tag is ICheckableNode)
             {

@@ -558,7 +558,7 @@ namespace MapStudio.UI
             //Draw dockable windows
             foreach (var dock in DockedWindows)
                 if (dock.Opened)
-                    LoadWindow(GetWindowName(dock.Name, workspaceID), ref dock.Opened, dock.Flags, () => dock.Render());
+                    LoadWindow(GetWindowName(dock.Name, workspaceID), ref dock.Opened, dock.Flags, () => dock.RenderWithStyling());
         }
 
         public NodeBase GetSelectedNode()

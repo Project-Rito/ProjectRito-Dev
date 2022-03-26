@@ -19,9 +19,14 @@ namespace GLFrameworkEngine
 
         public GenericRendererInstanced(NodeBase parent) : base(parent)
         {
+            RemoveCallback += (object sender, EventArgs e) =>
+            {
+                UpdateInstanceGroup = true;
+            };
         }
 
-        public virtual bool UpdateInstanceGroup { get; set; }
+        private bool _updateInstanceGroup = true;
+        public virtual bool UpdateInstanceGroup { get { return _updateInstanceGroup; } set { _updateInstanceGroup = value; } }
 
         public virtual bool GroupsWith(IInstanceDrawable drawable)
         {

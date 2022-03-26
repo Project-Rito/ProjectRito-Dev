@@ -39,8 +39,6 @@ namespace CafeLibrary.Rendering
             }
         }
 
-        public override bool UpdateInstanceGroup { get; set; }
-
         private BoundingNode _boundingNode;
         public override BoundingNode BoundingNode => _boundingNode;
 
@@ -54,15 +52,13 @@ namespace CafeLibrary.Rendering
 
         public bool StayInFrustum = false;
         private bool _inFrustum;
-        public override bool InFrustum
-        {
-            get
-            {
-                return _inFrustum;
+        public override bool InFrustum 
+        { 
+            get { 
+                return _inFrustum; 
             }
-            set
-            {
-                if (_inFrustum != value)
+            set {
+                if (value != _inFrustum)
                     UpdateInstanceGroup = true;
                 _inFrustum = value;
             }
@@ -108,7 +104,6 @@ namespace CafeLibrary.Rendering
 
         public BfresRender(string filePath, NodeBase parent = null) : base(parent)
         {
-            UpdateInstanceGroup = true;
             VisibilityChanged += (object sender, EventArgs e) =>
             {
                 UpdateInstanceGroup = true;
@@ -122,7 +117,6 @@ namespace CafeLibrary.Rendering
 
         public BfresRender(System.IO.Stream stream, string filePath, NodeBase parent = null) : base(parent)
         {
-            UpdateInstanceGroup = true;
             VisibilityChanged += (object sender, EventArgs e) =>
             {
                 UpdateInstanceGroup = true;

@@ -51,7 +51,7 @@ namespace UKingLibrary
             }
             set
             {
-                if (_inFrustum != value)
+                if (value != _inFrustum)
                     UpdateInstanceGroup = true;
                 _inFrustum = value;
             }
@@ -72,7 +72,8 @@ namespace UKingLibrary
             }
         }
 
-        public bool UpdateInstanceGroup { get; set; }
+        private bool _updateInstanceGroup = true;
+        public virtual bool UpdateInstanceGroup { get { return _updateInstanceGroup; } set { _updateInstanceGroup = value; } }
 
         public BoundingNode Boundings = new BoundingNode()
         {
@@ -86,8 +87,12 @@ namespace UKingLibrary
 
         public TagRender(string name, NodeBase parent) : base(parent)
         {
-            UpdateInstanceGroup = true;
+            //UpdateInstanceGroup = true;
             VisibilityChanged += (object sender, EventArgs e) =>
+            {
+                UpdateInstanceGroup = true;
+            };
+            RemoveCallback += (object sender, EventArgs e) =>
             {
                 UpdateInstanceGroup = true;
             };

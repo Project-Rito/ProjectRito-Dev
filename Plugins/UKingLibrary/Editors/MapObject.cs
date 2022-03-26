@@ -202,6 +202,29 @@ namespace UKingLibrary
 
             ((EditableObjectNode)Render.UINode).UIProperyDrawer += delegate
             {
+                if (ImGui.BeginCombo("##objFileSelect", MapFile.RootNode.Header))
+                {
+                    for (int i = 0; i < ParentEditor.FieldLoaders.Count(); i++)
+                    {
+                        string fileName = ParentEditor.FieldLoaders[i].MapFile.RootNode.Header;
+                        bool isSelected = fileName == MapFile.RootNode.Header;
+
+                        if (ImGui.Selectable(fileName, isSelected))
+                        {
+                            MapFile.Objs.Remove(HashId);
+                            ParentEditor.FieldLoaders[i].MapFile.Objs.Add(HashId, this);
+                            MapFile = ParentEditor.FieldLoaders[i].MapFile;
+
+                            Parent.Children.Remove(Render.UINode);
+                            Parent = MapFile.AddObject(this, ParentEditor);
+                        }
+
+                        if (isSelected)
+                            ImGui.SetItemDefaultFocus();
+                    }
+                    ImGui.EndCombo();
+                }
+
                 PropertyDrawer.Draw(this, Properties, new PropertyDrawer.PropertyChangedCallback(OnPropertyUpdate));
             };
             //Icon for gui node

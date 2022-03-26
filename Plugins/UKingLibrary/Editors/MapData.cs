@@ -23,8 +23,8 @@ namespace UKingLibrary
 
         public NodeBase RootNode = new NodeBase();
 
-        public NodeBase ObjectFolder = new NodeBase(TranslationSource.GetText("OBJECTS"));
-        public NodeBase RailFolder = new NodeBase(TranslationSource.GetText("RAIL_PATHS"));
+        public NodeFolder ObjectFolder = new NodeFolder(TranslationSource.GetText("OBJECTS"));
+        public NodeFolder RailFolder = new NodeFolder(TranslationSource.GetText("RAIL_PATHS"));
 
         BymlFileData Byaml;
 
@@ -90,11 +90,11 @@ namespace UKingLibrary
                     }
 
                     //Setup properties for editing
-                    MapObject data = new MapObject(editor);
+                    MapObject obj = new MapObject(editor);
 
-                    data.CreateNew(mapObj, actorInfo, parent, this);
+                    obj.CreateNew(mapObj, actorInfo, parent, this);
                     //Add the renderable to the viewport
-                    data.AddToScene();
+                    obj.AddToScene();
                 }
                 ProcessLoading.Instance.Update((((i+1) * 40)/numObjs) + 70, 100, "Loading map objs");
             }
@@ -149,8 +149,7 @@ namespace UKingLibrary
             }
 
             //Load all the outliner nodes into the editor
-            foreach (var node in nodeFolders.OrderBy(x => x.Key))
-                ObjectFolder.AddChild(node.Value);
+            ObjectFolder.FolderChildren = nodeFolders;
 
             // Set the camera position to the map pos
             if (byaml.RootNode.ContainsKey("LocationPosX") && byaml.RootNode.ContainsKey("LocationPosZ"))
@@ -173,6 +172,39 @@ namespace UKingLibrary
             }
 
             ProcessLoading.Instance.Update(100, 100, "Finished!");
+        }
+
+        public NodeBase AddObject(MapObject obj, UKingEditor editor)
+        {
+            Dictionary<string, NodeBase> nodeFolders = ObjectFolder.FolderChildren;
+
+            string profile = obj.ActorInfo.ContainsKey("profile") ? (string)obj.ActorInfo["profile"] : null;
+
+            //Set nodebase parent as the profile assigned by actor
+            NodeBase parent = null;
+            if (profile != null)
+            {
+                if (!nodeFolders.ContainsKey(profile))
+                {
+                    nodeFolders.Add(profile, new NodeBase(profile));
+                    nodeFolders[profile].HasCheckBox = true; //Allow checking
+                }
+                parent = nodeFolders[profile];
+            }
+            else
+            {
+                if (!nodeFolders.ContainsKey("Unknown"))
+                {
+                    nodeFolders.Add("Unknown", new NodeBase("Unknown"));
+                    nodeFolders["Unknown"].HasCheckBox = true; //Allow checking
+                }
+                parent = nodeFolders["Unknown"];
+            }
+            parent.AddChild(obj.Render.UINode);
+            ObjectFolder.FolderChildren = nodeFolders;
+
+            editor.Workspace.ScrollToSelectedNode(obj.Render.UINode);
+            return parent;
         }
 
         public void Save(Stream stream)

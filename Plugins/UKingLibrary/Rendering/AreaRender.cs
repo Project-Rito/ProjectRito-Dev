@@ -71,18 +71,18 @@ namespace UKingLibrary.Rendering
 
         public bool EnableFrustumCulling => true;
         private bool _inFrustum;
-        public bool InFrustum 
-        { 
-            get 
-            { 
-                return _inFrustum; 
-            } 
-            set 
+        public bool InFrustum
+        {
+            get
             {
-                if (_inFrustum != value)
+                return _inFrustum;
+            }
+            set
+            {
+                if (value != _inFrustum)
                     UpdateInstanceGroup = true;
                 _inFrustum = value;
-            } 
+            }
         }
 
         private bool _isSelected;
@@ -100,7 +100,8 @@ namespace UKingLibrary.Rendering
             }
         }
 
-        public bool UpdateInstanceGroup { get; set; }
+        private bool _updateInstanceGroup = true;
+        public virtual bool UpdateInstanceGroup { get { return _updateInstanceGroup; } set { _updateInstanceGroup = value; } }
 
         public override BoundingNode BoundingNode { get; } = new BoundingNode()
         {
@@ -118,6 +119,10 @@ namespace UKingLibrary.Rendering
         {
             UpdateInstanceGroup = true;
             VisibilityChanged += (object sender, EventArgs e) =>
+            {
+                UpdateInstanceGroup = true;
+            };
+            RemoveCallback += (object sender, EventArgs e) =>
             {
                 UpdateInstanceGroup = true;
             };

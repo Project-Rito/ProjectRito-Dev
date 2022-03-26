@@ -367,13 +367,15 @@ namespace MapStudio.UI
                     continue;
                 if (!((IInstanceDrawable)file).UpdateInstanceGroup)
                     continue;
-                ((IInstanceDrawable)file).UpdateInstanceGroup = false;
+                
                 if (!file.IsVisible)
                     continue;
 
                 if (file is IFrustumCulling)
                     if (!((IFrustumCulling)file).InFrustum)
                         continue;
+                ((IInstanceDrawable)file).UpdateInstanceGroup = false;
+
                 bool foundGroup = false;
                 foreach (List<IInstanceDrawable> group in instanceGroups)
                 {
