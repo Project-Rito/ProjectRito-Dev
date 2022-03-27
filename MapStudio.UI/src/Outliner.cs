@@ -320,6 +320,15 @@ namespace MapStudio.UI
 
         public void DrawNode(NodeBase node, float itemHeight, int level = 0)
         {
+            // Optimization; Avoid node calculation if possible
+            if (!ImGui.IsRectVisible(new Vector2(1, ImGui.GetTextLineHeight())) && !node.IsExpanded)
+            {
+                ImGui.TreeNode("placeholder");
+                return;
+            }
+
+            // Ugh we have to calculate the node and stuff...
+
             bool HasText = node.Header != null &&
                  node.Header.IndexOf(_searchText, StringComparison.OrdinalIgnoreCase) >= 0;
 
