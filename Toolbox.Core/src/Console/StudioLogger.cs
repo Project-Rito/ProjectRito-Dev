@@ -16,6 +16,14 @@ namespace Toolbox.Core
         private static List<Entry> Errors = new List<Entry>();
         private static List<Entry> Warnings = new List<Entry>();
 
+        private static string OutputLog;
+        private static string ErrorLog;
+        private static string WarningLog;
+
+        private static int OutputLogLength;
+        private static int ErrorLogLength;
+        private static int WarningLogLength;
+
         private static string Line;
 
         /// <summary>
@@ -30,15 +38,18 @@ namespace Toolbox.Core
         public static EventHandler OnProgressUpdated;
 
         public static string GetLog() {
-            return GetLog(Outputs);
+            UpdateLog(Outputs, ref OutputLog, ref OutputLogLength);
+            return OutputLog;
         }
 
         public static string GetErrorLog() {
-            return GetLog(Errors);
+            UpdateLog(Errors, ref ErrorLog, ref ErrorLogLength);
+            return ErrorLog;
         }
 
         public static string GetWarningLog() {
-            return GetLog(Warnings);
+            UpdateLog(Warnings, ref WarningLog, ref WarningLogLength);
+            return WarningLog;
         }
 
         public static string GetLine() {
@@ -52,12 +63,16 @@ namespace Toolbox.Core
             OnLoggerUpdated?.Invoke("", EventArgs.Empty);
         }
 
-        static string GetLog(List<Entry> entries)
+        static void UpdateLog(List<Entry> entries, ref string log, ref int logCount)
         {
-            string output = "";
-            for (int i = 0; i < entries.Count; i++)
-                output += entries[i].Text + "\n";
-            return output;
+            if (entries.Count > logCount)
+            {
+                for (int i = logCount; i < entries.Count; i++)
+                {
+                    log += entries[i].Text + "\n";
+                    logCount++;
+                }
+            }
         }
 
         /// <summary>
