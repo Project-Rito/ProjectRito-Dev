@@ -10,12 +10,23 @@ namespace MapStudio.UI
 
         public virtual void RenderWithStyling()
         {
-            foreach (ImGuiCol col in OverrideColors.Keys) {
-                ImGui.PushStyleColor(col, OverrideColors[col]);
-            }
+            PushStyling();
 
             Render();
 
+            PopStyling();
+        }
+
+        public virtual void PushStyling()
+        {
+            foreach (ImGuiCol col in OverrideColors.Keys)
+            {
+                ImGui.PushStyleColor(col, OverrideColors[col]);
+            }
+        }
+
+        public virtual void PopStyling()
+        {
             ImGui.PopStyleColor(OverrideColors.Count);
         }
 

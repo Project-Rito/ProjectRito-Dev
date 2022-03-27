@@ -324,7 +324,9 @@ namespace MapStudio
                 //Set the workspace size on load
                 ImGui.SetNextWindowSize(contentSize, ImGuiCond.Once);
 
+                workspace.PushStyling();
                 bool visible = ImGui.Begin(workspace.Name + $"###window{dockspaceId}", ref workspace.Opened);
+                workspace.PopStyling();
 
                 if (ImGui.DockBuilderGetNode(dockspaceId).NativePtr == null || workspace.UpdateDockLayout)
                 {
@@ -338,7 +340,7 @@ namespace MapStudio
                     ImGuiDockNodeFlags.CentralNode, workspace.window_class);
 
                 if (visible)
-                    workspace.Render((int)workspace.DockID);
+                    workspace.RenderWindows();
 
                 if (!workspace.Opened)
                 {
@@ -570,7 +572,7 @@ namespace MapStudio
                     //Docked windows
                     if (Workspace.ActiveWorkspace != null)
                     {
-                        foreach (var window in Workspace.ActiveWorkspace.DockedWindows)
+                        foreach (var window in Workspace.ActiveWorkspace.DockWindows)
                         {
                             if (ImGui.MenuItem(TranslationSource.GetText(window.Name), "", window.Opened))
                             {

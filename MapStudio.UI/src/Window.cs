@@ -2,7 +2,7 @@
 
 namespace MapStudio.UI
 {
-    public class Window : ImGuiObject
+    public class Window : ImGuiOwnershipObject
     {
         public virtual string Name { get; } = "Window";
         public virtual ImGuiWindowFlags Flags { get; }

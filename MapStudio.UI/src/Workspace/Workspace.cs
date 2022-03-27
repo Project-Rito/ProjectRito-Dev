@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Drawing;
 using System.Threading.Tasks;
 using ImGuiNET;
 using MapStudio.UI;
@@ -16,7 +17,7 @@ namespace MapStudio.UI
     /// <summary>
     /// Represents a workspace instance of a workspace window.
     /// </summary>
-    public class Workspace : IDisposable
+    public class Workspace : ImGuiOwnershipObject, IDisposable
     {
         public static Workspace ActiveWorkspace { get; set; }
 
@@ -92,21 +93,25 @@ namespace MapStudio.UI
         public DockWindow HelpWindow { get; set; }
 
         public List<Window> Windows = new List<Window>();
-        public List<DockWindow> DockedWindows = new List<DockWindow>();
+        public List<DockWindow> DockWindows = new List<DockWindow>();
+
+        private static ColorCycle WorkspaceColorCycle = new ColorCycle();
 
         public EventHandler ApplicationUserEntered;
 
         public Workspace(GlobalSettings settings, int id, GameWindow parentWindow)
         {
             ID = id;
+            OwnershipColor = WorkspaceColorCycle.NextColor();
+
             //Window docks
-            PropertyWindow = new PropertyWindow();
-            Outliner = new Outliner();
-            ToolWindow = new ToolWindow();
-            ConsoleWindow = new ConsoleWindow();
-            AssetViewWindow = new AssetViewWindow();
-            ViewportWindow = new Viewport(this, settings);
-            HelpWindow = new DockWindow();
+            PropertyWindow = new PropertyWindow() { Owner = this };
+            Outliner = new Outliner() { Owner = this };
+            ToolWindow = new ToolWindow() { Owner = this };
+            ConsoleWindow = new ConsoleWindow() { Owner = this };
+            AssetViewWindow = new AssetViewWindow() { Owner = this };
+            ViewportWindow = new Viewport(this, settings) { Owner = this };
+            HelpWindow = new DockWindow() { Owner = this };
 
             ParentWindow = parentWindow;
             ViewportWindow.Pipeline._context.Scene.SelectionUIChanged += (o, e) =>
@@ -134,14 +139,14 @@ namespace MapStudio.UI
             AssetViewWindow.DockDirection = ImGuiDir.Down;
             AssetViewWindow.SplitRatio = 0.3f;
 
-            this.DockedWindows.Add(Outliner);
-            this.DockedWindows.Add(PropertyWindow);
-            this.DockedWindows.Add(ConsoleWindow);
-            this.DockedWindows.Add(AssetViewWindow);
-            this.DockedWindows.Add(ToolWindow);
-            this.DockedWindows.Add(ViewportWindow);
+            this.DockWindows.Add(Outliner);
+            this.DockWindows.Add(PropertyWindow);
+            this.DockWindows.Add(ConsoleWindow);
+            this.DockWindows.Add(AssetViewWindow);
+            this.DockWindows.Add(ToolWindow);
+            this.DockWindows.Add(ViewportWindow);
 
-            foreach (var window in DockedWindows)
+            foreach (var window in DockWindows)
                 window.Opened = true;
 
             this.Windows.Add(new StatisticsWindow());
@@ -157,7 +162,7 @@ namespace MapStudio.UI
         public List<MenuItemModel> GetDockToggles()
         {
             List<MenuItemModel> menus = new List<MenuItemModel>();
-            foreach (var dock in DockedWindows)
+            foreach (var dock in DockWindows)
             {
                 var item = new MenuItemModel(dock.Name, () => {
                     dock.Opened = !dock.Opened;
@@ -386,10 +391,10 @@ namespace MapStudio.UI
             var docks = ActiveEditor.PrepareDocks();
             //A key to check if the existing layout changed
             string key = string.Join("", docks.Select(x => x.ToString()));
-            string currentKey = string.Join("", DockedWindows.Select(x => x.ToString()));
+            string currentKey = string.Join("", DockWindows.Select(x => x.ToString()));
             if (key != currentKey)
             {
-                DockedWindows = docks;
+                DockWindows = docks;
                 UpdateDockLayout = true;
             }
         }
@@ -535,7 +540,7 @@ namespace MapStudio.UI
         /// <summary>
         /// Displays the workspace and all the docked windows given the current dock ID.
         /// </summary>
-        public void Render(int workspaceID)
+        public void RenderWindows()
         {
             //Draw opened windows (non dockable)
             foreach (var window in Windows)
@@ -545,7 +550,7 @@ namespace MapStudio.UI
 
                 if (ImGui.Begin(window.Name, ref window.Opened, window.Flags))
                 {
-                    window.Render();
+                    window.RenderWithStyling();
                     ImGui.End();
                 }
             }
@@ -556,9 +561,13 @@ namespace MapStudio.UI
                 PropertyWindow.SelectedObject = GetSelectedNode();
 
             //Draw dockable windows
-            foreach (var dock in DockedWindows)
+            foreach (var dock in DockWindows)
                 if (dock.Opened)
-                    LoadWindow(GetWindowName(dock.Name, workspaceID), ref dock.Opened, dock.Flags, () => dock.RenderWithStyling());
+                {
+                    dock.PushStyling();
+                    LoadWindow(GetWindowName(dock.Name), ref dock.Opened, dock.Flags, () => dock.Render());
+                    dock.PopStyling();
+                }
         }
 
         public NodeBase GetSelectedNode()
@@ -682,14 +691,14 @@ namespace MapStudio.UI
             ViewportWindow.DockID = dock_main_id;
             ToolWindow.DockID = dock_down_left;
             */
-            foreach (var dock in DockedWindows)
+            foreach (var dock in DockWindows)
             {
                 if (dock.DockDirection == ImGuiDir.None)
                     dock.DockID = dock_main_id;
                 else
                 {
                     //Search for the same dock ID to reuse if possible
-                    var dockedWindow = DockedWindows.FirstOrDefault(x => x != dock && x.DockDirection == dock.DockDirection && x.SplitRatio == dock.SplitRatio && x.ParentDock == dock.ParentDock);
+                    var dockedWindow = DockWindows.FirstOrDefault(x => x != dock && x.DockDirection == dock.DockDirection && x.SplitRatio == dock.SplitRatio && x.ParentDock == dock.ParentDock);
                     if (dockedWindow != null && dockedWindow.DockID != 0)
                         dock.DockID = dockedWindow.DockID;
                     else if (dock.ParentDock != null)
@@ -697,7 +706,7 @@ namespace MapStudio.UI
                     else
                         dock.DockID = ImGui.DockBuilderSplitNode(dock_main_id, dock.DockDirection, dock.SplitRatio, out uint dockOut, out dock_main_id);
                 }
-                ImGui.DockBuilderDockWindow(GetWindowName(dock.Name, workspaceID), dock.DockID);
+                ImGui.DockBuilderDockWindow(GetWindowName(dock.Name), dock.DockID);
             }
 
             ImGui.DockBuilderFinish(dockspaceId);
@@ -733,10 +742,10 @@ namespace MapStudio.UI
             DataCache.TextureCache.Clear();
         }
 
-        private string GetWindowName(string name, int id)
+        private string GetWindowName(string name)
         {
             string text = TranslationSource.GetText(name);
-            return $"{text}##{name}_{id}";
+            return $"{text}##{name}_{DockID}";
         }
     }
 }
