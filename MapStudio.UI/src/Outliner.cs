@@ -178,10 +178,24 @@ namespace MapStudio.UI
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4());
 
-                if (ImGui.Button($"{IconManager.FILTER_ICON}")) {
-                    ImGui.OpenPopup("filter1");
+                if (ImGui.Button($"{IconManager.ADD_ICON}", new System.Numerics.Vector2(23)))
+                {
+                    ImGui.OpenPopup("addnew1");
+                }
+                if (ImGui.BeginPopup("addnew1"))
+                {
+                    foreach (var menuItem in ContextMenu)
+                    {
+                        ImGuiHelper.LoadMenuItem(menuItem);
+                    }
+                    ImGuiHelper.LoadMenuItem(NewItemContextMenu);
+                    ImGui.EndPopup();
                 }
 
+
+                if (ImGui.Button($"{IconManager.FILTER_ICON}", new System.Numerics.Vector2(23))) {
+                    ImGui.OpenPopup("filter1");
+                }
                 if (ImGui.BeginPopup("filter1"))
                 {
                     foreach (var item in FilterMenuItems)
@@ -255,7 +269,7 @@ namespace MapStudio.UI
 
             ImGui.EndChild();
             ImGui.PopStyleColor(2);
-            /*
+            /* TODO - figure out how to make right-click for add menu only work on background of outliner.
             if (ImGui.BeginPopupContextItem("##OUTLINER_POPUP", ImGuiPopupFlags.MouseButtonRight))
             {
                 foreach (var menuItem in ContextMenu)
