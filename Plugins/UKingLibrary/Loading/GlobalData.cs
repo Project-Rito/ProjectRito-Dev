@@ -8,6 +8,12 @@ namespace UKingLibrary
     {
         public static Dictionary<string, dynamic> Actors = new Dictionary<string, dynamic>();
 
+        public static readonly string[] FieldNames = new string[]
+            {
+                "MainField",
+                "AocField"
+            };
+
         public static readonly string[] SectionNames = new string[]
             {
                 "A-1",

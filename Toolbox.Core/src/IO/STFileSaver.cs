@@ -19,17 +19,17 @@ namespace Toolbox.Core.IO
         /// <param name="FileName">The name of the file</param>
         /// <param name="Alignment">The Alignment used for compression. Used for Yaz0 compression type. </param>
         /// <returns></returns>
-        public static SaveLog SaveFileFormat(IFileFormat fileFormat, string fileName)
+        public static SaveLog SaveFileFormat(IFileFormat fileFormat, string filePath)
         {
             SaveLog log = new SaveLog();
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            fileFormat.FileInfo.FilePath = fileName;
+            fileFormat.FileInfo.FilePath = filePath;
 
-            if (fileFormat.FileInfo.KeepOpen && File.Exists(fileName))
+            if (fileFormat.FileInfo.KeepOpen && File.Exists(filePath))
             {
-                string savedPath = Path.GetDirectoryName(fileName);
+                string savedPath = Path.GetDirectoryName(filePath);
                 string tempPath = Path.Combine(savedPath, "tempST.bin");
 
                 //Save a temporary file first to not disturb the opened file
@@ -46,12 +46,12 @@ namespace Toolbox.Core.IO
                         ((IDisposable)fileFormat).Dispose();
 
                     //After saving is done remove the existing file
-                    File.Delete(fileName);
+                    File.Delete(filePath);
 
                     //Now move and rename our temp file to the new file path
-                    File.Move(tempPath, fileName);
+                    File.Move(tempPath, filePath);
 
-                    fileFormat.Load(File.OpenRead(fileName));
+                    fileFormat.Load(File.OpenRead(filePath));
                 }
             }
             else if (fileFormat.FileInfo.Compression != null)
@@ -62,13 +62,13 @@ namespace Toolbox.Core.IO
                 var finalStream = CompressFile(mem, fileFormat);
                // File.WriteAllBytes(fileName, finalStream.ToArray());
 
-                using (var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite)) {
+                using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite)) {
                     finalStream.CopyTo(fileStream);
                 }
             }
             else
             {
-                using (var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite)) {
+                using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite)) {
                     fileFormat.Save(fileStream);
                 }
             }

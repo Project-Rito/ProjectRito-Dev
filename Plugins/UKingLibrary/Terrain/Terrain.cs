@@ -85,7 +85,7 @@ namespace UKingLibrary
         /// <summary>
         /// Loads all the terrain data in a given area.
         /// </summary>
-        public void LoadTerrainSection(int areaID, int sectionID, UKingEditor editor, int lodLevel = LOD_LEVEL_MAX)
+        public void LoadTerrainSection(string fieldName, int areaID, int sectionID, UKingEditor editor, int lodLevel = LOD_LEVEL_MAX)
         {
             float lodScale = DetailLevels[Math.Clamp(lodLevel, 0, 7)];
             Vector3 midpoint = CalculateMidPoint(areaID, sectionID);
@@ -101,7 +101,7 @@ namespace UKingLibrary
 
                 var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / tile.Value.Core.AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
 
-                CreateTerrainTile(tile.Value.Core, tile.Key, tileSectionScale, editor);
+                CreateTerrainTile(tile.Value.Core, fieldName, tile.Key, tileSectionScale, editor);
             }
 
 
@@ -119,7 +119,7 @@ namespace UKingLibrary
                 foreach (TSCB.TerrainAreaExtra extmData in tile.Value.Extra)
                 {
                     if (extmData.Type == TSCB.ExtraSectionType.Water)
-                        CreateWaterTile(tile.Value.Core, extmData, tile.Key, tileSectionScale, editor);
+                        CreateWaterTile(tile.Value.Core, extmData, fieldName, tile.Key, tileSectionScale, editor);
                 }
             }
 
@@ -142,10 +142,10 @@ namespace UKingLibrary
             }
             */
             // Collision
-            CreateCollisionTile(areaID, sectionID, 0);
+            CreateCollisionTile(fieldName, areaID, sectionID, 0);
         }
 
-        public void CreateCollisionTile(int areaID, int sectionID, int lodLevel = LOD_LEVEL_MAX)
+        public void CreateCollisionTile(string fieldName, int areaID, int sectionID, int lodLevel = LOD_LEVEL_MAX)
         {
             float lodScale = DetailLevels[Math.Clamp(lodLevel, 0, 7)];
 
@@ -156,16 +156,16 @@ namespace UKingLibrary
             {
                 var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / tile.Value.Core.AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
 
-                CreateCollisionTile(tile.Value.Core, tile.Key, tileSectionScale);
+                CreateCollisionTile(tile.Value.Core, fieldName, tile.Key, tileSectionScale);
             }
 
             GLContext.ActiveContext.CollisionCaster.UpdateCache();
         }
 
-        private void CreateCollisionTile(TSCB.TerrainAreaCore tile, string name, float tileSectionScale)
+        private void CreateCollisionTile(TSCB.TerrainAreaCore tile, string fieldName, string name, float tileSectionScale)
         {
             string packName = GetTilePackName(name);
-            var meshData = LoadTerrainFiles(packName, name, "hght");
+            var meshData = LoadTerrainFiles(packName, fieldName, name, "hght");
             Vector3 position = new Vector3(
              tile.PositionX * SECTION_WIDTH * TILE_TO_SECTION_SCALE,
              0,
@@ -236,16 +236,16 @@ namespace UKingLibrary
         }
 
         //Creates a terrain mesh from a given tile
-        private void CreateTerrainTile(TSCB.TerrainAreaCore tile, string name, float tileSectionScale, UKingEditor editor)
+        private void CreateTerrainTile(TSCB.TerrainAreaCore tile, string fieldName, string name, float tileSectionScale, UKingEditor editor)
         {
             string packName = GetTilePackName(name);
 
             Toolbox.Core.StudioLogger.WriteLine($"Creating terrain tile {name} in pack {packName}...");
 
             //Material info
-            var materialData = LoadTerrainFiles(packName, name, "mate");
+            var materialData = LoadTerrainFiles(packName, fieldName, name, "mate");
             //Height map
-            var heightBuffer = LoadTerrainFiles(packName, name, "hght");
+            var heightBuffer = LoadTerrainFiles(packName, fieldName, name, "hght");
 
             //Create a terrain mesh for rendering
             var meshRender = new TerrainRender();
@@ -268,14 +268,14 @@ namespace UKingLibrary
             editor.AddRender(meshRender);
         }
 
-        private void CreateWaterTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string name, float tileSectionScale, UKingEditor editor)
+        private void CreateWaterTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string fieldName, string name, float tileSectionScale, UKingEditor editor)
         {
             string packName = GetTilePackName(name);
 
             Toolbox.Core.StudioLogger.WriteLine($"Creating terrain tile {name} in pack {packName}...");
 
             //Height map
-            var heightBuffer = LoadTerrainFiles(packName, name, "water.extm");
+            var heightBuffer = LoadTerrainFiles(packName, fieldName, name, "water.extm");
 
             //Create a terrain mesh for rendering
             var meshRender = new WaterRender();
@@ -298,16 +298,16 @@ namespace UKingLibrary
             editor.AddRender(meshRender);
         }
 
-        private void CreateGrassTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string name, float tileSectionScale, UKingEditor editor)
+        private void CreateGrassTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string fieldName, string name, float tileSectionScale, UKingEditor editor)
         {
             string packName = GetTilePackName(name);
 
             Toolbox.Core.StudioLogger.WriteLine($"Creating terrain tile {name} in pack {packName}...");
 
             //Height map (Base Terrain)
-            var terrHeightBuffer = LoadTerrainFiles(packName, name, "hght");
+            var terrHeightBuffer = LoadTerrainFiles(packName, fieldName, name, "hght");
             //Height map (Grass)
-            var grassHeightBuffer = LoadTerrainFiles(packName, name, "grass.extm");
+            var grassHeightBuffer = LoadTerrainFiles(packName, fieldName, name, "grass.extm");
 
             //Create a terrain mesh for rendering
             var meshRender = new GrassRender();
@@ -330,9 +330,9 @@ namespace UKingLibrary
             editor.AddRender(meshRender);
         }
 
-        private byte[] LoadTerrainFiles(string packName, string name, string type)
+        private byte[] LoadTerrainFiles(string packName, string fieldName, string name, string type)
         {
-            var path = PluginConfig.GetContentPath($"Terrain\\A\\{PluginConfig.FieldName}\\{packName}.{type}.sstera");
+            var path = PluginConfig.GetContentPath($"Terrain\\A\\{fieldName}\\{packName}.{type}.sstera");
            return SARC.GetFile(path, $"{name}.{type}");
         }
 

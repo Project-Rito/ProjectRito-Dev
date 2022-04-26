@@ -78,7 +78,14 @@ namespace GLFrameworkEngine
 
         public TransformableObject(NodeBase parent) : base(parent)
         {
-            UpdateInstanceGroup = true;
+            VisibilityChanged += (object sender, EventArgs e) =>
+            {
+                UpdateInstanceGroup = true;
+            };
+            RemoveCallback += (object sender, EventArgs e) =>
+            {
+                UpdateInstanceGroup = true;
+            };
 
             //Update boundings on transform changed
             this.Transform.TransformUpdated += delegate {

@@ -87,7 +87,6 @@ namespace UKingLibrary
 
         public TagRender(string name, NodeBase parent) : base(parent)
         {
-            //UpdateInstanceGroup = true;
             VisibilityChanged += (object sender, EventArgs e) =>
             {
                 UpdateInstanceGroup = true;

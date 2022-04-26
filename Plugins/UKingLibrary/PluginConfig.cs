@@ -31,9 +31,6 @@ namespace UKingLibrary
         static List<bool> HasValidModPaths;
 
         [JsonProperty]
-        public static string FieldName = @"MainField";
-
-        [JsonProperty]
         public static int MaxTerrainLOD = 5;
 
         [JsonProperty]
@@ -80,22 +77,6 @@ namespace UKingLibrary
             // All of this should eventually be moved per-3D-scene
             if (ImGui.BeginMenu($"{TranslationSource.GetText("TERRAIN")}##uk_vmenu02"))
             {
-                // Desired rendered terrain
-                string[] fieldNames = { "AocField", "MainField" };
-                if (ImGui.BeginCombo(TranslationSource.GetText("FIELD_NAME"), FieldName))
-                {
-                    for (int i = 0; i < fieldNames.Length; i++)
-                    {
-                        bool is_selected = (FieldName == fieldNames[i]);
-                        if (ImGui.Selectable(fieldNames[i], is_selected))
-                            FieldName = fieldNames[i];
-                        if (is_selected)
-                            ImGui.SetItemDefaultFocus();
-                    }
-                    ImGui.EndCombo();
-                    Save();
-                }
-
                 if (ImGui.SliderInt(TranslationSource.GetText("MAX_DETAIL"), ref MaxTerrainLOD, 0, 7))
                     Save();
 #if DEBUG

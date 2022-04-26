@@ -315,14 +315,14 @@ namespace UKingLibrary
             var destLinks = Render.DestObjectLinks;
 
             bool selected = Render.IsSelected;
-            context.Scene.DeselectAll(context);
+            ParentEditor.Scene.DeselectAll(context); // Not sure why we're passing this
 
             //Remove old from scene
-            context.Scene.RemoveRenderObject(Render);
+            ParentEditor.Scene.RemoveRenderObject(Render);
             //Reload actor
             ReloadActor();
             //Add new render
-            context.Scene.AddRenderObject(Render);
+            ParentEditor.Scene.AddRenderObject(Render);
             //Reapply everything needed
             Render.IsSelected = selected;
             Render.SourceObjectLinks = srcLinks;
@@ -602,10 +602,10 @@ namespace UKingLibrary
                 }
                 else
                 {
-                    for (int i = 0; i < 30; i++)
+                    for (int i = 0; ; i++)
                     {
                         string modelPartPath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}-{i.ToString("D2")}.sbfres");
-                        
+
                         if (File.Exists(modelPartPath))
                         {
                             var renderCandidate = getActorSpecificBfresRender(actor, new BfresRender(modelPartPath, parent));
@@ -620,6 +620,8 @@ namespace UKingLibrary
                                 break;
                             }
                         }
+                        else
+                            break; // We couldn't find the model
                     }
                 }
                 if (!(render is BfresRender))

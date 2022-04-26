@@ -94,13 +94,13 @@ namespace Toolbox.Core.IO
         /// <summary>
         /// Gets the <see cref="IFileFormat"/> from a file or byte array. 
         /// </summary>
-        /// <param name="FileName">The name of the file</param>
+        /// <param name="FilePath">The name of the file</param>
         /// <param name="data">The byte array of the data</param>
         /// <param name="InArchive">If the file is in an archive so it can be saved back</param>
         /// <param name="Compressed">If the file is being compressed or not</param>
         /// <param name="CompressionFormat">The type of <see cref="ICompressionFormat"/> being used</param>
         /// <returns></returns>
-        public static IFileFormat OpenFileFormat(Stream stream, string FileName, Settings settings = null)
+        public static IFileFormat OpenFileFormat(Stream stream, string FilePath, Settings settings = null)
         {
             //File is empty so return
             if (stream == null || stream.Length < 8) return null;
@@ -113,15 +113,15 @@ namespace Toolbox.Core.IO
             //Check if the current setting has a compression format set or not
             if (settings.CompressionFormat == null)
             {
-                var decompressedSettings = TryDecompressFile(stream, FileName);
+                var decompressedSettings = TryDecompressFile(stream, FilePath);
                 if (decompressedSettings.CompressionFormat != null) {
-                    return OpenFileFormat(decompressedSettings.Stream, FileName, decompressedSettings);
+                    return OpenFileFormat(decompressedSettings.Stream, FilePath, decompressedSettings);
                 }
             }
 
             var info = new File_Info();
-            info.FileName = Path.GetFileName(FileName);
-            info.FilePath = FileName;
+            info.FileName = Path.GetFileName(FilePath);
+            info.FilePath = FilePath;
             info.ParentArchive = settings.ParentArchive;
 
             stream.Position = streamStartPos;
@@ -134,7 +134,7 @@ namespace Toolbox.Core.IO
                 {
                     fileFormat.FileInfo = info;
                     fileFormat.FileInfo.Stream = stream;
-                    return SetFileFormat(fileFormat, FileName, stream, settings);
+                    return SetFileFormat(fileFormat, FilePath, stream, settings);
                 }
             }
 

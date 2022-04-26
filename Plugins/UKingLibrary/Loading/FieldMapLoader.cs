@@ -43,16 +43,16 @@ namespace UKingLibrary
             return mapData;
         }
 
-        private void LoadProdInfo(UKingEditor editor)
+        private void LoadProdInfo(string fieldName, UKingEditor editor)
         {
-            TreeInstancesInfo = new ProdInfo(new MemoryStream(GetTreeProdInfo(editor)));
+            TreeInstancesInfo = new ProdInfo(new MemoryStream(GetTreeProdInfo(fieldName, editor)));
             editor.LoadProd(TreeInstancesInfo, $"{SectionName}_TeraTree.sblwb");
 
             Clusters.Clear();
             string[] prodIDs = new string[] { "00", "01", "10", "11" };
             foreach (var id in prodIDs)
             {
-                var path = PluginConfig.GetContentPath($"Map/{PluginConfig.FieldName}/{SectionName}/{SectionName}.{id}_Clustering.sblwp");
+                var path = PluginConfig.GetContentPath($"Map/{fieldName}/{SectionName}/{SectionName}.{id}_Clustering.sblwp");
                 if (!File.Exists(path))
                     continue;
 
@@ -70,15 +70,15 @@ namespace UKingLibrary
             MapFile.Save(stream);
         }
 
-        private byte[] GetTreeProdInfo(UKingEditor editor)
+        private byte[] GetTreeProdInfo(string fieldName, UKingEditor editor)
         {
-            var data = editor.TitleBG.SarcData.Files[$"Map/{PluginConfig.FieldName}/{SectionName}/{SectionName}_TeraTree.sblwp"];
+            var data = editor.TitleBG.SarcData.Files[$"Map/{fieldName}/{SectionName}/{SectionName}_TeraTree.sblwp"];
             return Toolbox.Core.IO.YAZ0.Decompress(data);
         }
 
-        private byte[] GetClusterProdInfo(string id)
+        private byte[] GetClusterProdInfo(string fieldName, string id)
         {
-            var path = PluginConfig.GetContentPath($"Map/{PluginConfig.FieldName}/{SectionName}/{SectionName}.{id}_Clustering.sblwp");
+            var path = PluginConfig.GetContentPath($"Map/{fieldName}/{SectionName}/{SectionName}.{id}_Clustering.sblwp");
             return Toolbox.Core.IO.YAZ0.Decompress(path);
         }
 

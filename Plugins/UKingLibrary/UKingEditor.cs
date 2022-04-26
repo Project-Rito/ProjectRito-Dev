@@ -28,7 +28,7 @@ namespace UKingLibrary
         /// <summary>
         /// Information of the loaded file.
         /// </summary>
-        public File_Info FileInfo { get; set; }
+        public File_Info FileInfo { get; set; } = new File_Info();
 
         UKingEditorConfig EditorConfig;
 
@@ -39,6 +39,10 @@ namespace UKingLibrary
 
         //Editor loaders
         public List<FieldMapLoader> FieldLoaders = new List<FieldMapLoader>();
+
+        private List<GLScene> Scenes = new List<GLScene>();
+
+        private Dictionary<string, Terrain> Terrains = new Dictionary<string, Terrain>();
 
 
 
@@ -68,7 +72,11 @@ namespace UKingLibrary
 
             ToolWindowDrawer = new MubinToolSettings();
 
-            Root.Header = "UKingFieldEditor";
+            Root.Header = "UKingEditor";
+            Root.OnSelected += delegate 
+                {
+                    MakeActiveEditor();
+                };
 
             SetupContextMenus();
             
@@ -97,15 +105,17 @@ namespace UKingLibrary
 
         private void SetupContextMenus()
         {
-            List<MenuItemModel> loadSectionMenuItems = new List<MenuItemModel>(GlobalData.SectionNames.Length);
-            foreach (var SectionName in GlobalData.SectionNames)
+            MenuItemModel loadSectionMenuItem = new MenuItemModel("Load Section");
+            
+            foreach (var fieldName in GlobalData.FieldNames)
             {
-                loadSectionMenuItems.Add(new MenuItemModel(SectionName, () => { LoadSection("MainField", SectionName); }));
+                loadSectionMenuItem.MenuItems.Add(new MenuItemModel(fieldName)
+                {
+                    MenuItems = GlobalData.SectionNames.Select(sectionName => new MenuItemModel(sectionName, () => { LoadSection(fieldName, sectionName); })).ToList()
+                });
             }
-            Root.ContextMenus.Add(new MenuItemModel("Load Section")
-            {
-                MenuItems = loadSectionMenuItems
-            });
+
+            Root.ContextMenus.Add(loadSectionMenuItem);
         }
 
         private void LoadAssetList()
@@ -181,20 +191,44 @@ namespace UKingLibrary
 
         private void LoadFieldMuunt(string fieldName, string fileName, Stream stream)
         {
-            MapFolder.TryAddChild(new NodeFolder {
-                Header = fieldName,
-                ContextMenus = new List<MenuItemModel>() 
-                {
-                    new MenuItemModel("Open Viewport", () => { Workspace.Windows.Add(new Viewport(Workspace, GlobalSettings.Current)); })
-                }
-            });
-            NodeBase fieldFolder = MapFolder.FolderChildren[fieldName];
+            if (!MapFolder.FolderChildren.ContainsKey(fieldName))
+            {
+                var scene = new GLScene();
+                scene.Init();
+                Scene = scene;
+                Scenes.Add(Scene);
+                Workspace.ViewportWindow.Pipeline._context.Scene = Scene;
 
+                Terrain = new Terrain();
+                Terrain.LoadTerrainTable(fieldName);
+                Terrains.Add(fieldName, Terrain);
+
+                // Ensure field folder exists (MainField, AocField, etc)
+                MapFolder.AddChild(new NodeFolder
+                {
+                    Header = fieldName,
+                    OnSelected = delegate
+                    {
+                        Scene = scene;
+                        Workspace.ViewportWindow.Pipeline._context.Scene = scene;
+                        Terrain = Terrains[fieldName];
+                    }
+                });
+            }
+
+            // Load into mapdata
             FieldMapLoader loader = new FieldMapLoader();
             MapData mapData = loader.Load(this, fileName, stream);
             FieldLoaders.Add(loader);
-            fieldFolder.AddChild(mapData.RootNode);
 
+            mapData.RootNode.ContextMenus.Add(new MenuItemModel("Remove", () => { UnloadFieldMuunt(mapData); }));
+
+            // Add muunt root to field folder
+            NodeBase fieldFolder = MapFolder.FolderChildren[fieldName];
+            fieldFolder.AddChild(mapData.RootNode);
+            
+
+            // Ensure terrain is loaded
             bool terrLoaded = false;
             foreach (var node in MapFolder.Children)
             {
@@ -211,8 +245,16 @@ namespace UKingLibrary
             {
                 var terrSectionID = GetSectionIndex(fileName.Substring(0, 3));
 
-                Terrain.LoadTerrainSection((int)terrSectionID.X, (int)terrSectionID.Y, this, PluginConfig.MaxTerrainLOD);
+                Terrain.LoadTerrainSection(fieldName, (int)terrSectionID.X, (int)terrSectionID.Y, this, PluginConfig.MaxTerrainLOD);
             }
+        }
+
+        private void UnloadFieldMuunt(MapData mapData)
+        {
+            NodeBase fieldFolder = mapData.RootNode.Parent;
+            fieldFolder.Children.Remove(mapData.RootNode);
+            mapData.Dispose();
+
         }
 
         //Todo prod should probably be a seperate FileEditor instance
@@ -235,6 +277,15 @@ namespace UKingLibrary
 
                     AddRender(render);
                 }
+            }
+        }
+
+        private void MakeActiveEditor()
+        {
+            if (Scene.IsInit())
+            {
+                Workspace.ActiveEditor = this;
+                Workspace.ViewportWindow.Pipeline._context.Scene = Scene;
             }
         }
 
@@ -261,6 +312,8 @@ namespace UKingLibrary
                 var outStream = File.Open(outPath, FileMode.OpenOrCreate, FileAccess.Write);
                 outStream.Write(YAZ0.Compress(bymlStream.ReadAllBytes()));
                 outStream.SetLength(outStream.Position);
+                outStream.Flush();
+                outStream.Close();
             }
         }
 
@@ -297,15 +350,10 @@ namespace UKingLibrary
                     }
                 }
             }
-            {
-                Terrain = new Terrain();
-                Terrain.LoadTerrainTable(PluginConfig.FieldName);
-            }
-            {
-                var path = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
-                TitleBG = new SARC();
-                TitleBG.Load(File.OpenRead(path));
-            }
+
+            var titleBgPath = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
+            TitleBG = new SARC();
+            TitleBG.Load(File.OpenRead(titleBgPath));
         }
 
         public override List<MenuItemModel> GetViewportMenuIcons()

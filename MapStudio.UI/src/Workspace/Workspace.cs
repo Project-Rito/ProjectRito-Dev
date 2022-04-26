@@ -223,7 +223,8 @@ namespace MapStudio.UI
 
             //Make sure the file format path is at the working directory instead of the project path
             //So when the user saves the files directly, they will save to the original place.
-            fileFormat.FileInfo.FilePath = $"{Resources.ProjectFile.WorkingDirectory}\\{fileFormat.FileInfo.FileName}";
+            if (!isProject)
+                fileFormat.FileInfo.FilePath = $"{Resources.ProjectFile.WorkingDirectory}\\{fileFormat.FileInfo.FileName}";
 
             StudioLogger.WriteLine(string.Format(TranslationSource.GetText("LOADING_FILE"), filePath));
 
@@ -414,7 +415,7 @@ namespace MapStudio.UI
 
                 //Path doesn't exist so use a file dialog
                 if (!File.Exists(file.FileInfo.FilePath))
-                    SaveFileWithDialog();
+                    SaveFileWithDialog(file);
                 else
                     SaveFileData(file, file.FileInfo.FilePath);
             }

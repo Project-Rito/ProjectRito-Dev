@@ -346,7 +346,6 @@ namespace MapStudio.UI
             }
         }
 
-        private List<List<IInstanceDrawable>> instanceGroups = new List<List<IInstanceDrawable>>();
         private void DrawSceneWithPostEffects()
         {
             foreach (var obj in _context.Scene.Objects)
@@ -358,9 +357,9 @@ namespace MapStudio.UI
                 }
             }
 
-            foreach (var group in instanceGroups)
+            foreach (var group in _context.Scene.InstanceGroups)
                 group.RemoveAll(file => file.UpdateInstanceGroup);
-            instanceGroups.RemoveAll(group => group.Count == 0);
+            _context.Scene.InstanceGroups.RemoveAll(group => group.Count == 0);
             foreach (var file in _context.Scene.Objects)
             {
                 if (!(file is IInstanceDrawable))
@@ -377,7 +376,7 @@ namespace MapStudio.UI
                 ((IInstanceDrawable)file).UpdateInstanceGroup = false;
 
                 bool foundGroup = false;
-                foreach (List<IInstanceDrawable> group in instanceGroups)
+                foreach (List<IInstanceDrawable> group in _context.Scene.InstanceGroups)
                 {
                     if (group.Count == 32) // Put in a new group if this one is full.
                         continue;
@@ -389,10 +388,10 @@ namespace MapStudio.UI
                     }
                 }
                 if (!foundGroup)
-                    instanceGroups.Add(new List<IInstanceDrawable>() { (IInstanceDrawable)file });
+                    _context.Scene.InstanceGroups.Add(new List<IInstanceDrawable>() { (IInstanceDrawable)file });
             }
 
-            foreach (var group in instanceGroups)
+            foreach (var group in _context.Scene.InstanceGroups)
             {
                 if (group[0] is EditableObject && !((EditableObject)group[0]).UsePostEffects)
                     continue;
@@ -417,9 +416,9 @@ namespace MapStudio.UI
             }
 
 
-            foreach (var group in instanceGroups)
+            foreach (var group in _context.Scene.InstanceGroups)
                 group.RemoveAll(file => file.UpdateInstanceGroup);
-            instanceGroups.RemoveAll(group => group.Count == 0);
+            _context.Scene.InstanceGroups.RemoveAll(group => group.Count == 0);
             foreach (var file in _context.Scene.Objects)
             {
                 if (!(file is IInstanceDrawable))
@@ -434,7 +433,7 @@ namespace MapStudio.UI
                     if (!((IFrustumCulling)file).InFrustum)
                         continue;
                 bool foundGroup = false;
-                foreach (List<IInstanceDrawable> group in instanceGroups)
+                foreach (List<IInstanceDrawable> group in _context.Scene.InstanceGroups)
                 {
                     if (group.Count == 32) // Put in a new group if this one is full.
                         continue;
@@ -447,10 +446,10 @@ namespace MapStudio.UI
                     }
                 }
                 if (!foundGroup)
-                    instanceGroups.Add(new List<IInstanceDrawable>() { (IInstanceDrawable)file });
+                    _context.Scene.InstanceGroups.Add(new List<IInstanceDrawable>() { (IInstanceDrawable)file });
             }
 
-            foreach (var group in instanceGroups)
+            foreach (var group in _context.Scene.InstanceGroups)
             {
                 if (group[0] is EditableObject && ((EditableObject)group[0]).UsePostEffects)
                     continue;
