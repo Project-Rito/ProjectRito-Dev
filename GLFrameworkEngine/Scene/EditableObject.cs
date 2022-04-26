@@ -22,9 +22,14 @@ namespace GLFrameworkEngine
         {
             get {
                 if (IsVisibleCallback != null)
-                    return _isVisible && IsVisibleCallback.Invoke();
-
-                return _isVisible; }
+                {
+                    bool visible = IsVisibleCallback.Invoke();
+                    if (visible != _isVisible)
+                        VisibilityChanged?.Invoke(this, EventArgs.Empty);
+                    return _isVisible && visible;
+                }
+                return _isVisible; 
+            }
             set
             {
                 if (_isVisible != value) {
