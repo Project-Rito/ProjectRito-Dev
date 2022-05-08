@@ -22,6 +22,9 @@ BOTW UPDATE PATH - BotW Update Path
 BOTW DLC PATH - BotW DLC Path
 MOD PATHS - Mod Paths
 
+LOAD_SECTION - Load Section
+LOAD_DUNGEON - Load Dungeon
+
 ACTOR_DOCUMENTATION - Actor Documentation
 INSTANCE_DOCUMENTATION - Instance Documentation
 NO_ACTOR_DOCUMENTATION_FOUND - No actor documentation found.

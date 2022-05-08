@@ -719,6 +719,10 @@ namespace MapStudio
         private void SaveProjectWithDialog()
         {
             var workspace = Workspace.ActiveWorkspace;
+            var settings = GlobalSettings.Current;
+
+            string oldProjectDir = $"{settings.Program.ProjectDirectory}\\{workspace.Name}";
+
             ProjectSaveDialog projectDialog = new ProjectSaveDialog(workspace.Name);
 
             DialogHandler.Show("Save Project", () =>
@@ -729,6 +733,7 @@ namespace MapStudio
                 if (!result)
                     return;
 
+                workspace.UpdateProjectAssetPaths(oldProjectDir, projectDialog.GetProjectDirectory());
                 workspace.SaveProject(projectDialog.GetProjectDirectory());
                 RecentFileHandler.SaveRecentFile(projectDialog.GetProjectDirectory(), "RecentProjects.txt", this.RecentProjects);
             });
@@ -741,7 +746,7 @@ namespace MapStudio
 
             //Check if the format is supported in the current editors.
             string ext = Path.GetExtension(filePath);
-            bool isProject = ext == ".json";
+            bool isProject = filePath.EndsWith("Project.json");
             ProcessLoading.IsLoading = true;
 
             //Load asset based format
@@ -750,7 +755,6 @@ namespace MapStudio
                 if (createNewWorkspace)
                 {
                     Workspace workspace = new Workspace(this.GlobalSettings, Workspaces.Count, this);
-                    workspace.Name = Path.GetFileName(filePath);
                     var editor = workspace.LoadFileFormat(filePath);
                     if (editor == null)
                     {

@@ -75,7 +75,7 @@ namespace GLFrameworkEngine
         public void PasteSelected(GLContext context)
         {
             if (CopiedObjects.Count > 0)
-                GLContext.ActiveContext.Scene.AddToUndo(new EditableObjectAddUndo(this, CopiedObjects));
+                context.Scene.AddToUndo(new EditableObjectAddUndo(this, CopiedObjects));
 
             DeselectAll(context);
             foreach (var obj in CopiedObjects)

@@ -15,6 +15,7 @@ namespace UKingLibrary
         public bool IsValid { get { return Editor == "UKingEditor"; } }
 
         public string FolderName;
-        public Dictionary<string, List<string>> OpenMapUnits = new Dictionary<string, List<string>> { { "MainField", new List<string>() }, { "AocField", new List<string>() } };
+        public Dictionary<string, List<string>> OpenMapUnits = new Dictionary<string, List<string>>();
+        public List<string> OpenDungeons = new List<string>();
     }
 }

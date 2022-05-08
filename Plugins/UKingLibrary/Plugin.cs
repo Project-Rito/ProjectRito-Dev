@@ -43,10 +43,12 @@ namespace UKingLibrary
 
         private void CreateNewUKingEditor()
         {
+            int editorIndex = GetEditorIndex();
+
             UKingEditorConfig config = new UKingEditorConfig()
             {
                 Editor = "UKingEditor",
-                FolderName = "UKingEditor/000"
+                FolderName = $"UKingEditor_{editorIndex.ToString("D3")}/"
             };
 
             MemoryStream stream = new MemoryStream();
@@ -59,18 +61,22 @@ namespace UKingLibrary
             UKingEditor editor = new UKingEditor();
             editor.Load(stream);
 
-            for (int i = 0; ; i++)
-            {
-                editor.FileInfo.FilePath = Path.Join(GlobalSettings.Current.Program.ProjectDirectory, Workspace.ActiveWorkspace.Name, $"UKingEditor_{i.ToString("D3")}.json");
-                if (!File.Exists(editor.FileInfo.FilePath))
-                    break;
-            }
-            editor.FileInfo.FileName = Path.GetFileName(editor.FileInfo.FilePath);
-            File.Create(editor.FileInfo.FilePath);
+            editor.FileInfo.FileName = $"UKingEditor_{editorIndex.ToString("D3")}.json";
+            editor.FileInfo.FilePath = Path.Join(GlobalSettings.Current.Program.ProjectDirectory, Workspace.ActiveWorkspace.Name, editor.FileInfo.FileName);
 
             Workspace.ActiveWorkspace.Resources.ProjectFile.FileAssets.Add(editor.FileInfo.FileName);
             Workspace.ActiveWorkspace.Outliner.Nodes.Add(editor.Root);
             Workspace.ActiveWorkspace.Resources.AddFile(editor);
+            Workspace.ActiveWorkspace.ToolWindow.ToolDrawer = editor.ToolWindowDrawer;
+        }
+
+        private int GetEditorIndex()
+        {
+            for (int i = 0; ; i++)
+            {
+                if (!Workspace.ActiveWorkspace.Resources.ProjectFile.FileAssets.Contains($"UKingEditor_{i.ToString("D3")}.json"))
+                    return i;
+            }
         }
     }
 }

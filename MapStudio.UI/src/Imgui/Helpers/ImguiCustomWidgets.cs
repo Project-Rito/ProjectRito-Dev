@@ -23,15 +23,17 @@ namespace MapStudio.UI
         {
             if (ImGui.BeginCombo(key, text, flags)) //Check for combo box popup and add items
             {
-                foreach (T item in items)
-                {
-                    bool isSelected = item.Equals(selectedItem);
-                    if (ImGui.Selectable(item.ToString(), isSelected)) {
-                        selectedItem = item;
-                        propertyChanged?.Invoke();
+                if (items != null) {
+                    foreach (T item in items)
+                    {
+                        bool isSelected = item.Equals(selectedItem);
+                        if (ImGui.Selectable(item.ToString(), isSelected)) {
+                            selectedItem = item;
+                            propertyChanged?.Invoke();
+                        }
+                        if (isSelected)
+                            ImGui.SetItemDefaultFocus();
                     }
-                    if (isSelected)
-                        ImGui.SetItemDefaultFocus();
                 }
                 ImGui.EndCombo();
             }

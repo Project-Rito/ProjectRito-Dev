@@ -339,7 +339,7 @@ namespace MapStudio.UI
 
         private void InitEditors(string filePath)
         {
-            bool isProject = filePath.EndsWith(".json");
+            bool isProject = filePath.EndsWith("Project.json");
 
             ProcessLoading.Instance.Update(0, 100, "Loading Files");
 
@@ -349,8 +349,6 @@ namespace MapStudio.UI
             //Set current folder as project name
             if (isProject)
                 Name = new DirectoryInfo(folder).Name;
-            else
-                Name = Path.GetFileName(filePath);
 
             //Load file resources
             if (isProject)
@@ -414,7 +412,7 @@ namespace MapStudio.UI
                     continue;
 
                 //Path doesn't exist so use a file dialog
-                if (!File.Exists(file.FileInfo.FilePath))
+                if (Resources.ProjectFolder == null && !File.Exists(file.FileInfo.FilePath))
                     SaveFileWithDialog(file);
                 else
                     SaveFileData(file, file.FileInfo.FilePath);
@@ -483,6 +481,23 @@ namespace MapStudio.UI
             IconManager.LoadTextureFile($"{folderPath}\\Thumbnail.png", 64, 64, true);
 
             PrintErrors();
+        }
+
+        /// <summary>
+        /// Updates asset paths to point to a new project directory
+        /// </summary>
+        public void UpdateProjectAssetPaths(string oldDir, string newDir)
+        {
+            foreach (IFileFormat file in Resources.Files)
+            {
+                if (file.FileInfo.FilePath == null)
+                    continue;
+                string oldDirFullPath = Path.GetFullPath(oldDir); // FullPath to ensure everything is consistently named, for use with StartsWith()
+                string newDirFullPath = Path.GetFullPath(newDir);
+                string fileFullPath = Path.GetFullPath(file.FileInfo.FilePath);
+                if (fileFullPath.StartsWith(oldDirFullPath))
+                    file.FileInfo.FilePath = fileFullPath.Replace(oldDirFullPath, newDirFullPath);
+            }
         }
 
         private void SaveEditorData(bool isProject)
@@ -620,7 +635,7 @@ namespace MapStudio.UI
             else if (ViewportWindow.IsFocused)
             {
                 if (!isRepeat)
-                    ActiveEditor.OnKeyDown(e);
+                    ActiveEditor?.OnKeyDown(e);
 
                 ViewportWindow.Pipeline._context.OnKeyDown(e, isRepeat);
                 if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Scene.ShowAddContextMenu))

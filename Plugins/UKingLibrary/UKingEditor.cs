@@ -18,7 +18,7 @@ namespace UKingLibrary
     public class UKingEditor : FileEditor, IFileFormat, IDisposable
     {
         public string[] Description => new string[] { "Field Map Data for Breath of the Wild" };
-        public string[] Extension => new string[] { ".json" };
+        public string[] Extension => new string[] { "*.json" };
 
         /// <summary>
         /// Whether or not the file can be saved.
@@ -33,20 +33,21 @@ namespace UKingLibrary
         UKingEditorConfig EditorConfig;
 
         NodeFolder MapFolder;
+        NodeFolder DungeonFolder;
 
         public Terrain Terrain;
         public SARC TitleBG;
 
         //Editor loaders
         public List<FieldMapLoader> FieldLoaders = new List<FieldMapLoader>();
+        public List<DungeonMapLoader> DungeonLoaders = new List<DungeonMapLoader>();
+
+        public List<MapData> ActiveMapData;
 
         private List<GLScene> Scenes = new List<GLScene>();
 
         private Dictionary<string, Terrain> Terrains = new Dictionary<string, Terrain>();
 
-
-
-        DungeonMapLoader DungeonLoader;
 
         public bool Identify(File_Info fileInfo, Stream stream)
         {
@@ -84,7 +85,9 @@ namespace UKingLibrary
             Root.Children.Clear();
 
             MapFolder = new NodeFolder { Header = "Map" };
+            DungeonFolder = new NodeFolder { Header = "Dungeon" };
             Root.AddChild(MapFolder);
+            Root.AddChild(DungeonFolder);
 
             CacheBackgroundFiles();
 
@@ -99,13 +102,21 @@ namespace UKingLibrary
                     LoadFieldMuunt(fieldName, fileName, STFileLoader.TryDecompressFile(File.Open(fullPath, FileMode.Open), fileName).Stream);
                 }
             }
+            foreach (var packName in EditorConfig.OpenDungeons)
+            {
+                string fullPath = Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/Pack/{packName}"), FileInfo.FolderPath);
+
+                if (!File.Exists(fullPath))
+                    continue;
+                LoadDungeon(packName, STFileLoader.TryDecompressFile(File.Open(fullPath, FileMode.Open), packName).Stream);
+            }
 
             LoadAssetList();
         }
 
         private void SetupContextMenus()
         {
-            MenuItemModel loadSectionMenuItem = new MenuItemModel("Load Section");
+            MenuItemModel loadSectionMenuItem = new MenuItemModel(TranslationSource.GetText("LOAD_SECTION"));
             
             foreach (var fieldName in GlobalData.FieldNames)
             {
@@ -116,6 +127,31 @@ namespace UKingLibrary
             }
 
             Root.ContextMenus.Add(loadSectionMenuItem);
+
+            MenuItemModel loadDungeonMenuItem = new MenuItemModel(TranslationSource.GetText("LOAD_DUNGEON"));
+
+            /*
+            MenuItemModel loadDungeonMenuItem = new MenuItemModel(TranslationSource.GetText("LOAD_DUNGEON"), () => {
+                ImguiFileDialog sfd = new ImguiFileDialog() { };
+
+                sfd.AddFilter(new FileFilter("*.pack"));
+                if (sfd.ShowDialog("SAVE_FILE"))
+                    LoadDungeon(Path.GetFileName(sfd.FilePath), File.OpenRead(sfd.FilePath));
+            });*/
+
+            //File prompt for now
+            List<string> packPaths = new List<string>();
+            foreach (var dir in PluginConfig.GetContentPaths("Pack/"))
+                foreach (var file in Directory.GetFiles(dir))
+                    if (!packPaths.Any(p => Path.GetFileName(p) == Path.GetFileName(file)))
+                        packPaths.Add(file);
+
+            foreach (var packPath in packPaths)
+                if (Path.GetFileName(packPath).StartsWith("Dungeon"))
+                    loadDungeonMenuItem.MenuItems.Add(new MenuItemModel(Path.GetFileNameWithoutExtension(packPath), () => { LoadDungeon(Path.GetFileName(packPath), File.OpenRead(packPath)); EditorConfig.OpenDungeons.Add(Path.GetFileName(packPath)); }));
+            
+
+            Root.ContextMenus.Add(loadDungeonMenuItem);
         }
 
         private void LoadAssetList()
@@ -156,18 +192,34 @@ namespace UKingLibrary
 
         private void LoadDungeon(string fileName, Stream stream)
         {
-            //Load file data
-            DungeonLoader = new DungeonMapLoader();
-            DungeonLoader.Load(this, fileName, stream);
+            // Set up new scene
+            var scene = new GLScene();
+            scene.Init();
+            Scene = scene;
+            Scenes.Add(Scene);
+            Workspace.ViewportWindow.Pipeline._context.Scene = Scene;
 
-            //Add objects
-            foreach (var map in DungeonLoader.MapFiles)
+
+            // Load file data
+            DungeonMapLoader loader = new DungeonMapLoader();
+            loader.Load(this, fileName, stream);
+
+            ActiveMapData = loader.MapFiles;
+
+            loader.RootNode.OnSelected = delegate
             {
-                //Add tree from muunt files
-                Root.AddChild(map.RootNode);
-            }
-            //Add rendered map model
-            this.AddRender(DungeonLoader.MapRender);
+                Scene = scene;
+                Workspace.ViewportWindow.Pipeline._context.Scene = scene;
+                ActiveMapData = loader.MapFiles;
+            };
+
+            DungeonFolder.AddChild(loader.RootNode);
+
+
+            // Add rendered map model
+            this.AddRender(loader.MapRender);
+
+            DungeonLoaders.Add(loader);
         }
 
         private void LoadSection(string fieldName, string sectionName)
@@ -203,6 +255,9 @@ namespace UKingLibrary
                 Terrain.LoadTerrainTable(fieldName);
                 Terrains.Add(fieldName, Terrain);
 
+                var fieldMapData = new List<MapData>();
+                ActiveMapData = fieldMapData;
+
                 // Ensure field folder exists (MainField, AocField, etc)
                 MapFolder.AddChild(new NodeFolder
                 {
@@ -212,6 +267,7 @@ namespace UKingLibrary
                         Scene = scene;
                         Workspace.ViewportWindow.Pipeline._context.Scene = scene;
                         Terrain = Terrains[fieldName];
+                        ActiveMapData = fieldMapData;
                     }
                 });
             }
@@ -220,6 +276,7 @@ namespace UKingLibrary
             FieldMapLoader loader = new FieldMapLoader();
             MapData mapData = loader.Load(this, fileName, stream);
             FieldLoaders.Add(loader);
+            ActiveMapData.Add(mapData);
 
             mapData.RootNode.ContextMenus.Add(new MenuItemModel("Remove", () => { UnloadFieldMuunt(mapData); }));
 
@@ -282,11 +339,15 @@ namespace UKingLibrary
 
         private void MakeActiveEditor()
         {
-            if (Scene.IsInit())
+            Workspace.ActiveEditor = this;
+            if (!Scene.IsInit())
             {
-                Workspace.ActiveEditor = this;
-                Workspace.ViewportWindow.Pipeline._context.Scene = Scene;
+                // Make a dummy scene
+                Scene = new GLScene();
+                Scene.Init();
             }
+
+            Workspace.ViewportWindow.Pipeline._context.Scene = Scene;
         }
 
         public void Save(Stream stream)
@@ -312,6 +373,17 @@ namespace UKingLibrary
                 var outStream = File.Open(outPath, FileMode.OpenOrCreate, FileAccess.Write);
                 outStream.Write(YAZ0.Compress(bymlStream.ReadAllBytes()));
                 outStream.SetLength(outStream.Position);
+                outStream.Flush();
+                outStream.Close();
+            }
+            foreach (var dungeonLoader in DungeonLoaders)
+            {
+                string dungeonFileName = dungeonLoader.RootNode.Header;
+                string outPath = Path.GetFullPath(Path.Join(Path.GetDirectoryName(FileInfo.FilePath), $"{EditorConfig.FolderName}/content/Pack/{dungeonFileName}"));
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+                var outStream = File.Open(outPath, FileMode.OpenOrCreate, FileAccess.Write);
+                dungeonLoader.Save(outStream);
                 outStream.Flush();
                 outStream.Close();
             }
@@ -353,7 +425,7 @@ namespace UKingLibrary
 
             var titleBgPath = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
             TitleBG = new SARC();
-            TitleBG.Load(File.OpenRead(titleBgPath));
+            TitleBG.Load(File.OpenRead(titleBgPath), "TitleBG.pack");
         }
 
         public override List<MenuItemModel> GetViewportMenuIcons()
@@ -362,7 +434,7 @@ namespace UKingLibrary
             menus.Add(new MenuItemModel(""));
             menus.Add(new MenuItemModel($"{IconManager.COPY_ICON}", Scene.CopySelected));
             menus.Add(new MenuItemModel($"{IconManager.PASTE_ICON}", () => Scene.PasteSelected(GLContext.ActiveContext)));
-            menus.Add(new MenuItemModel($"{IconManager.ADD_ICON}", () => CreateAndSelect(GLContext.ActiveContext)));
+            menus.Add(new MenuItemModel($"{IconManager.ADD_ICON}", () => CreateAndSelect()));
             menus.Add(new MenuItemModel($"{IconManager.DELETE_ICON}", Scene.DeleteSelected));
             return menus;
         }
@@ -373,7 +445,7 @@ namespace UKingLibrary
             menus.Add(new MenuItemModel(""));
             menus.Add(new MenuItemModel($"   {IconManager.COPY_ICON}    {TranslationSource.GetText("COPY")}", Scene.CopySelected));
             menus.Add(new MenuItemModel($"   {IconManager.PASTE_ICON}    {TranslationSource.GetText("PASTE")}", () => Scene.PasteSelected(GLContext.ActiveContext)));
-            menus.Add(new MenuItemModel($"   {IconManager.ADD_ICON}    {TranslationSource.GetText("CREATE")}", () => CreateAndSelect(GLContext.ActiveContext)));
+            menus.Add(new MenuItemModel($"   {IconManager.ADD_ICON}    {TranslationSource.GetText("CREATE")}", () => CreateAndSelect()));
             menus.Add(new MenuItemModel($"   {IconManager.DELETE_ICON}    {TranslationSource.GetText("REMOVE")}", Scene.DeleteSelected));
             return menus;
         }
@@ -385,7 +457,7 @@ namespace UKingLibrary
             GLContext.ActiveContext.Scene.BeginUndoCollection();
 
             if (e.IsKeyDown(InputSettings.INPUT.Scene.Create))
-                CreateAndSelect(GLContext.ActiveContext);
+                CreateAndSelect();
 
             GLContext.ActiveContext.Scene.EndUndoCollection();
         }
@@ -395,7 +467,7 @@ namespace UKingLibrary
             if (!(item.Tag is IDictionary<string, dynamic>))
                 return;
 
-            var mapData = FieldLoaders.FirstOrDefault().MapFile;
+            var mapData = ActiveMapData.FirstOrDefault();
 
             //Actor data attached to map object assets
             var actorInfo = item.Tag as IDictionary<string, dynamic>;
@@ -442,9 +514,11 @@ namespace UKingLibrary
             Workspace.ActiveWorkspace.ReloadOutliner();
         }
 
-        public void CreateAndSelect(GLContext context)
+        public void CreateAndSelect()
         {
-            var mapData = FieldLoaders.FirstOrDefault().MapFile;
+            var context = GLContext.ActiveContext;
+
+            var mapData = ActiveMapData.FirstOrDefault();
 
             var actorInfo = GlobalData.Actors["LinkTagAnd"] as IDictionary<string, dynamic>;
             string profile = actorInfo.ContainsKey("profile") ? (string)actorInfo["profile"] : null;
@@ -465,7 +539,7 @@ namespace UKingLibrary
             obj.CreateNew(GetHashId(mapData), "LinkTagAnd", actorInfo, parent, mapData);
             obj.AddToScene();
 
-            context.Scene.DeselectAll(context);
+            Scene.DeselectAll(context);
 
             obj.Render.Transform.Position = context.ScreenToWorld(context.Width / 2, context.Height / 2, 5 * GLContext.PreviewScale);
             obj.Render.Transform.UpdateMatrix(true);
@@ -477,9 +551,10 @@ namespace UKingLibrary
 
         public void Dispose()
         {
-            if (DungeonLoader != null)
-                DungeonLoader.Dispose();
-            Terrain?.Dispose();
+            foreach (var dungeonLoader in DungeonLoaders)
+                dungeonLoader.Dispose();
+            foreach (var terrain in Terrains.Values)
+                terrain.Dispose();
             foreach (var fieldLoader in FieldLoaders)
                 fieldLoader?.Dispose();
         }

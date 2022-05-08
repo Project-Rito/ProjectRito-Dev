@@ -242,10 +242,10 @@ namespace MapStudio.UI
                     CalculateCount(node, ref count);
 
                 ImGuiNative.igSetNextWindowContentSize(new System.Numerics.Vector2(0.0f, count * ItemHeight));
-                ImGui.BeginChild("##tree_view1");
+                ImGui.BeginChild("##tree_view1", new Vector2(0, 0), false, ImGuiWindowFlags.HorizontalScrollbar);
             }
             else
-                ImGui.BeginChild("##tree_view1");
+                ImGui.BeginChild("##tree_view1", new Vector2(0, 0), false, ImGuiWindowFlags.HorizontalScrollbar);
 
             IsFocused = ImGui.IsWindowFocused();
 
@@ -334,15 +334,6 @@ namespace MapStudio.UI
 
         public void DrawNode(NodeBase node, float itemHeight, int level = 0)
         {
-            // Optimization; Avoid node calculation if possible
-            if (!ImGui.IsRectVisible(new Vector2(1, ImGui.GetTextLineHeight())) && !node.IsExpanded)
-            {
-                ImGui.TreeNode("placeholder");
-                return;
-            }
-
-            // Ugh we have to calculate the node and stuff...
-
             bool HasText = node.Header != null &&
                  node.Header.IndexOf(_searchText, StringComparison.OrdinalIgnoreCase) >= 0;
 
@@ -387,7 +378,10 @@ namespace MapStudio.UI
             if (SelectedNodes.Contains(node))
                 flags |= ImGuiTreeNodeFlags.Selected;
 
-            if (isSearch && HasText || !isSearch)
+            //if (clip)
+                
+
+            if ((isSearch && HasText || !isSearch))
             {
                 //Add active file format styling. This determines what file to save.
                 //For files inside archives, it gets the parent of the file format to save.
@@ -681,16 +675,15 @@ namespace MapStudio.UI
             {
                 //Todo find a better alternative to clip parents
                 //Clip only the last level. Don't clip more than 3 levels to prevent clipping issues.
-                if (ClipNodes && node.Children.Count > 0 && node.Children[0].Children.Count == 0 && level < 3)
+                if (ClipNodes && node.Children.Count > 0 && node.Children.All(x => x.Children.Count == 0) && level < 3)
                 {
                     var children = node.Children.ToList();
                     if (isSearch)
                         children = GetSearchableNodes(children);
 
                     var clipper = new ImGuiListClipper2(children.Count, itemHeight);
-                    clipper.ItemsCount = children.Count;
 
-                    for (int line_i = clipper.DisplayStart; line_i < clipper.DisplayEnd; line_i++) // display only visible items
+                    for (int line_i = clipper.DisplayStart; line_i < clipper.DisplayEnd; line_i++)
                     {
                         DrawNode(children[line_i], itemHeight, level);
                     }

@@ -16,9 +16,9 @@ namespace Toolbox.Core
         private static List<Entry> Errors = new List<Entry>();
         private static List<Entry> Warnings = new List<Entry>();
 
-        private static string OutputLog;
-        private static string ErrorLog;
-        private static string WarningLog;
+        private static string OutputLog = "";
+        private static string ErrorLog = "";
+        private static string WarningLog = "";
 
         private static int OutputLogLength;
         private static int ErrorLogLength;

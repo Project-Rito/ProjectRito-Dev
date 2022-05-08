@@ -188,8 +188,8 @@ namespace MapStudio.UI
 
         private void DrawEditorMenu()
         {
-            List<string> editorList = ParentWorkspace.ActiveEditor.SubEditors;
-            string activeEditor = ParentWorkspace.ActiveEditor.SubEditor;
+            List<string> editorList = ParentWorkspace.ActiveEditor?.SubEditors;
+            string activeEditor = ParentWorkspace.ActiveEditor?.SubEditor;
 
             string text = $"{TranslationSource.GetText("EDITORS")} : [{TranslationSource.GetText(activeEditor)}]";
 

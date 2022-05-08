@@ -204,15 +204,15 @@ namespace UKingLibrary
             {
                 if (ImGui.BeginCombo("##objFileSelect", MapFile.RootNode.Header))
                 {
-                    for (int i = 0; i < ParentEditor.FieldLoaders.Count(); i++)
+                    for (int i = 0; i < ParentEditor.ActiveMapData.Count(); i++)
                     {
-                        string fileName = ParentEditor.FieldLoaders[i].MapFile.RootNode.Header;
+                        string fileName = ParentEditor.ActiveMapData[i].RootNode.Header;
                         bool isSelected = fileName == MapFile.RootNode.Header;
 
                         if (ImGui.Selectable(fileName, isSelected))
                         {
                             MapFile.Objs.Remove(HashId);
-                            ParentEditor.FieldLoaders[i].MapFile.Objs.Add(HashId, this);
+                            ParentEditor.ActiveMapData[i].Objs.Add(HashId, this);
                             MapFile = ParentEditor.FieldLoaders[i].MapFile;
 
                             Parent.Children.Remove(Render.UINode);

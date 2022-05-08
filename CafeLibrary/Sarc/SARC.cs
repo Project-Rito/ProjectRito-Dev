@@ -61,7 +61,7 @@ namespace CafeLibrary
             return sarc.Files[file];
         }
 
-        public void Load(System.IO.Stream stream) {
+        public void Load(System.IO.Stream stream, string fileName) {
             files.Clear();
 
             SarcData = SARC_Parser.UnpackRamN(stream);
@@ -76,6 +76,12 @@ namespace CafeLibrary
                 }
                 fileEntry.SetData(file.Value);
                 files.Add(fileEntry);
+            }
+
+            foreach (ICompressionFormat compressionFormat in FileManager.GetCompressionFormats())
+            {
+                if (compressionFormat.Identify(stream, fileName))
+                    FileInfo.Compression = compressionFormat;
             }
         }
 
@@ -103,16 +109,23 @@ namespace CafeLibrary
 
         public void Save(System.IO.Stream stream)
         {
+            var uncompressed = new MemoryStream();
             //Save data to stream
             var saved = SARC_Parser.PackN(SarcData);
-            using (var writer = new FileWriter(stream)) {
-                writer.Write(saved.Item2);
-            }
+            uncompressed.Write(saved.Item2);
 
             //Save alignment to compression type yaz0
-            if (FileInfo.Compression != null && FileInfo.Compression is Yaz0) {
-                ((Yaz0)FileInfo.Compression).Alignment = saved.Item1;
+            if (FileInfo.Compression != null) {
+                if (FileInfo.Compression is Yaz0)
+                    ((Yaz0)FileInfo.Compression).Alignment = saved.Item1;
+                stream.Write(FileInfo.Compression.Compress(uncompressed).ReadAllBytes());
             }
+            else
+            {
+                stream.Write(uncompressed.ReadAllBytes());
+            }
+
+            stream.SetLength(stream.Position);
         }
 
         public void Dispose()
