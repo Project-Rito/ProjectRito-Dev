@@ -64,6 +64,8 @@ namespace CafeLibrary
         public void Load(System.IO.Stream stream, string fileName) {
             files.Clear();
 
+            long streamStartPos = stream.Position;
+
             SarcData = SARC_Parser.UnpackRamN(stream);
             foreach (var file in SarcData.Files)
             {
@@ -78,11 +80,8 @@ namespace CafeLibrary
                 files.Add(fileEntry);
             }
 
-            foreach (ICompressionFormat compressionFormat in FileManager.GetCompressionFormats())
-            {
-                if (compressionFormat.Identify(stream, fileName))
-                    FileInfo.Compression = compressionFormat;
-            }
+            stream.Position = streamStartPos;
+            FileInfo.Compression = STFileLoader.GetCompressionFormat(stream, fileName);
         }
 
         public void SetFileData(string key, Stream stream) {

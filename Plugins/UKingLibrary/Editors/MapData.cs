@@ -6,6 +6,7 @@ using GLFrameworkEngine;
 using Toolbox.Core.ViewModels;
 using MapStudio.UI;
 using Toolbox.Core;
+using Toolbox.Core.IO;
 using ByamlExt.Byaml;
 using CafeLibrary.Rendering;
 
@@ -27,27 +28,27 @@ namespace UKingLibrary
         public NodeFolder RailFolder = new NodeFolder(TranslationSource.GetText("RAIL_PATHS"));
 
         BymlFileData Byaml;
-
-        UKingEditor ParentEditor;
+        STFileLoader.Settings FileSettings;
 
         public MapData() { }
 
-        public MapData(Stream stream, UKingEditor editor, string fileName) {
-            Load(stream, editor, fileName);
+        public MapData(Stream stream, IMapLoader parentLoader, string fileName) {
+            Load(stream, parentLoader, fileName);
         }
 
-        public void Load(Stream stream, UKingEditor editor, string fileName) {
-            Load(ByamlFile.LoadN(stream), editor, fileName);
+        public void Load(Stream stream, IMapLoader parentLoader, string fileName) {
+            FileSettings = STFileLoader.TryDecompressFile(stream, fileName);
+
+            Load(ByamlFile.LoadN(FileSettings.Stream), parentLoader, fileName);
         }
 
-        public void Load(BymlFileData byaml, UKingEditor editor, string fileName)
+        public void Load(BymlFileData byaml, IMapLoader parentLoader, string fileName)
         {
             Byaml = byaml;
-            ParentEditor = editor;
 
             Dictionary<string, NodeBase> nodeFolders = new Dictionary<string, NodeBase>();
 
-            RootNode = new NodeBase(fileName);
+            RootNode = new NodeBase(fileName) { Tag = this};
             RootNode.AddChild(ObjectFolder);
             RootNode.AddChild(RailFolder);
 
@@ -90,7 +91,7 @@ namespace UKingLibrary
                     }
 
                     //Setup properties for editing
-                    MapObject obj = new MapObject(editor);
+                    MapObject obj = new MapObject(parentLoader);
 
                     obj.CreateNew(mapObj, actorInfo, parent, this);
                     //Add the renderable to the viewport
@@ -174,7 +175,7 @@ namespace UKingLibrary
             ProcessLoading.Instance.Update(100, 100, "Finished!");
         }
 
-        public NodeBase AddObject(MapObject obj, UKingEditor editor)
+        public NodeBase AddObject(MapObject obj, IMapLoader parentLoader)
         {
             Dictionary<string, NodeBase> nodeFolders = ObjectFolder.FolderChildren;
 
@@ -203,7 +204,7 @@ namespace UKingLibrary
             parent.AddChild(obj.Render.UINode);
             ObjectFolder.FolderChildren = nodeFolders;
 
-            editor.Workspace.ScrollToSelectedNode(obj.Render.UINode);
+            parentLoader.ParentEditor.Workspace.ScrollToSelectedNode(obj.Render.UINode);
             return parent;
         }
 
@@ -213,6 +214,12 @@ namespace UKingLibrary
             var byamlData = Byaml;
             byamlData.RootNode = PropertiesToValues(Byaml.RootNode);
             ByamlFile.SaveN(stream, byamlData);
+            stream.Position = 0;
+
+            
+            Stream compressed = FileSettings.CompressionFormat.Compress(stream);
+            stream.Position = 0;
+            compressed.CopyTo(stream);
         }
 
         private void SaveEditor()

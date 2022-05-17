@@ -22,7 +22,7 @@ namespace UKingLibrary
         /// <summary>
         /// The file this is in
         /// </summary>
-        MapData MapFile;
+        MapData MapData;
 
         /// <summary>
         /// Properties related to the object instance.
@@ -43,7 +43,7 @@ namespace UKingLibrary
         /// </summary>
         public EditableObject Render;
 
-        UKingEditor ParentEditor;
+        private IMapLoader ParentLoader;
 
         /// <summary>
         /// The name of the object actor.
@@ -107,14 +107,14 @@ namespace UKingLibrary
         public List<LinkInstance> SourceLinks = new List<LinkInstance>();
         public List<LinkInstance> DestLinks = new List<LinkInstance>();
 
-        public MapObject(UKingEditor editor)
+        public MapObject(IMapLoader parentLoader)
         {
-            ParentEditor = editor;
+            ParentLoader = parentLoader;
         }
 
         public void CreateNew(uint hashId, string unitConfigName, dynamic actorInfo, NodeBase parent, MapData mapData)
         {
-            MapFile = mapData;
+            MapData = mapData;
 
             Properties = new Dictionary<string, dynamic>();
             Properties.Add("UnitConfigName", unitConfigName);
@@ -131,9 +131,9 @@ namespace UKingLibrary
 
         public void CreateNew(dynamic properties, dynamic actorInfo, NodeBase parent, MapData mapData)
         {
-            MapFile = mapData;
+            MapData = mapData;
 
-            Properties = MapData.ValuesToProperties(properties);
+            Properties = UKingLibrary.MapData.ValuesToProperties(properties);
 
             ActorInfo = actorInfo;
             string unitConfigName = Properties["UnitConfigName"].Value;
@@ -202,21 +202,21 @@ namespace UKingLibrary
 
             ((EditableObjectNode)Render.UINode).UIProperyDrawer += delegate
             {
-                if (ImGui.BeginCombo("##objFileSelect", MapFile.RootNode.Header))
+                if (ImGui.BeginCombo("##objFileSelect", MapData.RootNode.Header))
                 {
-                    for (int i = 0; i < ParentEditor.ActiveMapData.Count(); i++)
+                    for (int i = 0; i < ParentLoader.MapData.Count(); i++)
                     {
-                        string fileName = ParentEditor.ActiveMapData[i].RootNode.Header;
-                        bool isSelected = fileName == MapFile.RootNode.Header;
+                        string fileName = ParentLoader.MapData[i].RootNode.Header;
+                        bool isSelected = fileName == MapData.RootNode.Header;
 
                         if (ImGui.Selectable(fileName, isSelected))
                         {
-                            MapFile.Objs.Remove(HashId);
-                            ParentEditor.ActiveMapData[i].Objs.Add(HashId, this);
-                            MapFile = ParentEditor.FieldLoaders[i].MapFile;
+                            MapData = ParentLoader.MapData[i];
+                            MapData.Objs.Remove(HashId);
+                            MapData.Objs.Add(HashId, this);
 
                             Parent.Children.Remove(Render.UINode);
-                            Parent = MapFile.AddObject(this, ParentEditor);
+                            Parent = MapData.AddObject(this, ParentLoader);
                         }
 
                         if (isSelected)
@@ -264,15 +264,15 @@ namespace UKingLibrary
 
         public object Clone()
         {
-            MapObject clone = new MapObject(ParentEditor);
+            MapObject clone = new MapObject(ParentLoader);
 
             SaveTransform(); // We wanna make sure that the new actor is in the right location!
 
             clone.Properties = DeepCloneDictionary(Properties);
-            clone.HashId = UKingEditor.GetHashId(MapFile);
+            clone.HashId = UKingEditor.GetHashId(MapData);
             clone.ActorInfo = ActorInfo;
             clone.Parent = Parent;
-            clone.MapFile = MapFile;
+            clone.MapData = MapData;
             clone.ReloadActor();
 
             return clone;
@@ -315,14 +315,14 @@ namespace UKingLibrary
             var destLinks = Render.DestObjectLinks;
 
             bool selected = Render.IsSelected;
-            ParentEditor.Scene.DeselectAll(context); // Not sure why we're passing this
+            ParentLoader.Scene.DeselectAll(context); // Not sure why we're passing this
 
             //Remove old from scene
-            ParentEditor.Scene.RemoveRenderObject(Render);
+            ParentLoader.Scene.RemoveRenderObject(Render);
             //Reload actor
             ReloadActor();
             //Add new render
-            ParentEditor.Scene.AddRenderObject(Render);
+            ParentLoader.Scene.AddRenderObject(Render);
             //Reapply everything needed
             Render.IsSelected = selected;
             Render.SourceObjectLinks = srcLinks;
@@ -466,18 +466,18 @@ namespace UKingLibrary
         /// Adds the object to the current scene.
         /// </summary>
         public void AddToScene() {
-            ParentEditor.AddRender(Render);
+            ParentLoader.Scene.AddRenderObject(Render);
             //Add the actor to the animation player
-            ParentEditor.Workspace.StudioSystem.AddActor(this);
+            ParentLoader.ParentEditor.Workspace.StudioSystem.AddActor(this);
         }
 
         /// <summary>
         /// Removes the object from the current scene.
         /// </summary>
         public void RemoveFromScene() {
-            ParentEditor.RemoveRender(Render);
+            ParentLoader.Scene.RemoveRenderObject(Render);
             //Remove the actor from the animation player
-            ParentEditor.Workspace.StudioSystem.RemoveActor(this);
+            ParentLoader.ParentEditor.Workspace.StudioSystem.RemoveActor(this);
         }
 
         /// <summary>
@@ -485,7 +485,7 @@ namespace UKingLibrary
         /// </summary>
         public void AddToMap()
         {
-            MapFile.Objs.Add(HashId, this);
+            MapData.Objs.Add(HashId, this);
         }
 
         /// <summary>
@@ -493,7 +493,7 @@ namespace UKingLibrary
         /// </summary>
         public void RemoveFromMap()
         {
-            MapFile.Objs.Remove(HashId);
+            MapData.Objs.Remove(HashId);
         }
 
         /// <summary>

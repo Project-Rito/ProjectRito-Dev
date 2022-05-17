@@ -30,23 +30,16 @@ namespace UKingLibrary
         /// </summary>
         public File_Info FileInfo { get; set; } = new File_Info();
 
-        UKingEditorConfig EditorConfig;
+        public IMapLoader ActiveMapLoader;
 
-        NodeFolder MapFolder;
-        NodeFolder DungeonFolder;
-
-        public Terrain Terrain;
         public SARC TitleBG;
 
-        //Editor loaders
-        public List<FieldMapLoader> FieldLoaders = new List<FieldMapLoader>();
-        public List<DungeonMapLoader> DungeonLoaders = new List<DungeonMapLoader>();
+        /// <summary>
+        /// Psuedo-project info that applies to the editor
+        /// </summary>
+        private UKingEditorConfig EditorConfig;
 
-        public List<MapData> ActiveMapData;
-
-        private List<GLScene> Scenes = new List<GLScene>();
-
-        private Dictionary<string, Terrain> Terrains = new Dictionary<string, Terrain>();
+        private NodeFolder ContentFolder;
 
 
         public bool Identify(File_Info fileInfo, Stream stream)
@@ -80,16 +73,8 @@ namespace UKingLibrary
                 };
 
             SetupContextMenus();
-            
-
-            Root.Children.Clear();
-
-            MapFolder = new NodeFolder { Header = "Map" };
-            DungeonFolder = new NodeFolder { Header = "Dungeon" };
-            Root.AddChild(MapFolder);
-            Root.AddChild(DungeonFolder);
-
             CacheBackgroundFiles();
+            SetupRoot();
 
             foreach (var fieldName in EditorConfig.OpenMapUnits.Keys)
             {
@@ -99,7 +84,7 @@ namespace UKingLibrary
                     string fileName = Path.GetFileName(muPath);
                     if (!File.Exists(fullPath))
                         continue;
-                    LoadFieldMuunt(fieldName, fileName, STFileLoader.TryDecompressFile(File.Open(fullPath, FileMode.Open), fileName).Stream);
+                    LoadFieldMuunt(fieldName, fileName, File.Open(fullPath, FileMode.Open));
                 }
             }
             foreach (var packName in EditorConfig.OpenDungeons)
@@ -108,10 +93,25 @@ namespace UKingLibrary
 
                 if (!File.Exists(fullPath))
                     continue;
-                LoadDungeon(packName, STFileLoader.TryDecompressFile(File.Open(fullPath, FileMode.Open), packName).Stream);
+                LoadDungeon(packName, File.Open(fullPath, FileMode.Open));
             }
 
             LoadAssetList();
+        }
+
+        private void SetupRoot()
+        {
+            Root.Children.Clear();
+
+            ContentFolder = new NodeFolder("content")
+            {
+                FolderChildren = new Dictionary<string, NodeBase>()
+                {
+                    { "Map", new NodeFolder("Map") },
+                    { "Dungeon", new NodeFolder("Dungeon") }
+                }
+            };
+            Root.AddChild(ContentFolder);
         }
 
         private void SetupContextMenus()
@@ -192,34 +192,26 @@ namespace UKingLibrary
 
         private void LoadDungeon(string fileName, Stream stream)
         {
-            // Set up new scene
-            var scene = new GLScene();
-            scene.Init();
-            Scene = scene;
-            Scenes.Add(Scene);
-            Workspace.ViewportWindow.Pipeline._context.Scene = Scene;
-
-
-            // Load file data
-            DungeonMapLoader loader = new DungeonMapLoader();
-            loader.Load(this, fileName, stream);
-
-            ActiveMapData = loader.MapFiles;
-
-            loader.RootNode.OnSelected = delegate
+            DungeonMapLoader loader;
+            if (!((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).FolderChildren.ContainsKey(fileName))
             {
-                Scene = scene;
-                Workspace.ViewportWindow.Pipeline._context.Scene = scene;
-                ActiveMapData = loader.MapFiles;
-            };
+                loader = new DungeonMapLoader();
 
-            DungeonFolder.AddChild(loader.RootNode);
+                loader.RootNode.OnSelected = delegate
+                {
+                    MakeLoaderActive(loader);
+                };
 
+                ((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).AddChild(loader.RootNode);
+            }
+            else
+            {
+                loader = (DungeonMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).FolderChildren[fileName].Tag);
+            }
 
-            // Add rendered map model
-            this.AddRender(loader.MapRender);
+            loader.Load(fileName, stream, this);
 
-            DungeonLoaders.Add(loader);
+            MakeLoaderActive(loader);
         }
 
         private void LoadSection(string fieldName, string sectionName)
@@ -232,7 +224,7 @@ namespace UKingLibrary
                 if (!File.Exists(path))
                     return;
                 string fileName = Path.GetFileName(path);
-                var stream = STFileLoader.TryDecompressFile(File.Open(path, FileMode.Open), fileName).Stream;
+                var stream = File.Open(path, FileMode.Open);
 
                 EditorConfig.OpenMapUnits.TryAdd(fieldName, new List<string>());
                 EditorConfig.OpenMapUnits[fieldName].Add($"{fileName.Substring(0, 3)}/{fileName}");
@@ -243,67 +235,35 @@ namespace UKingLibrary
 
         private void LoadFieldMuunt(string fieldName, string fileName, Stream stream)
         {
-            if (!MapFolder.FolderChildren.ContainsKey(fieldName))
+            FieldMapLoader loader;
+            if (!((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren.ContainsKey(fieldName))
             {
-                var scene = new GLScene();
-                scene.Init();
-                Scene = scene;
-                Scenes.Add(Scene);
-                Workspace.ViewportWindow.Pipeline._context.Scene = Scene;
+                loader = new FieldMapLoader(fieldName);
 
-                Terrain = new Terrain();
-                Terrain.LoadTerrainTable(fieldName);
-                Terrains.Add(fieldName, Terrain);
-
-                var fieldMapData = new List<MapData>();
-                ActiveMapData = fieldMapData;
-
-                // Ensure field folder exists (MainField, AocField, etc)
-                MapFolder.AddChild(new NodeFolder
+                loader.RootNode.OnSelected = delegate
                 {
-                    Header = fieldName,
-                    OnSelected = delegate
-                    {
-                        Scene = scene;
-                        Workspace.ViewportWindow.Pipeline._context.Scene = scene;
-                        Terrain = Terrains[fieldName];
-                        ActiveMapData = fieldMapData;
-                    }
-                });
+                    MakeLoaderActive(loader);
+                };
+
+                ((NodeFolder)ContentFolder.FolderChildren["Map"]).AddChild(loader.RootNode);
+            }
+            else
+            {
+                loader = (FieldMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren[fieldName].Tag);
             }
 
-            // Load into mapdata
-            FieldMapLoader loader = new FieldMapLoader();
-            MapData mapData = loader.Load(this, fileName, stream);
-            FieldLoaders.Add(loader);
-            ActiveMapData.Add(mapData);
-
-            mapData.RootNode.ContextMenus.Add(new MenuItemModel("Remove", () => { UnloadFieldMuunt(mapData); }));
-
-            // Add muunt root to field folder
-            NodeBase fieldFolder = MapFolder.FolderChildren[fieldName];
-            fieldFolder.AddChild(mapData.RootNode);
-            
-
-            // Ensure terrain is loaded
-            bool terrLoaded = false;
-            foreach (var node in MapFolder.Children)
-            {
-                if (node.Header == fileName)
-                    continue;
-                if (node.Header.Substring(0, 3) == fileName.Substring(0, 3))
-                {
-                    terrLoaded = true;
-                    break;
-                }
-            }
-
-            if (!terrLoaded)
+            // Load terrain if not loaded
+            if (!loader.RootNode.FolderChildren.ContainsKey(FieldMapLoader.GetSectionName(fileName)))
             {
                 var terrSectionID = GetSectionIndex(fileName.Substring(0, 3));
 
-                Terrain.LoadTerrainSection(fieldName, (int)terrSectionID.X, (int)terrSectionID.Y, this, PluginConfig.MaxTerrainLOD);
+                loader.LoadTerrain(fieldName, (int)terrSectionID.X, (int)terrSectionID.Y, PluginConfig.MaxTerrainLOD);
             }
+
+            // Load map file
+            loader.LoadMuunt(fileName, stream, this);
+
+            MakeLoaderActive(loader);
         }
 
         private void UnloadFieldMuunt(MapData mapData)
@@ -337,6 +297,14 @@ namespace UKingLibrary
             }
         }
 
+        private void MakeLoaderActive(IMapLoader loader)
+        {
+            Scene = loader.Scene;
+            Workspace.ViewportWindow.Pipeline._context.Scene = Scene;
+
+            ActiveMapLoader = loader;
+        }
+
         private void MakeActiveEditor()
         {
             Workspace.ActiveEditor = this;
@@ -359,33 +327,17 @@ namespace UKingLibrary
             {
                 writer.Write(json);
             }
-            //Save the editor data
-            foreach (var fieldLoader in FieldLoaders) {
-                string fieldName = fieldLoader.MapFile.RootNode.Parent.Header;
-                string fileName = fieldLoader.MapFile.RootNode.Header;
-                string sectionName = fileName.Substring(0, 3);
-                string outPath = Path.GetFullPath(Path.Join(Path.GetDirectoryName(FileInfo.FilePath), $"{EditorConfig.FolderName}/aoc/0010/Map/{fieldName}/{sectionName}/{fileName}"));
 
-                var bymlStream = new MemoryStream();
-                fieldLoader.Save(bymlStream);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-                var outStream = File.Open(outPath, FileMode.OpenOrCreate, FileAccess.Write);
-                outStream.Write(YAZ0.Compress(bymlStream.ReadAllBytes()));
-                outStream.SetLength(outStream.Position);
-                outStream.Flush();
-                outStream.Close();
-            }
-            foreach (var dungeonLoader in DungeonLoaders)
+            foreach (NodeFolder fieldFolder in ContentFolder.FolderChildren["Map"].Children)
             {
-                string dungeonFileName = dungeonLoader.RootNode.Header;
-                string outPath = Path.GetFullPath(Path.Join(Path.GetDirectoryName(FileInfo.FilePath), $"{EditorConfig.FolderName}/content/Pack/{dungeonFileName}"));
+                FieldMapLoader loader = (FieldMapLoader)fieldFolder.Tag;
+                loader.Save(Path.GetFullPath(Path.Join(Path.GetDirectoryName(FileInfo.FilePath), $"{EditorConfig.FolderName}")));
+            }
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-                var outStream = File.Open(outPath, FileMode.OpenOrCreate, FileAccess.Write);
-                dungeonLoader.Save(outStream);
-                outStream.Flush();
-                outStream.Close();
+            foreach (NodeFolder dungeonFolder in ContentFolder.FolderChildren["Dungeon"].Children)
+            {
+                DungeonMapLoader loader = (DungeonMapLoader)dungeonFolder.Tag;
+                loader.Save(Path.GetFullPath(Path.Join(Path.GetDirectoryName(FileInfo.FilePath), $"{EditorConfig.FolderName}")));
             }
         }
 
@@ -467,7 +419,7 @@ namespace UKingLibrary
             if (!(item.Tag is IDictionary<string, dynamic>))
                 return;
 
-            var mapData = ActiveMapData.FirstOrDefault();
+            var mapData = ActiveMapLoader.MapData.FirstOrDefault();
 
             //Actor data attached to map object assets
             var actorInfo = item.Tag as IDictionary<string, dynamic>;
@@ -488,7 +440,7 @@ namespace UKingLibrary
             //Determine what actor to add in via the name
             var name = actorInfo["name"];
             //Create the actor data and add it to the scene
-            var obj = new MapObject(this);
+            var obj = new MapObject(ActiveMapLoader);
             var index = mapData.Objs.Count;
             obj.CreateNew(GetHashId(mapData), name, actorInfo, parent, mapData);
             //Add to the viewport scene
@@ -518,7 +470,7 @@ namespace UKingLibrary
         {
             var context = GLContext.ActiveContext;
 
-            var mapData = ActiveMapData.FirstOrDefault();
+            var mapData = ActiveMapLoader.MapData.FirstOrDefault();
 
             var actorInfo = GlobalData.Actors["LinkTagAnd"] as IDictionary<string, dynamic>;
             string profile = actorInfo.ContainsKey("profile") ? (string)actorInfo["profile"] : null;
@@ -535,7 +487,7 @@ namespace UKingLibrary
                 parent = folder;
             }
 
-            var obj = new MapObject(this);
+            var obj = new MapObject(ActiveMapLoader);
             obj.CreateNew(GetHashId(mapData), "LinkTagAnd", actorInfo, parent, mapData);
             obj.AddToScene();
 
@@ -551,12 +503,23 @@ namespace UKingLibrary
 
         public void Dispose()
         {
+            foreach (NodeFolder fieldFolder in ((NodeFolder)ContentFolder.FolderChildren["Map"]).Children)
+            {
+                IMapLoader loader = (IMapLoader)fieldFolder.Tag;
+                loader.Dispose();
+            }
+            foreach (NodeFolder dungeonFolder in ((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).Children) {
+                IMapLoader loader = (IMapLoader)dungeonFolder.Tag;
+                loader.Dispose();
+            }
+            /*
             foreach (var dungeonLoader in DungeonLoaders)
                 dungeonLoader.Dispose();
             foreach (var terrain in Terrains.Values)
                 terrain.Dispose();
             foreach (var fieldLoader in FieldLoaders)
                 fieldLoader?.Dispose();
+            */
         }
 
         public static uint GetHashId(MapData mapData)

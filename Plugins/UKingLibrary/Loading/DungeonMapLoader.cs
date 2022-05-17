@@ -5,36 +5,76 @@ using System.IO;
 using System.Threading.Tasks;
 using ByamlExt.Byaml;
 using OpenTK;
+using UKingLibrary.UI;
 using MapStudio.UI;
 using CafeLibrary;
 using CafeLibrary.Rendering;
 using Toolbox.Core;
 using Toolbox.Core.IO;
 using Toolbox.Core.ViewModels;
+using GLFrameworkEngine;
 
 namespace UKingLibrary
 {
-    public class DungeonMapLoader
+    public class DungeonMapLoader : IMapLoader
     {
-        public List<MapData> MapFiles = new List<MapData>();
-        public NodeBase RootNode = new NodeBase();
+        /// <summary>
+        /// The preview scale to use for everything loaded by this.
+        /// </summary>
+        public const float PreviewScale = 25;
 
-        public SARC DungeonData;
+        /// <summary>
+        /// The editor that this is associated with.
+        /// </summary>
+        public UKingEditor ParentEditor { get; set; }
 
-        public ProdInfo ClusteringInstances;
+        /// <summary>
+        /// The scene associated with the field.
+        /// </summary>
+        public GLScene Scene { get; set; } = new GLScene();
+
+        /// <summary>
+        /// The node associated with the field. Duh.
+        /// </summary>
+        public NodeFolder RootNode { get; set; } = new NodeFolder();
+
+        /// <summary>
+        /// All loaded MapData. Included here for convenience,
+        /// but MapData is also present in RootNode as a tag.
+        /// </summary>
+        public List<MapData> MapData { get; set; } = new List<MapData>();
+        /// <summary>
+        /// Instancing info related to trees.
+        /// </summary>
         public ProdInfo TeraTreeInstances;
 
+        /// <summary>
+        /// Instancing info related to clusters.
+        /// </summary>
+        public ProdInfo ClusteringInstances;
+
+
+        public SARC DungeonData;
         public BfresRender MapRender;
 
         public static Dictionary<string, dynamic> Actors = new Dictionary<string, dynamic>();
 
         private string DungeonName;
 
-        public void Load(UKingEditor editor, string fileName, Stream stream)
+        public DungeonMapLoader()
         {
-            GLFrameworkEngine.GLContext.PreviewScale = 25;
+            RootNode.Header = "Some random dungeon, idk.";
+            RootNode.Tag = this;
+            Scene.Init();
+        }
 
+        public void Load(string fileName, Stream stream, UKingEditor editor)
+        {
+            ParentEditor = editor;
+            ParentEditor.Workspace.Windows.Add(new ActorLinkNodeUI());
             DungeonName = Path.GetFileNameWithoutExtension(fileName);
+
+            RootNode.Header = fileName;
 
             //Load dungeon data
             DungeonData = new SARC();
@@ -51,22 +91,22 @@ namespace UKingLibrary
 
             ProcessLoading.Instance.Update(0, 100, "Loading map files.");
 
-            //Global actor list
+            ApplyPreviewScale();
             GlobalData.LoadActorDatabase();
 
             //Static and dynamic actors
             var staticFile = GetMubin("Static");
             if (staticFile != null)
-                MapFiles.Add(new MapData(GetMubin("Static"), editor, $"{DungeonName}_Static.smubin"));
+                MapData.Add(new MapData(GetMubin("Static"), this, $"{DungeonName}_Static.smubin")); // TODO - REENABLE
             var dynamicFile = GetMubin("Dynamic");
             if (dynamicFile != null)
-                MapFiles.Add(new MapData(GetMubin("Dynamic"), editor, $"{DungeonName}_Dynamic.smubin"));
+                MapData.Add(new MapData(GetMubin("Dynamic"), this, $"{DungeonName}_Dynamic.smubin")); // TODO - REENABLE
 
-            if (dynamicFile == null && staticFile == null)
+                if (dynamicFile == null && staticFile == null)
                 StudioLogger.WriteErrorException("yeah umm... can't really find any mubins....");
 
-            RootNode = new NodeBase(fileName);
-            foreach (var mapFile in MapFiles)
+            RootNode.Header = fileName;
+            foreach (var mapFile in MapData)
                 RootNode.AddChild(mapFile.RootNode);
 
             //editor.LoadProd(ClusteringInstances, $"{DungeonName}_Clustering.sblwp");
@@ -86,8 +126,9 @@ namespace UKingLibrary
                 MapRender.CanSelect = false;
                 MapRender.IsVisibleCallback += delegate
                 {
-                    return MapData.ShowMapModel;
+                    return UKingLibrary.MapData.ShowMapModel;
                 };
+                Scene.AddRenderObject(MapRender);
             }
             else
                 StudioLogger.WriteWarning("Couldn't find dungeon model!");
@@ -148,22 +189,31 @@ namespace UKingLibrary
             return YAZ0.Decompress(data);
         }
 
-        public void Save(Stream stream)
+        public void Save(string savePath)
         {
-            foreach (var mapFile in MapFiles)
+            foreach (MapData mapData in MapData)
             {
                 MemoryStream mapStream = new MemoryStream();
-                mapFile.Save(mapStream);
+                mapData.Save(mapStream);
 
-                DungeonData.SarcData.Files[$"Map/CDungeon/{DungeonName}/{mapFile.RootNode.Header}"] = YAZ0.Compress(mapStream.ToArray());
+                DungeonData.SarcData.Files[$"Map/CDungeon/{DungeonName}/{mapData.RootNode.Header}"] = YAZ0.Compress(mapStream.ToArray());
             }
-            DungeonData.Save(stream);
+
+            Directory.CreateDirectory(Path.Join(savePath, "content/Pack"));
+            FileStream fileStream = File.Open(Path.Join(savePath, $"content/Pack/{RootNode.Header}"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
+
+            DungeonData.Save(fileStream);
+        }
+
+        public static void ApplyPreviewScale()
+        {
+            GLFrameworkEngine.GLContext.PreviewScale = PreviewScale;
         }
 
         public void Dispose()
         {
-            foreach (var file in MapFiles)
-                file?.Dispose();
+            foreach (MapData mapData in MapData)
+                mapData?.Dispose();
             MapRender?.Dispose();
         }
     }

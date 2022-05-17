@@ -85,7 +85,7 @@ namespace UKingLibrary
         /// <summary>
         /// Loads all the terrain data in a given area.
         /// </summary>
-        public void LoadTerrainSection(string fieldName, int areaID, int sectionID, UKingEditor editor, int lodLevel = LOD_LEVEL_MAX)
+        public void LoadTerrainSection(string fieldName, int areaID, int sectionID, IMapLoader parentLoader, int lodLevel = LOD_LEVEL_MAX)
         {
             float lodScale = DetailLevels[Math.Clamp(lodLevel, 0, 7)];
             Vector3 midpoint = CalculateMidPoint(areaID, sectionID);
@@ -101,7 +101,7 @@ namespace UKingLibrary
 
                 var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / tile.Value.Core.AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
 
-                CreateTerrainTile(tile.Value.Core, fieldName, tile.Key, tileSectionScale, editor);
+                CreateTerrainTile(tile.Value.Core, fieldName, tile.Key, tileSectionScale, parentLoader);
             }
 
 
@@ -119,7 +119,7 @@ namespace UKingLibrary
                 foreach (TSCB.TerrainAreaExtra extmData in tile.Value.Extra)
                 {
                     if (extmData.Type == TSCB.ExtraSectionType.Water)
-                        CreateWaterTile(tile.Value.Core, extmData, fieldName, tile.Key, tileSectionScale, editor);
+                        CreateWaterTile(tile.Value.Core, extmData, fieldName, tile.Key, tileSectionScale, parentLoader);
                 }
             }
 
@@ -137,7 +137,7 @@ namespace UKingLibrary
                 foreach (TSCB.TerrainAreaExtra extmData in tile.Value.Extra)
                 {
                     if (extmData.Type == TSCB.ExtraSectionType.Grass)
-                        CreateGrassTile(tile.Value.Core, extmData, tile.Key, tileSectionScale, UKingEditor editor);
+                        CreateGrassTile(tile.Value.Core, extmData, tile.Key, tileSectionScale, parentLoader);
                 }
             }
             */
@@ -236,7 +236,7 @@ namespace UKingLibrary
         }
 
         //Creates a terrain mesh from a given tile
-        private void CreateTerrainTile(TSCB.TerrainAreaCore tile, string fieldName, string name, float tileSectionScale, UKingEditor editor)
+        private void CreateTerrainTile(TSCB.TerrainAreaCore tile, string fieldName, string name, float tileSectionScale, IMapLoader parentLoader)
         {
             string packName = GetTilePackName(name);
 
@@ -265,10 +265,10 @@ namespace UKingLibrary
                 return MapData.ShowMapModel;
             };
 
-            editor.AddRender(meshRender);
+            parentLoader.Scene.AddRenderObject(meshRender);
         }
 
-        private void CreateWaterTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string fieldName, string name, float tileSectionScale, UKingEditor editor)
+        private void CreateWaterTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string fieldName, string name, float tileSectionScale, IMapLoader parentLoader)
         {
             string packName = GetTilePackName(name);
 
@@ -295,7 +295,7 @@ namespace UKingLibrary
                 return MapData.ShowMapModel;
             };
 
-            editor.AddRender(meshRender);
+            parentLoader.Scene.AddRenderObject(meshRender);
         }
 
         private void CreateGrassTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string fieldName, string name, float tileSectionScale, UKingEditor editor)
