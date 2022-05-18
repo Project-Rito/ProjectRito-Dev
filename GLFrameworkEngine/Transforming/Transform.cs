@@ -19,6 +19,8 @@ namespace GLFrameworkEngine
         /// </summary>
         public BoundingBox ModelBounding = null;
 
+        public bool IndividualPivot = false;
+
         public Vector3 Origin;
 
         private bool originOverride = false;
@@ -62,6 +64,7 @@ namespace GLFrameworkEngine
             set
             {
                 RotationMatrix = Matrix3.CreateFromQuaternion(value);
+                rotationEuler = RotationMatrix.ExtractEulerAngles();
             }
         }
 
@@ -70,12 +73,15 @@ namespace GLFrameworkEngine
         /// </summary>
         public Vector3 RotationEuler
         {
-            get { return RotationMatrix.ExtractEulerAngles(); }
+            get { return rotationEuler; }
             set
             {
+                rotationEuler = value;
                 RotationMatrix = Matrix3Extension.FromEulerAngles(value);
             }
         }
+
+        private Vector3 rotationEuler;
 
         /// <summary>
         /// Gets or sets the <see cref="Rotation"/> using euler method in degrees. 
@@ -83,10 +89,11 @@ namespace GLFrameworkEngine
         [BindGUI("ROTATE", Category = "TRANSFORM")]
         public Vector3 RotationEulerDegrees
         {
-            get { return RotationEuler * STMath.Rad2Deg; }
+            get { return rotationEuler * STMath.Rad2Deg; }
             set
             {
-                RotationEuler = value * STMath.Deg2Rad;
+                rotationEuler = value * STMath.Deg2Rad;
+                RotationMatrix = Matrix3Extension.FromEulerAngles(rotationEuler);
                 NotifyPropertyChanged("RotationEulerDegrees");
             }
         }

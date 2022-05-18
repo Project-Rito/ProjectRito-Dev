@@ -348,13 +348,60 @@ namespace MapStudio.UI
 
         private void DrawSceneWithPostEffects()
         {
-            foreach (var file in _context.Scene.Objects)
-                if (file.IsVisible && file is EditableObject && ((EditableObject)file).UsePostEffects)
-                    file.DrawModel(_context, Pass.OPAQUE);
+            foreach (var obj in _context.Scene.Objects)
+            {
+                if (obj.IsVisible && obj is EditableObject && ((EditableObject)obj).UsePostEffects)
+                {
+                    obj.DrawModel(_context, Pass.OPAQUE);
+                    obj.DrawModel(_context, Pass.TRANSPARENT);
+                }
+            }
 
+            foreach (var group in _context.Scene.InstanceGroups)
+                group.RemoveAll(file => file.UpdateInstanceGroup);
+            _context.Scene.InstanceGroups.RemoveAll(group => group.Count == 0);
             foreach (var file in _context.Scene.Objects)
-                if (file.IsVisible && file is EditableObject && ((EditableObject)file).UsePostEffects)
-                    file.DrawModel(_context, Pass.TRANSPARENT);
+            {
+                if (!(file is IInstanceDrawable))
+                    continue;
+                if (!((IInstanceDrawable)file).UpdateInstanceGroup)
+                    continue;
+                
+                if (!file.IsVisible)
+                    continue;
+
+                if (file is IFrustumCulling)
+                    if (!((IFrustumCulling)file).InFrustum)
+                        continue;
+                ((IInstanceDrawable)file).UpdateInstanceGroup = false;
+
+                bool foundGroup = false;
+                foreach (List<IInstanceDrawable> group in _context.Scene.InstanceGroups)
+                {
+                    if (group.Count == 32) // Put in a new group if this one is full.
+                        continue;
+                    if (((IInstanceDrawable)file).GroupsWith(group[0]))
+                    {
+                        group.Add((IInstanceDrawable)file);
+                        foundGroup = true;
+                        break;
+                    }
+                }
+                if (!foundGroup)
+                    _context.Scene.InstanceGroups.Add(new List<IInstanceDrawable>() { (IInstanceDrawable)file });
+            }
+
+            foreach (var group in _context.Scene.InstanceGroups)
+            {
+                if (group[0] is EditableObject && !((EditableObject)group[0]).UsePostEffects)
+                    continue;
+                List<GLTransform> transforms = new List<GLTransform>(group.Count);
+                foreach (var file in group)
+                    transforms.Add(file.Transform);
+
+                group[0].DrawModel(_context, Pass.OPAQUE, transforms);
+                group[0].DrawModel(_context, Pass.TRANSPARENT, transforms);
+            }
         }
 
         private void DrawSceneNoPostEffects()
@@ -365,13 +412,53 @@ namespace MapStudio.UI
                     continue;
 
                 file.DrawModel(_context, Pass.OPAQUE);
+                file.DrawModel(_context, Pass.TRANSPARENT);
             }
+
+
+            foreach (var group in _context.Scene.InstanceGroups)
+                group.RemoveAll(file => file.UpdateInstanceGroup);
+            _context.Scene.InstanceGroups.RemoveAll(group => group.Count == 0);
             foreach (var file in _context.Scene.Objects)
             {
-                if (!file.IsVisible || file is EditableObject && ((EditableObject)file).UsePostEffects)
+                if (!(file is IInstanceDrawable))
                     continue;
+                if (!((IInstanceDrawable)file).UpdateInstanceGroup)
+                    continue;
+                ((IInstanceDrawable)file).UpdateInstanceGroup = false;
 
-                file.DrawModel(_context, Pass.TRANSPARENT);
+                if (!file.IsVisible)
+                    continue;
+                if (file is IFrustumCulling)
+                    if (!((IFrustumCulling)file).InFrustum)
+                        continue;
+                bool foundGroup = false;
+                foreach (List<IInstanceDrawable> group in _context.Scene.InstanceGroups)
+                {
+                    if (group.Count == 32) // Put in a new group if this one is full.
+                        continue;
+
+                    if (((IInstanceDrawable)file).GroupsWith(group[0]))
+                    {
+                        group.Add((IInstanceDrawable)file);
+                        foundGroup = true;
+                        break;
+                    }
+                }
+                if (!foundGroup)
+                    _context.Scene.InstanceGroups.Add(new List<IInstanceDrawable>() { (IInstanceDrawable)file });
+            }
+
+            foreach (var group in _context.Scene.InstanceGroups)
+            {
+                if (group[0] is EditableObject && ((EditableObject)group[0]).UsePostEffects)
+                    continue;
+                List<GLTransform> transforms = new List<GLTransform>(group.Count);
+                foreach (var file in group)
+                    transforms.Add(file.Transform);
+
+                group[0].DrawModel(_context, Pass.OPAQUE, transforms);
+                group[0].DrawModel(_context, Pass.TRANSPARENT, transforms);
             }
         }
 

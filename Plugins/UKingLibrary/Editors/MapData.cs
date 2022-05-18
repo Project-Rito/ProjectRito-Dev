@@ -6,43 +6,51 @@ using GLFrameworkEngine;
 using Toolbox.Core.ViewModels;
 using MapStudio.UI;
 using Toolbox.Core;
+using Toolbox.Core.IO;
 using ByamlExt.Byaml;
+using CafeLibrary.Rendering;
 
 namespace UKingLibrary
 {
     public class MapData
     {
+        public static bool ShowVisibleActors = true;
+        public static bool ShowInvisibleActors = true;
+        public static bool ShowMapModel = true;
+        public static bool ShowActorLinks = true;
+
         public Dictionary<uint, MapObject> Objs = new Dictionary<uint, MapObject>();
         public Dictionary<uint, RailPathData> Rails = new Dictionary<uint, RailPathData>();
 
-        public List<NodeBase> Nodes = new List<NodeBase>();
+        public NodeBase RootNode = new NodeBase();
 
-        public NodeBase ObjectFolder = new NodeBase(TranslationSource.GetText("OBJECTS"));
-        public NodeBase RailFolder = new NodeBase(TranslationSource.GetText("RAIL_PATHS"));
+        public NodeFolder ObjectFolder = new NodeFolder(TranslationSource.GetText("OBJECTS"));
+        public NodeFolder RailFolder = new NodeFolder(TranslationSource.GetText("RAIL_PATHS"));
 
         BymlFileData Byaml;
+        STFileLoader.Settings FileSettings;
 
         public MapData() { }
 
-        public MapData(Stream stream, string fileName) {
-            Load(stream, fileName);
+        public MapData(Stream stream, IMapLoader parentLoader, string fileName) {
+            Load(stream, parentLoader, fileName);
         }
 
-        public void Load(Stream stream, string fileName) {
-            Load(ByamlFile.LoadN(stream), fileName);
+        public void Load(Stream stream, IMapLoader parentLoader, string fileName) {
+            FileSettings = STFileLoader.TryDecompressFile(stream, fileName);
+
+            Load(ByamlFile.LoadN(FileSettings.Stream), parentLoader, fileName);
         }
 
-        public void Load(BymlFileData byaml, string fileName)
+        public void Load(BymlFileData byaml, IMapLoader parentLoader, string fileName)
         {
             Byaml = byaml;
 
             Dictionary<string, NodeBase> nodeFolders = new Dictionary<string, NodeBase>();
 
-            NodeBase folder = new NodeBase(fileName);
-            folder.AddChild(ObjectFolder);
-            folder.AddChild(RailFolder);
-
-            Nodes.Add(folder);
+            RootNode = new NodeBase(fileName) { Tag = this};
+            RootNode.AddChild(ObjectFolder);
+            RootNode.AddChild(RailFolder);
 
             int numObjs = byaml.RootNode["Objs"].Count;
 
@@ -83,11 +91,11 @@ namespace UKingLibrary
                     }
 
                     //Setup properties for editing
-                    MapObject data = new MapObject();
+                    MapObject obj = new MapObject(parentLoader);
 
-                    data.CreateNew(mapObj, actorInfo, parent, this);
+                    obj.CreateNew(mapObj, actorInfo, parent, this);
                     //Add the renderable to the viewport
-                    data.AddToScene();
+                    obj.AddToScene();
                 }
                 ProcessLoading.Instance.Update((((i+1) * 40)/numObjs) + 70, 100, "Loading map objs");
             }
@@ -142,8 +150,7 @@ namespace UKingLibrary
             }
 
             //Load all the outliner nodes into the editor
-            foreach (var node in nodeFolders.OrderBy(x => x.Key))
-                ObjectFolder.AddChild(node.Value);
+            ObjectFolder.FolderChildren = nodeFolders;
 
             // Set the camera position to the map pos
             if (byaml.RootNode.ContainsKey("LocationPosX") && byaml.RootNode.ContainsKey("LocationPosZ"))
@@ -168,12 +175,51 @@ namespace UKingLibrary
             ProcessLoading.Instance.Update(100, 100, "Finished!");
         }
 
+        public NodeBase AddObject(MapObject obj, IMapLoader parentLoader)
+        {
+            Dictionary<string, NodeBase> nodeFolders = ObjectFolder.FolderChildren;
+
+            string profile = obj.ActorInfo.ContainsKey("profile") ? (string)obj.ActorInfo["profile"] : null;
+
+            //Set nodebase parent as the profile assigned by actor
+            NodeBase parent = null;
+            if (profile != null)
+            {
+                if (!nodeFolders.ContainsKey(profile))
+                {
+                    nodeFolders.Add(profile, new NodeBase(profile));
+                    nodeFolders[profile].HasCheckBox = true; //Allow checking
+                }
+                parent = nodeFolders[profile];
+            }
+            else
+            {
+                if (!nodeFolders.ContainsKey("Unknown"))
+                {
+                    nodeFolders.Add("Unknown", new NodeBase("Unknown"));
+                    nodeFolders["Unknown"].HasCheckBox = true; //Allow checking
+                }
+                parent = nodeFolders["Unknown"];
+            }
+            parent.AddChild(obj.Render.UINode);
+            ObjectFolder.FolderChildren = nodeFolders;
+
+            parentLoader.ParentEditor.Workspace.ScrollToSelectedNode(obj.Render.UINode);
+            return parent;
+        }
+
         public void Save(Stream stream)
         {
             SaveEditor();
             var byamlData = Byaml;
             byamlData.RootNode = PropertiesToValues(Byaml.RootNode);
             ByamlFile.SaveN(stream, byamlData);
+            stream.Position = 0;
+
+            
+            Stream compressed = FileSettings.CompressionFormat.Compress(stream);
+            stream.Position = 0;
+            compressed.CopyTo(stream);
         }
 
         private void SaveEditor()

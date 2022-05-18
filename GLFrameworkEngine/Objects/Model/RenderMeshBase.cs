@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using OpenTK.Graphics.OpenGL;
+using System.Runtime.InteropServices;
 
 namespace GLFrameworkEngine
 {
@@ -44,8 +45,18 @@ namespace GLFrameworkEngine
 
             Draw(context);
         }
+        public void DrawPicking(GLContext context, ITransformableObject pickable, List<OpenTK.Matrix4> modelMatrices)
+        {
+            float[] modelMatricesFloatArr = MemoryMarshal.Cast<OpenTK.Matrix4, float>(modelMatrices.ToArray()).ToArray();
 
-        public void DrawWithSelection(GLContext context, bool isSelected)
+            context.CurrentShader = GlobalShaders.GetShader("PICKING");
+            context.ColorPicker.SetPickingColor(pickable, context.CurrentShader);
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, modelMatricesFloatArr);
+
+            Draw(context);
+        }
+
+        public void DrawWithSelection(GLContext context, bool isSelected, int instanceCount = 1)
         {
             context.CurrentShader.SetVector4(GLConstants.SelectionColorUniform, OpenTK.Vector4.Zero);
 
@@ -60,7 +71,7 @@ namespace GLFrameworkEngine
                 context.CurrentShader.SetVector4(GLConstants.SelectionColorUniform, new OpenTK.Vector4(GLConstants.SelectColor.Xyz, 0.5f));
             }
 
-            Draw(context);
+            DrawInstanced(context, instanceCount);
             context.CurrentShader.SetVector4(GLConstants.SelectionColorUniform, OpenTK.Vector4.Zero);
 
             context.CurrentShader.SetInt("hasTextures", 0);
@@ -77,7 +88,7 @@ namespace GLFrameworkEngine
                 GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
 
                 GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-                Draw(context);
+                DrawInstanced(context, instanceCount);
                 GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
 
                 GL.Disable(EnableCap.StencilTest);
@@ -98,6 +109,19 @@ namespace GLFrameworkEngine
 
             DrawWithSelection(context, isSelected);
         }
+        public void DrawSolidWithSelection(GLContext context, List<OpenTK.Matrix4> modelMatrices, OpenTK.Vector4 color, bool isSelected)
+        {
+            var standard = new StandardInstancedMaterial();
+            standard.Color = color;
+            standard.ModelMatrices = modelMatrices;
+            standard.DisplaySelection = isSelected;
+            standard.Render(context);
+
+            GL.Enable(EnableCap.CullFace);
+            GL.CullFace(CullFaceMode.Back);
+
+            DrawWithSelection(context, isSelected, modelMatrices.Count);
+        }
 
         public void DrawSolid(GLContext context, OpenTK.Matrix4 modelMatrix, OpenTK.Vector4 color)
         {
@@ -107,6 +131,15 @@ namespace GLFrameworkEngine
             standard.Render(context);
 
             Draw(context);
+        }
+        public void DrawSolid(GLContext context, List<OpenTK.Matrix4> modelMatrices, OpenTK.Vector4 color)
+        {
+            var standard = new StandardInstancedMaterial();
+            standard.Color = color;
+            standard.ModelMatrices = modelMatrices;
+            standard.Render(context);
+
+            DrawInstanced(context, modelMatrices.Count);
         }
 
         public void DrawHalfLambert(GLContext context, OpenTK.Matrix4 modelMatrix, OpenTK.Vector4 color)
@@ -118,6 +151,16 @@ namespace GLFrameworkEngine
             standard.Render(context);
 
             Draw(context);
+        }
+        public void DrawHalfLambert(GLContext context, List<OpenTK.Matrix4> modelMatrices, OpenTK.Vector4 color)
+        {
+            var standard = new StandardInstancedMaterial();
+            standard.HalfLambertShading = true;
+            standard.Color = color;
+            standard.ModelMatrices = modelMatrices;
+            standard.Render(context);
+
+            DrawInstanced(context, modelMatrices.Count);
         }
 
         /// <summary>
@@ -131,11 +174,11 @@ namespace GLFrameworkEngine
             Draw(shader, DrawCount, 0);
         }
 
-        public void DrawInstance(GLContext context, int instanceCount) {
+        public void DrawInstanced(GLContext context, int instanceCount) {
             DrawInstances(context.CurrentShader, DrawCount, instanceCount, 0);
         }
 
-        public void DrawInstance(ShaderProgram shader, int instanceCount) {
+        public void DrawInstanced(ShaderProgram shader, int instanceCount) {
             DrawInstances(shader, DrawCount, instanceCount, 0);
         }
 
@@ -198,7 +241,7 @@ namespace GLFrameworkEngine
         }
 
         private void DrawElementsInstanced(int count, int instanceCount, int offset = 0) {
-            GL.DrawElements(primitiveType, count, DrawElementsType.UnsignedInt, offset);
+            GL.DrawElementsInstanced(primitiveType, count, DrawElementsType.UnsignedInt, (IntPtr)offset, instanceCount);
 
             ResourceTracker.NumDrawCalls += 1;
             ResourceTracker.NumDrawTriangles += count;

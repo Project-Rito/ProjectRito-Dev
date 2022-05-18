@@ -450,38 +450,38 @@ namespace GLFrameworkEngine
             return (min + max) * 0.5f;
         }
 
-        public void OnKeyDown(GLContext context)
+        public void OnKeyDown(KeyEventInfo e, GLContext context)
         {
-            bool multiAxis = KeyInfo.EventInfo.KeyCtrl;
+            bool multiAxis = e.KeyCtrl;
 
             //Axis set
             if (multiAxis)
             {
-                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisX)) UpdateAxis(context, Axis.YZ);
-                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisY)) UpdateAxis(context, Axis.XZ);
-                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisZ)) UpdateAxis(context, Axis.XY);
+                if (e.IsKeyDown(InputSettings.INPUT.Transform.AxisX)) UpdateAxis(context, Axis.YZ);
+                if (e.IsKeyDown(InputSettings.INPUT.Transform.AxisY)) UpdateAxis(context, Axis.XZ);
+                if (e.IsKeyDown(InputSettings.INPUT.Transform.AxisZ)) UpdateAxis(context, Axis.XY);
             }
             else
             {
-                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisX)) UpdateAxis(context, Axis.X);
-                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisY)) UpdateAxis(context, Axis.Y);
-                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.AxisZ)) UpdateAxis(context, Axis.Z);
+                if (e.IsKeyDown(InputSettings.INPUT.Transform.AxisX)) UpdateAxis(context, Axis.X);
+                if (e.IsKeyDown(InputSettings.INPUT.Transform.AxisY)) UpdateAxis(context, Axis.Y);
+                if (e.IsKeyDown(InputSettings.INPUT.Transform.AxisZ)) UpdateAxis(context, Axis.Z);
             }
 
             if (!KeyInfo.EventInfo.KeyCtrl)
             {
                 //SRT action set
-                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.TranslateGizmo)) UpdateTransformMode(TransformActions.Translate);
-                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.RotateGizmo)) UpdateTransformMode(TransformActions.Rotate);
-                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.ScaleGizmo)) UpdateTransformMode(TransformActions.Scale);
+                if (e.IsKeyDown(InputSettings.INPUT.Transform.TranslateGizmo)) UpdateTransformMode(TransformActions.Translate);
+                if (e.IsKeyDown(InputSettings.INPUT.Transform.RotateGizmo)) UpdateTransformMode(TransformActions.Rotate);
+                if (e.IsKeyDown(InputSettings.INPUT.Transform.ScaleGizmo)) UpdateTransformMode(TransformActions.Scale);
 
                 //SRT action starting
-                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.Scale)) DragTransformAction(context, TransformActions.Scale);
-                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.Rotate)) DragTransformAction(context, TransformActions.Rotate);
-                if (KeyInfo.EventInfo.IsKeyDown(InputSettings.INPUT.Transform.Translate)) DragTransformAction(context, TransformActions.Translate);
+                if (e.IsKeyDown(InputSettings.INPUT.Transform.Scale)) DragTransformAction(context, TransformActions.Scale);
+                if (e.IsKeyDown(InputSettings.INPUT.Transform.Rotate)) DragTransformAction(context, TransformActions.Rotate);
+                if (e.IsKeyDown(InputSettings.INPUT.Transform.Translate)) DragTransformAction(context, TransformActions.Translate);
             }
 
-            if (ActiveActions.Count > 0 && !KeyInfo.EventInfo.KeyCtrl)
+            if (ActiveActions.Count > 0 && !e.KeyCtrl)
             {
                 TextInput();
                 if (!string.IsNullOrEmpty(textInput)) {

@@ -9,70 +9,128 @@ using UKingLibrary.UI;
 using MapStudio.UI;
 using CafeLibrary;
 using Toolbox.Core.IO;
+using Toolbox.Core.ViewModels;
 using GLFrameworkEngine;
 
 namespace UKingLibrary
 {
-    public class FieldMapLoader
+    public class FieldMapLoader : IMapLoader
     {
-        public MuuntByamlPlugin MubinPlugin;
+        /// <summary>
+        /// The preview scale to use for everything loaded by this.
+        /// </summary>
+        public const float PreviewScale = 25;
 
-        public List<MapData> MapFiles = new List<MapData>();
-        public SARC TitleBG;
-        public Terrain Terrain;
+        /// <summary>
+        /// The editor that this is associated with.
+        /// </summary>
+        public UKingEditor ParentEditor { get; set; }
+
+        /// <summary>
+        /// The scene associated with the field.
+        /// </summary>
+        public GLScene Scene { get; set; } = new GLScene();
+
+        /// <summary>
+        /// The node associated with the field. Duh.
+        /// </summary>
+        public NodeFolder RootNode { get; set; } = new NodeFolder();
+
+
+        /// <summary>
+        /// All loaded MapData. Included here for convenience,
+        /// but MapData is also present in RootNode as a tag.
+        /// </summary>
+        public List<MapData> MapData { get; set; } = new List<MapData>();
+
+        /// <summary>
+        /// The terrain for this field
+        /// </summary>
+        public Terrain Terrain { get; set; } = new Terrain();
 
         /// <summary>
         /// Instancing info related to trees.
         /// </summary>
         public ProdInfo TreeInstancesInfo;
 
+        /// <summary>
+        /// Instancing info related to clusters.
+        /// </summary>
         public List<ProdInfo> Clusters = new List<ProdInfo>();
 
-        public Vector2 SectionIDs = new Vector2(0, 0);
-
-        static string SectionName;
-
-        public void Load(MuuntByamlPlugin plugin, MapMuuntEditor editor, Stream stream)
+        public FieldMapLoader(string fieldName)
         {
-            MubinPlugin = plugin;
+            RootNode.Header = fieldName;
+            RootNode.Tag = this;
+            Scene.Init();
 
-            GLFrameworkEngine.GLContext.PreviewScale = 25;
+            Terrain.LoadTerrainTable(fieldName);
+        }
+
+        public MapData LoadMuunt(string fileName, Stream stream, UKingEditor editor)
+        {
+            ParentEditor = editor;
+            ParentEditor.Workspace.Windows.Add(new ActorLinkNodeUI());
 
             ProcessLoading.Instance.Update(0, 100, "Loading map files");
 
-            string fileName = plugin.FileInfo.FileName;
-            SectionName = fileName.Substring(0, 3);
-
-            bool IsDungeon = fileName.Contains("Dungeon");
-            if (!IsDungeon)
-            {
-                SectionIDs = GetSectionIndex(SectionName);
-                CacheBackgroundFiles();
-
-                Terrain.LoadTerrainSection((int)SectionIDs.X, (int)SectionIDs.Y, PluginConfig.MaxTerrainLOD);
-            }
-
+            ApplyPreviewScale();
             GlobalData.LoadActorDatabase();
 
-            var mapData = new MapData(stream, plugin.FileInfo.FileName);
-            MapFiles.Add(mapData);
+            var mapData = new MapData(stream, this, fileName);
+            RootNode.TryAddChild(new NodeFolder(GetSectionName(fileName)));
+            RootNode.FolderChildren[GetSectionName(fileName)].AddChild(mapData.RootNode);
+            MapData.Add(mapData);
 
-            editor.Load(MapFiles);
-            //LoadProdInfo(editor);
-
-            Workspace.ActiveWorkspace.Windows.Add(new ActorLinkNodeUI());
+            return mapData;
         }
 
-        private void LoadProdInfo(MapMuuntEditor editor)
+        public void LoadTerrain(string fieldName, int areaID, int sectionID, int lodLevel = 8)
         {
-            TreeInstancesInfo = new ProdInfo(new MemoryStream(GetTreeProdInfo()));
+            ApplyPreviewScale();
+            Terrain.LoadTerrainSection(fieldName, areaID, sectionID, this, lodLevel);
+        }
+
+        public static string GetSectionName(string fileName)
+        {
+            return fileName.Substring(0, 3);
+        }
+
+        public void Save(string savePath)
+        {
+            foreach (NodeFolder sectionFolder in RootNode.Children)
+            {
+                foreach (NodeBase file in sectionFolder.Children)
+                {
+                    string fileName = file.Header;
+                    MapData mapData = (MapData)file.Tag;
+
+                    MemoryStream saveStream = new MemoryStream();
+                    mapData.Save(saveStream);
+
+                    Directory.CreateDirectory(Path.Join(savePath, $"aoc/0010/Map/{RootNode.Header}/{GetSectionName(fileName)}"));
+                    FileStream fileStream = File.Open(Path.Join(savePath, $"aoc/0010/Map/{RootNode.Header}/{GetSectionName(fileName)}/{fileName}"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
+
+                    saveStream.WriteTo(fileStream);
+
+                    fileStream.SetLength(fileStream.Position);
+                    fileStream.Flush();
+                    fileStream.Close();
+                }
+            }
+        }
+
+        /*
+        private void LoadProdInfo(string fieldName, UKingEditor editor)
+        {
+            TreeInstancesInfo = new ProdInfo(new MemoryStream(GetTreeProdInfo(fieldName, editor)));
             editor.LoadProd(TreeInstancesInfo, $"{SectionName}_TeraTree.sblwb");
 
             Clusters.Clear();
             string[] prodIDs = new string[] { "00", "01", "10", "11" };
             foreach (var id in prodIDs)
             {
-                var path = PluginConfig.GetContentPath($"Map/{PluginConfig.FieldName}/{SectionName}/{SectionName}.{id}_Clustering.sblwp");
+                var path = PluginConfig.GetContentPath($"Map/{fieldName}/{SectionName}/{SectionName}.{id}_Clustering.sblwp");
                 if (!File.Exists(path))
                     continue;
 
@@ -84,72 +142,28 @@ namespace UKingLibrary
             }
         }
 
-        public void Save(Stream stream)
+        private byte[] GetTreeProdInfo(string fieldName, UKingEditor editor)
         {
-            //Save the map data
-            foreach (var map in MapFiles)
-                map.Save(stream);
-        }
-
-        private void CacheBackgroundFiles()
-        {
-            {
-                // Where to cache to
-                string cache = PluginConfig.GetCachePath($"Images\\Terrain");
-                if (!Directory.Exists(cache))
-                {
-
-                    // Get the data from the bfres
-                    string path = PluginConfig.GetContentPath("Model\\Terrain.Tex1.sbfres");
-                    var texs = CafeLibrary.Rendering.BfresLoader.GetTextures(path);
-                    if (texs == null)
-                        return;
-
-                    Directory.CreateDirectory(cache); // Ensure that our cache folder exists
-                    foreach (var tex in texs)
-                    {
-                        string outputPath = $"{cache}\\{tex.Key}";
-                        if (tex.Value.RenderTexture is GLTexture2D)
-                            ((GLTexture2D)tex.Value.RenderTexture).Save(outputPath);
-                        else
-                            ((GLTexture2DArray)tex.Value.RenderTexture).Save(outputPath);
-                    }
-                }
-            }
-            {
-                Terrain = new Terrain();
-                Terrain.LoadTerrainTable(PluginConfig.FieldName);
-            }
-            {
-                var path = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
-                TitleBG = new SARC();
-                TitleBG.Load(File.OpenRead(path));
-            }
-        }
-
-        private byte[] GetTreeProdInfo()
-        {
-            var data = TitleBG.SarcData.Files[$"Map/{PluginConfig.FieldName}/{SectionName}/{SectionName}_TeraTree.sblwp"];
+            var data = editor.TitleBG.SarcData.Files[$"Map/{fieldName}/{SectionName}/{SectionName}_TeraTree.sblwp"];
             return Toolbox.Core.IO.YAZ0.Decompress(data);
         }
 
-        private byte[] GetClusterProdInfo(string id)
+        private byte[] GetClusterProdInfo(string fieldName, string id)
         {
-            var path = PluginConfig.GetContentPath($"Map/{PluginConfig.FieldName}/{SectionName}/{SectionName}.{id}_Clustering.sblwp");
+            var path = PluginConfig.GetContentPath($"Map/{fieldName}/{SectionName}/{SectionName}.{id}_Clustering.sblwp");
             return Toolbox.Core.IO.YAZ0.Decompress(path);
         }
+        */
 
-        private Vector2 GetSectionIndex(string mapName)
+        public static void ApplyPreviewScale()
         {
-            string[] values = mapName.Split("-");
-            int sectionID = values[0][0] - 'A' - 1;
-            int sectionRegion = int.Parse(values[1]);
-            return new Vector2(sectionID, sectionRegion);
+            GLFrameworkEngine.GLContext.PreviewScale = PreviewScale;
         }
 
         public void Dispose()
         {
-            Terrain?.Dispose();
+            foreach (MapData mapData in MapData)
+                mapData.Dispose();
         }
     }
 }

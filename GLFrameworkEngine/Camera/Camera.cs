@@ -357,7 +357,7 @@ namespace GLFrameworkEngine
             //Frustum checks
             foreach (var ob in GLContext.ActiveContext.Scene.Objects) {
                 if (ob is IFrustumCulling && ((IFrustumCulling)ob).EnableFrustumCulling)
-                   ((IFrustumCulling)ob).InFrustum = ((IFrustumCulling)ob).IsInsideFrustum(GLContext.ActiveContext);
+                    ((IFrustumCulling)ob).InFrustum = ((IFrustumCulling)ob).IsInsideFrustum(GLContext.ActiveContext);
             }
         }
 

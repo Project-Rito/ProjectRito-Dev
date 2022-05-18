@@ -31,9 +31,6 @@ namespace UKingLibrary
         static List<bool> HasValidModPaths;
 
         [JsonProperty]
-        public static string FieldName = @"MainField";
-
-        [JsonProperty]
         public static int MaxTerrainLOD = 5;
 
         [JsonProperty]
@@ -80,22 +77,6 @@ namespace UKingLibrary
             // All of this should eventually be moved per-3D-scene
             if (ImGui.BeginMenu($"{TranslationSource.GetText("TERRAIN")}##uk_vmenu02"))
             {
-                // Desired rendered terrain
-                string[] fieldNames = { "AocField", "MainField" };
-                if (ImGui.BeginCombo(TranslationSource.GetText("FIELD_NAME"), FieldName))
-                {
-                    for (int i = 0; i < fieldNames.Length; i++)
-                    {
-                        bool is_selected = (FieldName == fieldNames[i]);
-                        if (ImGui.Selectable(fieldNames[i], is_selected))
-                            FieldName = fieldNames[i];
-                        if (is_selected)
-                            ImGui.SetItemDefaultFocus();
-                    }
-                    ImGui.EndCombo();
-                    Save();
-                }
-
                 if (ImGui.SliderInt(TranslationSource.GetText("MAX_DETAIL"), ref MaxTerrainLOD, 0, 7))
                     Save();
 #if DEBUG
@@ -110,23 +91,53 @@ namespace UKingLibrary
         {
             //Mod content
             foreach (string modPath in ModPaths) {
-                if (File.Exists($"{modPath}\\aoc\\0010\\{relativePath}"))    return $"{modPath}\\aoc\\0010\\{relativePath}";
-                if (File.Exists($"{modPath}\\aoc\\0011\\{relativePath}"))    return $"{modPath}\\aoc\\0011\\{relativePath}";
-                if (File.Exists($"{modPath}\\aoc\\0012\\{relativePath}"))    return $"{modPath}\\aoc\\0012\\{relativePath}";
+                if (File.Exists($"{modPath}\\aoc\\0010\\{relativePath}") || Directory.Exists($"{modPath}\\aoc\\0010\\{relativePath}"))    return $"{modPath}\\aoc\\0010\\{relativePath}";
+                if (File.Exists($"{modPath}\\aoc\\0011\\{relativePath}") || Directory.Exists($"{modPath}\\aoc\\0011\\{relativePath}"))    return $"{modPath}\\aoc\\0011\\{relativePath}";
+                if (File.Exists($"{modPath}\\aoc\\0012\\{relativePath}") || Directory.Exists($"{modPath}\\aoc\\0012\\{relativePath}"))    return $"{modPath}\\aoc\\0012\\{relativePath}";
 
-                if (File.Exists($"{modPath}\\content\\{relativePath}")) return $"{modPath}\\content\\{relativePath}";
+                if (File.Exists($"{modPath}\\content\\{relativePath}") || Directory.Exists($"{modPath}\\content\\{relativePath}")) return $"{modPath}\\content\\{relativePath}";
             }
 
             //DLC content
-            if (File.Exists($"{AocPath}\\0010\\{relativePath}"))    return $"{AocPath}\\0010\\{relativePath}";
-            if (File.Exists($"{AocPath}\\0011\\{relativePath}"))    return $"{AocPath}\\0011\\{relativePath}";
-            if (File.Exists($"{AocPath}\\0012\\{relativePath}"))    return $"{AocPath}\\0012\\{relativePath}";
+            if (File.Exists($"{AocPath}\\0010\\{relativePath}") || Directory.Exists($"{AocPath}\\0010\\{relativePath}"))    return $"{AocPath}\\0010\\{relativePath}";
+            if (File.Exists($"{AocPath}\\0011\\{relativePath}") || Directory.Exists($"{AocPath}\\0011\\{relativePath}"))    return $"{AocPath}\\0011\\{relativePath}";
+            if (File.Exists($"{AocPath}\\0012\\{relativePath}") || Directory.Exists($"{AocPath}\\0012\\{relativePath}"))    return $"{AocPath}\\0012\\{relativePath}";
             //Update content
-            if (File.Exists($"{UpdatePath}\\{relativePath}")) return $"{UpdatePath}\\{relativePath}";
+            if (File.Exists($"{UpdatePath}\\{relativePath}") || Directory.Exists($"{UpdatePath}\\{relativePath}")) return $"{UpdatePath}\\{relativePath}";
             //Base game content
-            if (File.Exists($"{GamePath}\\{relativePath}"))   return $"{GamePath}\\{relativePath}";
+            if (File.Exists($"{GamePath}\\{relativePath}") || Directory.Exists($"{GamePath}\\{relativePath}"))   return $"{GamePath}\\{relativePath}";
 
             return relativePath;
+        }
+
+        /// <summary>
+        /// Gets all content paths in an array ordered from base to extension
+        /// </summary>
+        public static string[] GetContentPaths(string relativePath)
+        {
+            List<string> relativePaths = new List<string>(1);
+
+            //Mod content
+            foreach (string modPath in ModPaths)
+            {
+                if (File.Exists($"{modPath}\\aoc\\0010\\{relativePath}") || Directory.Exists($"{modPath}\\aoc\\0010\\{relativePath}")) relativePaths.Add($"{modPath}\\aoc\\0010\\{relativePath}");
+                if (File.Exists($"{modPath}\\aoc\\0011\\{relativePath}") || Directory.Exists($"{modPath}\\aoc\\0011\\{relativePath}")) relativePaths.Add($"{modPath}\\aoc\\0011\\{relativePath}");
+                if (File.Exists($"{modPath}\\aoc\\0012\\{relativePath}") || Directory.Exists($"{modPath}\\aoc\\0012\\{relativePath}")) relativePaths.Add($"{modPath}\\aoc\\0012\\{relativePath}");
+
+                if (File.Exists($"{modPath}\\content\\{relativePath}") || Directory.Exists($"{modPath}\\content\\{relativePath}")) relativePaths.Add($"{modPath}\\content\\{relativePath}");
+            }
+
+            //DLC content
+            if (File.Exists($"{AocPath}\\0010\\{relativePath}") || File.Exists($"{AocPath}\\0010\\{relativePath}")) relativePaths.Add($"{AocPath}\\0010\\{relativePath}");
+            if (File.Exists($"{AocPath}\\0011\\{relativePath}") || File.Exists($"{AocPath}\\0011\\{relativePath}")) relativePaths.Add($"{AocPath}\\0011\\{relativePath}");
+            if (File.Exists($"{AocPath}\\0012\\{relativePath}") || File.Exists($"{AocPath}\\0012\\{relativePath}")) relativePaths.Add($"{AocPath}\\0012\\{relativePath}");
+            //Update content
+            if (File.Exists($"{UpdatePath}\\{relativePath}") || Directory.Exists($"{UpdatePath}\\{relativePath}")) relativePaths.Add($"{UpdatePath}\\{relativePath}");
+            //Base game content
+            if (File.Exists($"{GamePath}\\{relativePath}") || Directory.Exists($"{GamePath}\\{relativePath}")) relativePaths.Add($"{GamePath}\\{relativePath}");
+
+            relativePath.Reverse();
+            return relativePaths.ToArray();
         }
 
         public static string GetCachePath(string relativePath)

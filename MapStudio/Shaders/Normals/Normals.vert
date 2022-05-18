@@ -8,7 +8,7 @@ out VS_OUT {
 } vs_out;
 
 
-uniform mat4 mtxMdl;
+uniform mat4[32] mtxMdl;
 uniform mat4 mtxCam;
 
 uniform mat4 mtxProj;
@@ -18,9 +18,9 @@ void main()
 {
 	vec3 normal = vNormal;
 
-	normal = normalize(mat3(mtxMdl) * normal.xyz);
+	normal = normalize(mat3(mtxMdl[gl_InstanceID]) * normal.xyz);
 
-	gl_Position = mtxCam * mtxMdl * vec4(vPosition.xyz, 1);
-    mat3 normalMatrix = mat3(transpose(inverse(camMtx * mtxMdl)));
+	gl_Position = mtxCam * mtxMdl[gl_InstanceID] * vec4(vPosition.xyz, 1);
+    mat3 normalMatrix = mat3(transpose(inverse(camMtx * mtxMdl[gl_InstanceID])));
     vs_out.normal = normalize(vec3(mtxProj * vec4(normalMatrix * normal, 0.0)));
 }

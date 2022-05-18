@@ -177,7 +177,7 @@ namespace GLFrameworkEngine
                 LineMaterial.Color = LineColor;
 
                 if ((IsSelected || IsHovered) && !EditMode)
-                    LineMaterial.Color = GLConstants.SelectColor;
+                    LineMaterial.Color = new Vector4(GLConstants.SelectColor.Xyz, 1);
 
                 LineMaterial.Render(context);
             }
@@ -321,7 +321,7 @@ namespace GLFrameworkEngine
 
             //Draw the cone with a solid shader
             Matrix4 modelMatrix = offsetMat * Matrix4.CreateScale(scale) * rotation * translateMat;
-            ConeRenderer.DrawSolid(context, rot * modelMatrix, ArrowColor);
+            ConeRenderer.DrawSolid(context, new List<Matrix4> { rot * modelMatrix }, ArrowColor);
         }
 
         static Matrix4 RotationFromTo(Vector3 start, Vector3 end)

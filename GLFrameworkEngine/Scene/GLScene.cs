@@ -32,6 +32,11 @@ namespace GLFrameworkEngine
         public List<IDrawable> Objects = new List<IDrawable>();
 
         /// <summary>
+        /// Used to keep track of what objects can be grouped into a single draw call.
+        /// </summary>
+        public List<List<IInstanceDrawable>> InstanceGroups = new List<List<IInstanceDrawable>>();
+
+        /// <summary>
         /// A list of objects in edit mode.
         /// </summary>
         public List<ITransformableObject> EditModeObjects = new List<ITransformableObject>();
@@ -54,6 +59,20 @@ namespace GLFrameworkEngine
 
         public List<ITransformableObject> GetSelected() {
             return GetSelectableObjects().Where(x => x.IsSelected).ToList();
+        }
+
+        public bool IsInit()
+        {
+            return Cursor3D != null;
+        }
+
+        public void Init()
+        {
+            if (IsInit())
+                return;
+
+            ShadowRenderer = new ShadowMainRenderer();
+            Cursor3D = new Cursor3D();
         }
 
         public void SetCursor(GLContext context, int x, int y)

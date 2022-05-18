@@ -262,14 +262,14 @@ namespace GLFrameworkEngine
             Max = max;
         }
 
-        public void DrawSolid(GLContext context, Matrix4 transform, Vector4 color)
+        public void DrawSolid(GLContext context, Matrix4 transform, Vector4 color, int instanceCount = 1)
         {
             UpdateTransform(transform);
 
-            var solid = new StandardMaterial();
+            var solid = new StandardInstancedMaterial();
             solid.Color = color;
             solid.Render(context);
-            BoundingBoxRender.Draw(context, Min, Max);
+            BoundingBoxRender.Draw(context, Min, Max, instanceCount);
         }
 
         public void Draw(GLContext context) {

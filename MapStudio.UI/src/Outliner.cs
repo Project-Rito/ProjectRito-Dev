@@ -23,6 +23,7 @@ namespace MapStudio.UI
         public bool IsFocused = false;
 
         public List<MenuItemModel> ContextMenu = new List<MenuItemModel>();
+        public static MenuItemModel NewItemContextMenu = new MenuItemModel("ADD_NEW");
         public List<MenuItemModel> FilterMenuItems = new List<MenuItemModel>();
 
         public List<NodeBase> Nodes = new List<NodeBase>();
@@ -116,10 +117,6 @@ namespace MapStudio.UI
             if (target == null) //todo check visiblity.
                 return;
 
-            //Do not scroll to displayed selected node
-            if (SelectedNodes.Contains(target))
-                return;
-
             //Expand parents if necessary
             target.ExpandParent();
 
@@ -181,10 +178,24 @@ namespace MapStudio.UI
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4());
 
-                if (ImGui.Button($"{IconManager.FILTER_ICON}")) {
-                    ImGui.OpenPopup("filter1");
+                if (ImGui.Button($"{IconManager.ADD_ICON}", new System.Numerics.Vector2(23)))
+                {
+                    ImGui.OpenPopup("addnew1");
+                }
+                if (ImGui.BeginPopup("addnew1"))
+                {
+                    foreach (var menuItem in ContextMenu)
+                    {
+                        ImGuiHelper.LoadMenuItem(menuItem);
+                    }
+                    ImGuiHelper.LoadMenuItem(NewItemContextMenu);
+                    ImGui.EndPopup();
                 }
 
+
+                if (ImGui.Button($"{IconManager.FILTER_ICON}", new System.Numerics.Vector2(23))) {
+                    ImGui.OpenPopup("filter1");
+                }
                 if (ImGui.BeginPopup("filter1"))
                 {
                     foreach (var item in FilterMenuItems)
@@ -231,10 +242,10 @@ namespace MapStudio.UI
                     CalculateCount(node, ref count);
 
                 ImGuiNative.igSetNextWindowContentSize(new System.Numerics.Vector2(0.0f, count * ItemHeight));
-                ImGui.BeginChild("##tree_view1");
+                ImGui.BeginChild("##tree_view1", new Vector2(0, 0), false, ImGuiWindowFlags.HorizontalScrollbar);
             }
             else
-                ImGui.BeginChild("##tree_view1");
+                ImGui.BeginChild("##tree_view1", new Vector2(0, 0), false, ImGuiWindowFlags.HorizontalScrollbar);
 
             IsFocused = ImGui.IsWindowFocused();
 
@@ -258,6 +269,16 @@ namespace MapStudio.UI
 
             ImGui.EndChild();
             ImGui.PopStyleColor(2);
+            /* TODO - figure out how to make right-click for add menu only work on background of outliner.
+            if (ImGui.BeginPopupContextItem("##OUTLINER_POPUP", ImGuiPopupFlags.MouseButtonRight))
+            {
+                foreach (var menuItem in ContextMenu)
+                {
+                    ImGuiHelper.LoadMenuItem(menuItem);
+                }
+                ImGuiHelper.LoadMenuItem(NewItemContextMenu);
+                ImGui.EndPopup();
+            }*/
         }
 
         private void SetupNodes(NodeBase node)
@@ -357,7 +378,10 @@ namespace MapStudio.UI
             if (SelectedNodes.Contains(node))
                 flags |= ImGuiTreeNodeFlags.Selected;
 
-            if (isSearch && HasText || !isSearch)
+            //if (clip)
+                
+
+            if ((isSearch && HasText || !isSearch))
             {
                 //Add active file format styling. This determines what file to save.
                 //For files inside archives, it gets the parent of the file format to save.
@@ -651,16 +675,15 @@ namespace MapStudio.UI
             {
                 //Todo find a better alternative to clip parents
                 //Clip only the last level. Don't clip more than 3 levels to prevent clipping issues.
-                if (ClipNodes && node.Children.Count > 0 && node.Children[0].Children.Count == 0 && level < 3)
+                if (ClipNodes && node.Children.Count > 0 && node.Children.All(x => x.Children.Count == 0) && level < 3)
                 {
                     var children = node.Children.ToList();
                     if (isSearch)
                         children = GetSearchableNodes(children);
 
                     var clipper = new ImGuiListClipper2(children.Count, itemHeight);
-                    clipper.ItemsCount = children.Count;
 
-                    for (int line_i = clipper.DisplayStart; line_i < clipper.DisplayEnd; line_i++) // display only visible items
+                    for (int line_i = clipper.DisplayStart; line_i < clipper.DisplayEnd; line_i++)
                     {
                         DrawNode(children[line_i], itemHeight, level);
                     }
@@ -707,11 +730,6 @@ namespace MapStudio.UI
         {
             foreach (var item in node.ContextMenus)
                 LoadMenuItem(item);
-
-            foreach (var menuItem in ContextMenu)
-            {
-                ImGuiHelper.LoadMenuItem(menuItem);
-            }
 
             if (node.Tag is ICheckableNode)
             {
@@ -772,15 +790,14 @@ namespace MapStudio.UI
                 return;
             }
 
-            if (item.MenuItems.Count > 0)
+            if (item.MenuItems?.Count > 0)
             {
-                bool menuItem = ImGui.MenuItem(item.Header, "", true);
-                var hovered = ImGui.IsItemHovered();
 
-                if (menuItem && hovered)
+                if (ImGui.BeginMenu(item.Header))
                 {
-                    foreach (var c in item.MenuItems)
-                        LoadMenuItem(c);
+                    foreach (var child in item.MenuItems)
+                        LoadMenuItem(child);
+
                     ImGui.EndMenu();
                 }
             }

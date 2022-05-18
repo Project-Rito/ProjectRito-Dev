@@ -57,8 +57,15 @@ namespace MapStudio.UI
                 string path = asset.FileInfo.FileName;
 
                 ProjectFile.FileAssets.Add(path);
-                if (!File.Exists($"{ProjectFolder}\\{path}"))
+                if (!File.Exists($"{ProjectFolder}\\{path}") && File.Exists(asset.FileInfo.FilePath))
                     File.Copy(asset.FileInfo.FilePath, $"{ProjectFolder}\\{path}");
+                else if (!File.Exists(asset.FileInfo.FilePath))
+                {
+                    if (asset.FileInfo.FilePath == null)
+                        asset.FileInfo.FilePath = $"{ProjectFolder}\\{path}";
+
+                    SaveFileData(asset);
+                }
             }
             //Save json file
             ProjectFile.Save(filePath);
@@ -67,9 +74,13 @@ namespace MapStudio.UI
         public void SaveFileData() {
             foreach (var file in Files)
             {
-                Toolbox.Core.IO.STFileSaver.SaveFileFormat(file, file.FileInfo.FilePath);
-                StudioLogger.WriteLine(string.Format(TranslationSource.GetText("SAVED_FILE"), file.FileInfo.FilePath));
+                SaveFileData(file);
             }
+        }
+        public void SaveFileData(IFileFormat file)
+        {
+            Toolbox.Core.IO.STFileSaver.SaveFileFormat(file, file.FileInfo.FilePath);
+            StudioLogger.WriteLine(string.Format(TranslationSource.GetText("SAVED_FILE"), file.FileInfo.FilePath));
         }
 
         public void AddFile(IFileFormat file) {

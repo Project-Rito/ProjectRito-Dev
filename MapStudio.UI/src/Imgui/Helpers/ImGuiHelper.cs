@@ -35,23 +35,43 @@ namespace MapStudio.UI
                 return;
             }
 
-            if (item.MenuItems.Count == 0)
+            if (item.MenuItems?.Count > 0)
             {
-                if (ImGui.MenuItem(header, "", item.IsChecked, item.IsEnabled)) {
-                    if (item.CanCheck)
-                        item.IsChecked = !item.IsChecked;
-                    item.Command.Execute(item);
-                }
-            }
-            else
-            {
-                if (ImGui.BeginMenu(header)) {
+                if (ImGui.BeginMenu(header))
+                {
                     foreach (var child in item.MenuItems)
                         LoadMenuItem(child);
 
                     ImGui.EndMenu();
                 }
             }
+            else
+            {
+                if (ImGui.MenuItem(header, "", item.IsChecked, item.IsEnabled))
+                {
+                    if (item.CanCheck)
+                        item.IsChecked = !item.IsChecked;
+                    item.Command.Execute(item);
+                }
+            }
+        }
+
+        public static void BoldTextLabel(string key, string label)
+        {
+            ImGuiHelper.BeginBoldText();
+            ImGui.Text($"{key}:");
+            ImGuiHelper.EndBoldText();
+
+            ImGui.SameLine();
+            ImGui.TextColored(ImGui.GetStyle().Colors[(int)ImGuiCol.Text], label);
+        }
+
+        public static void BeginBoldText() {
+            ImGui.PushFont(ImGuiController.DefaultFontBold);
+        }
+
+        public static void EndBoldText() {
+            ImGui.PopFont();
         }
 
         public static void IncrementCursorPosX(float amount) {

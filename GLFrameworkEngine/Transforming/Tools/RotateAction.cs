@@ -54,6 +54,7 @@ namespace GLFrameworkEngine
         Vector3 hitPt;
 
         double offset = 0;
+        Quaternion previousRotation;
 
         public int ResetTransform(GLContext context, TransformSettings settings)
         {
@@ -69,6 +70,7 @@ namespace GLFrameworkEngine
             settings.RotationStartVector = dir;
             //Current active angle (reset at 0)
             settings.RotationAngle = 0;
+            previousRotation = settings.Rotation;
 
             return 0;
         }
@@ -97,13 +99,16 @@ namespace GLFrameworkEngine
                     Vector3 localPos = (pos - Settings.Origin).Normalized();
                     //The hit ray direction from the origin
                     Vector3 rotVecSrc = (hitPt - Settings.Origin).Normalized();
-                    //Perpendicular angle to check the hit angle
-                    Vector3 perpendicularVector = Vector3.Cross(rotVecSrc, axis).Normalized();
+                    if (hitPt != Settings.Origin)
+                    {
+                        //Perpendicular angle to check the hit angle
+                        Vector3 perpendicularVector = Vector3.Cross(rotVecSrc, axis).Normalized();
 
-                    float acosAngle = Math.Clamp(Vector3.Dot(localPos, rotVecSrc), -1, 1);
-                    angle = MathF.Acos(acosAngle);
-                    angle *= (Vector3.Dot(localPos, perpendicularVector) < 0.0f) ? 1.0f : -1.0f;
-                    settings.RotationAngle = (float)angle;
+                        float acosAngle = Math.Clamp(Vector3.Dot(localPos, rotVecSrc), -1, 1);
+                        angle = MathF.Acos(acosAngle);
+                        angle *= (Vector3.Dot(localPos, perpendicularVector) < 0.0f) ? 1.0f : -1.0f;
+                        settings.RotationAngle = (float)angle;
+                    }
                 }
             }
 
@@ -111,6 +116,17 @@ namespace GLFrameworkEngine
                 angle = Math.Round(angle / eighthPI) * eighthPI;
 
             DeltaRotation = GetRotation((float)angle);
+
+            //Update the rotation of the gizmo real time for viewing
+
+            //Local space order
+            var rotation = previousRotation * DeltaRotation;
+            //World space order
+            if (settings.TransformMode == TransformSettings.TransformSpace.World)
+                rotation = DeltaRotation * previousRotation;
+
+            settings.Rotation = rotation;
+
             return 1;
         }
 
@@ -153,12 +169,12 @@ namespace GLFrameworkEngine
                     //Direct rotation
                     if (transformTools.TransformSettings.HasTextInput)
                     {
-                        if (transformTools.TransformSettings.RotateFromOrigin)
+                        if (!adjustedTransforms[i].IndividualPivot && transformTools.TransformSettings.PivotMode == TransformSettings.PivotSpace.Selected)
                             adjustedTransforms[i].Position = Vector3.TransformPosition(previous.Position - OriginStart, Matrix4.CreateFromQuaternion(rotation)) + OriginStart;
                     }
                     else //Rotate by rotation difference
                     {
-                        if (transformTools.TransformSettings.RotateFromOrigin)
+                        if (!adjustedTransforms[i].IndividualPivot && transformTools.TransformSettings.PivotMode == TransformSettings.PivotSpace.Selected)
                             adjustedTransforms[i].Position = Vector3.TransformPosition(previous.Position - OriginStart, Matrix4.CreateFromQuaternion(DeltaRotation)) + OriginStart;
                     }
                     adjustedTransforms[i].UpdateMatrix(true);

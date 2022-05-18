@@ -22,7 +22,7 @@ namespace UKingLibrary
         /// <summary>
         /// The file this is in
         /// </summary>
-        MapData MapFile;
+        MapData MapData;
 
         /// <summary>
         /// Properties related to the object instance.
@@ -42,6 +42,8 @@ namespace UKingLibrary
         /// The render instance of the scene which can be transformed and altered.
         /// </summary>
         public EditableObject Render;
+
+        private IMapLoader ParentLoader;
 
         /// <summary>
         /// The name of the object actor.
@@ -105,15 +107,14 @@ namespace UKingLibrary
         public List<LinkInstance> SourceLinks = new List<LinkInstance>();
         public List<LinkInstance> DestLinks = new List<LinkInstance>();
 
-        public MapObject()
+        public MapObject(IMapLoader parentLoader)
         {
-
+            ParentLoader = parentLoader;
         }
-
 
         public void CreateNew(uint hashId, string unitConfigName, dynamic actorInfo, NodeBase parent, MapData mapData)
         {
-            MapFile = mapData;
+            MapData = mapData;
 
             Properties = new Dictionary<string, dynamic>();
             Properties.Add("UnitConfigName", unitConfigName);
@@ -130,9 +131,9 @@ namespace UKingLibrary
 
         public void CreateNew(dynamic properties, dynamic actorInfo, NodeBase parent, MapData mapData)
         {
-            MapFile = mapData;
+            MapData = mapData;
 
-            Properties = MapData.ValuesToProperties(properties);
+            Properties = UKingLibrary.MapData.ValuesToProperties(properties);
 
             ActorInfo = actorInfo;
             string unitConfigName = Properties["UnitConfigName"].Value;
@@ -194,13 +195,36 @@ namespace UKingLibrary
             Render.IsVisibleCallback += delegate
             {
                 if (Render is BfresRender)
-                    return MapMuuntEditor.ShowVisibleActors;
+                    return MapData.ShowVisibleActors;
                 else
-                    return MapMuuntEditor.ShowInvisibleActors;
+                    return MapData.ShowInvisibleActors;
             };
 
             ((EditableObjectNode)Render.UINode).UIProperyDrawer += delegate
             {
+                if (ImGui.BeginCombo("##objFileSelect", MapData.RootNode.Header))
+                {
+                    for (int i = 0; i < ParentLoader.MapData.Count(); i++)
+                    {
+                        string fileName = ParentLoader.MapData[i].RootNode.Header;
+                        bool isSelected = fileName == MapData.RootNode.Header;
+
+                        if (ImGui.Selectable(fileName, isSelected))
+                        {
+                            MapData = ParentLoader.MapData[i];
+                            MapData.Objs.Remove(HashId);
+                            MapData.Objs.Add(HashId, this);
+
+                            Parent.Children.Remove(Render.UINode);
+                            Parent = MapData.AddObject(this, ParentLoader);
+                        }
+
+                        if (isSelected)
+                            ImGui.SetItemDefaultFocus();
+                    }
+                    ImGui.EndCombo();
+                }
+
                 PropertyDrawer.Draw(this, Properties, new PropertyDrawer.PropertyChangedCallback(OnPropertyUpdate));
             };
             //Icon for gui node
@@ -240,15 +264,15 @@ namespace UKingLibrary
 
         public object Clone()
         {
-            MapObject clone = new MapObject();
+            MapObject clone = new MapObject(ParentLoader);
 
             SaveTransform(); // We wanna make sure that the new actor is in the right location!
 
             clone.Properties = DeepCloneDictionary(Properties);
-            clone.HashId = MapMuuntEditor.GetHashId(MapFile);
+            clone.HashId = UKingEditor.GetHashId(MapData);
             clone.ActorInfo = ActorInfo;
             clone.Parent = Parent;
-            clone.MapFile = MapFile;
+            clone.MapData = MapData;
             clone.ReloadActor();
 
             return clone;
@@ -291,14 +315,14 @@ namespace UKingLibrary
             var destLinks = Render.DestObjectLinks;
 
             bool selected = Render.IsSelected;
-            context.Scene.DeselectAll(context);
+            ParentLoader.Scene.DeselectAll(context); // Not sure why we're passing this
 
             //Remove old from scene
-            context.Scene.RemoveRenderObject(Render);
+            ParentLoader.Scene.RemoveRenderObject(Render);
             //Reload actor
             ReloadActor();
             //Add new render
-            context.Scene.AddRenderObject(Render);
+            ParentLoader.Scene.AddRenderObject(Render);
             //Reapply everything needed
             Render.IsSelected = selected;
             Render.SourceObjectLinks = srcLinks;
@@ -442,18 +466,18 @@ namespace UKingLibrary
         /// Adds the object to the current scene.
         /// </summary>
         public void AddToScene() {
-            GLContext.ActiveContext.Scene.AddRenderObject(Render);
+            ParentLoader.Scene.AddRenderObject(Render);
             //Add the actor to the animation player
-            Workspace.ActiveWorkspace.StudioSystem.AddActor(this);
+            ParentLoader.ParentEditor.Workspace.StudioSystem.AddActor(this);
         }
 
         /// <summary>
         /// Removes the object from the current scene.
         /// </summary>
         public void RemoveFromScene() {
-            GLContext.ActiveContext.Scene.RemoveRenderObject(Render);
+            ParentLoader.Scene.RemoveRenderObject(Render);
             //Remove the actor from the animation player
-            Workspace.ActiveWorkspace.StudioSystem.RemoveActor(this);
+            ParentLoader.ParentEditor.Workspace.StudioSystem.RemoveActor(this);
         }
 
         /// <summary>
@@ -461,7 +485,7 @@ namespace UKingLibrary
         /// </summary>
         public void AddToMap()
         {
-            MapFile.Objs.Add(HashId, this);
+            MapData.Objs.Add(HashId, this);
         }
 
         /// <summary>
@@ -469,7 +493,7 @@ namespace UKingLibrary
         /// </summary>
         public void RemoveFromMap()
         {
-            MapFile.Objs.Remove(HashId);
+            MapData.Objs.Remove(HashId);
         }
 
         /// <summary>
@@ -578,10 +602,10 @@ namespace UKingLibrary
                 }
                 else
                 {
-                    for (int i = 0; i < 30; i++)
+                    for (int i = 0; ; i++)
                     {
                         string modelPartPath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}-{i.ToString("D2")}.sbfres");
-                        
+
                         if (File.Exists(modelPartPath))
                         {
                             var renderCandidate = getActorSpecificBfresRender(actor, new BfresRender(modelPartPath, parent));
@@ -596,6 +620,8 @@ namespace UKingLibrary
                                 break;
                             }
                         }
+                        else
+                            break; // We couldn't find the model
                     }
                 }
                 if (!(render is BfresRender))

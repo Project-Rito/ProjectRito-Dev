@@ -67,6 +67,8 @@ namespace MapStudio
 
             //Disable the docking buttons
             ImGui.GetStyle().WindowMenuButtonPosition = ImGuiDir.None;
+            //Direct click on drag elements
+            ImGui.GetIO().ConfigDragClickToInputText = true;
 
             //Enable docking support
             ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.DockingEnable;
@@ -322,7 +324,9 @@ namespace MapStudio
                 //Set the workspace size on load
                 ImGui.SetNextWindowSize(contentSize, ImGuiCond.Once);
 
+                workspace.PushStyling();
                 bool visible = ImGui.Begin(workspace.Name + $"###window{dockspaceId}", ref workspace.Opened);
+                workspace.PopStyling();
 
                 if (ImGui.DockBuilderGetNode(dockspaceId).NativePtr == null || workspace.UpdateDockLayout)
                 {
@@ -336,7 +340,7 @@ namespace MapStudio
                     ImGuiDockNodeFlags.CentralNode, workspace.window_class);
 
                 if (visible)
-                    workspace.Render((int)workspace.DockID);
+                    workspace.RenderWindows();
 
                 if (!workspace.Opened)
                 {
@@ -568,7 +572,7 @@ namespace MapStudio
                     //Docked windows
                     if (Workspace.ActiveWorkspace != null)
                     {
-                        foreach (var window in Workspace.ActiveWorkspace.DockedWindows)
+                        foreach (var window in Workspace.ActiveWorkspace.DockWindows)
                         {
                             if (ImGui.MenuItem(TranslationSource.GetText(window.Name), "", window.Opened))
                             {
@@ -715,6 +719,10 @@ namespace MapStudio
         private void SaveProjectWithDialog()
         {
             var workspace = Workspace.ActiveWorkspace;
+            var settings = GlobalSettings.Current;
+
+            string oldProjectDir = $"{settings.Program.ProjectDirectory}\\{workspace.Name}";
+
             ProjectSaveDialog projectDialog = new ProjectSaveDialog(workspace.Name);
 
             DialogHandler.Show("Save Project", () =>
@@ -725,6 +733,7 @@ namespace MapStudio
                 if (!result)
                     return;
 
+                workspace.UpdateProjectAssetPaths(oldProjectDir, projectDialog.GetProjectDirectory());
                 workspace.SaveProject(projectDialog.GetProjectDirectory());
                 RecentFileHandler.SaveRecentFile(projectDialog.GetProjectDirectory(), "RecentProjects.txt", this.RecentProjects);
             });
@@ -737,7 +746,7 @@ namespace MapStudio
 
             //Check if the format is supported in the current editors.
             string ext = Path.GetExtension(filePath);
-            bool isProject = ext == ".json";
+            bool isProject = filePath.EndsWith("Project.json");
             ProcessLoading.IsLoading = true;
 
             //Load asset based format
@@ -746,9 +755,8 @@ namespace MapStudio
                 if (createNewWorkspace)
                 {
                     Workspace workspace = new Workspace(this.GlobalSettings, Workspaces.Count, this);
-                    workspace.Name = Path.GetFileName(filePath);
-                    bool loaded = workspace.LoadFileFormat(filePath);
-                    if (!loaded)
+                    var editor = workspace.LoadFileFormat(filePath);
+                    if (editor == null)
                     {
                         ProcessLoading.IsLoading = false;
                         ForceFocused = true;

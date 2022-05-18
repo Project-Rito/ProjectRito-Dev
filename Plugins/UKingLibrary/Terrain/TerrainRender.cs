@@ -11,7 +11,7 @@ using Toolbox.Core.ViewModels;
 
 namespace UKingLibrary.Rendering
 {
-    public class TerrainRender : EditableObject, IFrustumCulling
+    public class TerrainRender : EditableObject, IFrustumCulling, IColorPickable
     {
         public override bool UsePostEffects => false;
 
@@ -99,6 +99,19 @@ namespace UKingLibrary.Rendering
             LoadTerrainTextures();
         }
 
+        public void DrawColorPicking(GLContext context)
+        {
+            context.CurrentShader = GlobalShaders.GetShader("PICKING");
+            context.ColorPicker.SetPickingColor(this, context.CurrentShader);
+            var transformMatrix = Transform.TransformMatrix;
+            context.CurrentShader.SetMatrix4x4(GLConstants.ModelMatrix, ref transformMatrix);
+
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.DepthTest);
+
+            TerrainMesh.Draw(context);
+        }
+
         public override void DrawModel(GLContext context, Pass pass)
         {
             if ((TerrainMesh == null || pass != Pass.OPAQUE || !InFrustum))
@@ -109,7 +122,7 @@ namespace UKingLibrary.Rendering
             shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
             shader.SetTexture(TerrainTexture_Alb, "texTerrain_Alb", 1);
             shader.SetTexture(TerrainTexture_Nrm, "texTerrain_Nrm", 2);
-            shader.SetFloat("uBrightness", 2.0f); // Hack to fit in (normals calculation is kinda off or something)
+            shader.SetFloat("uBrightness", 1.5f); // Hack to fit in (normals calculation is kinda off or something)
             shader.SetBool("uDebugSections", PluginConfig.DebugTerrainSections);
 
             GL.Disable(EnableCap.Blend);

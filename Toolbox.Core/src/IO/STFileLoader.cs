@@ -48,31 +48,50 @@ namespace Toolbox.Core.IO
 
             try
             {
-                foreach (ICompressionFormat compressionFormat in FileManager.GetCompressionFormats())
-                {
-                    stream.Position = streamStartPos;
-                    if (compressionFormat.Identify(stream, fileName))
-                    {
-                        Console.WriteLine("compressionFormat " + compressionFormat);
+                stream.Position = streamStartPos;
+                ICompressionFormat compressionFormat =  GetCompressionFormat(stream, fileName);
+                Console.WriteLine("compressionFormat " + compressionFormat);
 
-                        stream.Position = streamStartPos;
-
-                        settings.CompressedSize = (uint)stream.Length;
-                        settings.Stream = compressionFormat.Decompress(stream);
-                        settings.DecompressedSize = (uint)settings.Stream.Length;
-                        settings.CompressionFormat = compressionFormat;
-                        //Close compressed stream and use settings.Stream instead
-                        stream.Close();
-                        return settings;
-                    }
-                }
+                settings.CompressedSize = (uint)stream.Length;
+                settings.Stream = compressionFormat.Decompress(stream);
+                settings.DecompressedSize = (uint)settings.Stream.Length;
+                settings.CompressionFormat = compressionFormat;
+                //Close compressed stream and use settings.Stream instead
+                stream.Close();
+                return settings;
             } //It's possible some types fail to compress if identify was incorrect so we should skip any errors
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
 
+            // If not compressed:
+            stream.Position = streamStartPos;
+            settings.CompressedSize = (uint)stream.Length;
+            settings.Stream = stream;
+            settings.DecompressedSize = (uint)stream.Length;
+
             return settings;
+        }
+
+        public static ICompressionFormat GetCompressionFormat(Stream stream, string fileName)
+        {
+            long streamStartPos = stream.Position;
+
+            foreach (ICompressionFormat compressionFormat in FileManager.GetCompressionFormats())
+            {
+                stream.Position = streamStartPos;
+                if (compressionFormat.Identify(stream, fileName))
+                {
+                    stream.Position = streamStartPos;
+
+                    return compressionFormat;
+                }
+            }
+
+            stream.Position = streamStartPos;
+
+            return new Uncompressed();
         }
 
         /// <summary>
@@ -88,13 +107,13 @@ namespace Toolbox.Core.IO
         /// <summary>
         /// Gets the <see cref="IFileFormat"/> from a file or byte array. 
         /// </summary>
-        /// <param name="FileName">The name of the file</param>
+        /// <param name="FilePath">The name of the file</param>
         /// <param name="data">The byte array of the data</param>
         /// <param name="InArchive">If the file is in an archive so it can be saved back</param>
         /// <param name="Compressed">If the file is being compressed or not</param>
         /// <param name="CompressionFormat">The type of <see cref="ICompressionFormat"/> being used</param>
         /// <returns></returns>
-        public static IFileFormat OpenFileFormat(Stream stream, string FileName, Settings settings = null)
+        public static IFileFormat OpenFileFormat(Stream stream, string FilePath, Settings settings = null)
         {
             //File is empty so return
             if (stream == null || stream.Length < 8) return null;
@@ -107,15 +126,15 @@ namespace Toolbox.Core.IO
             //Check if the current setting has a compression format set or not
             if (settings.CompressionFormat == null)
             {
-                var decompressedSettings = TryDecompressFile(stream, FileName);
+                var decompressedSettings = TryDecompressFile(stream, FilePath);
                 if (decompressedSettings.CompressionFormat != null) {
-                    return OpenFileFormat(decompressedSettings.Stream, FileName, decompressedSettings);
+                    return OpenFileFormat(decompressedSettings.Stream, FilePath, decompressedSettings);
                 }
             }
 
             var info = new File_Info();
-            info.FileName = Path.GetFileName(FileName);
-            info.FilePath = FileName;
+            info.FileName = Path.GetFileName(FilePath);
+            info.FilePath = FilePath;
             info.ParentArchive = settings.ParentArchive;
 
             stream.Position = streamStartPos;
@@ -128,7 +147,7 @@ namespace Toolbox.Core.IO
                 {
                     fileFormat.FileInfo = info;
                     fileFormat.FileInfo.Stream = stream;
-                    return SetFileFormat(fileFormat, FileName, stream, settings);
+                    return SetFileFormat(fileFormat, FilePath, stream, settings);
                 }
             }
 

@@ -244,7 +244,7 @@ namespace GLFrameworkEngine
                 //Update standard camera matrices
                 var mtxMdl = Camera.ModelMatrix;
                 var mtxCam = Camera.ViewProjectionMatrix;
-                shader.SetMatrix4x4("mtxMdl", ref mtxMdl);
+                shader.SetMatrix4x4(GLConstants.ModelMatrix, ref mtxMdl);
                 shader.SetMatrix4x4("mtxCam", ref mtxCam);
             }
         }
@@ -337,9 +337,9 @@ namespace GLFrameworkEngine
 
         public void OnKeyDown(KeyEventInfo e, bool isRepeat)
         {
-            SelectionTools.OnKeyDown(this);
-            TransformTools.OnKeyDown(this);
-            Scene.OnKeyDown(e, this);
+            SelectionTools.OnKeyDown(e, this);
+            TransformTools.OnKeyDown(e, this);
+            Scene.OnKeyDown(e, this, isRepeat);
 
             if (!isRepeat)
                 Camera.KeyPress();

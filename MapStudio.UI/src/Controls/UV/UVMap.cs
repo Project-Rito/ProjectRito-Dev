@@ -47,7 +47,7 @@ namespace MapStudio.UI
 
             var cameraMtx = camera.ViewMatrix * camera.ProjectionMatrix;
 
-            //shader.SetMatrix4x4("mtxMdl", ref scaleMtx);
+            //shader.SetMatrix4x4(GLConstants.ModelMatrixInstanced, ref scaleMtx);
             shader.SetMatrix4x4("mtxCam", ref cameraMtx);
 
             shader.SetInt("hasTexture", 0);
