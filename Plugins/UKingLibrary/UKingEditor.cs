@@ -231,6 +231,17 @@ namespace UKingLibrary
 
                 LoadFieldMuunt(fieldName, fileName, stream);
             }
+
+            // Load collision
+            for (int i = 0; i < 4; i++)
+            {
+                string filePath = PluginConfig.GetContentPath($"Physics/StaticCompound/{fieldName}/{sectionName}-{i}.shksc");
+                if (File.Exists(filePath)) // Just in case, ya know?
+                {
+                    FieldMapLoader loader = (FieldMapLoader)((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren[fieldName].Tag;
+                    loader.LoadBakedCollision(Path.GetFileName(filePath), File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                }
+            }
         }
 
         private void LoadFieldMuunt(string fieldName, string fileName, Stream stream)

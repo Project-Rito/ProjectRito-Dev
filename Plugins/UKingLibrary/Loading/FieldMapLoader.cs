@@ -39,9 +39,15 @@ namespace UKingLibrary
 
         /// <summary>
         /// All loaded MapData. Included here for convenience,
-        /// but MapData is also present in RootNode as a tag.
+        /// but references are also present in MapData.RootNode.Tag.
         /// </summary>
         public List<MapData> MapData { get; set; } = new List<MapData>();
+
+        /// <summary>
+        /// All baked collision for the field. Included here for convenience,
+        /// but references are also present in MapCollisionLoader.RootNode.Tag.
+        /// </summary>
+        public List<MapCollisionLoader> BakedCollision { get; set; } = new List<MapCollisionLoader>();
 
         /// <summary>
         /// The terrain for this field
@@ -78,8 +84,8 @@ namespace UKingLibrary
             GlobalData.LoadActorDatabase();
 
             var mapData = new MapData(stream, this, fileName);
-            RootNode.TryAddChild(new NodeFolder(GetSectionName(fileName)));
-            RootNode.FolderChildren[GetSectionName(fileName)].AddChild(mapData.RootNode);
+            InitSectionFolder(GetSectionName(fileName));
+            ((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Muunt"].AddChild(mapData.RootNode);
             MapData.Add(mapData);
 
             return mapData;
@@ -91,6 +97,27 @@ namespace UKingLibrary
             Terrain.LoadTerrainSection(fieldName, areaID, sectionID, this, lodLevel);
         }
 
+        public void LoadBakedCollision(string fileName, Stream stream)
+        {
+            MapCollisionLoader loader = new MapCollisionLoader();
+            loader.Load(stream, fileName);
+
+            InitSectionFolder(GetSectionName(fileName));
+            ((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Collision"].AddChild(loader.RootNode);
+            BakedCollision.Add(loader);
+        }
+
+        private void InitSectionFolder(string sectionName)
+        {
+            RootNode.TryAddChild(new NodeFolder(sectionName) {
+                FolderChildren = new Dictionary<string, NodeBase> 
+                { 
+                    { "Muunt", new NodeFolder("Muunt") }, 
+                    { "Collision", new NodeFolder("Collision") } 
+                } 
+            });
+        }
+
         public static string GetSectionName(string fileName)
         {
             return fileName.Substring(0, 3);
@@ -100,18 +127,35 @@ namespace UKingLibrary
         {
             foreach (NodeFolder sectionFolder in RootNode.Children)
             {
-                foreach (NodeBase file in sectionFolder.Children)
+                // Muunt saving
+                foreach (NodeBase file in sectionFolder.FolderChildren["Muunt"].Children)
                 {
                     string fileName = file.Header;
                     MapData mapData = (MapData)file.Tag;
 
-                    MemoryStream saveStream = new MemoryStream();
+                    MemoryStream saveStream = new MemoryStream(); // Might not actually need this in a memorystream here, pretty sure it will automatically do that. Have to look at compression formats though.
                     mapData.Save(saveStream);
 
                     Directory.CreateDirectory(Path.Join(savePath, $"aoc/0010/Map/{RootNode.Header}/{GetSectionName(fileName)}"));
                     FileStream fileStream = File.Open(Path.Join(savePath, $"aoc/0010/Map/{RootNode.Header}/{GetSectionName(fileName)}/{fileName}"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
 
                     saveStream.WriteTo(fileStream);
+
+                    fileStream.SetLength(fileStream.Position);
+                    fileStream.Flush();
+                    fileStream.Close();
+                }
+
+                // Baked collision saving
+                foreach (NodeBase file in sectionFolder.FolderChildren["Collision"].Children)
+                {
+                    string fileName = file.Header;
+                    MapCollisionLoader loader = (MapCollisionLoader)file.Tag;
+
+                    Directory.CreateDirectory(Path.Join(savePath, $"content/Physics/StaticCompound/{RootNode.Header}/"));
+                    FileStream fileStream = File.Open(Path.Join(savePath, $"content/Physics/StaticCompound/{RootNode.Header}/{fileName}"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
+
+                    loader.Save(fileStream);
 
                     fileStream.SetLength(fileStream.Position);
                     fileStream.Flush();

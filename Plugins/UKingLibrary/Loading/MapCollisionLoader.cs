@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Numerics;
 using Toolbox.Core.IO;
+using Toolbox.Core.ViewModels;
 using HKX2;
 using HKX2Builders;
 using HKX2Builders.Extensions;
@@ -23,18 +24,27 @@ and got to work.
 
 namespace UKingLibrary
 {
-    public class FieldCollisionLoader
+    public class MapCollisionLoader
     {
+        public NodeBase RootNode;
+
         private HKXHeader Header = HKXHeader.BotwWiiu(); // TODO - actually get the right platform
         private hkRootLevelContainer Root;
         private StaticCompoundInfo StaticCompound;
 
-        public void Load(Stream stream)
+        private STFileLoader.Settings FileSettings;
+
+        public void Load(Stream stream, string fileName)
         {
-            List<IHavokObject> roots = Util.ReadBotwHKX(YAZ0.Decompress(stream.ReadAllBytes()), ".hksc");
+            FileSettings = STFileLoader.TryDecompressFile(stream, fileName);
+
+            List<IHavokObject> roots = Util.ReadBotwHKX(FileSettings.Stream.ReadAllBytes(), ".hksc");
 
             StaticCompound = (StaticCompoundInfo)roots[0];
             Root = (hkRootLevelContainer)roots[1];
+
+            RootNode = new NodeBase(fileName);
+            RootNode.Tag = this;
         }
 
         public hkpShape[] GetShapes(uint hashId)
@@ -274,8 +284,9 @@ namespace UKingLibrary
             var uncompressed = new MemoryStream();
             Util.WriteBotwHKX(new IHavokObject[] { StaticCompound, Root }, Header, ".hksc", uncompressed);
 
+            uncompressed.Position = 0;
             stream.Position = 0;
-            stream.Write(YAZ0.Compress(uncompressed.ReadAllBytes()));
+            FileSettings.CompressionFormat.Compress(uncompressed).CopyTo(stream);
             stream.SetLength(stream.Position + 1);
         }
 

@@ -204,7 +204,19 @@ namespace MapStudio.UI
             /// <summary>
             /// Gets the current project directory.
             /// </summary>
-            public string ProjectDirectory = DefaultProjectPath();
+            private string _projectDirectory = DefaultProjectPath();
+            public string ProjectDirectory {
+                get
+                {
+                    Directory.CreateDirectory(_projectDirectory);
+                    return _projectDirectory;
+                }
+                set
+                {
+                    Directory.CreateDirectory(value);
+                    _projectDirectory = value;
+                }
+            }
 
             /// <summary>
             /// Gets the default project directory from the user's local application directory.
@@ -213,7 +225,7 @@ namespace MapStudio.UI
             static string DefaultProjectPath()
             {
                 string local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                return $"{local}\\MapStudio";
+                return $"{local}\\MapStudio\\Projects";
             }
         }
 
