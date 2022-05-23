@@ -76,15 +76,37 @@ namespace UKingLibrary
             CacheBackgroundFiles();
             SetupRoot();
 
-            foreach (var fieldName in EditorConfig.OpenMapUnits.Keys)
+            foreach (string fieldName in EditorConfig.OpenMapUnits.Keys)
             {
-                foreach (var muPath in EditorConfig.OpenMapUnits[fieldName])
+                foreach (string muName in EditorConfig.OpenMapUnits[fieldName])
                 {
-                    string fullPath = Path.GetFullPath(muPath, Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"aoc/0010/Map/{fieldName}/"), FileInfo.FolderPath));
-                    string fileName = Path.GetFileName(muPath);
+                    // Load map data
+                    string fullPath = Path.GetFullPath(muName, Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"aoc/0010/Map/{fieldName}/"), FileInfo.FolderPath));
+                    string fileName = Path.GetFileName(muName);
                     if (!File.Exists(fullPath))
                         continue;
                     LoadFieldMuunt(fieldName, fileName, File.Open(fullPath, FileMode.Open));
+                }
+
+                FieldMapLoader loader = (FieldMapLoader)((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren[fieldName].Tag;
+
+                // Load all section-specific stuff
+                foreach (NodeBase sectionFolder in loader.RootNode.Children)
+                {
+                    string sectionName = sectionFolder.Header;
+
+                    // Load collision
+                    for (int i = 0; i < 4; i++)
+                    {
+                        string filePath = null;
+                        if (File.Exists(Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/Physics/StaticCompound/{fieldName}/{sectionName}-{i}.shksc"), FileInfo.FolderPath)))
+                            filePath = Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/Physics/StaticCompound/{fieldName}/{sectionName}-{i}.shksc"), FileInfo.FolderPath);
+                        else if (File.Exists(PluginConfig.GetContentPath($"Physics/StaticCompound/{fieldName}/{sectionName}-{i}.shksc")))
+                            filePath = PluginConfig.GetContentPath($"Physics/StaticCompound/{fieldName}/{sectionName}-{i}.shksc");
+
+                        if (filePath != null) // Just in case, ya know?
+                            loader.LoadBakedCollision(Path.GetFileName(filePath), File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                    }
                 }
             }
             foreach (var packName in EditorConfig.OpenDungeons)
@@ -216,9 +238,7 @@ namespace UKingLibrary
 
         private void LoadSection(string fieldName, string sectionName)
         {
-            string[] endings = { "Static", "Dynamic" };
-
-            foreach (var ending in endings)
+            foreach (var ending in GlobalData.MuuntEndings)
             {
                 string path = PluginConfig.GetContentPath($"Map/{fieldName}/{sectionName}/{sectionName}_{ending}.smubin");
                 if (!File.Exists(path))

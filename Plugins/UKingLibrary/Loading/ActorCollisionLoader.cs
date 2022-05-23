@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Numerics;
+using Toolbox.Core;
 using Toolbox.Core.IO;
 using Toolbox.Core.ViewModels;
 using HKX2;
@@ -45,6 +46,44 @@ namespace UKingLibrary
             RootNode.Tag = this;
         }
 
+        public void CreateNew()
+        {
+            // Adapted from https://gitlab.com/HKX2/BlenderAddon/-/blob/main/lib/BlenderAddon/BlenderAddon/Generator.cs. Thanks Kreny!
+            Root = new hkRootLevelContainer()
+            {
+                m_namedVariants = new List<hkRootLevelContainerNamedVariant>
+                {
+                    new()
+                    {
+                        m_name = "Physics Data",
+                        m_className = "hkpPhysicsData",
+                        m_variant = new hkpPhysicsData
+                        {
+                            m_worldCinfo = null,
+                            m_systems = new List<hkpPhysicsSystem>
+                            {
+                                new()
+                                {
+                                    m_rigidBodies = new List<hkpRigidBody>(),
+                                    m_constraints = new List<hkpConstraintInstance>(),
+                                    m_actions = new List<hkpAction>(),
+                                    m_phantoms = new List<hkpPhantom>(),
+                                    m_name = "Default Physics System",
+                                    m_userData = 0,
+                                    m_active = true
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            FileSettings = new STFileLoader.Settings()
+            {
+                CompressionFormat = new Uncompressed()
+            };
+        }
+
         public hkpShape[] GetShapes()
         {
             List<hkpShape> shapes = new List<hkpShape>();
@@ -57,7 +96,82 @@ namespace UKingLibrary
 
         public void AddShape(hkpShape shape)
         {
-
+            // Also adapted from https://gitlab.com/HKX2/BlenderAddon/-/blob/main/lib/BlenderAddon/BlenderAddon/Generator.cs. Thanks again Kreny!
+            ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.Add(new hkpRigidBody()
+            {
+                m_userData = 0,
+                m_collidable = new hkpLinkedCollidable
+                {
+                    m_shape = shape,
+                    m_shapeKey = 0xFFFFFFFF,
+                    m_forceCollideOntoPpu = 8,
+                    m_broadPhaseHandle = new hkpTypedBroadPhaseHandle
+                    {
+                        m_type = BroadPhaseType.BROAD_PHASE_ENTITY,
+                        m_objectQualityType = 0,
+                        m_collisionFilterInfo = 0x90000000
+                    },
+                    m_allowedPenetrationDepth = float.MaxValue
+                },
+                m_multiThreadCheck = new hkMultiThreadCheck(),
+                m_name = "Collision_IDK", // still cracks me up that everyone that uses Kreny's tool has this
+                m_properties = new List<hkSimpleProperty>(),
+                m_material = new hkpMaterial()
+                {
+                    m_responseType = ResponseType.RESPONSE_SIMPLE_CONTACT,
+                    m_rollingFrictionMultiplier = 0,
+                    m_friction = 0.5f,
+                    m_restitution = 0.4f
+                },
+                m_damageMultiplier = 1f,
+                m_storageIndex = 0xFFFF,
+                m_contactPointCallbackDelay = 0xFFFF,
+                m_autoRemoveLevel = 0,
+                m_numShapeKeysInContactPointProperties = 1,
+                m_responseModifierFlags = 0,
+                m_uid = 0xFFFFFFFF,
+                m_spuCollisionCallback = new hkpEntitySpuCollisionCallback()
+                {
+                    m_eventFilter = SpuCollisionCallbackEventFilter.SPU_SEND_CONTACT_POINT_ADDED_OR_PROCESS,
+                    m_userFilter = 1
+                },
+                m_motion = new hkpMaxSizeMotion()
+                {
+                    m_type = MotionType.MOTION_FIXED,
+                    m_deactivationIntegrateCounter = 15,
+                    m_deactivationNumInactiveFrames_0 = 0xC000,
+                    m_deactivationNumInactiveFrames_1 = 0xC000,
+                    m_motionState = new hkMotionState()
+                    {
+                        m_transform = Matrix4x4.Identity,
+                        m_sweptTransform_0 = new Vector4(0.0f),
+                        m_sweptTransform_1 = new Vector4(0.0f),
+                        m_sweptTransform_2 = new Vector4(0.0f, 0.0f, 0.0f, 0.99999994f),
+                        m_sweptTransform_3 = new Vector4(0.0f, 0.0f, 0.0f, 0.99999994f),
+                        m_sweptTransform_4 = new Vector4(0.0f),
+                        m_deltaAngle = new Vector4(0.0f),
+                        m_objectRadius = 2.25f,
+                        m_linearDamping = 0,
+                        m_angularDamping = 0x3D4D,
+                        m_timeFactor = 0x3F80,
+                        m_maxLinearVelocity = new hkUFloat8 { m_value = 127 },
+                        m_maxAngularVelocity = new hkUFloat8 { m_value = 127 },
+                        m_deactivationClass = 1
+                    },
+                    m_inertiaAndMassInv = new Vector4(0.0f),
+                    m_linearVelocity = new Vector4(0.0f),
+                    m_angularVelocity = new Vector4(0.0f),
+                    m_deactivationRefPosition_0 = new Vector4(0.0f),
+                    m_deactivationRefPosition_1 = new Vector4(0.0f),
+                    m_deactivationRefOrientation_0 = 0,
+                    m_deactivationRefOrientation_1 = 0,
+                    m_savedMotion = null,
+                    m_savedQualityTypeIndex = 0,
+                    m_gravityFactor = 0x3F80
+                },
+                m_localFrame = null,
+                m_npData = 0xFFFFFFFF
+            });
         }
 
         /// <summary>

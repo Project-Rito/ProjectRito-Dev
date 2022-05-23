@@ -32,6 +32,9 @@ namespace UKingLibrary
                 refreshScene |= ImGui.DragFloat($"{TranslationSource.GetText("ARROW_LENGTH")}##vmenu14", ref RenderablePath.BezierArrowLength, 0.05f, 0f, 10f);
             }
 
+            if (ImGui.Button($"{TranslationSource.GetText("CACHE_COLLISION")}"))
+                CollisionCacher.Cache(PluginConfig.CollisionCachePath);
+
             if (refreshScene)
                 GLContext.ActiveContext.UpdateViewport = true;
         }

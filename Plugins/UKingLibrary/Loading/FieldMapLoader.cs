@@ -105,6 +105,9 @@ namespace UKingLibrary
             InitSectionFolder(GetSectionName(fileName));
             ((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Collision"].AddChild(loader.RootNode);
             BakedCollision.Add(loader);
+
+            loader.GetShapes(2345477785);
+            loader.GetShapes(321785217);
         }
 
         private void InitSectionFolder(string sectionName)

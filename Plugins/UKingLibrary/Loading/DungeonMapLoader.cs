@@ -43,6 +43,13 @@ namespace UKingLibrary
         /// but MapData is also present in RootNode as a tag.
         /// </summary>
         public List<MapData> MapData { get; set; } = new List<MapData>();
+
+        /// <summary>
+        /// All baked collision for the field. Included here for convenience,
+        /// but references are also present in MapCollisionLoader.RootNode.Tag.
+        /// </summary>
+        public List<MapCollisionLoader> BakedCollision { get; set; } = new List<MapCollisionLoader>();
+
         /// <summary>
         /// Instancing info related to trees.
         /// </summary>

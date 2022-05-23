@@ -98,6 +98,12 @@ namespace UKingLibrary
                 "J-8",
             };
 
+        public static readonly string[] MuuntEndings = new string[]
+        {
+            "Static", 
+            "Dynamic"
+        };
+
     public static void LoadActorDatabase()
         {
             if (Actors.Count > 0)

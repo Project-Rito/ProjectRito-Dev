@@ -13,6 +13,7 @@ namespace UKingLibrary
         public UKingEditor ParentEditor { get; set; }
         public GLScene Scene { get; set; }
         public List<MapData> MapData { get; set; }
+        public List<MapCollisionLoader> BakedCollision { get; set; }
         public NodeFolder RootNode { get; set; }
     }
 }

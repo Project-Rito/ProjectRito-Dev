@@ -14,6 +14,7 @@ using UKingLibrary.Rendering;
 using CafeLibrary.Rendering;
 using Toolbox.Core.Animations;
 using ImGuiNET;
+using HKX2;
 
 namespace UKingLibrary
 {
@@ -223,6 +224,38 @@ namespace UKingLibrary
                             ImGui.SetItemDefaultFocus();
                     }
                     ImGui.EndCombo();
+                }
+
+                if (ImGui.Button(TranslationSource.GetText("ADD_COLLISION")))
+                {
+                    string actorCollisionPath = $"{PluginConfig.CollisionCachePath}/{Name}.hkrb";
+                    if (File.Exists(actorCollisionPath))
+                    {
+                        ActorCollisionLoader actorCollisionLoader = new ActorCollisionLoader();
+                        actorCollisionLoader.Load(File.OpenRead(actorCollisionPath), Path.GetFileName(actorCollisionPath));
+                        hkpShape[] shapes = actorCollisionLoader.GetShapes();
+
+                        System.Numerics.Matrix4x4 matrix = new System.Numerics.Matrix4x4();
+                        matrix.M11 = Render.Transform.TransformMatrix.M11;
+                        matrix.M12 = Render.Transform.TransformMatrix.M12;
+                        matrix.M13 = Render.Transform.TransformMatrix.M13;
+                        matrix.M14 = Render.Transform.TransformMatrix.M14;
+                        matrix.M21 = Render.Transform.TransformMatrix.M21;
+                        matrix.M22 = Render.Transform.TransformMatrix.M22;
+                        matrix.M23 = Render.Transform.TransformMatrix.M23;
+                        matrix.M24 = Render.Transform.TransformMatrix.M24;
+                        matrix.M31 = Render.Transform.TransformMatrix.M31;
+                        matrix.M32 = Render.Transform.TransformMatrix.M32;
+                        matrix.M33 = Render.Transform.TransformMatrix.M33;
+                        matrix.M34 = Render.Transform.TransformMatrix.M34;
+                        matrix.M41 = Render.Transform.TransformMatrix.M41 / GLContext.PreviewScale;
+                        matrix.M42 = Render.Transform.TransformMatrix.M42 / GLContext.PreviewScale;
+                        matrix.M43 = Render.Transform.TransformMatrix.M43 / GLContext.PreviewScale;
+                        matrix.M44 = Render.Transform.TransformMatrix.M44;
+
+                        foreach (hkpShape shape in shapes)
+                            ParentLoader.BakedCollision[3].AddShape(shape, matrix, HashId);
+                    }
                 }
 
                 PropertyDrawer.Draw(this, Properties, new PropertyDrawer.PropertyChangedCallback(OnPropertyUpdate));
