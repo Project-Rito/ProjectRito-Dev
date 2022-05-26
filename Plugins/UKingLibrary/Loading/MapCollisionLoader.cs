@@ -89,7 +89,7 @@ namespace UKingLibrary
 
             List<ActorShapePairing> shapePairings = GenerateActorShapePairings();
 
-            #region Transform
+            #region Decompose Transform
             Vector3 translation = new Vector3();
             Quaternion rotation = new Quaternion();
             Vector3 scale = new Vector3();
@@ -139,6 +139,7 @@ namespace UKingLibrary
                 leafBvhNode = new BVNode()
                 {
                     IsLeaf = true,
+                    IsSectionHead = false,
                     Primitive = 0,
                     PrimitiveCount = 1,
                     Left = null,
@@ -179,9 +180,9 @@ namespace UKingLibrary
 
             #region New shape pairing
             // Add our data
-            if (shapePairings.Any(x => x.ActorInfo.m_HashId.Equals(hashId)))
+            if (shapePairings.Any(x => x.ActorInfo?.m_HashId == hashId))
             {
-                shapePairings.Find(x => x.ActorInfo.m_HashId.Equals(hashId)).Shapes.Add(new ShapeInfoShapeInstancePairing()
+                shapePairings.Find(x => x.ActorInfo?.m_HashId == hashId).Shapes.Add(new ShapeInfoShapeInstancePairing()
                 {
                     ShapeInfo = new ShapeInfo() {
                         m_ActorInfoIndex = 0, // Set when applying actor shape pairings
@@ -427,28 +428,31 @@ namespace UKingLibrary
         private List<ActorShapePairing> GenerateActorShapePairings()
         {
             List<ActorShapePairing> shapePairings = new List<ActorShapePairing>(StaticCompound.m_ActorInfo.Count);
-            foreach (var actorInfo in StaticCompound.m_ActorInfo)
+            for (int i = 0; i < StaticCompound.m_ShapeInfo.Count; i++)
             {
-                List<ShapeInfoShapeInstancePairing> shapeInfoShapeInstancePairing = new List<ShapeInfoShapeInstancePairing>();
-                for (int i = 0; i < StaticCompound.m_ShapeInfo.Count; i++)
-                {
-                    if (i >= actorInfo.m_ShapeInfoStart && i <= actorInfo.m_ShapeInfoEnd)
-                    {
-                        shapeInfoShapeInstancePairing.Add(new ShapeInfoShapeInstancePairing()
-                        {
-                            ShapeInfo = StaticCompound.m_ShapeInfo[i],
-                            Instance = GetShapeInstanceByUserData((ulong)i),
-                            RigidBodyIndex = GetShapeRigidBodyIndexByUserData((ulong)i),
-                            LeafNode = GetShapeLeafNodeByPrimitive(GetShapeInstanceIndexByUserData((ulong)i))
-                        });
-                    }
-                }
+                ShapeInfo shapeInfo = StaticCompound.m_ShapeInfo[i];
 
-                shapePairings.Add(new ActorShapePairing
+                ShapeInfoShapeInstancePairing shapeInstancePairing = new ShapeInfoShapeInstancePairing()
                 {
-                    ActorInfo = actorInfo,
-                    Shapes = shapeInfoShapeInstancePairing
-                });
+                    ShapeInfo = shapeInfo,
+                    Instance = GetShapeInstanceByUserData((ulong)i),
+                    RigidBodyIndex = GetShapeRigidBodyIndexByUserData((ulong)i),
+                    LeafNode = GetShapeLeafNodeByPrimitive(GetShapeInstanceIndexByUserData((ulong)i))
+                };
+
+                // Find existing shape pairing or create a new one
+                int actorShapePairingIdx = shapePairings.FindIndex(x => x.Shapes[0].ShapeInfo.m_ActorInfoIndex == shapeInfo.m_ActorInfoIndex);
+                if (actorShapePairingIdx != -1)
+                    shapePairings[actorShapePairingIdx].Shapes.Add(shapeInstancePairing);
+                else
+                    shapePairings.Add(new ActorShapePairing()
+                    {
+                        ActorInfo = shapeInfo.m_ActorInfoIndex != -1 ? StaticCompound.m_ActorInfo[shapeInfo.m_ActorInfoIndex] : null,
+                        Shapes = new List<ShapeInfoShapeInstancePairing>()
+                        {
+                            shapeInstancePairing
+                        }
+                    });
             }
 
             return shapePairings;
@@ -462,7 +466,8 @@ namespace UKingLibrary
                 ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances.Clear();
 
             foreach (ActorShapePairing pairing in shapePairings)
-                StaticCompound.m_ActorInfo.Add(pairing.ActorInfo);
+                if (pairing.ActorInfo != null)
+                    StaticCompound.m_ActorInfo.Add(pairing.ActorInfo);
             StaticCompound.m_ActorInfo.Sort(delegate (ActorInfo x, ActorInfo y)
             {
                 if (x.m_HashId == y.m_HashId)
@@ -472,7 +477,7 @@ namespace UKingLibrary
 
             foreach (ActorShapePairing pairing in shapePairings)
             {
-                int actorInfoIndex = StaticCompound.m_ActorInfo.FindIndex(x => x.m_HashId == pairing.ActorInfo.m_HashId);
+                int actorInfoIndex = StaticCompound.m_ActorInfo.FindIndex(x => x.m_HashId == pairing.ActorInfo?.m_HashId);
                 foreach (ShapeInfoShapeInstancePairing shapeData in pairing.Shapes)
                 {
                     shapeData.ShapeInfo.m_ActorInfoIndex = actorInfoIndex;
@@ -544,6 +549,8 @@ namespace UKingLibrary
                 BVNode rigidBodyBVH = new BVNode() { IsLeaf = false };
                 rigidBodyBVH = BVNode.InsertLeafs(rigidBodyBVH, rigidBodyLeafNodes[i]);
                 ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_nodes = rigidBodyBVH.BuildAxis6Tree();
+                ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_domain.m_min = new Vector4(rigidBodyBVH.Min, 0);
+                ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_domain.m_max = new Vector4(rigidBodyBVH.Max, 0);
             }
         }
     }

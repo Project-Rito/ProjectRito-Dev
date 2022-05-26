@@ -72,6 +72,12 @@ namespace UKingLibrary
         {
             RootNode.Header = "Some random dungeon, idk.";
             RootNode.Tag = this;
+            RootNode.FolderChildren = new Dictionary<string, NodeBase>
+                {
+                    { "Muunt", new NodeFolder("Muunt") },
+                    { "Collision", new NodeFolder("Collision") }
+                };
+
             Scene.Init();
         }
 
@@ -83,11 +89,11 @@ namespace UKingLibrary
 
             RootNode.Header = fileName;
 
-            //Load dungeon data
+            // Load dungeon data
             DungeonData = new SARC();
             DungeonData.Load(stream, fileName);
 
-            //Load mubin data from sarc
+            // Load mubin data from sarc
             ProcessLoading.Instance.Update(20, 100, "Loading map units");
             var teraTree = GetBlwp("TeraTree");
             if (teraTree != null)
@@ -114,12 +120,12 @@ namespace UKingLibrary
 
             RootNode.Header = fileName;
             foreach (var mapFile in MapData)
-                RootNode.AddChild(mapFile.RootNode);
+                RootNode.FolderChildren["Muunt"].AddChild(mapFile.RootNode);
 
             //editor.LoadProd(ClusteringInstances, $"{DungeonName}_Clustering.sblwp");
             //editor.LoadProd(TeraTreeInstances, $"{DungeonName}_TeraTree.sblwp");
 
-            //Load model data into editor
+            // Load model data into editor
             var dungeonModel = GetModel();
             if (dungeonModel != null)
             {
@@ -139,6 +145,17 @@ namespace UKingLibrary
             }
             else
                 StudioLogger.WriteWarning("Couldn't find dungeon model!");
+
+            // Load baked collision data
+            MapCollisionLoader bakedCollisionLoader = new MapCollisionLoader();
+            bakedCollisionLoader.Load(GetStaticCompound(), $"{DungeonName}.shksc");
+            RootNode.FolderChildren["Collision"].Children.Add(bakedCollisionLoader.RootNode);
+            BakedCollision.Add(bakedCollisionLoader);
+        }
+
+        public void AddBakedCollisionShape(HKX2.hkpShape shape, System.Numerics.Matrix4x4 transform, uint hashId)
+        {
+            BakedCollision[0].AddShape(shape, transform, hashId);
         }
 
         private Stream GetModel()
@@ -189,6 +206,17 @@ namespace UKingLibrary
             return null;
         }
 
+        private Stream GetStaticCompound()
+        {
+            byte[] data;
+            if (DungeonData.SarcData.Files.TryGetValue($"Physics/StaticCompound/CDungeon/{DungeonName}.shksc", out data))
+                return new MemoryStream(Toolbox.Core.IO.YAZ0.Decompress(data));
+
+            if (DungeonData.SarcData.Files.TryGetValue($"Physics/StaticCompound/MainFieldDungeon/{DungeonName}.shksc", out data))
+                return new MemoryStream(Toolbox.Core.IO.YAZ0.Decompress(data));
+            return null;
+        }
+
         private byte[] TryDecompress(byte[] data) // Why aren't we using this yet? For stuff we save we wanna run into an error trying to open it if we're not gonna save it the same way.
         {
             if (data == null) return null;
@@ -203,7 +231,16 @@ namespace UKingLibrary
                 MemoryStream mapStream = new MemoryStream();
                 mapData.Save(mapStream);
 
-                DungeonData.SarcData.Files[$"Map/CDungeon/{DungeonName}/{mapData.RootNode.Header}"] = YAZ0.Compress(mapStream.ToArray());
+                DungeonData.SarcData.Files[$"Map/CDungeon/{DungeonName}/{mapData.RootNode.Header}"] = YAZ0.Compress(mapStream.ToArray()); // Todo save CDungeon or MainFieldDungeon as string for proper saving.1
+            }
+            foreach (MapCollisionLoader loader in BakedCollision)
+            {
+                string fileName = loader.RootNode.Header;
+
+                MemoryStream memoryStream = new MemoryStream();
+                loader.Save(memoryStream);
+
+                DungeonData.SarcData.Files[$"Physics/StaticCompound/CDungeon/{DungeonName}.shksc"] = YAZ0.Compress(memoryStream.ToArray());
             }
 
             Directory.CreateDirectory(Path.Join(savePath, "content/Pack"));

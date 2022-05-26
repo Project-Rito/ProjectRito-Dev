@@ -15,5 +15,7 @@ namespace UKingLibrary
         public List<MapData> MapData { get; set; }
         public List<MapCollisionLoader> BakedCollision { get; set; }
         public NodeFolder RootNode { get; set; }
+
+        public void AddBakedCollisionShape(HKX2.hkpShape shape, System.Numerics.Matrix4x4 transform, uint hashId);
     }
 }

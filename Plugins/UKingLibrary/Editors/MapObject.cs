@@ -235,26 +235,26 @@ namespace UKingLibrary
                         actorCollisionLoader.Load(File.OpenRead(actorCollisionPath), Path.GetFileName(actorCollisionPath));
                         hkpShape[] shapes = actorCollisionLoader.GetShapes();
 
-                        System.Numerics.Matrix4x4 matrix = new System.Numerics.Matrix4x4();
-                        matrix.M11 = Render.Transform.TransformMatrix.M11;
-                        matrix.M12 = Render.Transform.TransformMatrix.M12;
-                        matrix.M13 = Render.Transform.TransformMatrix.M13;
-                        matrix.M14 = Render.Transform.TransformMatrix.M14;
-                        matrix.M21 = Render.Transform.TransformMatrix.M21;
-                        matrix.M22 = Render.Transform.TransformMatrix.M22;
-                        matrix.M23 = Render.Transform.TransformMatrix.M23;
-                        matrix.M24 = Render.Transform.TransformMatrix.M24;
-                        matrix.M31 = Render.Transform.TransformMatrix.M31;
-                        matrix.M32 = Render.Transform.TransformMatrix.M32;
-                        matrix.M33 = Render.Transform.TransformMatrix.M33;
-                        matrix.M34 = Render.Transform.TransformMatrix.M34;
-                        matrix.M41 = Render.Transform.TransformMatrix.M41 / GLContext.PreviewScale;
-                        matrix.M42 = Render.Transform.TransformMatrix.M42 / GLContext.PreviewScale;
-                        matrix.M43 = Render.Transform.TransformMatrix.M43 / GLContext.PreviewScale;
-                        matrix.M44 = Render.Transform.TransformMatrix.M44;
+                        System.Numerics.Matrix4x4 transform = new System.Numerics.Matrix4x4();
+                        transform.M11 = Render.Transform.TransformMatrix.M11;
+                        transform.M12 = Render.Transform.TransformMatrix.M12;
+                        transform.M13 = Render.Transform.TransformMatrix.M13;
+                        transform.M14 = Render.Transform.TransformMatrix.M14;
+                        transform.M21 = Render.Transform.TransformMatrix.M21;
+                        transform.M22 = Render.Transform.TransformMatrix.M22;
+                        transform.M23 = Render.Transform.TransformMatrix.M23;
+                        transform.M24 = Render.Transform.TransformMatrix.M24;
+                        transform.M31 = Render.Transform.TransformMatrix.M31;
+                        transform.M32 = Render.Transform.TransformMatrix.M32;
+                        transform.M33 = Render.Transform.TransformMatrix.M33;
+                        transform.M34 = Render.Transform.TransformMatrix.M34;
+                        transform.M41 = Render.Transform.TransformMatrix.M41 / GLContext.PreviewScale;
+                        transform.M42 = Render.Transform.TransformMatrix.M42 / GLContext.PreviewScale;
+                        transform.M43 = Render.Transform.TransformMatrix.M43 / GLContext.PreviewScale;
+                        transform.M44 = Render.Transform.TransformMatrix.M44;
 
                         foreach (hkpShape shape in shapes)
-                            ParentLoader.BakedCollision[3].AddShape(shape, matrix, HashId);
+                            ParentLoader.AddBakedCollisionShape(shape, transform, HashId);
                     }
                 }
 

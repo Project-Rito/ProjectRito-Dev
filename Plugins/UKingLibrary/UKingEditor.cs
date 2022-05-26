@@ -111,11 +111,14 @@ namespace UKingLibrary
             }
             foreach (var packName in EditorConfig.OpenDungeons)
             {
-                string fullPath = Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/Pack/{packName}"), FileInfo.FolderPath);
+                string filePath = null;
+                if (File.Exists(Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/Pack/{packName}"), FileInfo.FolderPath)))
+                    filePath = Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/Pack/{packName}"), FileInfo.FolderPath);
+                else if (File.Exists(PluginConfig.GetContentPath($"Pack/{packName}")))
+                    filePath = PluginConfig.GetContentPath($"Pack/{packName}");
 
-                if (!File.Exists(fullPath))
-                    continue;
-                LoadDungeon(packName, File.Open(fullPath, FileMode.Open));
+                if (filePath != null)
+                    LoadDungeon(packName, File.Open(filePath, FileMode.Open));
             }
 
             LoadAssetList();
