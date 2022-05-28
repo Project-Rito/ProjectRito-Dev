@@ -99,6 +99,10 @@ namespace UKingLibrary
 
         public void LoadBakedCollision(string fileName, Stream stream)
         {
+            if (RootNode.FolderChildren.ContainsKey(GetSectionName(fileName)))
+                if (((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Collision"].Children.Any(x => x.Header == fileName))
+                    return;
+
             MapCollisionLoader loader = new MapCollisionLoader();
             loader.Load(stream, fileName);
 
@@ -107,9 +111,25 @@ namespace UKingLibrary
             BakedCollision.Add(loader);
         }
 
-        public void AddBakedCollisionShape(HKX2.hkpShape shape, System.Numerics.Matrix4x4 transform, uint hashId)
+        public void AddBakedCollisionShape(uint hashId, string muuntFileName, HKX2.hkpShape shape, System.Numerics.Matrix4x4 transform)
         {
-            BakedCollision[3].AddShape(shape, transform, hashId);
+            ((MapCollisionLoader)((NodeFolder)RootNode.FolderChildren[GetSectionName(muuntFileName)]).FolderChildren["Collision"].Children[3].Tag).AddShape(shape, hashId, transform);
+        }
+
+        public void RemoveBakedCollisionShape(uint hashId)
+        {
+            foreach (MapCollisionLoader bakedCollision in BakedCollision)
+                bakedCollision.RemoveShape(hashId);
+        }
+
+        public bool BakedCollisionShapeExists(uint hashId)
+        {
+            return (BakedCollision.Any(x => x.ShapeExists(hashId)));
+        }
+
+        public bool UpdateBakedCollisionShapeTransform(uint hashId, System.Numerics.Matrix4x4 transform)
+        {
+            return BakedCollision.Any(x => x.UpdateShapeTransform(hashId, transform));
         }
 
         private void InitSectionFolder(string sectionName)
@@ -126,6 +146,15 @@ namespace UKingLibrary
         public static string GetSectionName(string fileName)
         {
             return fileName.Substring(0, 3);
+        }
+        public static string GetSectionName(System.Numerics.Matrix4x4 transform)
+        {
+            int letterIndex = (int)(transform.Translation.X / 1000) + 5;
+            int numberIndex = (int)(transform.Translation.Z / 1000) + 5;
+
+            char[] letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J' };
+
+            return $"{letters[letterIndex]}-{numberIndex}";
         }
 
         public void Save(string savePath)

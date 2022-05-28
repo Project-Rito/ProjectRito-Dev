@@ -107,6 +107,12 @@ namespace UKingLibrary
             ApplyPreviewScale();
             GlobalData.LoadActorDatabase();
 
+            // Load baked collision data
+            MapCollisionLoader bakedCollisionLoader = new MapCollisionLoader();
+            bakedCollisionLoader.Load(GetStaticCompound(), $"{DungeonName}.shksc");
+            RootNode.FolderChildren["Collision"].Children.Add(bakedCollisionLoader.RootNode);
+            BakedCollision.Add(bakedCollisionLoader);
+
             //Static and dynamic actors
             var staticFile = GetMubin("Static");
             if (staticFile != null)
@@ -145,17 +151,26 @@ namespace UKingLibrary
             }
             else
                 StudioLogger.WriteWarning("Couldn't find dungeon model!");
-
-            // Load baked collision data
-            MapCollisionLoader bakedCollisionLoader = new MapCollisionLoader();
-            bakedCollisionLoader.Load(GetStaticCompound(), $"{DungeonName}.shksc");
-            RootNode.FolderChildren["Collision"].Children.Add(bakedCollisionLoader.RootNode);
-            BakedCollision.Add(bakedCollisionLoader);
         }
 
-        public void AddBakedCollisionShape(HKX2.hkpShape shape, System.Numerics.Matrix4x4 transform, uint hashId)
+        public void AddBakedCollisionShape(uint hashId, string muuntFileName, HKX2.hkpShape shape, System.Numerics.Matrix4x4 transform)
         {
-            BakedCollision[0].AddShape(shape, transform, hashId);
+            BakedCollision[0].AddShape(shape, hashId, transform);
+        }
+
+        public void RemoveBakedCollisionShape(uint hashId)
+        {
+            BakedCollision[0].RemoveShape(hashId);
+        }
+
+        public bool BakedCollisionShapeExists(uint hashId)
+        {
+            return BakedCollision[0].ShapeExists(hashId);
+        }
+
+        public bool UpdateBakedCollisionShapeTransform(uint hashId, System.Numerics.Matrix4x4 transform)
+        {
+            return BakedCollision[0].UpdateShapeTransform(hashId, transform);
         }
 
         private Stream GetModel()
@@ -247,6 +262,8 @@ namespace UKingLibrary
             FileStream fileStream = File.Open(Path.Join(savePath, $"content/Pack/{RootNode.Header}"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
 
             DungeonData.Save(fileStream);
+
+            fileStream.Close();
         }
 
         public static void ApplyPreviewScale()

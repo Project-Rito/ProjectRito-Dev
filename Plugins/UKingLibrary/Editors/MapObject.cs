@@ -30,6 +30,8 @@ namespace UKingLibrary
         /// </summary>
         public IDictionary<string, dynamic> Properties;
 
+        public bool BakeCollision;
+
         /// <summary>
         /// Parameters related to the actor instance.
         /// </summary>
@@ -135,6 +137,7 @@ namespace UKingLibrary
             MapData = mapData;
 
             Properties = UKingLibrary.MapData.ValuesToProperties(properties);
+            BakeCollision = ParentLoader.BakedCollisionShapeExists(HashId);
 
             ActorInfo = actorInfo;
             string unitConfigName = Properties["UnitConfigName"].Value;
@@ -226,37 +229,7 @@ namespace UKingLibrary
                     ImGui.EndCombo();
                 }
 
-                if (ImGui.Button(TranslationSource.GetText("ADD_COLLISION")))
-                {
-                    string actorCollisionPath = $"{PluginConfig.CollisionCachePath}/{Name}.hkrb";
-                    if (File.Exists(actorCollisionPath))
-                    {
-                        ActorCollisionLoader actorCollisionLoader = new ActorCollisionLoader();
-                        actorCollisionLoader.Load(File.OpenRead(actorCollisionPath), Path.GetFileName(actorCollisionPath));
-                        hkpShape[] shapes = actorCollisionLoader.GetShapes();
-
-                        System.Numerics.Matrix4x4 transform = new System.Numerics.Matrix4x4();
-                        transform.M11 = Render.Transform.TransformMatrix.M11;
-                        transform.M12 = Render.Transform.TransformMatrix.M12;
-                        transform.M13 = Render.Transform.TransformMatrix.M13;
-                        transform.M14 = Render.Transform.TransformMatrix.M14;
-                        transform.M21 = Render.Transform.TransformMatrix.M21;
-                        transform.M22 = Render.Transform.TransformMatrix.M22;
-                        transform.M23 = Render.Transform.TransformMatrix.M23;
-                        transform.M24 = Render.Transform.TransformMatrix.M24;
-                        transform.M31 = Render.Transform.TransformMatrix.M31;
-                        transform.M32 = Render.Transform.TransformMatrix.M32;
-                        transform.M33 = Render.Transform.TransformMatrix.M33;
-                        transform.M34 = Render.Transform.TransformMatrix.M34;
-                        transform.M41 = Render.Transform.TransformMatrix.M41 / GLContext.PreviewScale;
-                        transform.M42 = Render.Transform.TransformMatrix.M42 / GLContext.PreviewScale;
-                        transform.M43 = Render.Transform.TransformMatrix.M43 / GLContext.PreviewScale;
-                        transform.M44 = Render.Transform.TransformMatrix.M44;
-
-                        foreach (hkpShape shape in shapes)
-                            ParentLoader.AddBakedCollisionShape(shape, transform, HashId);
-                    }
-                }
+                if (ImGui.Checkbox(TranslationSource.GetText("BAKE_COLLISION"), ref BakeCollision));
 
                 PropertyDrawer.Draw(this, Properties, new PropertyDrawer.PropertyChangedCallback(OnPropertyUpdate));
             };
@@ -405,12 +378,61 @@ namespace UKingLibrary
             });
         }
 
+        public void SaveBakedCollision()
+        {
+            if (BakeCollision)
+            {
+                // Reformat our transform.
+                // (I really need to make a util to do this so the code isn't as messy)
+                System.Numerics.Matrix4x4 transform = new System.Numerics.Matrix4x4();
+                transform.M11 = Render.Transform.TransformMatrix.M11;
+                transform.M12 = Render.Transform.TransformMatrix.M12;
+                transform.M13 = Render.Transform.TransformMatrix.M13;
+                transform.M14 = Render.Transform.TransformMatrix.M14;
+                transform.M21 = Render.Transform.TransformMatrix.M21;
+                transform.M22 = Render.Transform.TransformMatrix.M22;
+                transform.M23 = Render.Transform.TransformMatrix.M23;
+                transform.M24 = Render.Transform.TransformMatrix.M24;
+                transform.M31 = Render.Transform.TransformMatrix.M31;
+                transform.M32 = Render.Transform.TransformMatrix.M32;
+                transform.M33 = Render.Transform.TransformMatrix.M33;
+                transform.M34 = Render.Transform.TransformMatrix.M34;
+                transform.M41 = Render.Transform.TransformMatrix.M41 / GLContext.PreviewScale;
+                transform.M42 = Render.Transform.TransformMatrix.M42 / GLContext.PreviewScale;
+                transform.M43 = Render.Transform.TransformMatrix.M43 / GLContext.PreviewScale;
+                transform.M44 = Render.Transform.TransformMatrix.M44;
+
+                // If the actor already has baked collision just update the transform
+                if (ParentLoader.UpdateBakedCollisionShapeTransform(HashId, transform))
+                    return;
+
+                // If not add collision
+                string actorCollisionPath = $"{PluginConfig.CollisionCachePath}/{Name}.hkrb";
+                if (File.Exists(actorCollisionPath))
+                {
+                    ActorCollisionLoader actorCollisionLoader = new ActorCollisionLoader();
+                    actorCollisionLoader.Load(File.OpenRead(actorCollisionPath), Path.GetFileName(actorCollisionPath));
+                    hkpShape[] shapes = actorCollisionLoader.GetShapes();
+
+                    
+
+                    foreach (hkpShape shape in shapes)
+                        ParentLoader.AddBakedCollisionShape(HashId, MapData.RootNode.Header, shape, transform);
+                }
+            }
+            else
+            {
+                ParentLoader.RemoveBakedCollisionShape(HashId);
+            }
+        }
+
         /// <summary>
         /// Saves the actor in the scene.
         /// </summary>
         public void SaveActor()
         {
             SaveTransform();
+            SaveBakedCollision();
         }
 
         public override void BeginFrame()
