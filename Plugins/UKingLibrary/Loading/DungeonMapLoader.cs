@@ -21,7 +21,7 @@ namespace UKingLibrary
         /// <summary>
         /// The preview scale to use for everything loaded by this.
         /// </summary>
-        public const float PreviewScale = 25;
+        public const float PreviewScale = 16;
 
         /// <summary>
         /// The editor that this is associated with.

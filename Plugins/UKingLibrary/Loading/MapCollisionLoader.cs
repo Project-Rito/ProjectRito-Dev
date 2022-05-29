@@ -344,6 +344,9 @@ namespace UKingLibrary
 
         public BVNode TransformedLeafFromBvh(BVNode shapeBvh, Matrix4x4 instanceTransform)
         {
+            if (shapeBvh == null)
+                return null;
+
             BVNode instanceBvhLeaf = new BVNode()
             {
                 IsLeaf = true,
@@ -445,6 +448,7 @@ namespace UKingLibrary
             public hkpStaticCompoundShapeInstance Instance;
             public int RigidBodyIndex;
             public BVNode LeafNode;
+            public bool NullActorInfoPtr;
         }
         private struct ActorShapePairing
         {
@@ -529,7 +533,8 @@ namespace UKingLibrary
                     ShapeInfo = shapeInfo,
                     Instance = GetShapeInstanceByUserData((ulong)i),
                     RigidBodyIndex = GetShapeRigidBodyIndexByUserData((ulong)i),
-                    LeafNode = GetShapeLeafNodeByPrimitive(GetShapeInstanceIndexByUserData((ulong)i))
+                    LeafNode = GetShapeLeafNodeByPrimitive(GetShapeInstanceIndexByUserData((ulong)i)),
+                    NullActorInfoPtr = shapeInfo.m_ActorInfoIndex == -1
                 };
 
                 // Find existing shape pairing or create a new one
@@ -590,12 +595,21 @@ namespace UKingLibrary
 
                 return 0;
             });
-
             for (int i = 0; i < StaticCompound.m_ActorInfo.Count; i++)
             {
                 StaticCompound.m_ActorInfo[i].m_ShapeInfoStart = StaticCompound.m_ShapeInfo.FindIndex(x => x.m_ActorInfoIndex == i);
                 StaticCompound.m_ActorInfo[i].m_ShapeInfoEnd = StaticCompound.m_ShapeInfo.FindLastIndex(x => x.m_ActorInfoIndex == i);
             }
+            // Apply null actorinfo pointers... why do these exist? Idk.
+            foreach (ActorShapePairing pairing in shapePairings)
+            {
+                foreach (ShapeInfoShapeInstancePairing shapeData in pairing.Shapes)
+                {
+                    int shapeInfoIdx = StaticCompound.m_ShapeInfo.FindIndex(x => x.m_InstanceId == shapeData.ShapeInfo.m_InstanceId && x.m_ActorInfoIndex == shapeData.ShapeInfo.m_ActorInfoIndex);
+                    StaticCompound.m_ShapeInfo[shapeInfoIdx].m_ActorInfoIndex = shapeData.NullActorInfoPtr ? -1 : StaticCompound.m_ShapeInfo[shapeInfoIdx].m_ActorInfoIndex;
+                }
+            }
+            
 
             foreach (ActorShapePairing pairing in shapePairings)
             {

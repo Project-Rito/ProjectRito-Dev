@@ -81,14 +81,15 @@ namespace UKingLibrary
                 foreach (string muName in EditorConfig.OpenMapUnits[fieldName])
                 {
                     // Load map data
-                    string fullPath = Path.GetFullPath(muName, Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"aoc/0010/Map/{fieldName}/"), FileInfo.FolderPath));
-                    string fileName = Path.GetFileName(muName);
-                    if (!File.Exists(fullPath))
-                        continue;
-                    LoadFieldMuunt(fieldName, fileName, File.Open(fullPath, FileMode.Open));
-                }
+                    string filePath = null;
+                    if (File.Exists(Path.GetFullPath(muName, Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"aoc/0010/Map/{fieldName}/"), FileInfo.FolderPath))))
+                        filePath = Path.GetFullPath(muName, Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"aoc/0010/Map/{fieldName}/"), FileInfo.FolderPath));
+                    else if (File.Exists(PluginConfig.GetContentPath($"Map/{fieldName}/{muName}")))
+                        filePath = PluginConfig.GetContentPath($"Map/{fieldName}/{muName}");
 
-                FieldMapLoader loader = (FieldMapLoader)((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren[fieldName].Tag;
+                    string fileName = Path.GetFileName(muName);
+                    LoadFieldMuunt(fieldName, fileName, File.Open(filePath, FileMode.Open));
+                }
             }
             foreach (var packName in EditorConfig.OpenDungeons)
             {
@@ -277,7 +278,11 @@ namespace UKingLibrary
                     filePath = PluginConfig.GetContentPath($"Physics/StaticCompound/{fieldName}/{sectionName}-{i}.shksc");
 
                 if (filePath != null) // Just in case, ya know?
-                    loader.LoadBakedCollision(Path.GetFileName(filePath), File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                {
+                    Stream compoundStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    loader.LoadBakedCollision(Path.GetFileName(filePath), compoundStream);
+                    compoundStream.Close();
+                }                    
             }
 
             // Load map file

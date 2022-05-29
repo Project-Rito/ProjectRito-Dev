@@ -220,6 +220,7 @@ namespace UKingLibrary
             Stream compressed = FileSettings.CompressionFormat.Compress(stream);
             stream.Position = 0;
             compressed.CopyTo(stream);
+            stream.SetLength(stream.Position);
         }
 
         private void SaveEditor()
