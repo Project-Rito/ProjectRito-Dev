@@ -17,6 +17,9 @@ FIELD_NAME - Field Name
 MAX_DETAIL - Max Detail
 DEBUG_SECTIONS - Debug Sections
 
+CACHE_COLLISION - Cache Collision
+BAKE_COLLISION - Bake Collision
+
 BOTW GAME PATH - BotW Game Path
 BOTW UPDATE PATH - BotW Update Path
 BOTW DLC PATH - BotW DLC Path

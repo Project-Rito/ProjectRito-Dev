@@ -30,7 +30,29 @@ namespace UKingLibrary
         /// </summary>
         public IDictionary<string, dynamic> Properties;
 
-        public bool BakeCollision;
+        private bool _bakeCollision;
+        public bool BakeCollision
+        {
+            get
+            {
+                return _bakeCollision;
+            }
+            set
+            {
+
+                if (value && !_bakeCollision)
+                {
+                    string actorCollisionPath = $"{PluginConfig.CollisionCachePath}/{Name}.hkrb";
+                    if (File.Exists(actorCollisionPath))
+                        _bakeCollision = true;
+                }
+                else if (value && _bakeCollision) { }
+                else
+                {
+                    _bakeCollision = false;
+                }
+            }
+        }
 
         /// <summary>
         /// Parameters related to the actor instance.
@@ -229,12 +251,16 @@ namespace UKingLibrary
                     ImGui.EndCombo();
                 }
 
-                ImGui.Checkbox(TranslationSource.GetText("BAKE_COLLISION"), ref BakeCollision);
+                bool bakeCollision = BakeCollision;
+                if (ImGui.Checkbox(TranslationSource.GetText("BAKE_COLLISION"), ref bakeCollision))
+                    BakeCollision = bakeCollision;
+#if DEBUG
                 if (ImGui.Button("debug: get shapes"))
                 {
                     foreach (var loader in ParentLoader.BakedCollision)
                         loader.GetShapes(HashId);
                 }
+#endif
 
                 PropertyDrawer.Draw(this, Properties, new PropertyDrawer.PropertyChangedCallback(OnPropertyUpdate));
             };
@@ -284,6 +310,7 @@ namespace UKingLibrary
             clone.ActorInfo = ActorInfo;
             clone.Parent = Parent;
             clone.MapData = MapData;
+            clone.BakeCollision = BakeCollision;
             clone.ReloadActor();
 
             return clone;
@@ -346,6 +373,7 @@ namespace UKingLibrary
             if (key == "UnitConfigName")
             {
                 ActorInfo = GlobalData.Actors[Properties[key].Value];
+                BakeCollision = true;
                 SaveTransform();
                 UpdateActorModel();
             }
@@ -652,7 +680,7 @@ namespace UKingLibrary
                 string animPath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}_Animation.sbfres");
                 if (File.Exists(modelPath))
                 {
-                    var renderCandidate = getActorSpecificBfresRender(actor, new BfresRender(modelPath, parent));
+                    var renderCandidate = GetActorSpecificBfresRender(actor, new BfresRender(modelPath, parent));
                     if (renderCandidate != null)
                     {
                         render = renderCandidate;
@@ -671,7 +699,7 @@ namespace UKingLibrary
 
                         if (File.Exists(modelPartPath))
                         {
-                            var renderCandidate = getActorSpecificBfresRender(actor, new BfresRender(modelPartPath, parent));
+                            var renderCandidate = GetActorSpecificBfresRender(actor, new BfresRender(modelPartPath, parent));
                             if (renderCandidate != null)
                             {
                                 render = renderCandidate;
@@ -700,7 +728,7 @@ namespace UKingLibrary
             return render;
         }
 
-        private BfresRender getActorSpecificBfresRender(IDictionary<string, dynamic> actor, BfresRender render)
+        private BfresRender GetActorSpecificBfresRender(IDictionary<string, dynamic> actor, BfresRender render)
         {
             bool containsActorMainModel = false;
             foreach (var model in render.Models)

@@ -467,8 +467,8 @@ namespace UKingLibrary
             var name = actorInfo["name"];
             //Create the actor data and add it to the scene
             var obj = new MapObject(ActiveMapLoader);
-            var index = mapData.Objs.Count;
             obj.CreateNew(GetHashId(mapData), name, actorInfo, parent, mapData);
+            obj.BakeCollision = true;
             //Add to the viewport scene
             obj.AddToScene();
 
@@ -515,6 +515,7 @@ namespace UKingLibrary
 
             var obj = new MapObject(ActiveMapLoader);
             obj.CreateNew(GetHashId(mapData), "LinkTagAnd", actorInfo, parent, mapData);
+            obj.BakeCollision = true;
             obj.AddToScene();
 
             Scene.DeselectAll(context);
