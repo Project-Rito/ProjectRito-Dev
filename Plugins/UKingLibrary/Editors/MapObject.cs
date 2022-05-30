@@ -229,7 +229,12 @@ namespace UKingLibrary
                     ImGui.EndCombo();
                 }
 
-                if (ImGui.Checkbox(TranslationSource.GetText("BAKE_COLLISION"), ref BakeCollision));
+                ImGui.Checkbox(TranslationSource.GetText("BAKE_COLLISION"), ref BakeCollision);
+                if (ImGui.Button("debug: get shapes"))
+                {
+                    foreach (var loader in ParentLoader.BakedCollision)
+                        loader.GetShapes(HashId);
+                }
 
                 PropertyDrawer.Draw(this, Properties, new PropertyDrawer.PropertyChangedCallback(OnPropertyUpdate));
             };

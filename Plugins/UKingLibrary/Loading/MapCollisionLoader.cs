@@ -71,7 +71,6 @@ namespace UKingLibrary
 
             foreach (hkpRigidBody rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies)
             {
-
                 foreach (hkpStaticCompoundShapeInstance instance in ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances)
                 {
                     if (instance.m_userData >= (ulong)actorInfo.m_ShapeInfoStart && instance.m_userData <= (ulong)actorInfo.m_ShapeInfoEnd)
@@ -92,15 +91,24 @@ namespace UKingLibrary
                 return;
 
             #region Build Instance
-            float ukn1;
+            Vector3 translation;
+            Quaternion rotation;
+            Vector3 scale;
+            Matrix4x4.Decompose(transform, out scale, out rotation, out translation);
+
+            InstanceFlags instanceFlags = (InstanceFlags)0b00111111000000000000000000000010;
             if (shape is hkpConvexVerticesShape)
-                ukn1 = .5000002f;
-            else
-                ukn1 = .5000001f;
+                instanceFlags |= InstanceFlags.CONVEX_VERTICES_SHAPE;
+            if (scale != Vector3.One)
+                instanceFlags |= InstanceFlags.SCALED;
 
             hkpStaticCompoundShapeInstance shapeInstance = new hkpStaticCompoundShapeInstance()
             {
-                m_transform = FormatInstanceTransform(transform, ukn1),
+                m_position = translation,
+                m_rotation = rotation,
+                m_scale = scale,
+                m_instanceFlags = instanceFlags,
+                m_ukn = 0.5f,
                 m_shape = shape,
                 m_filterInfo = 0,
                 m_childFilterInfoMask = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[0].m_uid,
@@ -196,8 +204,18 @@ namespace UKingLibrary
                 ShapeInfoShapeInstancePairing shapePairing = ShapePairings[pairingIdx].Shapes[shapeIdx];
 
                 // Set transform
-                Matrix4x4 originalTransform = UnformatInstanceTransform(shapePairing.Instance.m_transform);
-                shapePairing.Instance.m_transform = FormatInstanceTransform(transform, shapePairing.Instance.m_transform.M14);
+
+                Vector3 translation;
+                Quaternion rotation;
+                Vector3 scale;
+                Matrix4x4.Decompose(transform, out scale, out rotation, out translation);
+
+                Matrix4x4 originalTransform = ComposeMatrix(shapePairing.Instance.m_position, shapePairing.Instance.m_rotation, shapePairing.Instance.m_scale);
+                shapePairing.Instance.m_position = translation;
+                shapePairing.Instance.m_rotation = rotation;
+                shapePairing.Instance.m_scale = scale;
+                if (scale != Vector3.One)
+                    shapePairing.Instance.m_instanceFlags |= InstanceFlags.SCALED;
 
                 BVNode leafBvhNode = null;
                
@@ -390,41 +408,12 @@ namespace UKingLibrary
             return instanceBvhLeaf;
         }
 
-        public Matrix4x4 FormatInstanceTransform(Matrix4x4 transform, float ukn1 = .5000001f, float ukn2 = .5f)
+        public Matrix4x4 ComposeMatrix(Vector3 translation, Quaternion rotation, Vector3 scale)
         {
-            Vector3 translation = new Vector3();
-            Quaternion rotation = new Quaternion();
-            Vector3 scale = new Vector3();
-
-            Matrix4x4.Decompose(transform, out scale, out rotation, out translation);
-
-            return new Matrix4x4
-            {
-                M11 = translation.X,
-                M12 = translation.Y,
-                M13 = translation.Z,
-                M14 = ukn1, // UKN: I don't have a clue what this is, soo I can't calculate it.
-                M21 = rotation.X,
-                M22 = rotation.Y,
-                M23 = rotation.Z,
-                M24 = rotation.W,
-                M31 = scale.X,
-                M32 = scale.Y,
-                M33 = scale.Z,
-                M34 = ukn2,
-                M41 = 0f,
-                M42 = 0f,
-                M43 = 0f,
-                M44 = 1f
-            };
-        }
-
-        public Matrix4x4 UnformatInstanceTransform(Matrix4x4 matrix)
-        {
-            Matrix4x4 translate = Matrix4x4.CreateTranslation(matrix.M11, matrix.M12, matrix.M13);
-            Matrix4x4 rotation = Matrix4x4.CreateFromQuaternion(new Quaternion(matrix.M21, matrix.M22, matrix.M23, matrix.M24));
-            Matrix4x4 scale = Matrix4x4.CreateScale(matrix.M31, matrix.M32, matrix.M33);
-            return rotation * scale * translate;
+            Matrix4x4 translationMatrix = Matrix4x4.CreateTranslation(translation);
+            Matrix4x4 rotationMatrix = Matrix4x4.CreateFromQuaternion(rotation);
+            Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(scale);
+            return rotationMatrix * scaleMatrix * translationMatrix;
         }
 
         public void Save(Stream stream)
