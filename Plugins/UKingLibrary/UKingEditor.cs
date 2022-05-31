@@ -37,7 +37,7 @@ namespace UKingLibrary
         /// <summary>
         /// Psuedo-project info that applies to the editor
         /// </summary>
-        private UKingEditorConfig EditorConfig;
+        public UKingEditorConfig EditorConfig;
 
         private NodeFolder ContentFolder;
 

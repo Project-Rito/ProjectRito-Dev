@@ -416,27 +416,12 @@ namespace UKingLibrary
             if (BakeCollision)
             {
                 // Reformat our transform.
-                // (I really need to make a util to do this so the code isn't as messy)
-                System.Numerics.Matrix4x4 transform = new System.Numerics.Matrix4x4();
-                transform.M11 = Render.Transform.TransformMatrix.M11;
-                transform.M12 = Render.Transform.TransformMatrix.M12;
-                transform.M13 = Render.Transform.TransformMatrix.M13;
-                transform.M14 = Render.Transform.TransformMatrix.M14;
-                transform.M21 = Render.Transform.TransformMatrix.M21;
-                transform.M22 = Render.Transform.TransformMatrix.M22;
-                transform.M23 = Render.Transform.TransformMatrix.M23;
-                transform.M24 = Render.Transform.TransformMatrix.M24;
-                transform.M31 = Render.Transform.TransformMatrix.M31;
-                transform.M32 = Render.Transform.TransformMatrix.M32;
-                transform.M33 = Render.Transform.TransformMatrix.M33;
-                transform.M34 = Render.Transform.TransformMatrix.M34;
-                transform.M41 = Render.Transform.TransformMatrix.M41 / GLContext.PreviewScale;
-                transform.M42 = Render.Transform.TransformMatrix.M42 / GLContext.PreviewScale;
-                transform.M43 = Render.Transform.TransformMatrix.M43 / GLContext.PreviewScale;
-                transform.M44 = Render.Transform.TransformMatrix.M44;
+                System.Numerics.Vector3 translation = new System.Numerics.Vector3(Render.Transform.Position.X, Render.Transform.Position.Y, Render.Transform.Position.Z) / GLContext.PreviewScale;
+                System.Numerics.Quaternion rotation = new System.Numerics.Quaternion(Render.Transform.Rotation.X, Render.Transform.Rotation.Y, Render.Transform.Rotation.Z, Render.Transform.Rotation.W);
+                System.Numerics.Vector3 scale = new System.Numerics.Vector3(Render.Transform.Scale.X, Render.Transform.Scale.Y, Render.Transform.Scale.Z);
 
                 // If the actor already has baked collision just update the transform
-                if (ParentLoader.UpdateBakedCollisionShapeTransform(HashId, transform))
+                if (ParentLoader.UpdateBakedCollisionShapeTransform(HashId, translation, rotation, scale))
                     return;
 
                 // If not add collision
@@ -450,7 +435,7 @@ namespace UKingLibrary
                     
 
                     foreach (hkpShape shape in shapes)
-                        ParentLoader.AddBakedCollisionShape(HashId, MapData.RootNode.Header, shape, transform);
+                        ParentLoader.AddBakedCollisionShape(HashId, MapData.RootNode.Header, shape, translation, rotation, scale);
                 }
             }
             else

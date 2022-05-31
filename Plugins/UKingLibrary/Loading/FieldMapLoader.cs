@@ -111,9 +111,9 @@ namespace UKingLibrary
             BakedCollision.Add(loader);
         }
 
-        public void AddBakedCollisionShape(uint hashId, string muuntFileName, HKX2.hkpShape shape, System.Numerics.Matrix4x4 transform)
+        public void AddBakedCollisionShape(uint hashId, string muuntFileName, HKX2.hkpShape shape, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
         {
-            ((MapCollisionLoader)((NodeFolder)RootNode.FolderChildren[GetSectionName(muuntFileName)]).FolderChildren["Collision"].Children[3].Tag).AddShape(shape, hashId, transform);
+            ((MapCollisionLoader)((NodeFolder)RootNode.FolderChildren[GetSectionName(muuntFileName)]).FolderChildren["Collision"].Children[3].Tag).AddShape(shape, hashId, translation, rotation, scale);
         }
 
         public void RemoveBakedCollisionShape(uint hashId)
@@ -127,9 +127,9 @@ namespace UKingLibrary
             return (BakedCollision.Any(x => x.ShapeExists(hashId)));
         }
 
-        public bool UpdateBakedCollisionShapeTransform(uint hashId, System.Numerics.Matrix4x4 transform)
+        public bool UpdateBakedCollisionShapeTransform(uint hashId, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
         {
-            return BakedCollision.Any(x => x.UpdateShapeTransform(hashId, transform));
+            return BakedCollision.Any(x => x.UpdateShapeTransform(hashId, translation, rotation, scale));
         }
 
         private void InitSectionFolder(string sectionName)

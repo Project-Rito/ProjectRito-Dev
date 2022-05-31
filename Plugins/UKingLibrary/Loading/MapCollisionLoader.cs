@@ -54,48 +54,22 @@ namespace UKingLibrary
 
         public hkpShape[] GetShapes(uint hashId)
         {
-            List<hkpShape> shapes = new List<hkpShape>(1);
-
             // TODO: In future do a binary search like https://github.com/krenyy/botw_havok/blob/dc7966c7780ef8c8a35e061cd3aacc20020fa2d7/botw_havok/cli/hkrb_extract.py#L30
-            ActorInfo actorInfo = null;
-            foreach (var actInfo in StaticCompound.m_ActorInfo)
+            foreach (ActorShapePairing pairing in ShapePairings)
             {
-                if (actInfo.m_HashId == hashId)
-                {
-                    actorInfo = actInfo;
-                    break;
-                }
+                if (pairing.ActorInfo.m_HashId == hashId)
+                    return pairing.Shapes.Select(x => x.Instance.m_shape).ToArray();
             }
-            if (actorInfo == null)
-                return null;
-
-            foreach (hkpRigidBody rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies)
-            {
-                foreach (hkpStaticCompoundShapeInstance instance in ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances)
-                {
-                    if (instance.m_userData >= (ulong)actorInfo.m_ShapeInfoStart && instance.m_userData <= (ulong)actorInfo.m_ShapeInfoEnd)
-                    {
-                        // This is a shape we need!
-                        shapes.Add(instance.m_shape);
-                    }
-                }
-            }
-
-            return shapes.ToArray();
+            return new hkpShape[0];
         }
 
-        public void AddShape(hkpShape shape, uint hashId, Matrix4x4 transform)
+        public void AddShape(hkpShape shape, uint hashId, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
         {
             // Some shapes we can't find the aabb for yet.
             if (shape is not hkpBvCompressedMeshShape && shape is not hkpConvexVerticesShape)
                 return;
 
             #region Build Instance
-            Vector3 translation;
-            Quaternion rotation;
-            Vector3 scale;
-            Matrix4x4.Decompose(transform, out scale, out rotation, out translation);
-
             InstanceFlags instanceFlags = (InstanceFlags)0b00111111000000000000000000000010;
             if (shape is hkpConvexVerticesShape)
                 instanceFlags |= InstanceFlags.CONVEX_VERTICES_SHAPE;
@@ -121,7 +95,7 @@ namespace UKingLibrary
             BVNode leafBvhNode = null;
             BVNode shapeBvh = GetShapeBvh(shape);
 
-            leafBvhNode = TransformedLeafFromBvh(shapeBvh, transform);
+            leafBvhNode = TransformLeaf(shapeBvh, ComposeMatrix(translation, rotation, scale));
 
             // Add our data
             if (ShapePairings.Any(x => x.ActorInfo?.m_HashId == hashId))
@@ -192,7 +166,7 @@ namespace UKingLibrary
         /// Updates a shape's transform given HashId.
         /// </summary>
         /// <returns>True if shape is present. False if shape is not present.</returns>
-        public bool UpdateShapeTransform(uint hashId, Matrix4x4 transform)
+        public bool UpdateShapeTransform(uint hashId, Vector3 translation, Quaternion rotation, Vector3 scale)
         {
             int pairingIdx = ShapePairings.FindIndex(x => x.ActorInfo?.m_HashId == hashId);
             if (pairingIdx == -1)
@@ -204,29 +178,19 @@ namespace UKingLibrary
                 ShapeInfoShapeInstancePairing shapePairing = ShapePairings[pairingIdx].Shapes[shapeIdx];
 
                 // Set transform
-
-                Vector3 translation;
-                Quaternion rotation;
-                Vector3 scale;
-                Matrix4x4.Decompose(transform, out scale, out rotation, out translation);
-
                 Matrix4x4 originalTransform = ComposeMatrix(shapePairing.Instance.m_position, shapePairing.Instance.m_rotation, shapePairing.Instance.m_scale);
                 shapePairing.Instance.m_position = translation;
                 shapePairing.Instance.m_rotation = rotation;
                 shapePairing.Instance.m_scale = scale;
                 if (scale != Vector3.One)
                     shapePairing.Instance.m_instanceFlags |= InstanceFlags.SCALED;
+                else
+                    shapePairing.Instance.m_instanceFlags &= ~InstanceFlags.SCALED;
 
-                BVNode leafBvhNode = null;
-               
-                // Set BVH
+                // Set BVH (If we can't find the shape BVH it's not supported yet... leave vanilla leaf intact.)
                 BVNode shapeBvh = GetShapeBvh(shapePairing.Instance.m_shape);
-
-                Matrix4x4 inverseTransform = new Matrix4x4();
-                Matrix4x4.Invert(originalTransform, out inverseTransform);
-
-                leafBvhNode = TransformedLeafFromBvh(TransformedLeafFromBvh(shapePairing.LeafNode, inverseTransform), transform);
-                shapePairing.LeafNode = leafBvhNode;
+                if (shapeBvh != null)
+                    shapePairing.LeafNode = TransformLeaf(shapeBvh, ComposeMatrix(translation, rotation, scale));
 
                 // Apply
                 ShapePairings[pairingIdx].Shapes[shapeIdx] = shapePairing;
@@ -343,24 +307,26 @@ namespace UKingLibrary
 
         public BVNode GetShapeBvh(hkpShape shape)
         {
-            BVNode bvh = new BVNode();
             if (shape is hkpBvCompressedMeshShape)
             {
-                bvh = ((hkpBvCompressedMeshShape)shape).GetMeshBvh();
+                return ((hkpBvCompressedMeshShape)shape).GetMeshBvh();
             }
             else if (shape is hkpConvexVerticesShape)
             {
                 Vector4 center = ((hkpConvexVerticesShape)shape).m_aabbCenter;
                 Vector4 halfExtents = ((hkpConvexVerticesShape)shape).m_aabbHalfExtents;
 
-                bvh.Min = new Vector3(center.X, center.Y, center.Z) - new Vector3(halfExtents.X, halfExtents.Y, halfExtents.Z);
-                bvh.Max = new Vector3(center.X, center.Y, center.Z) + new Vector3(halfExtents.X, halfExtents.Y, halfExtents.Z);
+                return new BVNode()
+                {
+                    Min = new Vector3(center.X, center.Y, center.Z) - new Vector3(halfExtents.X, halfExtents.Y, halfExtents.Z),
+                    Max = new Vector3(center.X, center.Y, center.Z) + new Vector3(halfExtents.X, halfExtents.Y, halfExtents.Z)
+                };
             }
 
-            return bvh;
+            return null;
         }
 
-        public BVNode TransformedLeafFromBvh(BVNode shapeBvh, Matrix4x4 instanceTransform)
+        public BVNode TransformLeaf(BVNode shapeBvh, Matrix4x4 instanceTransform)
         {
             if (shapeBvh == null)
                 return null;
@@ -378,7 +344,7 @@ namespace UKingLibrary
             };
 
             // A little bit annoying that we have to convert stuff between System.Numerics and OpenTK, but it's worth it to be able to reuse aabb code.
-            BoundingNode leafBvhBoundingNode = new BoundingNode(new OpenTK.Vector3(instanceBvhLeaf.Min.X, instanceBvhLeaf.Min.Y, instanceBvhLeaf.Min.Z), new OpenTK.Vector3(instanceBvhLeaf.Max.X, instanceBvhLeaf.Max.Y, instanceBvhLeaf.Max.Z));
+            BoundingBox leafBvhBoundingNode = new BoundingBox(new OpenTK.Vector3(instanceBvhLeaf.Min.X, instanceBvhLeaf.Min.Y, instanceBvhLeaf.Min.Z), new OpenTK.Vector3(instanceBvhLeaf.Max.X, instanceBvhLeaf.Max.Y, instanceBvhLeaf.Max.Z));
             leafBvhBoundingNode.UpdateTransform(new OpenTK.Matrix4()
             {
                 M11 = instanceTransform.M11,
@@ -398,12 +364,12 @@ namespace UKingLibrary
                 M43 = instanceTransform.M43,
                 M44 = instanceTransform.M44
             });
-            instanceBvhLeaf.Min.X = leafBvhBoundingNode.Box.Min.X;
-            instanceBvhLeaf.Min.Y = leafBvhBoundingNode.Box.Min.Y;
-            instanceBvhLeaf.Min.Z = leafBvhBoundingNode.Box.Min.Z;
-            instanceBvhLeaf.Max.X = leafBvhBoundingNode.Box.Max.X;
-            instanceBvhLeaf.Max.Y = leafBvhBoundingNode.Box.Max.Y;
-            instanceBvhLeaf.Max.Z = leafBvhBoundingNode.Box.Max.Z;
+            instanceBvhLeaf.Min.X = leafBvhBoundingNode.Min.X;
+            instanceBvhLeaf.Min.Y = leafBvhBoundingNode.Min.Y;
+            instanceBvhLeaf.Min.Z = leafBvhBoundingNode.Min.Z;
+            instanceBvhLeaf.Max.X = leafBvhBoundingNode.Max.X;
+            instanceBvhLeaf.Max.Y = leafBvhBoundingNode.Max.Y;
+            instanceBvhLeaf.Max.Z = leafBvhBoundingNode.Max.Z;
 
             return instanceBvhLeaf;
         }

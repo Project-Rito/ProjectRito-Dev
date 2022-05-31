@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using ImGuiNET;
 using MapStudio.UI;
 using GLFrameworkEngine;
@@ -14,8 +15,12 @@ namespace UKingLibrary
         public MubinToolSettings() {
         }
 
+        private string _removeOnlyOneUnitConfigName = @"";
+        private string _removeOnlyOneFieldName = @"MainField";
         public void Render()
         {
+            UKingEditor editor = (UKingEditor)Workspace.ActiveWorkspace.ActiveEditor; // If this is being rendered we know that the active editor is a UKingEditor.
+
             bool refreshScene = false;
             if (ImGui.CollapsingHeader(TranslationSource.GetText("OBJS"), ImGuiTreeNodeFlags.DefaultOpen))
             {
@@ -32,8 +37,40 @@ namespace UKingLibrary
                 refreshScene |= ImGui.DragFloat($"{TranslationSource.GetText("ARROW_LENGTH")}##vmenu14", ref RenderablePath.BezierArrowLength, 0.05f, 0f, 10f);
             }
 
-            if (ImGui.Button($"{TranslationSource.GetText("CACHE_COLLISION")}"))
-                CollisionCacher.Cache(PluginConfig.CollisionCachePath);
+            // Task tools
+            if (ImGui.CollapsingHeader(TranslationSource.GetText("COLLISION_TOOLS")))
+            {
+                if (ImGui.Button(TranslationSource.GetText("CACHE_BAKED_COLLISION")))
+                    CollisionCacher.Cache(PluginConfig.CollisionCachePath);
+            }
+
+            if (ImGui.CollapsingHeader(TranslationSource.GetText("ONLYONE_TOOLS"))) {
+                // Select UnitConfigName
+                ImGui.InputText(TranslationSource.GetText("ACTOR_NAME"), ref _removeOnlyOneUnitConfigName, 128);
+
+                // Select field to act on
+                if (ImGui.BeginCombo("##removeOnlyOneFieldName", _removeOnlyOneFieldName))
+                {
+                    foreach (string fieldName in GlobalData.FieldNames)
+                    {
+                        bool isSelected = _removeOnlyOneFieldName == fieldName;
+
+                        if (ImGui.Selectable(fieldName, isSelected))
+                        {
+                            _removeOnlyOneFieldName = fieldName;
+                        }
+
+                        if (isSelected)
+                            ImGui.SetItemDefaultFocus();
+                    }
+                    ImGui.EndCombo();
+                }
+
+                if (ImGui.Button($"{TranslationSource.GetText("REMOVE_ONLYONE")}"))
+                    OnlyOneRemover.Remove(_removeOnlyOneUnitConfigName, _removeOnlyOneFieldName, Path.GetFullPath(Path.Join(Path.GetDirectoryName(editor.FileInfo.FilePath), $"{editor.EditorConfig.FolderName}")));
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(TranslationSource.GetText("ONLYONE_REMOVER_NOTICE"));
+            }
 
             if (refreshScene)
                 GLContext.ActiveContext.UpdateViewport = true;

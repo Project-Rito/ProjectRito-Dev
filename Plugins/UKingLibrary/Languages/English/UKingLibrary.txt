@@ -7,6 +7,7 @@ SHOW_MAP_MODEL - Show Map Model
 SHOW_ACTOR_LINKS - Show Actor Links
 
 OBJ - Obj
+ACTOR_NAME - Actor Name
 INCOMING_LINKS - Incoming Links
 OUTGOING_LINKS - Outgoing Links
 
@@ -17,8 +18,17 @@ FIELD_NAME - Field Name
 MAX_DETAIL - Max Detail
 DEBUG_SECTIONS - Debug Sections
 
-CACHE_COLLISION - Cache Collision
+CACHE_BAKED_COLLISION - Cache Baked Collision
 BAKE_COLLISION - Bake Collision
+
+COLLISION_TOOLS - Collision Tools
+
+ONLYONE_TOOLS - OnlyOne Tools
+REMOVE_ONLYONE - Remove OnlyOne
+ONLYONE_REMOVER_NOTICE :
+Does not act on files currently being edited.
+Should be used with a project loaded.
+:
 
 BOTW GAME PATH - BotW Game Path
 BOTW UPDATE PATH - BotW Update Path

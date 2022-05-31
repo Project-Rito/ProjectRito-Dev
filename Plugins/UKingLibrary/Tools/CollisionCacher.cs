@@ -12,7 +12,7 @@ namespace UKingLibrary
 {
     public class CollisionCacher
     {
-        public static void Cache(string dir)
+        public static void Cache(string savePath)
         {
             Dictionary<string, Dictionary<string, List<BymlFileData>>> fields = new Dictionary<string, Dictionary<string, List<BymlFileData>>>();
             foreach (string fieldName in GlobalData.FieldNames)
@@ -66,14 +66,14 @@ namespace UKingLibrary
                 }
             }
 
-            Directory.CreateDirectory(dir);
+            Directory.CreateDirectory(savePath);
             foreach (KeyValuePair<string, hkpShape[]> actor in actorShapes)
             {
                 ActorCollisionLoader actorCollisionLoader = new ActorCollisionLoader();
                 actorCollisionLoader.CreateNew();
                 foreach (hkpShape shape in actor.Value)
                     actorCollisionLoader.AddShape(shape);
-                actorCollisionLoader.Save(File.Create(Path.Join(dir, $"{actor.Key}.hkrb")));
+                actorCollisionLoader.Save(File.Create(Path.Join(savePath, $"{actor.Key}.hkrb")));
             }
         }
     }
