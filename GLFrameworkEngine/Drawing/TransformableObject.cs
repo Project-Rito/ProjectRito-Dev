@@ -64,7 +64,8 @@ namespace GLFrameworkEngine
             }
         }
 
-        public bool UpdateInstanceGroup { get; set; }
+        private bool _updateInstanceGroup = true;
+        public bool UpdateInstanceGroup { get { return _updateInstanceGroup; } set { _updateInstanceGroup = value; } }
 
         public BoundingNode Boundings = new BoundingNode()
         {
