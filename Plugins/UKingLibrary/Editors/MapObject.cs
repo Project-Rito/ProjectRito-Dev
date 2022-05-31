@@ -307,11 +307,13 @@ namespace UKingLibrary
 
             clone.Properties = DeepCloneDictionary(Properties);
             clone.HashId = UKingEditor.GetHashId(MapData);
+            clone.DestLinks = DestLinks;
             clone.ActorInfo = ActorInfo;
             clone.Parent = Parent;
             clone.MapData = MapData;
             clone.BakeCollision = BakeCollision;
             clone.ReloadActor();
+            clone.Render.DestObjectLinks.AddRange(DestLinks.Select(x => x.Object.Render));
 
             return clone;
         }

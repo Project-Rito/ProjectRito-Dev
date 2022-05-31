@@ -57,7 +57,7 @@ namespace UKingLibrary
             // TODO: In future do a binary search like https://github.com/krenyy/botw_havok/blob/dc7966c7780ef8c8a35e061cd3aacc20020fa2d7/botw_havok/cli/hkrb_extract.py#L30
             foreach (ActorShapePairing pairing in ShapePairings)
             {
-                if (pairing.ActorInfo.m_HashId == hashId)
+                if (pairing.ActorInfo?.m_HashId == hashId)
                     return pairing.Shapes.Select(x => x.Instance.m_shape).ToArray();
             }
             return new hkpShape[0];
