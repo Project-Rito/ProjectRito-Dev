@@ -118,5 +118,12 @@ namespace GLFrameworkEngine
         public BoundingNode(Vector3 min, Vector3 max) {
             Box = BoundingBox.FromMinMax(min, max);
         }
+
+        public BoundingNode(System.Numerics.Vector3 min, System.Numerics.Vector3 max)
+        {
+            Vector3 otkMin = new Vector3(min.X, min.Y, min.Z);
+            Vector3 otkMax = new Vector3(max.X, max.Y, max.Z);
+            Box = BoundingBox.FromMinMax(otkMin, otkMax);
+        }
     }
 }

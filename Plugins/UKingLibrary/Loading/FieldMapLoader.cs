@@ -109,11 +109,15 @@ namespace UKingLibrary
             InitSectionFolder(GetSectionName(fileName));
             ((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Collision"].AddChild(loader.RootNode);
             BakedCollision.Add(loader);
+            Scene.AddRenderObject(loader);
         }
 
         public void AddBakedCollisionShape(uint hashId, string muuntFileName, HKX2.hkpShape shape, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
         {
-            ((MapCollisionLoader)((NodeFolder)RootNode.FolderChildren[GetSectionName(muuntFileName)]).FolderChildren["Collision"].Children[3].Tag).AddShape(shape, hashId, translation, rotation, scale);
+            FieldSectionInfo section = new FieldSectionInfo(muuntFileName);
+            int quadIndex = section.GetQuadIndex(translation);
+
+            ((MapCollisionLoader)((NodeFolder)RootNode.FolderChildren[GetSectionName(muuntFileName)]).FolderChildren["Collision"].Children[quadIndex].Tag).AddShape(shape, hashId, translation, rotation, scale);
         }
 
         public void RemoveBakedCollisionShape(uint hashId)
@@ -129,7 +133,34 @@ namespace UKingLibrary
 
         public bool UpdateBakedCollisionShapeTransform(uint hashId, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
         {
-            return BakedCollision.Any(x => x.UpdateShapeTransform(hashId, translation, rotation, scale));
+            FieldSectionInfo section = GetBakedCollisionShapeSection(hashId);
+            if (section == null)
+                return false;
+            int quadIndex = section.GetQuadIndex(translation);
+
+            if (BakedCollision[quadIndex].UpdateShapeTransform(hashId, translation, rotation, scale))
+                return true;
+
+            HKX2.hkpShape[] shapes = BakedCollision.First(x => x.ShapeExists(hashId))?.GetShapes(hashId);
+            if (shapes == null)
+                return false;
+            RemoveBakedCollisionShape(hashId);
+            foreach (HKX2.hkpShape shape in shapes)
+                AddBakedCollisionShape(hashId, section.Name, shape, translation, rotation, scale);
+
+
+            return true;
+        }
+
+        public FieldSectionInfo GetBakedCollisionShapeSection(uint hashId)
+        {
+            foreach (string sectionName in RootNode.FolderChildren.Keys)
+            {
+                if (((NodeFolder)RootNode.FolderChildren[sectionName]).FolderChildren["Collision"].Children.Any(x => ((MapCollisionLoader)x.Tag).ShapeExists(hashId)))
+                    return new FieldSectionInfo(sectionName);
+            }
+
+            return null;
         }
 
         private void InitSectionFolder(string sectionName)

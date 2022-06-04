@@ -25,7 +25,7 @@ and got to work.
 
 namespace UKingLibrary
 {
-    public class MapCollisionLoader
+    public class MapCollisionLoader : IDrawable
     {
         public NodeBase RootNode;
 
@@ -46,10 +46,20 @@ namespace UKingLibrary
             StaticCompound = (StaticCompoundInfo)roots[0];
             Root = (hkRootLevelContainer)roots[1];
 
-            RootNode = new NodeBase(fileName);
-            RootNode.Tag = this;
+            RootNode = new NodeFolder(fileName)
+            {
+                Tag = this,
+                HasCheckBox = true,
+                IsChecked = false,
+                OnChecked = (object value, EventArgs args) =>
+                {
+                    IsVisible = (bool)value;
+                }
+            };
 
             ShapePairings = GenerateActorShapePairings();
+
+            UpdateRenders(); // Rendering functionality
         }
 
         public hkpShape[] GetShapes(uint hashId)
@@ -379,11 +389,12 @@ namespace UKingLibrary
             Matrix4x4 translationMatrix = Matrix4x4.CreateTranslation(translation);
             Matrix4x4 rotationMatrix = Matrix4x4.CreateFromQuaternion(rotation);
             Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(scale);
-            return rotationMatrix * scaleMatrix * translationMatrix;
+            return scaleMatrix * rotationMatrix * translationMatrix;
         }
 
         public void Save(Stream stream)
         {
+            UpdateRenders(); // Might as well apply render updates
             ApplyActorShapePairings(ShapePairings);
 
             var uncompressed = new MemoryStream();
@@ -617,6 +628,50 @@ namespace UKingLibrary
                 ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_nodes = rigidBodyBVH.BuildAxis6Tree();
                 ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_domain.m_min = new Vector4(rigidBodyBVH.Min, 0);
                 ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_domain.m_max = new Vector4(rigidBodyBVH.Max, 0);
+            }
+        }
+
+        // Rendering
+        public bool IsVisible { get; set; } = false;
+
+        private List<HavokMeshShapeRender> ShapeRenders = new List<HavokMeshShapeRender>();
+
+        public void DrawModel(GLContext context, Pass pass)
+        {
+            if (!IsVisible)
+                return;
+
+            foreach (HavokMeshShapeRender render in ShapeRenders)
+                render.DrawModel(context, pass);
+        }
+
+        public void Dispose()
+        {
+            // Haha who knows who cares
+        }
+
+        private void UpdateRenders()
+        {
+            ShapeRenders.Clear();
+            foreach (ActorShapePairing actorPairing in ShapePairings)
+            {
+                foreach (ShapeInfoShapeInstancePairing shapePairing in actorPairing.Shapes)
+                {
+                    if (shapePairing.Instance.m_shape is not hkpBvCompressedMeshShape) // Only thing supported rn.
+                        continue;
+
+                    HavokMeshShapeRender render = new HavokMeshShapeRender(RootNode);
+                    render.LoadShape((hkpBvCompressedMeshShape)shapePairing.Instance.m_shape);
+
+                    render.Transform.Position = new OpenTK.Vector3(shapePairing.Instance.m_position.X, shapePairing.Instance.m_position.Y, shapePairing.Instance.m_position.Z) * GLContext.PreviewScale;
+                    render.Transform.Rotation = new OpenTK.Quaternion(shapePairing.Instance.m_rotation.X, shapePairing.Instance.m_rotation.Y, shapePairing.Instance.m_rotation.Z, shapePairing.Instance.m_rotation.W);
+                    render.Transform.Scale = new OpenTK.Vector3(shapePairing.Instance.m_scale.X, shapePairing.Instance.m_scale.Y, shapePairing.Instance.m_scale.Z);
+                    render.Transform.UpdateMatrix(true);
+
+                    render.SetBounding(new BoundingNode(shapePairing.LeafNode.Min * GLContext.PreviewScale, shapePairing.LeafNode.Max * GLContext.PreviewScale));
+
+                    ShapeRenders.Add(render);
+                }
             }
         }
     }

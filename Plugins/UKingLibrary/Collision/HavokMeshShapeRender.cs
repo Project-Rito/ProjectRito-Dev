@@ -9,11 +9,14 @@ using HKX2Builders;
 using HKX2Builders.Extensions;
 
 
-namespace UKingLibrary.Collision
+namespace UKingLibrary
 {
     public class HavokMeshShapeRender : EditableObject
     {
         RenderMesh<HavokMeshShapeVertex> ShapeMesh;
+
+        private BoundingNode _boundingNode;
+        public override BoundingNode BoundingNode => _boundingNode;
 
         public HavokMeshShapeRender(NodeBase parent) : base(parent)
         {
@@ -25,11 +28,13 @@ namespace UKingLibrary.Collision
             {
                 var shader = GlobalShaders.GetShader("HAVOK_SHAPE");
                 context.CurrentShader = shader;
-                shader.SetTransform(GLConstants.ModelMatrix, new GLTransform());
+                shader.SetTransform(GLConstants.ModelMatrix, Transform);
 
                 GL.Enable(EnableCap.CullFace);
                 GL.Enable(EnableCap.Blend);
                 ShapeMesh.Draw(context);
+
+                BoundingNode.Box.DrawSolid(context, Matrix4.Identity, Vector4.One);
             }
         }
 
@@ -44,7 +49,7 @@ namespace UKingLibrary.Collision
             {
                 vertices[i] = new HavokMeshShapeVertex()
                 {
-                    Position = new Vector3(mesh.Vertices[i].X, mesh.Vertices[i].Y, mesh.Vertices[i].Z)
+                    Position = new Vector3(mesh.Vertices[i].X, mesh.Vertices[i].Y, mesh.Vertices[i].Z) * GLContext.PreviewScale
                 };
             }
 
@@ -88,6 +93,11 @@ namespace UKingLibrary.Collision
 
 
             ShapeMesh = new RenderMesh<HavokMeshShapeVertex>(vertices, indices.ToArray(), OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
+        }
+
+        public void SetBounding(BoundingNode boundingNode)
+        {
+            _boundingNode = boundingNode;
         }
 
         public struct HavokMeshShapeVertex

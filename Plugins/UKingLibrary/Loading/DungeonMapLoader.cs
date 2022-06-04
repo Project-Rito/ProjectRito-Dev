@@ -112,6 +112,7 @@ namespace UKingLibrary
             bakedCollisionLoader.Load(GetStaticCompound(), $"{DungeonName}.shksc");
             RootNode.FolderChildren["Collision"].Children.Add(bakedCollisionLoader.RootNode);
             BakedCollision.Add(bakedCollisionLoader);
+            Scene.AddRenderObject(bakedCollisionLoader);
 
             //Static and dynamic actors
             var staticFile = GetMubin("Static");
