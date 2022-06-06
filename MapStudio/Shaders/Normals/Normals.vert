@@ -8,7 +8,7 @@ out VS_OUT {
 } vs_out;
 
 
-uniform mat4[32] mtxMdl;
+uniform mat4[64] mtxMdl;
 uniform mat4 mtxCam;
 
 uniform mat4 mtxProj;

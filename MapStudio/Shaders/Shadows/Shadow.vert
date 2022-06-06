@@ -13,7 +13,7 @@ in vec3 vBitangent;
 
 out vec2 f_texcoord0;
 
-uniform mat4[32] mtxMdl;
+uniform mat4[64] mtxMdl;
 uniform mat4 mtxCam;
 uniform mat4 mtxLightVP;
 

@@ -34,7 +34,7 @@ layout (location = 8) in vec4 vTangent;
 layout (location = 9) in vec4 vBitangent;
 layout (location = 10) in vec2 vTexCoord3;
 
-uniform mat4[32] mtxMdl;
+uniform mat4[64] mtxMdl;
 uniform mat4 mtxCam;
 
 // Skinning uniforms

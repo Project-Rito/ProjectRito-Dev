@@ -15,7 +15,7 @@ out float materialWeight;
 flat out vec2 texIndex;
 out vec3 v_DebugHighlight;
 
-uniform mat4[32] mtxMdl;
+uniform mat4[64] mtxMdl;
 uniform mat4 mtxCam;
 
 void main()

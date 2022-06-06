@@ -8,7 +8,7 @@ in vec2 v_inTexCoord;
 out vec2 texCoords0;
 out vec3 normal;
 
-uniform mat4[32] mtxMdl;
+uniform mat4[64] mtxMdl;
 uniform mat4 mtxCam;
 
 void main(){

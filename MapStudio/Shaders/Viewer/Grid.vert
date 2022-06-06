@@ -1,7 +1,7 @@
 ﻿#version 330 core
 in vec3 vPosition;
 
-uniform mat4[32] mtxMdl;
+uniform mat4[64] mtxMdl;
 uniform mat4 mtxCam;
 
 void main(){

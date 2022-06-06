@@ -378,7 +378,7 @@ namespace MapStudio.UI
                 bool foundGroup = false;
                 foreach (List<IInstanceDrawable> group in _context.Scene.InstanceGroups)
                 {
-                    if (group.Count == 32) // Put in a new group if this one is full.
+                    if (group.Count == 64) // Put in a new group if this one is full.
                         continue;
                     if (((IInstanceDrawable)file).GroupsWith(group[0]))
                     {
@@ -435,7 +435,7 @@ namespace MapStudio.UI
                 bool foundGroup = false;
                 foreach (List<IInstanceDrawable> group in _context.Scene.InstanceGroups)
                 {
-                    if (group.Count == 32) // Put in a new group if this one is full.
+                    if (group.Count == 64) // Put in a new group if this one is full.
                         continue;
 
                     if (((IInstanceDrawable)file).GroupsWith(group[0]))

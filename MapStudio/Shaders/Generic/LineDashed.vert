@@ -2,7 +2,7 @@
 
 layout(location = 0) in vec3 vPosition;
 
-uniform mat4[32] mtxMdl;
+uniform mat4[64] mtxMdl;
 uniform mat4 mtxCam;
 uniform mat4 mtxView;
 uniform mat4 mtxProj;

@@ -1,7 +1,7 @@
 #version 330 core
 
 uniform mat4 mtxCam;
-uniform mat4[32] mtxMdl;
+uniform mat4[64] mtxMdl;
 
 uniform vec2 pos;
 uniform float scale;

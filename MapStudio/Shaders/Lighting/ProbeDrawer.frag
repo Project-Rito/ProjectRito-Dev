@@ -5,7 +5,7 @@ in vec3 normal;
 
 out vec4 fragOutput;
 
-uniform mat4[32] mtxMdl;
+uniform mat4[64] mtxMdl;
 uniform mat4 mtxCam;
 
 vec3 calculateSH(

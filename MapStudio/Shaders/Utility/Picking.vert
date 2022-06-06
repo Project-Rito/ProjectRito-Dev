@@ -7,7 +7,7 @@ layout (location = 15) in float vFaceIndex;
 
 out float faceIndex;
 
-uniform mat4[32] mtxMdl;
+uniform mat4[64] mtxMdl;
 uniform mat4 mtxCam;
 
 // Skinning uniforms

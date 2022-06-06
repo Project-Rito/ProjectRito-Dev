@@ -5,7 +5,7 @@ layout(location = 1) in vec3 vNormal;
 layout(location = 2) in vec2 vTexCoord;
 layout(location = 3) in vec4 vColor;
 
-uniform mat4[32] mtxMdl;
+uniform mat4[64] mtxMdl;
 uniform mat4 mtxCam;
 uniform mat4 mtxView;
 uniform mat4 mtxProj;
