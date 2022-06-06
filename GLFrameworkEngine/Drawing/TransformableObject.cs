@@ -34,6 +34,7 @@ namespace GLFrameworkEngine
         StandardInstancedMaterial Material = new StandardInstancedMaterial();
 
         public bool EnableFrustumCulling => true;
+
         private bool _inFrustum = true;
         public bool InFrustum
         {
@@ -46,6 +47,21 @@ namespace GLFrameworkEngine
                 if (_inFrustum != value)
                     UpdateInstanceGroup = true;
                 _inFrustum = value;
+            }
+        }
+
+        private bool _isSelected;
+        public override bool IsSelected
+        {
+            get
+            {
+                return _isSelected;
+            }
+            set
+            {
+                if (_isSelected != value)
+                    UpdateInstanceGroup = true;
+                _isSelected = value;
             }
         }
 
