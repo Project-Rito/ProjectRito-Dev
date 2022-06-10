@@ -30,7 +30,7 @@ namespace UKingLibrary
                 fields.Add(fieldName, field);
             }
 
-            Dictionary<string, hkpShape[]> actorShapes = new Dictionary<string, hkpShape[]>();
+            Dictionary<string, BakedCollisionShapeCacheable[]> actorShapes = new Dictionary<string, BakedCollisionShapeCacheable[]>();
             foreach (string fieldName in GlobalData.FieldNames)
             {
                 foreach (KeyValuePair<string, Dictionary<string, List<BymlFileData>>> field in fields)
@@ -55,9 +55,11 @@ namespace UKingLibrary
                                 {
                                     foreach (MapCollisionLoader collisionLoader in collisionLoaders)
                                     {
-                                        var shapes = collisionLoader.GetShapes(obj["HashId"]);
-                                        if (shapes != null)
-                                            actorShapes.Add(obj["UnitConfigName"], shapes);
+                                        if (obj["UnitConfigName"] == "TwnObj_Village_HatenoHouse_A_L_01")
+                                            Console.WriteLine();
+                                        BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(obj["HashId"]);
+                                        if (infos != null)
+                                            actorShapes.Add(obj["UnitConfigName"], infos);
                                     }
                                 }
                             }
@@ -65,15 +67,15 @@ namespace UKingLibrary
                     }
                 }
             }
-
             Directory.CreateDirectory(savePath);
-            foreach (KeyValuePair<string, hkpShape[]> actor in actorShapes)
+            foreach (KeyValuePair<string, BakedCollisionShapeCacheable[]> actor in actorShapes)
             {
-                ActorCollisionLoader actorCollisionLoader = new ActorCollisionLoader();
-                actorCollisionLoader.CreateNew();
-                foreach (hkpShape shape in actor.Value)
-                    actorCollisionLoader.AddShape(shape);
-                actorCollisionLoader.Save(File.Create(Path.Join(savePath, $"{actor.Key}.hkrb")));
+                MapCollisionLoader collisionLoader = new MapCollisionLoader();
+                collisionLoader.CreateForCaching();
+                foreach (BakedCollisionShapeCacheable info in actor.Value)
+                    collisionLoader.AddShape(info, 0, System.Numerics.Vector3.Zero, System.Numerics.Quaternion.Identity, System.Numerics.Vector3.One);
+                collisionLoader.Save(File.Create(Path.Join(savePath, $"{actor.Key}.hksc")));
+
             }
         }
     }

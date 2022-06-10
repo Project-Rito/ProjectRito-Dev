@@ -112,12 +112,12 @@ namespace UKingLibrary
             Scene.AddRenderObject(loader);
         }
 
-        public void AddBakedCollisionShape(uint hashId, string muuntFileName, HKX2.hkpShape shape, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
+        public void AddBakedCollisionShape(uint hashId, string muuntFileName, BakedCollisionShapeCacheable info, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
         {
             FieldSectionInfo section = new FieldSectionInfo(muuntFileName);
             int quadIndex = section.GetQuadIndex(translation);
 
-            ((MapCollisionLoader)((NodeFolder)RootNode.FolderChildren[GetSectionName(muuntFileName)]).FolderChildren["Collision"].Children[quadIndex].Tag).AddShape(shape, hashId, translation, rotation, scale);
+            ((MapCollisionLoader)((NodeFolder)RootNode.FolderChildren[GetSectionName(muuntFileName)]).FolderChildren["Collision"].Children[quadIndex].Tag).AddShape(info, hashId, translation, rotation, scale);
         }
 
         public void RemoveBakedCollisionShape(uint hashId)
@@ -141,12 +141,12 @@ namespace UKingLibrary
             if (BakedCollision[quadIndex].UpdateShapeTransform(hashId, translation, rotation, scale))
                 return true;
 
-            HKX2.hkpShape[] shapes = BakedCollision.First(x => x.ShapeExists(hashId))?.GetShapes(hashId);
-            if (shapes == null)
+            BakedCollisionShapeCacheable[] infos = BakedCollision.First(x => x.ShapeExists(hashId))?.GetCacheables(hashId);
+            if (infos == null)
                 return false;
             RemoveBakedCollisionShape(hashId);
-            foreach (HKX2.hkpShape shape in shapes)
-                AddBakedCollisionShape(hashId, section.Name, shape, translation, rotation, scale);
+            foreach (BakedCollisionShapeCacheable info in infos)
+                AddBakedCollisionShape(hashId, section.Name, info, translation, rotation, scale);
 
 
             return true;

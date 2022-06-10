@@ -62,29 +62,107 @@ namespace UKingLibrary
             UpdateRenders(); // Rendering functionality
         }
 
-        public hkpShape[] GetShapes(uint hashId)
+        #region Interfacing for collision manipulation
+        public BakedCollisionShapeCacheable[] GetCacheables(uint hashId)
         {
             // TODO: In future do a binary search like https://github.com/krenyy/botw_havok/blob/dc7966c7780ef8c8a35e061cd3aacc20020fa2d7/botw_havok/cli/hkrb_extract.py#L30
             foreach (ActorShapePairing pairing in ShapePairings)
             {
                 if (pairing.ActorInfo?.m_HashId == hashId)
-                    return pairing.Shapes.Select(x => x.Instance.m_shape).ToArray();
+                {
+                    BakedCollisionShapeCacheable[] cacheables = new BakedCollisionShapeCacheable[pairing.Shapes.Count];
+
+                    for (int i = 0; i < pairing.Shapes.Count; i++)
+                    {
+                        ShapeInfoShapeInstancePairing shape = pairing.Shapes[i];
+                        hkpRigidBody rigidBody = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[shape.RigidBodyIndex];
+
+                        BakedCollisionShapeCacheable cacheable = new BakedCollisionShapeCacheable
+                        {
+                            RigidBody = new hkpRigidBody
+                            {
+                                m_autoRemoveLevel = rigidBody.m_autoRemoveLevel,
+                                m_collidable = new hkpLinkedCollidable
+                                {
+                                    m_allowedPenetrationDepth = rigidBody.m_collidable.m_allowedPenetrationDepth,
+                                    m_broadPhaseHandle = rigidBody.m_collidable.m_broadPhaseHandle,
+                                    m_forceCollideOntoPpu = rigidBody.m_collidable.m_forceCollideOntoPpu,
+                                    m_shape = new hkpStaticCompoundShape
+                                    {
+                                        m_bitsPerKey = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_bitsPerKey,
+                                        m_bvTreeType = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_bvTreeType,
+                                        m_disabledLargeShapeKeyTable = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_disabledLargeShapeKeyTable,
+                                        m_dispatchType = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_dispatchType,
+                                        m_instanceExtraInfos = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instanceExtraInfos,
+                                        m_instances = new List<hkpStaticCompoundShapeInstance>
+                                        {
+                                            new hkpStaticCompoundShapeInstance()
+                                            {
+                                                m_childFilterInfoMask = shape.Instance.m_childFilterInfoMask,
+                                                m_filterInfo = shape.Instance.m_filterInfo,
+                                                m_instanceFlags = shape.Instance.m_instanceFlags,
+                                                m_position = Vector3.Zero,
+                                                m_rotation = Quaternion.Identity,
+                                                m_scale = Vector3.One,
+                                                m_shape = shape.Instance.m_shape,
+                                                m_userData = shape.Instance.m_userData,
+                                                m_ukn = shape.Instance.m_ukn
+                                            }
+                                        },
+                                        m_numBitsForChildShapeKey = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_numBitsForChildShapeKey,
+                                        m_shapeInfoCodecType = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_shapeInfoCodecType,
+                                        m_tree = new hkcdStaticTreeDefaultTreeStorage6()
+                                        {
+                                            m_domain = new hkAabb
+                                            {
+                                                m_min = Vector4.Zero,
+                                                m_max = Vector4.Zero,
+                                            },
+                                            m_nodes = new List<hkcdStaticTreeCodec3Axis6>()
+                                        },
+                                        m_userData = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_userData,
+                                    },
+                                    m_shapeKey = rigidBody.m_collidable.m_shapeKey
+                                },
+                                m_contactPointCallbackDelay = rigidBody.m_contactPointCallbackDelay,
+                                m_damageMultiplier = rigidBody.m_damageMultiplier,
+                                m_localFrame = rigidBody.m_localFrame,
+                                m_material = rigidBody.m_material,
+                                m_motion = rigidBody.m_motion,
+                                m_multiThreadCheck = rigidBody.m_multiThreadCheck,
+                                m_name = rigidBody.m_name,
+                                m_npData = rigidBody.m_npData,
+                                m_numShapeKeysInContactPointProperties = rigidBody.m_numShapeKeysInContactPointProperties,
+                                m_properties = rigidBody.m_properties,
+                                m_responseModifierFlags = rigidBody.m_responseModifierFlags,
+                                m_spuCollisionCallback = rigidBody.m_spuCollisionCallback
+                            },
+                            BodyGroup = shape.ShapeInfo.m_BodyGroup,
+                            BodyLayerType = shape.ShapeInfo.m_BodyLayerType,
+                            NullActorInfoPtr = shape.NullActorInfoPtr
+                        };
+
+                        cacheables[i] = cacheable;
+                    }
+
+                    return cacheables;
+                }
             }
-            return new hkpShape[0];
+            return null;
         }
 
-        public void AddShape(hkpShape shape, uint hashId, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
+        public void AddShape(BakedCollisionShapeCacheable cacheable, uint hashId, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
         {
             // Some shapes we can't find the aabb for yet.
-            if (shape is not hkpBvCompressedMeshShape && shape is not hkpConvexVerticesShape)
+            if (cacheable.Shape is not hkpBvCompressedMeshShape && cacheable.Shape is not hkpConvexVerticesShape)
                 return;
 
             #region Build Instance
-            InstanceFlags instanceFlags = (InstanceFlags)0b00111111000000000000000000000010;
-            if (shape is hkpConvexVerticesShape)
-                instanceFlags |= InstanceFlags.CONVEX_VERTICES_SHAPE;
+            InstanceFlags instanceFlags = cacheable.Instance.m_instanceFlags;
             if (scale != Vector3.One)
                 instanceFlags |= InstanceFlags.SCALED;
+            else
+                instanceFlags &= ~InstanceFlags.SCALED;
 
             hkpStaticCompoundShapeInstance shapeInstance = new hkpStaticCompoundShapeInstance()
             {
@@ -92,20 +170,24 @@ namespace UKingLibrary
                 m_rotation = rotation,
                 m_scale = scale,
                 m_instanceFlags = instanceFlags,
-                m_ukn = 0.5f,
-                m_shape = shape,
-                m_filterInfo = 0,
-                m_childFilterInfoMask = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[0].m_uid,
+                m_ukn = cacheable.Instance.m_ukn,
+                m_shape = cacheable.Shape,
+                m_filterInfo = cacheable.Instance.m_filterInfo,
+                m_childFilterInfoMask = cacheable.Instance.m_childFilterInfoMask,
                 m_userData = 0 // Set when applying actor shape pairings
             };
             #endregion
 
             #region New shape pairing
             // Get BVH
-            BVNode leafBvhNode = null;
-            BVNode shapeBvh = GetShapeBvh(shape);
+            BVNode shapeBvh = GenerateShapeBvh(cacheable.Shape);
+            BVNode leafBvhNode = leafBvhNode = TransformLeaf(shapeBvh, ComposeMatrix(translation, rotation, scale));
 
-            leafBvhNode = TransformLeaf(shapeBvh, ComposeMatrix(translation, rotation, scale));
+            // Generate rigidbody if needed
+            if (!((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.Any(x => x.m_name == cacheable.RigidBody.m_name))
+                ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.Add(cacheable.RigidBody);
+
+            int rigidBodyIdx = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.FindIndex(x => x.m_name == cacheable.RigidBody.m_name);
 
             // Add our data
             if (ShapePairings.Any(x => x.ActorInfo?.m_HashId == hashId))
@@ -115,12 +197,13 @@ namespace UKingLibrary
                     ShapeInfo = new ShapeInfo() {
                         m_ActorInfoIndex = 0, // Set when applying actor shape pairings
                         m_InstanceId = 0, // If you put all instances per the object into an array, I think this would be the index into that.
-                        m_BodyGroup = 0,
-                        m_BodyLayerType = 0
+                        m_BodyGroup = cacheable.BodyGroup,
+                        m_BodyLayerType = cacheable.BodyLayerType
                     },
                     Instance = shapeInstance,
-                    RigidBodyIndex = 0, // Which rigid body should this live in?
-                    LeafNode = leafBvhNode
+                    RigidBodyIndex = rigidBodyIdx, // Which rigid body should this live in?
+                    LeafNode = leafBvhNode,
+                    NullActorInfoPtr = cacheable.NullActorInfoPtr
                 });
             }
             else
@@ -131,7 +214,7 @@ namespace UKingLibrary
                     {
                         m_HashId = hashId,
                         m_ShapeInfoStart = 0, // Set when applying actor shape pairings
-                        m_ShapeInfoEnd = 0 // Set when applying actor shape pairings
+                        m_ShapeInfoEnd = 0 // Set when applying actor shape pairings,
                     },
                     Shapes = new List<ShapeInfoShapeInstancePairing>()
                     {
@@ -141,12 +224,13 @@ namespace UKingLibrary
                             {
                                 m_ActorInfoIndex = 0, // Set when applying actor shape pairings
                                 m_InstanceId = 0, // If you put all instances per the object into an array, I think this would be the index into that.
-                                m_BodyGroup = 0,
-                                m_BodyLayerType = 0
+                                m_BodyGroup = cacheable.BodyGroup,
+                                m_BodyLayerType = cacheable.BodyLayerType
                             },
                             Instance = shapeInstance,
-                            RigidBodyIndex = 0, // Which rigid body should this live in?
-                            LeafNode = leafBvhNode
+                            RigidBodyIndex = rigidBodyIdx, // Which rigid body should this live in?
+                            LeafNode = leafBvhNode,
+                            NullActorInfoPtr = cacheable.NullActorInfoPtr
                         }
                     }
                 });
@@ -187,6 +271,10 @@ namespace UKingLibrary
                 // Get
                 ShapeInfoShapeInstancePairing shapePairing = ShapePairings[pairingIdx].Shapes[shapeIdx];
 
+                // Some shapes we can't find the aabb for yet.
+                if (shapePairing.Instance.m_shape is not hkpBvCompressedMeshShape && shapePairing.Instance.m_shape is not hkpConvexVerticesShape)
+                    continue;
+
                 // Set transform
                 Matrix4x4 originalTransform = ComposeMatrix(shapePairing.Instance.m_position, shapePairing.Instance.m_rotation, shapePairing.Instance.m_scale);
                 shapePairing.Instance.m_position = translation;
@@ -198,7 +286,7 @@ namespace UKingLibrary
                     shapePairing.Instance.m_instanceFlags &= ~InstanceFlags.SCALED;
 
                 // Set BVH (If we can't find the shape BVH it's not supported yet... leave vanilla leaf intact.)
-                BVNode shapeBvh = GetShapeBvh(shapePairing.Instance.m_shape);
+                BVNode shapeBvh = GenerateShapeBvh(shapePairing.Instance.m_shape);
                 if (shapeBvh != null)
                     shapePairing.LeafNode = TransformLeaf(shapeBvh, ComposeMatrix(translation, rotation, scale));
 
@@ -208,7 +296,59 @@ namespace UKingLibrary
 
             return true;
         }
+        #endregion
 
+        #region Cache object building
+        public void CreateForCaching()
+        {
+            StaticCompound = new StaticCompoundInfo
+            {
+                m_Offset = 0,
+                m_ActorInfo = new List<ActorInfo>(),
+                m_ShapeInfo = new List<ShapeInfo>()
+            };
+
+            List<hkpPhysicsSystem> systems = new List<hkpPhysicsSystem>(17);
+            for (int i = 0; i < 17; i++)
+            {
+                systems.Add(new hkpPhysicsSystem
+                {
+                    m_rigidBodies = new List<hkpRigidBody>(),
+                    m_constraints = new List<hkpConstraintInstance>(),
+                    m_actions = new List<hkpAction>(),
+                    m_phantoms = new List<hkpPhantom>(),
+                    m_name = $@"Compound_{i}",
+                    m_userData = 0,
+                    m_active = true,
+                });
+            }
+
+            Root = new hkRootLevelContainer
+            {
+                m_namedVariants = new List<hkRootLevelContainerNamedVariant>()
+                {
+                    new hkRootLevelContainerNamedVariant
+                    {
+                        m_name = "hkpPhysicsData",
+                        m_className = "hkpPhysicsData",
+                        m_variant = new hkpPhysicsData
+                        {
+                            m_worldCinfo = null,
+                            m_systems = systems
+                        }
+                    }
+                }
+            };
+
+            ShapePairings = GenerateActorShapePairings();
+            FileSettings = new STFileLoader.Settings()
+            {
+                CompressionFormat = new Toolbox.Core.Uncompressed(),
+            };
+        }
+        #endregion
+
+        #region Collision manipulation extras
         /// <summary>
         /// Untested.
         /// </summary>
@@ -314,8 +454,10 @@ namespace UKingLibrary
                 }
             });
         }
+        #endregion
 
-        public BVNode GetShapeBvh(hkpShape shape)
+        #region Utils
+        private BVNode GenerateShapeBvh(hkpShape shape)
         {
             if (shape is hkpBvCompressedMeshShape)
             {
@@ -336,7 +478,7 @@ namespace UKingLibrary
             return null;
         }
 
-        public BVNode TransformLeaf(BVNode shapeBvh, Matrix4x4 instanceTransform)
+        private BVNode TransformLeaf(BVNode shapeBvh, Matrix4x4 instanceTransform)
         {
             if (shapeBvh == null)
                 return null;
@@ -384,13 +526,14 @@ namespace UKingLibrary
             return instanceBvhLeaf;
         }
 
-        public Matrix4x4 ComposeMatrix(Vector3 translation, Quaternion rotation, Vector3 scale)
+        private Matrix4x4 ComposeMatrix(Vector3 translation, Quaternion rotation, Vector3 scale)
         {
             Matrix4x4 translationMatrix = Matrix4x4.CreateTranslation(translation);
             Matrix4x4 rotationMatrix = Matrix4x4.CreateFromQuaternion(rotation);
             Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(scale);
             return scaleMatrix * rotationMatrix * translationMatrix;
         }
+        #endregion
 
         public void Save(Stream stream)
         {
@@ -406,8 +549,7 @@ namespace UKingLibrary
             stream.SetLength(stream.Position);
         }
 
-
-
+        #region Pairing structs
         private struct ShapeInfoShapeInstancePairing
         {
             public ShapeInfo ShapeInfo;
@@ -421,7 +563,9 @@ namespace UKingLibrary
             public ActorInfo ActorInfo;
             public List<ShapeInfoShapeInstancePairing> Shapes;
         }
+        #endregion
 
+        #region Pairing creation and application
         /// <summary>
         /// Looks through all rigid bodies and finds a shape instance based on userData.
         /// </summary>
@@ -479,6 +623,7 @@ namespace UKingLibrary
             foreach (var rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies)
             {
                 BVNode rigidBodyBVH = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_tree.GetBVH();
+                var test = BVNode.GetLeafNodes(rigidBodyBVH);
                 foreach (BVNode leafNode in BVNode.GetLeafNodes(rigidBodyBVH))
                     if (leafNode.Primitive == primitive)
                         return leafNode;
@@ -623,15 +768,19 @@ namespace UKingLibrary
 
             for (int i = 0; i < ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.Count; i++)
             {
+                if (rigidBodyLeafNodes[i].Count == 0)
+                    continue;
                 BVNode rigidBodyBVH = new BVNode() { IsLeaf = false };
                 rigidBodyBVH = BVNode.InsertLeafs(rigidBodyBVH, rigidBodyLeafNodes[i]);
                 ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_nodes = rigidBodyBVH.BuildAxis6Tree();
+                var test = BVNode.GetLeafNodes(rigidBodyBVH);
                 ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_domain.m_min = new Vector4(rigidBodyBVH.Min, 0);
                 ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_domain.m_max = new Vector4(rigidBodyBVH.Max, 0);
             }
         }
+        #endregion
 
-        // Rendering
+        #region Rendering
         public bool IsVisible { get; set; } = false;
 
         private List<HavokMeshShapeRender> ShapeRenders = new List<HavokMeshShapeRender>();
@@ -643,11 +792,6 @@ namespace UKingLibrary
 
             foreach (HavokMeshShapeRender render in ShapeRenders)
                 render.DrawModel(context, pass);
-        }
-
-        public void Dispose()
-        {
-            // Haha who knows who cares
         }
 
         private void UpdateRenders()
@@ -668,11 +812,18 @@ namespace UKingLibrary
                     render.Transform.Scale = new OpenTK.Vector3(shapePairing.Instance.m_scale.X, shapePairing.Instance.m_scale.Y, shapePairing.Instance.m_scale.Z);
                     render.Transform.UpdateMatrix(true);
 
-                    render.SetBounding(new BoundingNode(shapePairing.LeafNode.Min * GLContext.PreviewScale, shapePairing.LeafNode.Max * GLContext.PreviewScale));
+                    if (shapePairing.LeafNode != null)
+                        render.SetBounding(new BoundingNode(shapePairing.LeafNode.Min * GLContext.PreviewScale, shapePairing.LeafNode.Max * GLContext.PreviewScale));
 
                     ShapeRenders.Add(render);
                 }
             }
+        }
+        #endregion
+
+        public void Dispose()
+        {
+            // Haha who knows who cares
         }
     }
 }

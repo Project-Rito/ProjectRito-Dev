@@ -34,7 +34,7 @@ namespace UKingLibrary
                 GL.Enable(EnableCap.Blend);
                 ShapeMesh.Draw(context);
 
-                BoundingNode.Box.DrawSolid(context, Matrix4.Identity, Vector4.One);
+                BoundingNode?.Box.DrawSolid(context, Matrix4.Identity, Vector4.One);
             }
         }
 

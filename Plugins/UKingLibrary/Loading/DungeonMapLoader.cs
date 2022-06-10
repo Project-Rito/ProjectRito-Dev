@@ -154,9 +154,9 @@ namespace UKingLibrary
                 StudioLogger.WriteWarning("Couldn't find dungeon model!");
         }
 
-        public void AddBakedCollisionShape(uint hashId, string muuntFileName, HKX2.hkpShape shape, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
+        public void AddBakedCollisionShape(uint hashId, string muuntFileName, BakedCollisionShapeCacheable info, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
         {
-            BakedCollision[0].AddShape(shape, hashId, translation, rotation, scale);
+            BakedCollision[0].AddShape(info, hashId, translation, rotation, scale);
         }
 
         public void RemoveBakedCollisionShape(uint hashId)

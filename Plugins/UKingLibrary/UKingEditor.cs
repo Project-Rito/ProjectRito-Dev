@@ -226,11 +226,17 @@ namespace UKingLibrary
         {
             foreach (var ending in GlobalData.MuuntEndings)
             {
-                string path = PluginConfig.GetContentPath($"Map/{fieldName}/{sectionName}/{sectionName}_{ending}.smubin");
-                if (!File.Exists(path))
-                    return;
-                string fileName = Path.GetFileName(path);
-                var stream = File.Open(path, FileMode.Open);
+                string filePath = null;
+                if (File.Exists(Path.GetFullPath($"{sectionName}/{sectionName}_{ending}.smubin", Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"aoc/0010/Map/{fieldName}/"), FileInfo.FolderPath))))
+                    filePath = Path.GetFullPath($"{sectionName}/{sectionName}_{ending}.smubin", Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"aoc/0010/Map/{fieldName}/"), FileInfo.FolderPath));
+                else if (File.Exists(PluginConfig.GetContentPath($"Map/{fieldName}/{sectionName}/{sectionName}_{ending}.smubin")))
+                    filePath = PluginConfig.GetContentPath($"Map/{fieldName}/{sectionName}/{sectionName}_{ending}.smubin");
+
+                if (filePath == null)
+                    continue;
+
+                string fileName = Path.GetFileName(filePath);
+                var stream = File.Open(filePath, FileMode.Open);
 
                 EditorConfig.OpenMapUnits.TryAdd(fieldName, new List<string>());
                 EditorConfig.OpenMapUnits[fieldName].Add($"{fileName.Substring(0, 3)}/{fileName}");

@@ -42,7 +42,7 @@ namespace UKingLibrary
 
                 if (value && !_bakeCollision)
                 {
-                    string actorCollisionPath = $"{PluginConfig.CollisionCachePath}/{Name}.hkrb";
+                    string actorCollisionPath = $"{PluginConfig.CollisionCachePath}/{Name}.hksc";
                     if (File.Exists(actorCollisionPath))
                         _bakeCollision = true;
                 }
@@ -258,7 +258,7 @@ namespace UKingLibrary
                 if (ImGui.Button("debug: get shapes"))
                 {
                     foreach (var loader in ParentLoader.BakedCollision)
-                        loader.GetShapes(HashId);
+                        loader.GetCacheables(HashId);
                 }
 #endif
 
@@ -427,17 +427,15 @@ namespace UKingLibrary
                     return;
 
                 // If not add collision
-                string actorCollisionPath = $"{PluginConfig.CollisionCachePath}/{Name}.hkrb";
+                string actorCollisionPath = $"{PluginConfig.CollisionCachePath}/{Name}.hksc";
                 if (File.Exists(actorCollisionPath))
                 {
-                    ActorCollisionLoader actorCollisionLoader = new ActorCollisionLoader();
-                    actorCollisionLoader.Load(File.OpenRead(actorCollisionPath), Path.GetFileName(actorCollisionPath));
-                    hkpShape[] shapes = actorCollisionLoader.GetShapes();
+                    MapCollisionLoader collisionLoader = new MapCollisionLoader();
+                    collisionLoader.Load(File.OpenRead(actorCollisionPath), Path.GetFileName(actorCollisionPath));
+                    BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(0);
 
-                    
-
-                    foreach (hkpShape shape in shapes)
-                        ParentLoader.AddBakedCollisionShape(HashId, MapData.RootNode.Header, shape, translation, rotation, scale);
+                    foreach (BakedCollisionShapeCacheable info in infos)
+                        ParentLoader.AddBakedCollisionShape(HashId, MapData.RootNode.Header, info, translation, rotation, scale);
                 }
             }
             else
