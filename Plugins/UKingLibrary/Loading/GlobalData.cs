@@ -112,7 +112,7 @@ namespace UKingLibrary
             MapStudio.UI.ProcessLoading.Instance.Update(60, 100, "Loading actor database");
 
             //Todo cache these somewhere to load as decompressed next time
-            var paths = PluginConfig.GetContentPaths("Actor\\ActorInfo.product.sbyml");
+            var paths = PluginConfig.GetContentPaths("Actor/ActorInfo.product.sbyml");
             foreach (var path in paths)
             {
                 var decompressed = Toolbox.Core.IO.YAZ0.Decompress(path);

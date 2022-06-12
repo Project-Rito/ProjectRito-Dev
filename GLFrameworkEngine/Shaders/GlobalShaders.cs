@@ -24,45 +24,45 @@ namespace GLFrameworkEngine
         {
             intDefault = true;
 
-            ShaderPaths.Add("DEBUG", "BFRES\\BfresDebug");
-            ShaderPaths.Add("BILLBOARD", "Billboard\\BillboardTexture");
-            ShaderPaths.Add("CUBEMAP_HDRENCODE", "Cubemap\\HdrEncode");
-            ShaderPaths.Add("CUBEMAP_HDRDECODE", "Cubemap\\HdrDecode");
-            ShaderPaths.Add("EQUIRECTANGULAR", "Cubemap\\Equirectangular");
-            ShaderPaths.Add("CUBEMAP_IRRADIANCE", "Cubemap\\Irradiance");
-            ShaderPaths.Add("CUBEMAP_PREFILTER", "Cubemap\\Prefilter");
-            ShaderPaths.Add("GIZMO", "Editor\\Gizmo");
-            ShaderPaths.Add("IMAGE_EDITOR", "Editor\\ImageEditor");
-            ShaderPaths.Add("UV_WINDOW", "Editor\\UVWindow");
-            ShaderPaths.Add("EFFECTS_DEFAULT", "Effects\\Default");
-            ShaderPaths.Add("BASIC", "Generic\\Basic");
-            ShaderPaths.Add("LINE", "Generic\\Line");
-            ShaderPaths.Add("LINE_DASHED", "Generic\\LineDashed");
-            ShaderPaths.Add("TEXTURE_ICON", "Interface\\TextureIcon");
-            ShaderPaths.Add("LIGHTMAP", "Lighting\\Lightmap");
-            ShaderPaths.Add("PROBE", "Lighting\\ProbeCubemap");
-            ShaderPaths.Add("LIGHTPREPASS", "Lighting\\LightPrepass");
-            ShaderPaths.Add("PROBE_DRAWER", "Lighting\\ProbeDrawer");
-            ShaderPaths.Add("PROBE_VOXEL", "Lighting\\ProbeVoxelDrawer");
-            ShaderPaths.Add("LPP_CAUSTICS", "Lighting\\Caustics");
-            ShaderPaths.Add("NORMALS", "Normals\\Normals");
-            ShaderPaths.Add("BLOOM_EXTRACT", "PostFx\\Bloom\\BloomExtract");
-            ShaderPaths.Add("BLUR", "PostFx\\Blur\\GaussianBlur");
-            ShaderPaths.Add("COLOR_CORRECTION", "PostFx\\Correction\\ColorCorrection");
-            ShaderPaths.Add("FINALHDR", "PostFx\\FinalHDR");
-            ShaderPaths.Add("SCREEN", "Screen\\Screen");
-            ShaderPaths.Add("SHADOW", "Shadows\\Shadow");
-            ShaderPaths.Add("SHADOWPREPASS", "Shadows\\ShadowPrepass");
-            ShaderPaths.Add("SHADOWQUAD", "Shadows\\ShadowQuad");
-            ShaderPaths.Add("NORMALIZE_DEPTH", "Utility\\NormalizeDepth");
-            ShaderPaths.Add("PICKING", "Utility\\Picking");
-            ShaderPaths.Add("SELECTION", "Utility\\Selection");
-            ShaderPaths.Add("GRID", "Viewer\\Grid");
-            ShaderPaths.Add("GRID_INFINITE", "Viewer\\GridInfinite");
-            ShaderPaths.Add("LINKING", "Linking\\Connection");
+            ShaderPaths.Add("DEBUG", "BFRES/BfresDebug");
+            ShaderPaths.Add("BILLBOARD", "Billboard/BillboardTexture");
+            ShaderPaths.Add("CUBEMAP_HDRENCODE", "Cubemap/HdrEncode");
+            ShaderPaths.Add("CUBEMAP_HDRDECODE", "Cubemap/HdrDecode");
+            ShaderPaths.Add("EQUIRECTANGULAR", "Cubemap/Equirectangular");
+            ShaderPaths.Add("CUBEMAP_IRRADIANCE", "Cubemap/Irradiance");
+            ShaderPaths.Add("CUBEMAP_PREFILTER", "Cubemap/Prefilter");
+            ShaderPaths.Add("GIZMO", "Editor/Gizmo");
+            ShaderPaths.Add("IMAGE_EDITOR", "Editor/ImageEditor");
+            ShaderPaths.Add("UV_WINDOW", "Editor/UVWindow");
+            ShaderPaths.Add("EFFECTS_DEFAULT", "Effects/Default");
+            ShaderPaths.Add("BASIC", "Generic/Basic");
+            ShaderPaths.Add("LINE", "Generic/Line");
+            ShaderPaths.Add("LINE_DASHED", "Generic/LineDashed");
+            ShaderPaths.Add("TEXTURE_ICON", "Interface/TextureIcon");
+            ShaderPaths.Add("LIGHTMAP", "Lighting/Lightmap");
+            ShaderPaths.Add("PROBE", "Lighting/ProbeCubemap");
+            ShaderPaths.Add("LIGHTPREPASS", "Lighting/LightPrepass");
+            ShaderPaths.Add("PROBE_DRAWER", "Lighting/ProbeDrawer");
+            ShaderPaths.Add("PROBE_VOXEL", "Lighting/ProbeVoxelDrawer");
+            ShaderPaths.Add("LPP_CAUSTICS", "Lighting/Caustics");
+            ShaderPaths.Add("NORMALS", "Normals/Normals");
+            ShaderPaths.Add("BLOOM_EXTRACT", "PostFx/Bloom/BloomExtract");
+            ShaderPaths.Add("BLUR", "PostFx/Blur/GaussianBlur");
+            ShaderPaths.Add("COLOR_CORRECTION", "PostFx/Correction/ColorCorrection");
+            ShaderPaths.Add("FINALHDR", "PostFx/FinalHDR");
+            ShaderPaths.Add("SCREEN", "Screen/Screen");
+            ShaderPaths.Add("SHADOW", "Shadows/Shadow");
+            ShaderPaths.Add("SHADOWPREPASS", "Shadows/ShadowPrepass");
+            ShaderPaths.Add("SHADOWQUAD", "Shadows/ShadowQuad");
+            ShaderPaths.Add("NORMALIZE_DEPTH", "Utility/NormalizeDepth");
+            ShaderPaths.Add("PICKING", "Utility/Picking");
+            ShaderPaths.Add("SELECTION", "Utility/Selection");
+            ShaderPaths.Add("GRID", "Viewer/Grid");
+            ShaderPaths.Add("GRID_INFINITE", "Viewer/GridInfinite");
+            ShaderPaths.Add("LINKING", "Linking/Connection");
             ShaderPaths.Add("CUBEMAP_FILTER", "CubemapFilter");
             ShaderPaths.Add("IRRADIANCE_CUBEMAP", "IrradianceCubemap");
-            ShaderPaths.Add("LUT_DISPLAY", "LUT\\LutDisplay");
+            ShaderPaths.Add("LUT_DISPLAY", "LUT/LutDisplay");
         }
 
         public static void AddShader(string key, string relativePath) {
@@ -113,7 +113,7 @@ namespace GLFrameworkEngine
         {
             List<Shader> shaders = new List<Shader>();
 
-            string shaderFolder = $"{Runtime.ExecutableDir}\\Shaders\\";
+            string shaderFolder = $"{Runtime.ExecutableDir}/Shaders/";
             string frag = $"{shaderFolder}{name}.frag";
             string vert = $"{shaderFolder}{name}.vert";
             string geom = $"{shaderFolder}{name}.geom";

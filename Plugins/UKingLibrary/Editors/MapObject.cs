@@ -268,12 +268,12 @@ namespace UKingLibrary
             string icon = "Node";
             if (ActorInfo.ContainsKey("bfres"))
             {
-                if (!IconManager.HasIcon(PluginConfig.GetCachePath($"Images\\ActorImages\\{ActorInfo["bfres"]}.sbfres.png")))
+                if (!IconManager.HasIcon(PluginConfig.GetCachePath($"Images/ActorImages/{ActorInfo["bfres"]}.sbfres.png")))
                 {
-                    if (File.Exists(PluginConfig.GetCachePath($"Images\\ActorImages\\{ActorInfo["bfres"]}.sbfres.png")))
-                        IconManager.LoadTextureFile(PluginConfig.GetCachePath($"Images\\ActorImages\\{ActorInfo["bfres"]}.sbfres.png"), 32, 32);
+                    if (File.Exists(PluginConfig.GetCachePath($"Images/ActorImages/{ActorInfo["bfres"]}.sbfres.png")))
+                        IconManager.LoadTextureFile(PluginConfig.GetCachePath($"Images/ActorImages/{ActorInfo["bfres"]}.sbfres.png"), 32, 32);
                 }
-                icon = PluginConfig.GetCachePath($"Images\\ActorImages\\{ActorInfo["bfres"]}.sbfres.png");
+                icon = PluginConfig.GetCachePath($"Images/ActorImages/{ActorInfo["bfres"]}.sbfres.png");
             }
             Render.UINode.Icon = icon;
 
@@ -661,8 +661,8 @@ namespace UKingLibrary
             //Bfres render
             if (actor.ContainsKey("bfres"))
             {
-                string modelPath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}.sbfres");
-                string animPath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}_Animation.sbfres");
+                string modelPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}.sbfres");
+                string animPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}_Animation.sbfres");
                 if (File.Exists(modelPath))
                 {
                     var renderCandidate = GetActorSpecificBfresRender(actor, new BfresRender(modelPath, parent));
@@ -680,7 +680,7 @@ namespace UKingLibrary
                 {
                     for (int i = 0; ; i++)
                     {
-                        string modelPartPath = PluginConfig.GetContentPath($"Model\\{actor["bfres"]}-{i.ToString("D2")}.sbfres");
+                        string modelPartPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}-{i.ToString("D2")}.sbfres");
 
                         if (File.Exists(modelPartPath))
                         {
@@ -763,13 +763,13 @@ namespace UKingLibrary
 
         static void LoadTextures(BfresRender render, string bfres)
         {
-            string texpathNX = PluginConfig.GetContentPath($"Model\\{bfres}.Tex.sbfres");
-            string texpath1 = PluginConfig.GetContentPath($"Model\\{bfres}.Tex1.sbfres");
+            string texpathNX = PluginConfig.GetContentPath($"Model/{bfres}.Tex.sbfres");
+            string texpath1 = PluginConfig.GetContentPath($"Model/{bfres}.Tex1.sbfres");
 
-            string teratexpathNX = PluginConfig.GetContentPath($"Model\\Terrain.Tex.sbfres");
-            string teratexpath1 = PluginConfig.GetContentPath($"Model\\Terrain.Tex1.sbfres");
+            string teratexpathNX = PluginConfig.GetContentPath($"Model/Terrain.Tex.sbfres");
+            string teratexpath1 = PluginConfig.GetContentPath($"Model/Terrain.Tex1.sbfres");
 
-            string titleBGPath = PluginConfig.GetContentPath($"Pack\\TitleBG.pack");
+            string titleBGPath = PluginConfig.GetContentPath($"Pack/TitleBG.pack");
 
             if (render.Textures.Count == 0)
             {
@@ -797,11 +797,11 @@ namespace UKingLibrary
 
 
                 // Try TitleBG - probably not gonna be there anyway, but whatever
-                candidate = BfresLoader.GetTextures(titleBGPath + "\\" + texpathNX);
+                candidate = BfresLoader.GetTextures(titleBGPath + "/" + texpathNX);
                 if (candidate != null)
                     render.Textures = candidate;
 
-                candidate = BfresLoader.GetTextures(titleBGPath + "\\" + texpath1);
+                candidate = BfresLoader.GetTextures(titleBGPath + "/" + texpath1);
                 if (candidate != null)
                     render.Textures = candidate;
 

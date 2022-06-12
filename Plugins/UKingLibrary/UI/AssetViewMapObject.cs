@@ -114,8 +114,8 @@ namespace UKingLibrary.UI
         {
             return; //Todo the icon loader does not work correctly
 
-            string modelpath = PluginConfig.GetContentPath($"Model\\{BfresPath}.sbfres");
-            string texpath = PluginConfig.GetContentPath($"Model\\{BfresPath}.Tex.sbfres");
+            string modelpath = PluginConfig.GetContentPath($"Model/{BfresPath}.sbfres");
+            string texpath = PluginConfig.GetContentPath($"Model/{BfresPath}.Tex.sbfres");
 
             if (File.Exists($"{modelpath}"))
             {

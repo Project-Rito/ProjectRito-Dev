@@ -94,21 +94,21 @@ namespace UKingLibrary
         {
             //Mod content
             foreach (string modPath in ModPaths) {
-                if (File.Exists($"{modPath}\\aoc\\0010\\{relativePath}") || Directory.Exists($"{modPath}\\aoc\\0010\\{relativePath}"))    return $"{modPath}\\aoc\\0010\\{relativePath}";
-                if (File.Exists($"{modPath}\\aoc\\0011\\{relativePath}") || Directory.Exists($"{modPath}\\aoc\\0011\\{relativePath}"))    return $"{modPath}\\aoc\\0011\\{relativePath}";
-                if (File.Exists($"{modPath}\\aoc\\0012\\{relativePath}") || Directory.Exists($"{modPath}\\aoc\\0012\\{relativePath}"))    return $"{modPath}\\aoc\\0012\\{relativePath}";
+                if (File.Exists($"{modPath}/aoc/0010/{relativePath}") || Directory.Exists($"{modPath}/aoc/0010/{relativePath}"))    return $"{modPath}/aoc/0010/{relativePath}";
+                if (File.Exists($"{modPath}/aoc/0011/{relativePath}") || Directory.Exists($"{modPath}/aoc/0011/{relativePath}"))    return $"{modPath}/aoc/0011/{relativePath}";
+                if (File.Exists($"{modPath}/aoc/0012/{relativePath}") || Directory.Exists($"{modPath}/aoc/0012/{relativePath}"))    return $"{modPath}/aoc/0012/{relativePath}";
 
-                if (File.Exists($"{modPath}\\content\\{relativePath}") || Directory.Exists($"{modPath}\\content\\{relativePath}")) return $"{modPath}\\content\\{relativePath}";
+                if (File.Exists($"{modPath}/content/{relativePath}") || Directory.Exists($"{modPath}/content/{relativePath}")) return $"{modPath}/content/{relativePath}";
             }
 
             //DLC content
-            if (File.Exists($"{AocPath}\\0010\\{relativePath}") || Directory.Exists($"{AocPath}\\0010\\{relativePath}"))    return $"{AocPath}\\0010\\{relativePath}";
-            if (File.Exists($"{AocPath}\\0011\\{relativePath}") || Directory.Exists($"{AocPath}\\0011\\{relativePath}"))    return $"{AocPath}\\0011\\{relativePath}";
-            if (File.Exists($"{AocPath}\\0012\\{relativePath}") || Directory.Exists($"{AocPath}\\0012\\{relativePath}"))    return $"{AocPath}\\0012\\{relativePath}";
+            if (File.Exists($"{AocPath}/0010/{relativePath}") || Directory.Exists($"{AocPath}/0010/{relativePath}"))    return $"{AocPath}/0010/{relativePath}";
+            if (File.Exists($"{AocPath}/0011/{relativePath}") || Directory.Exists($"{AocPath}/0011/{relativePath}"))    return $"{AocPath}/0011/{relativePath}";
+            if (File.Exists($"{AocPath}/0012/{relativePath}") || Directory.Exists($"{AocPath}/0012/{relativePath}"))    return $"{AocPath}/0012/{relativePath}";
             //Update content
-            if (File.Exists($"{UpdatePath}\\{relativePath}") || Directory.Exists($"{UpdatePath}\\{relativePath}")) return $"{UpdatePath}\\{relativePath}";
+            if (File.Exists($"{UpdatePath}/{relativePath}") || Directory.Exists($"{UpdatePath}/{relativePath}")) return $"{UpdatePath}/{relativePath}";
             //Base game content
-            if (File.Exists($"{GamePath}\\{relativePath}") || Directory.Exists($"{GamePath}\\{relativePath}"))   return $"{GamePath}\\{relativePath}";
+            if (File.Exists($"{GamePath}/{relativePath}") || Directory.Exists($"{GamePath}/{relativePath}"))   return $"{GamePath}/{relativePath}";
 
             return relativePath;
         }
@@ -123,21 +123,21 @@ namespace UKingLibrary
             //Mod content
             foreach (string modPath in ModPaths)
             {
-                if (File.Exists($"{modPath}\\aoc\\0010\\{relativePath}") || Directory.Exists($"{modPath}\\aoc\\0010\\{relativePath}")) relativePaths.Add($"{modPath}\\aoc\\0010\\{relativePath}");
-                if (File.Exists($"{modPath}\\aoc\\0011\\{relativePath}") || Directory.Exists($"{modPath}\\aoc\\0011\\{relativePath}")) relativePaths.Add($"{modPath}\\aoc\\0011\\{relativePath}");
-                if (File.Exists($"{modPath}\\aoc\\0012\\{relativePath}") || Directory.Exists($"{modPath}\\aoc\\0012\\{relativePath}")) relativePaths.Add($"{modPath}\\aoc\\0012\\{relativePath}");
+                if (File.Exists($"{modPath}/aoc/0010/{relativePath}") || Directory.Exists($"{modPath}/aoc/0010/{relativePath}")) relativePaths.Add($"{modPath}/aoc/0010/{relativePath}");
+                if (File.Exists($"{modPath}/aoc/0011/{relativePath}") || Directory.Exists($"{modPath}/aoc/0011/{relativePath}")) relativePaths.Add($"{modPath}/aoc/0011/{relativePath}");
+                if (File.Exists($"{modPath}/aoc/0012/{relativePath}") || Directory.Exists($"{modPath}/aoc/0012/{relativePath}")) relativePaths.Add($"{modPath}/aoc/0012/{relativePath}");
 
-                if (File.Exists($"{modPath}\\content\\{relativePath}") || Directory.Exists($"{modPath}\\content\\{relativePath}")) relativePaths.Add($"{modPath}\\content\\{relativePath}");
+                if (File.Exists($"{modPath}/content/{relativePath}") || Directory.Exists($"{modPath}/content/{relativePath}")) relativePaths.Add($"{modPath}/content/{relativePath}");
             }
 
             //DLC content
-            if (File.Exists($"{AocPath}\\0010\\{relativePath}") || File.Exists($"{AocPath}\\0010\\{relativePath}")) relativePaths.Add($"{AocPath}\\0010\\{relativePath}");
-            if (File.Exists($"{AocPath}\\0011\\{relativePath}") || File.Exists($"{AocPath}\\0011\\{relativePath}")) relativePaths.Add($"{AocPath}\\0011\\{relativePath}");
-            if (File.Exists($"{AocPath}\\0012\\{relativePath}") || File.Exists($"{AocPath}\\0012\\{relativePath}")) relativePaths.Add($"{AocPath}\\0012\\{relativePath}");
+            if (File.Exists($"{AocPath}/0010/{relativePath}") || File.Exists($"{AocPath}/0010/{relativePath}")) relativePaths.Add($"{AocPath}/0010/{relativePath}");
+            if (File.Exists($"{AocPath}/0011/{relativePath}") || File.Exists($"{AocPath}/0011/{relativePath}")) relativePaths.Add($"{AocPath}/0011/{relativePath}");
+            if (File.Exists($"{AocPath}/0012/{relativePath}") || File.Exists($"{AocPath}/0012/{relativePath}")) relativePaths.Add($"{AocPath}/0012/{relativePath}");
             //Update content
-            if (File.Exists($"{UpdatePath}\\{relativePath}") || Directory.Exists($"{UpdatePath}\\{relativePath}")) relativePaths.Add($"{UpdatePath}\\{relativePath}");
+            if (File.Exists($"{UpdatePath}/{relativePath}") || Directory.Exists($"{UpdatePath}/{relativePath}")) relativePaths.Add($"{UpdatePath}/{relativePath}");
             //Base game content
-            if (File.Exists($"{GamePath}\\{relativePath}") || Directory.Exists($"{GamePath}\\{relativePath}")) relativePaths.Add($"{GamePath}\\{relativePath}");
+            if (File.Exists($"{GamePath}/{relativePath}") || Directory.Exists($"{GamePath}/{relativePath}")) relativePaths.Add($"{GamePath}/{relativePath}");
 
             relativePath.Reverse();
             return relativePaths.ToArray();
@@ -145,7 +145,7 @@ namespace UKingLibrary
 
         public static string GetCachePath(string relativePath)
         {
-            return $"{Toolbox.Core.Runtime.ExecutableDir}\\Cache\\{PluginName}\\{relativePath}";
+            return $"{Toolbox.Core.Runtime.ExecutableDir}/Cache/{PluginName}/{relativePath}";
         }
 
         /// <summary>
@@ -154,9 +154,9 @@ namespace UKingLibrary
         /// <returns></returns>
         public static PluginConfig Load()
         {
-            if (!File.Exists($"{Runtime.ExecutableDir}\\UKingConfig.json")) { new PluginConfig().Save(); }
+            if (!File.Exists($"{Runtime.ExecutableDir}/UKingConfig.json")) { new PluginConfig().Save(); }
 
-            var config = JsonConvert.DeserializeObject<PluginConfig>(File.ReadAllText($"{Runtime.ExecutableDir}\\UKingConfig.json"));
+            var config = JsonConvert.DeserializeObject<PluginConfig>(File.ReadAllText($"{Runtime.ExecutableDir}/UKingConfig.json"));
             config.Reload();
             return config;
         }
@@ -166,7 +166,7 @@ namespace UKingLibrary
         /// </summary>
         public void Save()
         {
-            File.WriteAllText($"{Runtime.ExecutableDir}\\UKingConfig.json", JsonConvert.SerializeObject(this));
+            File.WriteAllText($"{Runtime.ExecutableDir}/UKingConfig.json", JsonConvert.SerializeObject(this));
             Reload();
         }
 
@@ -175,15 +175,15 @@ namespace UKingLibrary
         /// </summary>
         public void Reload()
         {
-            HasValidGamePath = File.Exists($"{GamePath}\\Actor\\ActorInfo.product.sbyml");
-            HasValidUpdatePath = File.Exists($"{UpdatePath}\\Actor\\ActorInfo.product.sbyml");
-            HasValidAocPath = File.Exists($"{AocPath}\\0010\\Pack\\AocMainField.pack");
+            HasValidGamePath = File.Exists($"{GamePath}/Actor/ActorInfo.product.sbyml");
+            HasValidUpdatePath = File.Exists($"{UpdatePath}/Actor/ActorInfo.product.sbyml");
+            HasValidAocPath = File.Exists($"{AocPath}/0010/Pack/AocMainField.pack");
 
             HasValidModPaths = Enumerable.Repeat(false, ModPaths.Count).ToList();
             bool allModPathsValid = true;
             for (int i = 0; i < ModPaths.Count; i++)
             {
-                bool valid = Directory.Exists($"{ModPaths[i]}\\content") || Directory.Exists($"{ModPaths[i]}\\aoc");
+                bool valid = Directory.Exists($"{ModPaths[i]}/content") || Directory.Exists($"{ModPaths[i]}/aoc");
                 HasValidModPaths[i] = valid;
                 if (!valid)
                     allModPathsValid = false;

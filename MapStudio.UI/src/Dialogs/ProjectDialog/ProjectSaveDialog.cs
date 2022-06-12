@@ -15,7 +15,7 @@ namespace MapStudio.UI
         public string GetProjectDirectory()
         {
             var settings = GlobalSettings.Current;
-            return $"{settings.Program.ProjectDirectory}\\{ProjectName}";
+            return $"{settings.Program.ProjectDirectory}/{ProjectName}";
         }
 
         public ProjectSaveDialog(string name) {

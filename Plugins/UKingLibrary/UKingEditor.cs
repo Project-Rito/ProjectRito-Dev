@@ -385,12 +385,12 @@ namespace UKingLibrary
         {
             {
                 // Where to cache to
-                string cache = PluginConfig.GetCachePath($"Images\\Terrain");
+                string cache = PluginConfig.GetCachePath($"Images/Terrain");
                 if (!Directory.Exists(cache))
                 {
 
                     // Get the data from the bfres
-                    string path = PluginConfig.GetContentPath("Model\\Terrain.Tex1.sbfres");
+                    string path = PluginConfig.GetContentPath("Model/Terrain.Tex1.sbfres");
                     var texs = CafeLibrary.Rendering.BfresLoader.GetTextures(path);
                     if (texs == null)
                         return;
@@ -398,7 +398,7 @@ namespace UKingLibrary
                     Directory.CreateDirectory(cache); // Ensure that our cache folder exists
                     foreach (var tex in texs)
                     {
-                        string outputPath = $"{cache}\\{tex.Key}";
+                        string outputPath = $"{cache}/{tex.Key}";
                         if (tex.Value.RenderTexture is GLTexture2D)
                             ((GLTexture2D)tex.Value.RenderTexture).Save(outputPath);
                         else
@@ -407,7 +407,7 @@ namespace UKingLibrary
                 }
             }
 
-            var titleBgPath = PluginConfig.GetContentPath("Pack\\TitleBG.pack");
+            var titleBgPath = PluginConfig.GetContentPath("Pack/TitleBG.pack");
             TitleBG = new SARC();
             TitleBG.Load(File.OpenRead(titleBgPath), "TitleBG.pack");
         }

@@ -96,7 +96,7 @@ namespace MapStudio.UI
 
         public static void Load()
         {
-            string folder = $"{Toolbox.Core.Runtime.ExecutableDir}\\Lib\\Themes";
+            string folder = $"{Toolbox.Core.Runtime.ExecutableDir}/Lib/Themes";
             if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);
 
@@ -108,12 +108,12 @@ namespace MapStudio.UI
 
         public static void Save()
         {
-            string folder = $"{Toolbox.Core.Runtime.ExecutableDir}\\Lib\\Themes";
+            string folder = $"{Toolbox.Core.Runtime.ExecutableDir}/Lib/Themes";
             if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);
 
             foreach (var theme in Themes)
-                theme.Export($"{folder}\\{theme.Name}.json");
+                theme.Export($"{folder}/{theme.Name}.json");
         }
 
         public void Export(string fileName)

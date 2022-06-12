@@ -86,7 +86,7 @@ namespace MapStudio.UI
         /// </summary>
         public void Reload() {
             Translation.Clear();
-            foreach (var file in Directory.GetFiles($"{Runtime.ExecutableDir}\\Languages/{LanguageKey}"))
+            foreach (var file in Directory.GetFiles($"{Runtime.ExecutableDir}/Languages/{LanguageKey}"))
                 Load(file);
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
         }
