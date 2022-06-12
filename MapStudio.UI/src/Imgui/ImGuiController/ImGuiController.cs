@@ -63,7 +63,7 @@ namespace MapStudio.UI
                 (*nativeConfig).RasterizerMultiply = 1f;
                 (*nativeConfig).GlyphOffset = new System.Numerics.Vector2(0);
 
-                io.Fonts.AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\Font.ttf", 16, nativeConfig);
+                io.Fonts.AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/Font.ttf", 16, nativeConfig);
             }
 
             //Merge icon fonts. Important that this goes after the main target font being used so it can be merged.
@@ -76,13 +76,13 @@ namespace MapStudio.UI
             char max = Convert.ToChar(0xe0fe);
             float fontSize = 16.0f;
 
-            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\OpenFontIcons.ttf", fontSize, config, new[] { min, max, (char)0 });
-            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\fa-regular-400.ttf", fontSize, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
-            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\fa-solid-900.ttf", fontSize, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/OpenFontIcons.ttf", fontSize, config, new[] { min, max, (char)0 });
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/fa-regular-400.ttf", fontSize, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/fa-solid-900.ttf", fontSize, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
 
             //Font needs a slight shift.
             config.GlyphMinAdvanceX = 12;
-            AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\NotoSansCJKjp-Medium.otf", fontSize, config, io.Fonts.GetGlyphRangesJapanese());
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/NotoSansCJKjp-Medium.otf", fontSize, config, io.Fonts.GetGlyphRangesJapanese());
 
             //Store the default font for monospaced UI (ie hex viewer)
             DefaultFont = io.Fonts.AddFontDefault();
@@ -96,7 +96,7 @@ namespace MapStudio.UI
                 (*nativeConfig).RasterizerMultiply = 1f;
                 (*nativeConfig).GlyphOffset = new System.Numerics.Vector2(0);
 
-                DefaultFontBold = io.Fonts.AddFontFromFileTTF($"{Runtime.ExecutableDir}\\Lib\\Fonts\\FontBold.ttf", 16, nativeConfig);
+                DefaultFontBold = io.Fonts.AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/FontBold.ttf", 16, nativeConfig);
             }
             
 

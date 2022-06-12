@@ -84,9 +84,9 @@ namespace MapStudio
             IconManager.LoadTextureFile("Warning", Properties.Resources.Warning, 32, 32);
 
             //Load icons for map objects                                                                     // - This should be handled per-plugin.
-            if (Directory.Exists($"{Runtime.ExecutableDir}\\Images\\MapObjects"))                            //   This is for consistency reasons, and also 
+            if (Directory.Exists($"{Runtime.ExecutableDir}/Images/MapObjects"))                            //   This is for consistency reasons, and also 
             {                                                                                                //   so that there aren't name conflicts.
-                foreach (var imageFile in Directory.GetFiles($"{Runtime.ExecutableDir}\\Images\\MapObjects"))//   When migrated, it should use
+                foreach (var imageFile in Directory.GetFiles($"{Runtime.ExecutableDir}/Images/MapObjects"))//   When migrated, it should use
                 {                                                                                            //   PluginConfig.GetCachePath().
                     IconManager.LoadTextureFile(imageFile, 32, 32);
                 }
@@ -101,8 +101,8 @@ namespace MapStudio
             GlobalSettings.ReloadTheme();
 
             //Load recent file lists
-            RecentFileHandler.LoadRecentList($"{Runtime.ExecutableDir}\\Recent.txt", RecentFiles);
-            RecentFileHandler.LoadRecentList($"{Runtime.ExecutableDir}\\RecentProjects.txt", RecentProjects);
+            RecentFileHandler.LoadRecentList($"{Runtime.ExecutableDir}/Recent.txt", RecentFiles);
+            RecentFileHandler.LoadRecentList($"{Runtime.ExecutableDir}/RecentProjects.txt", RecentProjects);
 
             InitDock();
 
@@ -420,7 +420,7 @@ namespace MapStudio
                         }, (e) =>
                         {
                             if (e)
-                                LoadFileFormat($"{projectList.SelectedProject}\\Project.json");
+                                LoadFileFormat($"{projectList.SelectedProject}/Project.json");
                         });
                     }
                     if (ImGui.BeginMenu($"       {TranslationSource.GetText("MENU_RECENT_PROJECTS")}##MAIN03"))
@@ -660,8 +660,8 @@ namespace MapStudio
 
         private void DisplayRecentProject(string folder)
         {
-            string thumbFile = $"{folder}\\Thumbnail.png";
-            string projectFile = $"{folder}\\Project.json";
+            string thumbFile = $"{folder}/Thumbnail.png";
+            string projectFile = $"{folder}/Project.json";
             string projectName = new DirectoryInfo(folder).Name;
 
             if (!File.Exists(projectFile))
@@ -709,7 +709,7 @@ namespace MapStudio
             var workspace = Workspace.ActiveWorkspace;
 
             var settings = GlobalSettings.Current;
-            string dir = $"{settings.Program.ProjectDirectory}\\{workspace.Name}";
+            string dir = $"{settings.Program.ProjectDirectory}/{workspace.Name}";
 
             workspace.SaveProject(dir);
 
@@ -721,7 +721,7 @@ namespace MapStudio
             var workspace = Workspace.ActiveWorkspace;
             var settings = GlobalSettings.Current;
 
-            string oldProjectDir = $"{settings.Program.ProjectDirectory}\\{workspace.Name}";
+            string oldProjectDir = $"{settings.Program.ProjectDirectory}/{workspace.Name}";
 
             ProjectSaveDialog projectDialog = new ProjectSaveDialog(workspace.Name);
 

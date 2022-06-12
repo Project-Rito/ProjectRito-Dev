@@ -40,7 +40,7 @@ namespace MapStudio.WindowsApi
                 var name = new DirectoryInfo(project).Name;
 
                 JumpListLink recentList = new JumpListLink(exec, name);
-                recentList.Arguments = $"{project}\\Project.json";
+                recentList.Arguments = $"{project}/Project.json";
                 list.AddUserTasks(recentList);
             }
             list.Refresh();

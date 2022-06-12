@@ -39,7 +39,7 @@ namespace MapStudio.UI
             ProjectFolder = Path.GetDirectoryName(filePath);
 
             foreach (var asset in ProjectFile.FileAssets)
-                workspace.LoadFileFormat($"{ProjectFolder}\\{asset}", true);
+                workspace.LoadFileFormat($"{ProjectFolder}/{asset}", true);
 
             ProjectFile.LoadSettings(context, workspace);
         }
@@ -57,12 +57,12 @@ namespace MapStudio.UI
                 string path = asset.FileInfo.FileName;
 
                 ProjectFile.FileAssets.Add(path);
-                if (!File.Exists($"{ProjectFolder}\\{path}") && File.Exists(asset.FileInfo.FilePath))
-                    File.Copy(asset.FileInfo.FilePath, $"{ProjectFolder}\\{path}");
+                if (!File.Exists($"{ProjectFolder}/{path}") && File.Exists(asset.FileInfo.FilePath))
+                    File.Copy(asset.FileInfo.FilePath, $"{ProjectFolder}/{path}");
                 else if (!File.Exists(asset.FileInfo.FilePath))
                 {
                     if (asset.FileInfo.FilePath == null)
-                        asset.FileInfo.FilePath = $"{ProjectFolder}\\{path}";
+                        asset.FileInfo.FilePath = $"{ProjectFolder}/{path}";
 
                     SaveFileData(asset);
                 }

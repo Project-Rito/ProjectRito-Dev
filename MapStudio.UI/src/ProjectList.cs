@@ -73,8 +73,8 @@ namespace MapStudio.UI
 
         private void DisplayProject(string folder)
         {
-            string thumbFile = $"{folder}\\Thumbnail.png";
-            string projectFile = $"{folder}\\Project.json";
+            string thumbFile = $"{folder}/Thumbnail.png";
+            string projectFile = $"{folder}/Project.json";
             string projectName = new DirectoryInfo(folder).Name;
 
             if (!File.Exists(projectFile))

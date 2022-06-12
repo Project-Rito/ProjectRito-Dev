@@ -154,7 +154,7 @@ namespace Toolbox.Core.ViewModels
             }
         }
 
-        private string _icon = "\\Images\\Folder.png";
+        private string _icon = "/Images/Folder.png";
 
         /// <summary>
         /// Gets the icon key or character of the node.
@@ -170,7 +170,7 @@ namespace Toolbox.Core.ViewModels
             }
         }
 
-        private object imageSoure = new Uri("\\Images\\Folder.png", UriKind.Relative);
+        private object imageSoure = new Uri("/Images/Folder.png", UriKind.Relative);
 
         /// <summary>
         /// Gets or sets the raw image source of the Icon value.

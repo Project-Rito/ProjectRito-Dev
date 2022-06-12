@@ -224,7 +224,7 @@ namespace MapStudio.UI
             //Make sure the file format path is at the working directory instead of the project path
             //So when the user saves the files directly, they will save to the original place.
             if (!isProject)
-                fileFormat.FileInfo.FilePath = $"{Resources.ProjectFile.WorkingDirectory}\\{fileFormat.FileInfo.FileName}";
+                fileFormat.FileInfo.FilePath = $"{Resources.ProjectFile.WorkingDirectory}/{fileFormat.FileInfo.FileName}";
 
             StudioLogger.WriteLine(string.Format(TranslationSource.GetText("LOADING_FILE"), filePath));
 
@@ -473,12 +473,12 @@ namespace MapStudio.UI
             //Apply editor data
             SaveEditorData(true);
             //Save as project
-            Resources.SaveProject($"{folderPath}\\Project.json", ViewportWindow.Pipeline._context, this);
+            Resources.SaveProject($"{folderPath}/Project.json", ViewportWindow.Pipeline._context, this);
             //Save the thumbnail in the current view
             var thumb = ViewportWindow.Pipeline.SaveAsScreenshot(720, 512);
-            thumb.Save($"{folderPath}\\Thumbnail.png");
+            thumb.Save($"{folderPath}/Thumbnail.png");
             //Update icon cache for thumbnails used
-            IconManager.LoadTextureFile($"{folderPath}\\Thumbnail.png", 64, 64, true);
+            IconManager.LoadTextureFile($"{folderPath}/Thumbnail.png", 64, 64, true);
 
             PrintErrors();
         }

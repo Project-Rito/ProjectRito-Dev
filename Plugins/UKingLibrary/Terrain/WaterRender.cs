@@ -278,12 +278,12 @@ namespace UKingLibrary.Rendering
             WaterTexture_Nrm.MinFilter = TextureMinFilter.LinearMipmapLinear;
 
             //Load the terrain data as cached images.
-            string cache = PluginConfig.GetCachePath("Images\\Terrain");
+            string cache = PluginConfig.GetCachePath("Images/Terrain");
 
             // Alb ------------------------------------------------
             for (int i = 0; i < WaterTexture_Emm.ArrayCount; i++)
             {
-                string tex = $"{cache}\\WaterEmm_{i}.png";
+                string tex = $"{cache}/WaterEmm_{i}.png";
                 if (System.IO.File.Exists(tex))
                 {
                     var image = new System.Drawing.Bitmap(tex);
@@ -300,7 +300,7 @@ namespace UKingLibrary.Rendering
             // Nrm ------------------------------------------------
             for (int i = 0; i < WaterTexture_Nrm.ArrayCount; i++)
             {
-                string tex = $"{cache}\\WaterNm_{i}.png";
+                string tex = $"{cache}/WaterNm_{i}.png";
                 if (System.IO.File.Exists(tex))
                 {
                     var image = new System.Drawing.Bitmap(tex);
