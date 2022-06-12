@@ -22,10 +22,12 @@ namespace MapStudio
             IsDebugCheck(ref IS_DEBUG);
 
             //Hide the console unless debugging
+            #if Windows
             if (!IS_DEBUG)
                 ConsoleWindowUtil.Hide();
             else
                 ConsoleWindowUtil.Show();
+            #endif
 
             //Assembly searching from folders
             var domain = AppDomain.CurrentDomain;

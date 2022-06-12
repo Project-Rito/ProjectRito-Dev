@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace MapStudio.UI
 {
+    #if Windows
     public class ConsoleWindowUtil
     {
         [DllImport("kernel32.dll")]
@@ -30,4 +31,5 @@ namespace MapStudio.UI
             ShowWindow(handle, SW_SHOW);
         }
     }
+    #endif
 }
