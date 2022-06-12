@@ -29,6 +29,8 @@ namespace UKingLibrary
     {
         public NodeBase RootNode;
 
+        private string Prefix;
+
         private HKXHeader Header = HKXHeader.BotwWiiu(); // TODO - actually get the right platform
         private hkRootLevelContainer Root;
         private StaticCompoundInfo StaticCompound;
@@ -56,6 +58,8 @@ namespace UKingLibrary
                     IsVisible = (bool)value;
                 }
             };
+
+            Prefix = Path.GetFileNameWithoutExtension(fileName);
 
             ShapePairings = GenerateActorShapePairings();
 
@@ -135,7 +139,9 @@ namespace UKingLibrary
                                 m_numShapeKeysInContactPointProperties = rigidBody.m_numShapeKeysInContactPointProperties,
                                 m_properties = rigidBody.m_properties,
                                 m_responseModifierFlags = rigidBody.m_responseModifierFlags,
-                                m_spuCollisionCallback = rigidBody.m_spuCollisionCallback
+                                m_spuCollisionCallback = rigidBody.m_spuCollisionCallback,
+                                m_storageIndex = rigidBody.m_storageIndex,
+                                m_uid = rigidBody.m_uid
                             },
                             BodyGroup = shape.ShapeInfo.m_BodyGroup,
                             BodyLayerType = shape.ShapeInfo.m_BodyLayerType,
@@ -184,10 +190,28 @@ namespace UKingLibrary
             BVNode leafBvhNode = leafBvhNode = TransformLeaf(shapeBvh, ComposeMatrix(translation, rotation, scale));
 
             // Generate rigidbody if needed
-            if (!((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.Any(x => x.m_name == cacheable.RigidBody.m_name))
-                ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.Add(cacheable.RigidBody);
+            cacheable.RigidBody.m_name = Prefix + cacheable.RigidBody.m_name.Substring(cacheable.RigidBody.m_name.IndexOf('_')); // Update name to match compound
 
             int rigidBodyIdx = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.FindIndex(x => x.m_name == cacheable.RigidBody.m_name);
+            if (rigidBodyIdx == -1)
+            {
+                ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.Add(cacheable.RigidBody);
+                rigidBodyIdx = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.Count - 1;
+            }
+            else // When merging into an existing rigidbody we might need to update some stuff.
+            {
+                hkpRigidBody rigidBody = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[rigidBodyIdx];
+
+                sbyte oldNumBitsForChildShapeKey = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_numBitsForChildShapeKey;
+                sbyte newNumBitsForChildShapeKey = ((hkpStaticCompoundShape)cacheable.RigidBody.m_collidable.m_shape).m_numBitsForChildShapeKey;
+                if (newNumBitsForChildShapeKey > oldNumBitsForChildShapeKey)
+                    ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[rigidBodyIdx].m_collidable.m_shape).m_numBitsForChildShapeKey = newNumBitsForChildShapeKey;
+
+                byte oldNumShapeKeysInContactPointProperties = rigidBody.m_numShapeKeysInContactPointProperties;
+                byte newNumShapeKeysInContactPointProperties = cacheable.RigidBody.m_numShapeKeysInContactPointProperties;
+                if (newNumShapeKeysInContactPointProperties > oldNumShapeKeysInContactPointProperties)
+                    ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[rigidBodyIdx].m_numShapeKeysInContactPointProperties = newNumShapeKeysInContactPointProperties;
+            }
 
             // Add our data
             if (ShapePairings.Any(x => x.ActorInfo?.m_HashId == hashId))
