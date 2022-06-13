@@ -15,29 +15,29 @@ namespace UKingLibrary.UI
 
         public static void Draw(MapObject mapObject, IDictionary<string, dynamic> values, PropertyChangedCallback callback = null)
         {
-            IDictionary<string, dynamic> properties = null;
+            IDictionary<string, dynamic> parameters = null;
             if (values.ContainsKey("!Parameters"))
-                properties = (IDictionary<string, dynamic>)values["!Parameters"];
+                parameters = (IDictionary<string, dynamic>)values["!Parameters"];
 
             float width = ImGui.GetWindowWidth();
 
             if (ImGui.CollapsingHeader(TranslationSource.GetText("OBJ"), ImGuiTreeNodeFlags.DefaultOpen))
             {
                 if (ImGui.Button($"{TranslationSource.GetText("EDIT")}##obj", new System.Numerics.Vector2(width, 22)))
-                    DialogHandler.Show("Property Window", () => PropertiesDialog(values), null);
+                    DialogHandler.Show($"{TranslationSource.GetText("PROPERTY_WINDOW")}", () => PropertiesDialog(values), null);
 
                 ImGui.Columns(2);
                 LoadProperties(values, callback);
                 ImGui.Columns(1);
             }
 
-            if (properties != null && ImGui.CollapsingHeader(TranslationSource.GetText("PROPERTIES"), ImGuiTreeNodeFlags.DefaultOpen))
+            if (parameters != null && ImGui.CollapsingHeader(TranslationSource.GetText("PARAMETERS"), ImGuiTreeNodeFlags.DefaultOpen))
             {
-                if (ImGui.Button("Edit##prop", new System.Numerics.Vector2(width, 22)))
-                    DialogHandler.Show("Property Window", () => PropertiesDialog(properties), null);
+                if (ImGui.Button($"{TranslationSource.GetText("EDIT")}##param", new System.Numerics.Vector2(width, 22)))
+                    DialogHandler.Show($"{TranslationSource.GetText("PROPERTY_WINDOW")}", () => PropertiesDialog(parameters), null);
 
                 ImGui.Columns(2);
-                LoadProperties(properties, callback);
+                LoadProperties(parameters, callback);
                 ImGui.Columns(1);
             }
 
@@ -46,16 +46,17 @@ namespace UKingLibrary.UI
                 ImGui.Columns(2);
                 foreach (var link in mapObject.SourceLinks)
                     DrawLinkItem(link);
-
                 ImGui.Columns(1);
             }
 
             if (ImGui.CollapsingHeader(TranslationSource.GetText("OUTGOING_LINKS"), ImGuiTreeNodeFlags.DefaultOpen))
             {
+                if (ImGui.Button($"{TranslationSource.GetText("EDIT")}##link", new System.Numerics.Vector2(width, 22)))
+                    DialogHandler.Show($"{TranslationSource.GetText("LINK_WINDOW")}", () => LinksDialog(mapObject.DestLinks, mapObject), null);
+
                 ImGui.Columns(2);
                 foreach (var link in mapObject.DestLinks)
                     DrawLinkItem(link);
-
                 ImGui.Columns(1);
             }
 
@@ -88,30 +89,103 @@ namespace UKingLibrary.UI
             ImGui.NextColumn();
         }
 
-        static List<string> removedProperties = new List<string>();
+        // A dialog to add/remove links
+        static void LinksDialog(List<MapObject.LinkInstance> links, MapObject mapObject)
+        {
+            if (ImGui.CollapsingHeader(TranslationSource.GetText("ADD_LINK"), ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                ImGui.PushItemWidth(100);
+                ImGui.Combo("##addlinktype", ref selectedLinkType, LinkTypes, LinkTypes.Length, 100);
+                ImGui.PopItemWidth();
 
-        //A dialog to add/remove properties.
+                ImGui.SameLine();
+                ImGui.InputInt($"##addlinkid", ref addLinkHashId, 0, 0, ImGuiInputTextFlags.CharsDecimal);
+
+                ImGui.SameLine();
+                ImGui.PushItemWidth(100);
+                if (ImGui.Button(TranslationSource.GetText("ADD")))
+                {
+                    links.Add(new MapObject.LinkInstance()
+                    {
+                        Properties = new Dictionary<string, dynamic>()
+                        {
+                            { "!Parameters", new Dictionary<string, dynamic>() },
+                            { "DefinitionName", new MapData.Property<dynamic>(LinkTypes[selectedLinkType]) },
+                            { "DestUnitHashId", new MapData.Property<dynamic>((uint)addLinkHashId) }
+                        },
+                        Object = ((UKingEditor)Workspace.ActiveWorkspace.ActiveEditor).ActiveMapLoader.MapObjectByHashId((uint)addLinkHashId)
+                    });
+                }
+            }
+
+            if (ImGui.CollapsingHeader(TranslationSource.GetText("LINKS"), ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                float window_width = ImGui.GetWindowWidth();
+                ImGui.Columns(3);
+                foreach (MapObject.LinkInstance link in links)
+                {
+                    ImGui.PushItemWidth(ImGui.GetColumnWidth());
+                    int editSelectedLinkType = Array.IndexOf(LinkTypes, (string)link.Properties["DefinitionName"].Value);
+                    ImGui.Combo("##editlinktype", ref editSelectedLinkType, LinkTypes, LinkTypes.Length, 100);
+                    link.Properties["DefinitionName"] = new MapData.Property<dynamic>(LinkTypes[editSelectedLinkType]);
+                    ImGui.PopItemWidth();
+
+                    ImGui.NextColumn();
+
+                    int editLinkHashId = (int)link.Properties["DestUnitHashId"].Value;
+                    ImGui.InputInt($"##addlinkid", ref editLinkHashId, 0, 0, ImGuiInputTextFlags.CharsDecimal);
+                    link.Properties["DestUnitHashId"] = new MapData.Property<dynamic>((uint)editLinkHashId);
+
+                    ImGui.NextColumn();
+
+                    ImGui.PushItemWidth(80);
+
+                    if (ImGui.Button($"Remove##{link.Properties["DefinitionName"]}{link.Properties["DestUnitHashId"]}"))
+                        removedLinks.Add(link);
+
+                    ImGui.PopItemWidth();
+
+                    ImGui.NextColumn();
+                }
+                ImGui.Columns(1);
+
+                foreach (var link in removedLinks)
+                    links.Remove(link);
+
+                if (removedLinks.Count > 0)
+                    removedLinks.Clear();
+            }
+        }
+
+        static List<MapObject.LinkInstance> removedLinks = new List<MapObject.LinkInstance>();
+
+        static int addLinkHashId = 0;
+
+        static int selectedLinkType = 0;
+
+        static string[] LinkTypes = new string[] // Loll this list goes on foreverrrrr
+        {
+            "-AxisX", "-AxisY", "-AxisZ", "AreaCol", "AxisX", "AxisY", "AxisZ", "BAndSCs", "BAndSLimitAngYCs", "BasicSig", "BasicSigOnOnly", "ChangeAtnSig", "CogWheelCs", "CopyWaitRevival", "Create", "DeadUp", "Delete", "DemoMember", "FixedCs", "ForSale", "ForbidAttention", "Freeze", "GimmickSuccess", "HingeCs", "LifeZero", "LimitHingeCs", "ModelBind", "MtxCopyCreate", "OffWaitRevival", "PhysSystemGroup", "PlacementLOD", "PulleyCs", "RackAndPinionCs", "Recreate", "Reference", "Remains", "SensorBlind", "SliderCs", "Stable", "StackLink", "SyncLink", "VelocityControl"
+        };
+
+        // A dialog to add/remove properties.
         static void PropertiesDialog(IDictionary<string, dynamic> properties)
         {
             if (isUpdating)
                 return;
 
-            if (ImGui.CollapsingHeader("Add Property", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader(TranslationSource.GetText("ADD_PROPERTY"), ImGuiTreeNodeFlags.DefaultOpen))
             {
                 ImGui.PushItemWidth(100);
-                if (ImGui.Combo("", ref selectedPropertyType, PropertyTypes, PropertyTypes.Length, 100))
-                {
-
-                }
+                ImGui.Combo("##addproptype", ref selectedPropertyType, PropertyTypes, PropertyTypes.Length, 100);
                 ImGui.PopItemWidth();
 
                 ImGui.SameLine();
-
                 ImGui.InputText($"##addpropname", ref addPropertyName, 0x100);
-                ImGui.SameLine();
 
+                ImGui.SameLine();
                 ImGui.PushItemWidth(100);
-                if (ImGui.Button("Add"))
+                if (ImGui.Button(TranslationSource.GetText("ADD")))
                 {
                     if (!string.IsNullOrEmpty(addPropertyName))
                     {
@@ -132,11 +206,11 @@ namespace UKingLibrary.UI
                 }
                 ImGui.PopItemWidth();
             }
-            if (ImGui.CollapsingHeader("Properties", ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader(TranslationSource.GetText("PROPERTIES"), ImGuiTreeNodeFlags.DefaultOpen))
             {
                 float window_width = ImGui.GetWindowWidth();
                 ImGui.Columns(3);
-                foreach (var pair in properties)
+                foreach (KeyValuePair<string, dynamic> pair in properties)
                 {
                     string name = pair.Key;
 
@@ -205,6 +279,8 @@ namespace UKingLibrary.UI
             }
             return null;
         }
+
+        static List<string> removedProperties = new List<string>();
 
         static string addPropertyName = "";
 

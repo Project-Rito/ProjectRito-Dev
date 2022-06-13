@@ -450,6 +450,7 @@ namespace UKingLibrary
         public void SaveActor()
         {
             SaveTransform();
+            SaveLinks();
             SaveBakedCollision();
         }
 
@@ -622,6 +623,21 @@ namespace UKingLibrary
                 SaveVector("Scale", Render.Transform.Scale);
         }
 
+        void SaveLinks()
+        {
+            if (Properties.ContainsKey("LinksToObj"))
+                Properties.Remove("LinksToObj");
+            Properties.Add("LinksToObj", new List<dynamic>());
+            
+            foreach (LinkInstance link in DestLinks)
+            {
+                Properties["LinksToObj"].Add(link.Properties);
+            }
+
+            if (Properties["LinksToObj"].Count == 0)
+                Properties.Remove("LinksToObj");
+        }
+
         private void SaveVector(string key, Vector3 value, bool isRotation = false)
         {
             if (isRotation && (value.X == 0 && value.Z == 0 && value.Y != 0))
@@ -651,6 +667,9 @@ namespace UKingLibrary
 
             if (name == "BoxWater")
                 return new AreaWaterRender(parent, new Vector4(0, 0, 1, 1));
+
+            if (name == "AscendingCurrent")
+                return new AscendingCurrentRender(parent, new Vector4(1, 1, 1, 1));
 
             if (TagRender.IsTag(name))
                 return new TagRender(name, parent);

@@ -20,5 +20,7 @@ namespace UKingLibrary
         public void RemoveBakedCollisionShape(uint hashId);
         public bool BakedCollisionShapeExists(uint hashId);
         public bool UpdateBakedCollisionShapeTransform(uint hashId, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale);
+
+        public MapObject MapObjectByHashId(uint hashId);
     }
 }

@@ -174,6 +174,16 @@ namespace UKingLibrary
             return BakedCollision[0].UpdateShapeTransform(hashId, translation, rotation, scale);
         }
 
+        public MapObject MapObjectByHashId(uint hashId)
+        {
+            foreach (MapData mapData in MapData)
+            {
+                if (mapData.Objs.ContainsKey(hashId))
+                    return mapData.Objs[hashId];
+            }
+            return null;
+        }
+
         private Stream GetModel()
         {
             byte[] data;

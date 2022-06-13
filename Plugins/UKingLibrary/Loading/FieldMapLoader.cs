@@ -163,6 +163,16 @@ namespace UKingLibrary
             return null;
         }
 
+        public MapObject MapObjectByHashId(uint hashId)
+        {
+            foreach (MapData mapData in MapData)
+            {
+                if (mapData.Objs.ContainsKey(hashId))
+                    return mapData.Objs[hashId];
+            }
+            return null;
+        }
+
         private void InitSectionFolder(string sectionName)
         {
             RootNode.TryAddChild(new NodeFolder(sectionName) {
