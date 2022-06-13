@@ -133,7 +133,7 @@ namespace UKingLibrary.UI
                     ImGui.NextColumn();
 
                     int editLinkHashId = (int)link.Properties["DestUnitHashId"].Value;
-                    ImGui.InputInt($"##addlinkid", ref editLinkHashId, 0, 0, ImGuiInputTextFlags.CharsDecimal);
+                    ImGui.InputInt($"##editlinkid", ref editLinkHashId, 0, 0, ImGuiInputTextFlags.CharsDecimal);
                     link.Properties["DestUnitHashId"] = new MapData.Property<dynamic>((uint)editLinkHashId);
 
                     ImGui.NextColumn();
