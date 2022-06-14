@@ -637,6 +637,22 @@ namespace UKingLibrary
             return 0;
         }
         /// <summary>
+        /// Find ActorInfo based on a shapeInfo index it points to.
+        /// Try to avoid calling this if possible as it might find an ActorInfo referencing a shape instance in another rigidbody.
+        /// </summary>
+        private ActorInfo GetActorInfoByShapeIndex(int index)
+        {
+            foreach (ActorInfo actorInfo in StaticCompound.m_ActorInfo)
+            {
+                if (actorInfo.m_ShapeInfoStart <= index && actorInfo.m_ShapeInfoEnd >= index)
+                {
+                    return actorInfo;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Finds a BVH leaf node containing the given primative.
         /// </summary>
         private BVNode GetShapeLeafNodeByPrimitive(uint? primitive)
@@ -679,7 +695,7 @@ namespace UKingLibrary
                 else
                     shapePairings.Add(new ActorShapePairing()
                     {
-                        ActorInfo = shapeInfo.m_ActorInfoIndex != -1 ? StaticCompound.m_ActorInfo[shapeInfo.m_ActorInfoIndex] : null,
+                        ActorInfo = shapeInfo.m_ActorInfoIndex != -1 ? StaticCompound.m_ActorInfo[shapeInfo.m_ActorInfoIndex] : GetActorInfoByShapeIndex(i),
                         Shapes = new List<ShapeInfoShapeInstancePairing>()
                         {
                             shapeInstancePairing
