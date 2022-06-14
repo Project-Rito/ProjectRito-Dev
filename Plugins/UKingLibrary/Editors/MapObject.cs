@@ -832,6 +832,17 @@ namespace UKingLibrary
             public IDictionary<string, dynamic> Properties;
 
             public MapObject Object;
+
+            public LinkInstance()
+            {
+
+            }
+
+            public LinkInstance(uint hashId, IDictionary<string, dynamic> properties)
+            {
+                Properties = properties;
+                Object = ((UKingEditor)Workspace.ActiveWorkspace.ActiveEditor).ActiveMapLoader.MapObjectByHashId(hashId);
+            }
         }
     }
 }

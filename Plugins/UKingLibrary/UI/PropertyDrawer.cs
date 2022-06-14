@@ -105,16 +105,22 @@ namespace UKingLibrary.UI
                 ImGui.PushItemWidth(100);
                 if (ImGui.Button(TranslationSource.GetText("ADD")))
                 {
-                    links.Add(new MapObject.LinkInstance()
-                    {
-                        Properties = new Dictionary<string, dynamic>()
+                    MapObject.LinkInstance link = new MapObject.LinkInstance(
+                        (uint)addLinkHashId, 
+                        new Dictionary<string, dynamic>()
                         {
                             { "!Parameters", new Dictionary<string, dynamic>() },
                             { "DefinitionName", new MapData.Property<dynamic>(LinkTypes[selectedLinkType]) },
                             { "DestUnitHashId", new MapData.Property<dynamic>((uint)addLinkHashId) }
-                        },
-                        Object = ((UKingEditor)Workspace.ActiveWorkspace.ActiveEditor).ActiveMapLoader.MapObjectByHashId((uint)addLinkHashId)
+                        }
+                    );
+                    link.Object.SourceLinks.Add(new MapObject.LinkInstance()
+                    {
+                        Properties = link.Properties,
+                        Object = mapObject
                     });
+                    mapObject.Render.DestObjectLinks.Add(link.Object.Render);
+                    links.Add(link);
                 }
             }
 
@@ -126,21 +132,33 @@ namespace UKingLibrary.UI
                 {
                     ImGui.PushItemWidth(ImGui.GetColumnWidth());
                     int editSelectedLinkType = Array.IndexOf(LinkTypes, (string)link.Properties["DefinitionName"].Value);
-                    ImGui.Combo("##editlinktype", ref editSelectedLinkType, LinkTypes, LinkTypes.Length, 100);
+                    ImGui.Combo($"##editlinktype##{link.Properties["DefinitionName"].Value}{link.Properties["DestUnitHashId"].Value}", ref editSelectedLinkType, LinkTypes, LinkTypes.Length, 100);
                     link.Properties["DefinitionName"] = new MapData.Property<dynamic>(LinkTypes[editSelectedLinkType]);
                     ImGui.PopItemWidth();
 
                     ImGui.NextColumn();
 
                     int editLinkHashId = (int)link.Properties["DestUnitHashId"].Value;
-                    ImGui.InputInt($"##editlinkid", ref editLinkHashId, 0, 0, ImGuiInputTextFlags.CharsDecimal);
+                    ImGui.InputInt($"##editlinkid##{link.Properties["DefinitionName"].Value}{link.Properties["DestUnitHashId"].Value}", ref editLinkHashId, 0, 0, ImGuiInputTextFlags.CharsDecimal);
+                    if (editLinkHashId != (int)link.Properties["DestUnitHashId"].Value)
+                    {
+                        link.Object.SourceLinks.RemoveAll(x => x.Properties["DestUnitHashId"].Value == mapObject.HashId);
+                        link.Object.Render.DestObjectLinks.Remove(link.Object.Render);
+                        link.Object = ((UKingEditor)Workspace.ActiveWorkspace.ActiveEditor).ActiveMapLoader.MapObjectByHashId((uint)editLinkHashId);
+                        link.Object.SourceLinks.Add(new MapObject.LinkInstance()
+                        {
+                            Properties = link.Properties,
+                            Object = mapObject
+                        });
+                        mapObject.Render.DestObjectLinks.Add(link.Object.Render);
+                    }
                     link.Properties["DestUnitHashId"] = new MapData.Property<dynamic>((uint)editLinkHashId);
 
                     ImGui.NextColumn();
 
                     ImGui.PushItemWidth(80);
 
-                    if (ImGui.Button($"Remove##{link.Properties["DefinitionName"]}{link.Properties["DestUnitHashId"]}"))
+                    if (ImGui.Button($"Remove##{link.Properties["DefinitionName"].Value}{link.Properties["DestUnitHashId"].Value}"))
                         removedLinks.Add(link);
 
                     ImGui.PopItemWidth();
@@ -150,7 +168,11 @@ namespace UKingLibrary.UI
                 ImGui.Columns(1);
 
                 foreach (var link in removedLinks)
+                {
+                    link.Object.SourceLinks.RemoveAll(x => x.Properties["DestUnitHashId"].Value == mapObject.HashId);
+                    mapObject.Render.DestObjectLinks.Remove(link.Object.Render);
                     links.Remove(link);
+                }
 
                 if (removedLinks.Count > 0)
                     removedLinks.Clear();
