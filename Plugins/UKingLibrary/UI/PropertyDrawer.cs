@@ -143,7 +143,7 @@ namespace UKingLibrary.UI
                     if (editLinkHashId != (int)link.Properties["DestUnitHashId"].Value)
                     {
                         link.Object.SourceLinks.RemoveAll(x => x.Properties["DestUnitHashId"].Value == mapObject.HashId);
-                        link.Object.Render.DestObjectLinks.Remove(link.Object.Render);
+                        mapObject.Render.DestObjectLinks.Remove(link.Object.Render);
                         link.Object = ((UKingEditor)Workspace.ActiveWorkspace.ActiveEditor).ActiveMapLoader.MapObjectByHashId((uint)editLinkHashId);
                         link.Object.SourceLinks.Add(new MapObject.LinkInstance()
                         {
