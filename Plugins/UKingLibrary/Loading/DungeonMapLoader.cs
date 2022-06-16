@@ -252,6 +252,28 @@ namespace UKingLibrary
 
         public void Save(string savePath)
         {
+            foreach (EditableObject obj in Scene.DeletedObjects)
+            {
+                if (obj.UINode.Tag is MapObject)
+                {
+                    MapObject mapObject = (MapObject)obj.UINode.Tag;
+
+                    RemoveBakedCollisionShape(mapObject.HashId);
+
+                    foreach (MapObject.LinkInstance link in mapObject.DestLinks)
+                    {
+                        link.Object.SourceLinks.RemoveAll(x => x.Object == mapObject);
+                        link.Object.Render.SourceObjectLinks.RemoveAll(x => x == mapObject.Render);
+                    }
+                    foreach (MapObject.LinkInstance link in mapObject.SourceLinks)
+                    {
+                        link.Object.DestLinks.RemoveAll(x => x.Object == mapObject);
+                        link.Object.Render.DestObjectLinks.RemoveAll(x => x == mapObject.Render);
+                    }
+                }
+            }
+            Scene.DeletedObjects.RemoveAll(x => x.UINode.Tag is MapObject);
+
             foreach (MapData mapData in MapData)
             {
                 MemoryStream mapStream = new MemoryStream();

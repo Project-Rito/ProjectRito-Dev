@@ -6,6 +6,7 @@ namespace GLFrameworkEngine
 {
     public partial class GLScene
     {
+        public List<EditableObject> DeletedObjects { get; set; } = new List<EditableObject>();
 
         public List<EditableObject> GetEditObjects()
         {
@@ -45,6 +46,7 @@ namespace GLFrameworkEngine
 
         public void DeleteSelected() {
             var selected = GetEditObjects();
+            DeletedObjects.AddRange(selected);
             AddToUndo(new EditableObjectDeletedUndo(this, selected));
             //Remove edit object types
             foreach (var ob in selected) {

@@ -55,8 +55,6 @@ namespace UKingLibrary
                                 {
                                     foreach (MapCollisionLoader collisionLoader in collisionLoaders)
                                     {
-                                        if (obj["UnitConfigName"] == "TwnObj_Village_HatenoHouse_A_L_01")
-                                            Console.WriteLine();
                                         BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(obj["HashId"]);
                                         if (infos != null)
                                             actorShapes.Add(obj["UnitConfigName"], infos);

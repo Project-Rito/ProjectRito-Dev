@@ -429,9 +429,9 @@ namespace UKingLibrary.UI
             var vec = new System.Numerics.Vector3(values["X"].Value, values["Y"].Value, values["Z"].Value);
             if (ImGui.DragFloat3($"##{key}", ref vec))
             {
-                values["X"] = vec.X;
-                values["Y"] = vec.Y;
-                values["Z"] = vec.Z;
+                values["X"].Value = vec.X;
+                values["Y"].Value = vec.Y;
+                values["Z"].Value = vec.Z;
             }
         }
 
