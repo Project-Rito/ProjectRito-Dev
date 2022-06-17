@@ -52,7 +52,7 @@ namespace UKingLibrary
             {
                 Tag = this,
                 HasCheckBox = true,
-                IsChecked = false,
+                IsChecked = true,
                 OnChecked = (object value, EventArgs args) =>
                 {
                     IsVisible = (bool)value;
@@ -821,7 +821,26 @@ namespace UKingLibrary
         #endregion
 
         #region Rendering
-        public bool IsVisible { get; set; } = false;
+        private bool _isVisible = true;
+        public bool IsVisible 
+        {
+            get
+            {
+                // Kinda meh location for this logic
+                // but it cleans up the user experience
+                // in such a small way that I'm not too worried about it.
+                if (!MapData.ShowCollisionShapes)
+                    RootNode.HasCheckBox = false;
+                else
+                    RootNode.HasCheckBox = true;
+
+                return MapData.ShowCollisionShapes && _isVisible;
+            }
+            set
+            {
+                _isVisible = value;
+            }
+        }
 
         private List<HavokMeshShapeRender> ShapeRenders = new List<HavokMeshShapeRender>();
 

@@ -18,6 +18,7 @@ namespace UKingLibrary
         public static bool ShowInvisibleActors = true;
         public static bool ShowMapModel = true;
         public static bool ShowActorLinks = true;
+        public static bool ShowCollisionShapes = false;
 
         public Dictionary<uint, MapObject> Objs = new Dictionary<uint, MapObject>();
         public Dictionary<uint, RailPathData> Rails = new Dictionary<uint, RailPathData>();
