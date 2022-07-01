@@ -42,7 +42,7 @@ namespace UKingLibrary
             if (ImGui.CollapsingHeader(TranslationSource.GetText("COLLISION_TOOLS")))
             {
                 if (ImGui.Button(TranslationSource.GetText("CACHE_BAKED_COLLISION")))
-                    CollisionCacher.Cache(PluginConfig.CollisionCachePath);
+                    CollisionCacher.CacheAll(PluginConfig.CollisionCacheDir);
             }
 
             if (ImGui.CollapsingHeader(TranslationSource.GetText("ONLYONE_TOOLS"))) {

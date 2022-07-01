@@ -39,11 +39,10 @@ namespace UKingLibrary
             }
             set
             {
-
                 if (value && !_bakeCollision)
                 {
-                    string actorCollisionPath = $"{PluginConfig.CollisionCachePath}/{Name}.hksc";
-                    if (File.Exists(actorCollisionPath))
+                    string actorCollisionPath = $"{PluginConfig.CollisionCacheDir}/{Name}.hksc";
+                    if (File.Exists(actorCollisionPath) || ParentLoader.BakedCollisionShapeExists(HashId))
                         _bakeCollision = true;
                 }
                 else if (value && _bakeCollision) { }
@@ -159,7 +158,7 @@ namespace UKingLibrary
             MapData = mapData;
 
             Properties = UKingLibrary.MapData.ValuesToProperties(properties);
-            BakeCollision = ParentLoader.BakedCollisionShapeExists(HashId);
+            _bakeCollision = ParentLoader.BakedCollisionShapeExists(HashId);
 
             ActorInfo = actorInfo;
             string unitConfigName = Properties["UnitConfigName"].Value;
@@ -427,7 +426,7 @@ namespace UKingLibrary
                     return;
 
                 // If not add collision
-                string actorCollisionPath = $"{PluginConfig.CollisionCachePath}/{Name}.hksc";
+                string actorCollisionPath = $"{PluginConfig.CollisionCacheDir}/{Name}.hksc";
                 if (File.Exists(actorCollisionPath))
                 {
                     MapCollisionLoader collisionLoader = new MapCollisionLoader();
@@ -615,10 +614,9 @@ namespace UKingLibrary
             Properties.Remove("Translate");
             Properties.Remove("Rotate");
             Properties.Remove("Scale");
-            if (Render.Transform.Position != Vector3.Zero)
-                SaveVector("Translate", Render.Transform.Position / GLContext.PreviewScale);
+            SaveVector("Translate", Render.Transform.Position / GLContext.PreviewScale, true, false);
             if (Render.Transform.RotationEuler != Vector3.Zero)
-                SaveVector("Rotate", Render.Transform.RotationEuler, true);
+                SaveVector("Rotate", Render.Transform.RotationEuler, false, true);
             if (Render.Transform.Scale != Vector3.One)
                 SaveVector("Scale", Render.Transform.Scale);
         }
@@ -638,14 +636,14 @@ namespace UKingLibrary
                 Properties.Remove("LinksToObj");
         }
 
-        private void SaveVector(string key, Vector3 value, bool isRotation = false)
+        private void SaveVector(string key, Vector3 value, bool isTransform = false, bool isRotation = false)
         {
-            if (isRotation && (value.X == 0 && value.Z == 0 && value.Y != 0))
+            if (isRotation && (value.X == 0 && value.Z == 0))
             {
                 //Single rotation on the up axis
                 BymlHelper.SetValue(Properties, key, new MapData.Property<dynamic>(value.Y));
             }
-            else if (value.IsUniform())
+            else if (!isTransform && value.IsUniform())
                 BymlHelper.SetValue(Properties, key, new MapData.Property<dynamic>(value.X));
             else
             {

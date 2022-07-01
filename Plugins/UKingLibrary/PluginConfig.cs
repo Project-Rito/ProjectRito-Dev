@@ -26,7 +26,7 @@ namespace UKingLibrary
         static List<string> ModPaths = new List<string>();
 
         [JsonProperty]
-        public static string CollisionCachePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/MapStudio/UKing/CollisionCache";
+        public static string CollisionCacheDir = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/MapStudio/UKing/CollisionCache";
 
         static bool HasValidGamePath;
         static bool HasValidUpdatePath;

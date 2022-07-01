@@ -595,12 +595,15 @@ namespace UKingLibrary
         /// </summary>
         private hkpStaticCompoundShapeInstance GetShapeInstanceByUserData(ulong userData)
         {
-            foreach (var rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies)
+            foreach (var system in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems)
             {
-                foreach (var shapeInstance in ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances)
+                foreach (var rigidBody in system.m_rigidBodies)
                 {
-                    if (shapeInstance.m_userData == userData)
-                        return shapeInstance;
+                    foreach (var shapeInstance in ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances)
+                    {
+                        if (shapeInstance.m_userData == userData)
+                            return shapeInstance;
+                    }
                 }
             }
             
@@ -679,7 +682,7 @@ namespace UKingLibrary
             {
                 ShapeInfo shapeInfo = StaticCompound.m_ShapeInfo[i];
 
-                ShapeInfoShapeInstancePairing shapeInstancePairing = new ShapeInfoShapeInstancePairing()
+                ShapeInfoShapeInstancePairing shapeInstancePairing = new ShapeInfoShapeInstancePairing() // Todo: Store system index and utilize when rebuilding or caching
                 {
                     ShapeInfo = shapeInfo,
                     Instance = GetShapeInstanceByUserData((ulong)i),
@@ -813,7 +816,6 @@ namespace UKingLibrary
                 BVNode rigidBodyBVH = new BVNode() { IsLeaf = false };
                 rigidBodyBVH = BVNode.InsertLeafs(rigidBodyBVH, rigidBodyLeafNodes[i]);
                 ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_nodes = rigidBodyBVH.BuildAxis6Tree();
-                var test = BVNode.GetLeafNodes(rigidBodyBVH);
                 ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_domain.m_min = new Vector4(rigidBodyBVH.Min, 0);
                 ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_domain.m_max = new Vector4(rigidBodyBVH.Max, 0);
             }

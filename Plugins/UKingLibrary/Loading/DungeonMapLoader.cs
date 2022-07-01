@@ -279,7 +279,7 @@ namespace UKingLibrary
                 MemoryStream mapStream = new MemoryStream();
                 mapData.Save(mapStream);
 
-                DungeonData.SarcData.Files[$"Map/CDungeon/{DungeonName}/{mapData.RootNode.Header}"] = YAZ0.Compress(mapStream.ToArray()); // Todo save CDungeon or MainFieldDungeon as string for proper saving.1
+                DungeonData.SarcData.Files[$"Map/CDungeon/{DungeonName}/{mapData.RootNode.Header}"] = YAZ0.Compress(mapStream.ToArray()); // Todo preserve CDungeon or MainFieldDungeon as string for proper saving.
             }
             foreach (MapCollisionLoader loader in BakedCollision)
             {
