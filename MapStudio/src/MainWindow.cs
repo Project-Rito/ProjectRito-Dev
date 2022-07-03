@@ -402,11 +402,11 @@ namespace MapStudio
                         }
                         ImGui.EndMenu();
                     }
-                    if (ImGui.MenuItem($"  {IconManager.SAVE_ICON}    {TranslationSource.GetText("MENU_SAVE")}##MAIN08", "Ctrl+S", false, canSave))
+                    if (ImGui.MenuItem($"  {IconManager.SAVE_ICON}    {TranslationSource.GetText("MENU_SAVE_EDITOR")}##MAIN08", "", false, canSave))
                     {
                         Workspace.ActiveWorkspace.SaveFileData();
                     }
-                    if (ImGui.MenuItem($"  {IconManager.SAVE_ICON}    {TranslationSource.GetText("MENU_SAVE_AS")}##MAIN08", "Ctrl+Alt+S", false, canSave))
+                    if (ImGui.MenuItem($"  {IconManager.SAVE_ICON}    {TranslationSource.GetText("MENU_SAVE_EDITOR_AS")}##MAIN08", "", false, canSave))
                     {
                         Workspace.ActiveWorkspace.SaveFileWithDialog();
                     }
@@ -431,11 +431,11 @@ namespace MapStudio
                         }
                         ImGui.EndMenu();
                     }
-                    if (ImGui.MenuItem($"       {TranslationSource.GetText("MENU_SAVE_PROJECT")}##MAIN04", "", false, canSave))
+                    if (ImGui.MenuItem($"       {TranslationSource.GetText("MENU_SAVE_PROJECT")}##MAIN04", "Ctrl+S", false, canSave))
                     {
                         SaveProject();
                     }
-                    if (ImGui.MenuItem($"       {TranslationSource.GetText("MENU_SAVE_PROJECT_AS")}##MAIN05", "", false, canSave))
+                    if (ImGui.MenuItem($"       {TranslationSource.GetText("MENU_SAVE_PROJECT_AS")}##MAIN05", "Ctrl+Alt+S", false, canSave))
                     {
                         SaveProjectWithDialog();
                     }
@@ -706,9 +706,15 @@ namespace MapStudio
 
         private void SaveProject()
         {
-            var workspace = Workspace.ActiveWorkspace;
+            if (Workspace.ActiveWorkspace.Name == TranslationSource.GetText("NEW_PROJECT"))
+            {
+                SaveProjectWithDialog();
+                return;
+            }
 
+            var workspace = Workspace.ActiveWorkspace;
             var settings = GlobalSettings.Current;
+
             string dir = $"{settings.Program.ProjectDirectory}/{workspace.Name}";
 
             workspace.SaveProject(dir);
@@ -728,9 +734,9 @@ namespace MapStudio
             DialogHandler.Show("Save Project", () =>
             {
                 projectDialog.LoadUI();
-            }, (result) =>
+            }, (confirmed) =>
             {
-                if (!result)
+                if (!confirmed)
                     return;
 
                 workspace.UpdateProjectAssetPaths(oldProjectDir, projectDialog.GetProjectDirectory());
@@ -813,7 +819,10 @@ namespace MapStudio
             {
                 if (Keyboard.GetState().IsKeyDown(Key.ControlLeft) && e.Key == Key.S && Workspace.ActiveWorkspace != null)
                 {
-                    Workspace.ActiveWorkspace.SaveFileData();
+                    if (Keyboard.GetState().IsKeyDown(Key.AltLeft))
+                        SaveProjectWithDialog();
+                    else
+                        SaveProject();
                 }
             }
 

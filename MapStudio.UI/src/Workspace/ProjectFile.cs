@@ -68,7 +68,7 @@ namespace MapStudio.UI
 
         public void ApplySettings(GLContext context, Workspace workspace)
         {
-            SelectedWorkspace = workspace.ActiveEditor.SubEditor;
+            SelectedWorkspace = workspace.ActiveEditor?.SubEditor;
 
             var camera = context.Camera;
             this.Camera.RotationX = camera.RotationX;

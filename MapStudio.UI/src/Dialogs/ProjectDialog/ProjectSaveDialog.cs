@@ -10,7 +10,7 @@ namespace MapStudio.UI
 {
     public class ProjectSaveDialog
     {
-        string ProjectName;
+        string ProjectName = "";
 
         public string GetProjectDirectory()
         {
@@ -18,8 +18,10 @@ namespace MapStudio.UI
             return $"{settings.Program.ProjectDirectory}/{ProjectName}";
         }
 
-        public ProjectSaveDialog(string name) {
-            ProjectName = name;
+        public ProjectSaveDialog(string name)
+        {
+            if (name != TranslationSource.GetText("NEW_PROJECT"))
+                ProjectName = name;
         }
 
         public void LoadUI()
@@ -36,7 +38,8 @@ namespace MapStudio.UI
                 DialogHandler.ClosePopup(false);
 
             if (save) {
-                DialogHandler.ClosePopup(true);
+                if (ProjectName != TranslationSource.GetText("NEW_PROJECT"))
+                    DialogHandler.ClosePopup(true);
             }
         }
     }

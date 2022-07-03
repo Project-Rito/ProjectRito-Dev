@@ -182,8 +182,10 @@ namespace MapStudio.UI
         public List<MenuItemModel> GetEditMenus()
         {
             List<MenuItemModel> menus = new List<MenuItemModel>();
-            menus.AddRange(ViewportWindow.GetEditMenuItems());
-            menus.AddRange(ActiveEditor.GetEditMenuItems());
+            if (ViewportWindow != null)
+                menus.AddRange(ViewportWindow?.GetEditMenuItems());
+            if (ActiveEditor != null)
+                menus.AddRange(ActiveEditor.GetEditMenuItems());
             return menus;
         }
 
@@ -285,7 +287,7 @@ namespace MapStudio.UI
 
         public void CreateNewProject()
         {
-            Name = "New Project";
+            Name = TranslationSource.GetText("NEW_PROJECT");
             Resources = new ProjectResources();
             LoadProjectResources();
         }
