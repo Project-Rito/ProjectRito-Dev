@@ -30,7 +30,8 @@ namespace GLFrameworkEngine
         public class Scene3D
         {
             public string ShowAddContextMenu = "Ctrl+Q";
-            public string SelectAll = "Ctrl+A";
+            public string SelectAll = "Ctrl+!Shift+A";
+            public string DeselectAll = "Ctrl+Shift+A";
             public string Undo = "Ctrl+Z";
             public string Redo = "Ctrl+R";
             public string EditMode = "Tab";
