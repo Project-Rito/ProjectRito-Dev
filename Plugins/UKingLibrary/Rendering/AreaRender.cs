@@ -244,7 +244,7 @@ namespace UKingLibrary.Rendering
             if (AreaShape == AreaShapes.Sphere)
             {
                 if (FillRenderer == null)
-                    FillRenderer = new SphereRender(1, 10, 10);
+                    FillRenderer = new SphereRender(1, 50, 50);
             }
             else
             {
