@@ -26,11 +26,7 @@ namespace MapStudio.UI
 
         public void LoadUI()
         {
-            var settings = GlobalSettings.Current;
-
             ImGui.InputText(TranslationSource.GetText("PROJECT_NAME"), ref ProjectName, 100);
-            string projectDir = settings.Program.ProjectDirectory;
-            ImguiCustomWidgets.PathSelector(TranslationSource.GetText("PROJECT_FOLDER"), ref projectDir);
 
             var cancel = ImGui.Button(TranslationSource.GetText("CANCEL")); ImGui.SameLine();
             var save = ImGui.Button(TranslationSource.GetText("SAVE"));

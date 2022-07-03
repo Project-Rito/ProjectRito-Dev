@@ -31,10 +31,10 @@ Does not act on files currently being edited.
 Should be used with a project loaded.
 :
 
-BOTW GAME PATH - BotW Game Path
-BOTW UPDATE PATH - BotW Update Path
-BOTW DLC PATH - BotW DLC Path
-MOD PATHS - Mod Paths
+BOTW_GAME_PATH - BotW Game Path
+BOTW_UPDATE_PATH - BotW Update Path
+BOTW_DLC_PATH - BotW DLC Path
+MOD_PATHS - Mod Paths
 
 LOAD_SECTION - Load Section
 LOAD_DUNGEON - Load Dungeon

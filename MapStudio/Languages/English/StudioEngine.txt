@@ -122,7 +122,7 @@ HIDE_ALL - Hide All
 LANGUAGE - Language
 
 PROJECT_NAME - Project Name
-PROJECT_FOLDER - Project Folder
+PROJECT_SAVE_DIRECTORY - Project Save Directory
 
 # Dock Windows
 

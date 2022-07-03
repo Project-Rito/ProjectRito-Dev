@@ -52,7 +52,7 @@ namespace UKingLibrary
             if (ImGui.Button(TranslationSource.GetText("UPDATE_ACTORDOCS")))
                 ActorDocs.Update();
 
-            if (ImGui.BeginMenu($"{TranslationSource.GetText("MOD PATHS")}##uk_vmenu01"))
+            if (ImGui.BeginMenu($"{TranslationSource.GetText("MOD_PATHS")}##uk_vmenu01"))
             {
                 for (int i = 0; i < ModPaths.Count; i++)
                 {
@@ -68,13 +68,13 @@ namespace UKingLibrary
                 ImGui.EndMenu();
             }
 
-            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW GAME PATH"), ref GamePath, HasValidGamePath))
+            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW_GAME_PATH"), ref GamePath, HasValidGamePath))
                 Save();
 
-            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW UPDATE PATH"), ref UpdatePath, HasValidUpdatePath))
+            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW_UPDATE_PATH"), ref UpdatePath, HasValidUpdatePath))
                 Save();
 
-            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW DLC Path"), ref AocPath, HasValidAocPath))
+            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW_DLC_PATH"), ref AocPath, HasValidAocPath))
                 Save();
 
             // All of this should eventually be moved per-3D-scene

@@ -175,7 +175,8 @@ namespace MapStudio.UI
         public List<MenuItemModel> GetViewportMenuIcons()
         {
             List<MenuItemModel> menus = new List<MenuItemModel>();
-            menus.AddRange(ActiveEditor.GetViewportMenuIcons());
+            if (ActiveEditor != null)
+                menus.AddRange(ActiveEditor.GetViewportMenuIcons());
             return menus;
         }
 
@@ -358,10 +359,13 @@ namespace MapStudio.UI
             else
                 Resources.LoadFolder(folder, filePath);
 
-            //Load the current workspace layout from the project file
-            ActiveEditor.SubEditor = Resources.ProjectFile.SelectedWorkspace;
-            //Current tool window to display
-            ToolWindow.ToolDrawer = this.ActiveEditor.ToolWindowDrawer;
+            if (ActiveEditor != null)
+            {
+                //Load the current workspace layout from the project file
+                ActiveEditor.SubEditor = Resources.ProjectFile.SelectedWorkspace;
+                //Current tool window to display
+                ToolWindow.ToolDrawer = this.ActiveEditor.ToolWindowDrawer;
+            }
 
             ProcessLoading.Instance.Update(70, 100, "Loading Editors");
 
@@ -481,6 +485,8 @@ namespace MapStudio.UI
             thumb.Save($"{folderPath}/Thumbnail.png");
             //Update icon cache for thumbnails used
             IconManager.LoadTextureFile($"{folderPath}/Thumbnail.png", 64, 64, true);
+
+            SaveFileData();
 
             PrintErrors();
         }

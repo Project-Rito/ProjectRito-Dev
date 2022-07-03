@@ -468,6 +468,8 @@ namespace MapStudio
                             plugin.DrawUI();
                     }
 
+                    ImguiCustomWidgets.PathSelector(TranslationSource.GetText("PROJECT_SAVE_PATH"), ref GlobalSettings.Program.ProjectDirectory);
+
                     var language = TranslationSource.LanguageKey;
                     if (ImGui.BeginCombo($"{TranslationSource.GetText("LANGUAGE")}", language))
                     {

@@ -194,29 +194,17 @@ namespace MapStudio.UI
 
         public class ProgramSettings
         {
-            public string Theme { get; set; } = "DARK_BLUE_THEME";
+            public string Theme = "DARK_BLUE_THEME";
 
             /// <summary>
             /// The language of the program.
             /// </summary>
-            public string Language { get; set; } = "English";
+            public string Language = "English";
 
             /// <summary>
             /// Gets the current project directory.
             /// </summary>
-            private string _projectDirectory = DefaultProjectPath();
-            public string ProjectDirectory {
-                get
-                {
-                    Directory.CreateDirectory(_projectDirectory);
-                    return _projectDirectory;
-                }
-                set
-                {
-                    Directory.CreateDirectory(value);
-                    _projectDirectory = value;
-                }
-            }
+            public string ProjectDirectory = DefaultProjectPath();
 
             /// <summary>
             /// Gets the default project directory from the user's local application directory.
