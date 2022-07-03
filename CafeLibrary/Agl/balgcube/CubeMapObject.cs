@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
-using AampLibraryCSharp;
+using Nintendo.Aamp;
 using System.ComponentModel;
 using Syroot.Maths;
 
@@ -21,7 +21,7 @@ namespace AGraphicsLibrary
 
         public CubeMapObject(ParamList paramList)
         {
-            foreach (var obj in paramList.paramObjects)
+            foreach (var obj in paramList.ParamObjects)
             {
                 if (obj.HashString == "cubemap_unit")
                     CubeMapUint = new CubeMapUint(obj);

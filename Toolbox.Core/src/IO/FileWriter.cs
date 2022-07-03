@@ -5,23 +5,23 @@ using OpenTK;
 
 namespace Toolbox.Core.IO
 {
-    public class FileWriter : BinaryDataWriter
+    public class FileWriter : BinaryStream
     {
         public void CheckByteOrderMark(uint ByteOrderMark)
         {
             if (ByteOrderMark == 0xFEFF)
-                ByteOrder = ByteOrder.BigEndian;
+                ByteConverter = ByteConverter.Big;
             else
-                ByteOrder = ByteOrder.LittleEndian;
+                ByteConverter = ByteConverter.Little;
         }
 
         public FileWriter(Stream stream, bool leaveOpen = false)
-            : base(stream, Encoding.ASCII, leaveOpen)
+            : base(stream, null, Encoding.ASCII, BooleanCoding.Byte, DateTimeCoding.NetTicks, StringCoding.ZeroTerminated, leaveOpen)
         {
         }
 
         public FileWriter(Stream stream, Encoding encoding, bool leaveOpen = false)
-    : base(stream, encoding, leaveOpen)
+    : base(stream, null, encoding, BooleanCoding.Byte, DateTimeCoding.NetTicks, StringCoding.ZeroTerminated, leaveOpen)
         {
         }
 
@@ -87,7 +87,7 @@ namespace Toolbox.Core.IO
                 Write(color.ToBytes());
         }
 
-        public void WriteStruct<T>(T item) => Write(item.StructToBytes(ByteOrder == ByteOrder.BigEndian));
+        public void WriteStruct<T>(T item) => Write(item.StructToBytes(ByteConverter == ByteConverter.Big));
 
         public void WriteSignature(string value)
         {
@@ -96,7 +96,7 @@ namespace Toolbox.Core.IO
 
         public void WriteString(string value, Encoding encoding = null)
         {
-            Write(value, BinaryStringFormat.ZeroTerminated, encoding ?? Encoding);
+            Write(value);
         }
 
         public void WriteUint64Offset(long target)
@@ -111,9 +111,9 @@ namespace Toolbox.Core.IO
         public void SetByteOrder(bool IsBigEndian)
         {
             if (IsBigEndian)
-                ByteOrder = ByteOrder.BigEndian;
+                ByteConverter = ByteConverter.Big;
             else
-                ByteOrder = ByteOrder.LittleEndian;
+                ByteConverter = ByteConverter.Little;
         }
 
         public void WriteString(string text, uint fixedSize, Encoding encoding = null)

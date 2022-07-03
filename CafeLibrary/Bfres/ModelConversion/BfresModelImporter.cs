@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BfresLibrary.Helpers;
-using BfresLibrary;
-using BfresLibrary.GX2;
+using Nintendo.Bfres.Helpers;
+using Nintendo.Bfres;
+using Nintendo.Bfres.GX2;
 using System.IO;
 using Syroot.Maths;
 using Toolbox.Core.IO;
 using Toolbox.Core;
-using BfresLibrary.TextConvert;
+using Nintendo.Bfres.TextConvert;
 
 namespace CafeLibrary.ModelConversion
 {
     public class BfresModelImporter
     {
-        public static Model ImportModel(CommandListHandler cmdList, ResFile resFile, string dir)
+        public static Model ImportModel(CommandListHandler cmdList, BfresFile resFile, string dir)
         {
             STGenericScene scene = new STGenericScene();
             if (File.Exists($"{dir}.dae"))
@@ -28,7 +28,7 @@ namespace CafeLibrary.ModelConversion
             return fmdl;
         }
 
-        static Model ConvertScene(CommandListHandler cmdList, ResFile resFile, string dir, STGenericScene scene)
+        static Model ConvertScene(CommandListHandler cmdList, BfresFile resFile, string dir, STGenericScene scene)
         {
             var model = scene.Models.FirstOrDefault();
             model.Skeleton.Reset();
@@ -68,7 +68,7 @@ namespace CafeLibrary.ModelConversion
                     rotation = new Vector4F(quat.X, quat.Y, quat.Z, quat.W);
                 }
 
-                var bfresBone = new BfresLibrary.Bone()
+                var bfresBone = new Nintendo.Bfres.Bone()
                 {
                     FlagsRotation = BoneFlagsRotation.EulerXYZ,
                     FlagsTransform = SetBoneFlags(bone),
@@ -498,14 +498,14 @@ namespace CafeLibrary.ModelConversion
             return (float)Math.Max(Math.Sqrt(max * max), Math.Sqrt(min * min));
         }
 
-        private static VertexBuffer GenerateVertexBuffer(ResFile resFile, STGenericMesh mesh, MeshSettings settings,
+        private static VertexBuffer GenerateVertexBuffer(BfresFile resFile, STGenericMesh mesh, MeshSettings settings,
            STSkeleton skeleton, Skeleton fskl, List<int> rigidIndices, List<int> smoothIndices)
         {
             if (settings.UseTangents || settings.UseBitangents)
                 mesh.CalculateTangentBitangent(0);
 
             VertexBufferHelper vertexBufferHelper = new VertexBufferHelper(
-                new VertexBuffer(), resFile.ByteOrder);
+                new VertexBuffer(), resFile.Endian);
 
             List<Vector4F> Positions = new List<Vector4F>();
             List<Vector4F> Normals = new List<Vector4F>();

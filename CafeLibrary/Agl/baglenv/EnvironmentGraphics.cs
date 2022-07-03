@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AampLibraryCSharp;
+using Nintendo.Aamp;
 using Toolbox.Core;
 
 namespace AGraphicsLibrary
@@ -150,11 +150,11 @@ namespace AGraphicsLibrary
         }
 
         public void SaveFile(string fileName) {
-            AampFile.Save(fileName);
+            AampFile.WriteBinary(fileName);
         }
 
         public void LoadFile(string fileName) {
-            LoadFile(AampFile.LoadFile(fileName));
+            LoadFile(AampFile.FromBinary(fileName));
         }
 
         public void LoadFile(AampFile aamp)
@@ -169,39 +169,39 @@ namespace AGraphicsLibrary
             SpotLights.Clear();
             PointLights.Clear();
 
-            foreach (var obj in aamp.RootNode.childParams)
+            foreach (var obj in aamp.RootNode.ChildParams)
             { 
                 switch (obj.HashString)
                 {
                     case "AmbientLight": break;
                     case "DirectionalLight":
-                        foreach (var child in obj.paramObjects)
+                        foreach (var child in obj.ParamObjects)
                             DirectionalLights.Add(new DirectionalLight(child));
                         break;
                     case "HemisphereLight":
-                        foreach (var child in obj.paramObjects)
+                        foreach (var child in obj.ParamObjects)
                             HemisphereLights.Add(new HemisphereLight(child));
                         break;
                     case "Fog":
-                        foreach (var child in obj.paramObjects)
+                        foreach (var child in obj.ParamObjects)
                             FogObjects.Add(new Fog(child));
                         break;
                     case "BloomObj":
-                        foreach (var child in obj.paramObjects)
+                        foreach (var child in obj.ParamObjects)
                             BloomObjects.Add(new BloomObj(child));
                         break;
                     case "PointLightRig":
-                        foreach (var child in obj.paramObjects)
+                        foreach (var child in obj.ParamObjects)
                             PointLights.Add(new PointLightRig(child));
                         Console.WriteLine($"PointLights {PointLights.Count}");
                         break;
                     case "SpotLightRig":
-                        foreach (var child in obj.paramObjects)
+                        foreach (var child in obj.ParamObjects)
                             SpotLights.Add(new SpotLightRig(child));
                         Console.WriteLine($"SpotLights {SpotLights.Count}");
                         break;
                     case "OfxLargeLensFlareRig":
-                        foreach (var child in obj.paramObjects)
+                        foreach (var child in obj.ParamObjects)
                             LensFlareRigs.Add(new OfxLargeLensFlareRig(child));
                         break;
                 }
@@ -215,12 +215,12 @@ namespace AGraphicsLibrary
             aamp.ParameterIOType = "aglenv";
 
             if (isVersion2)
-                aamp = aamp.ConvertToVersion2();
+                aamp.ToVersion2();
             else
-                aamp = aamp.ConvertToVersion1();
+                aamp.ToVersion1();
 
             var mem = new System.IO.MemoryStream();
-            aamp.Save(mem);
+            mem.Write(aamp.ToBinary());
             return mem.ToArray();
         }
     }

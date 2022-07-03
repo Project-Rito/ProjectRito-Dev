@@ -31,7 +31,7 @@ namespace CafeLibrary
             }
         }
 
-        public bool BigEndian => SarcData.endianness == Syroot.BinaryData.ByteOrder.BigEndian;
+        public bool BigEndian => SarcData.endianness == Syroot.BinaryData.Core.Endian.Big;
 
         public SarcData SarcData;
 

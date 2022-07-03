@@ -1,4 +1,4 @@
-﻿using AampLibraryCSharp;
+﻿using Nintendo.Aamp;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -22,7 +22,7 @@ namespace AGraphicsLibrary
         public static void Prepare(byte[] fileData)
         {
             ProbeLighting = new ProbeLighting();
-            ProbeLighting.LoadValues(AampFile.LoadFile(new System.IO.MemoryStream(fileData)));
+            ProbeLighting.LoadValues(AampFile.FromBinary(new System.IO.MemoryStream(fileData)));
         }
 
         public static ProbeOutput Generate(GLContext control, GLTextureCube diffuseCubemap, int lightmapTexID, Vector3 position)

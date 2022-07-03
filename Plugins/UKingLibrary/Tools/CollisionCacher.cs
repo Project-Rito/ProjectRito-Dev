@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using ByamlExt.Byaml;
+using Nintendo.Byml;
 using Toolbox.Core;
 using Toolbox.Core.IO;
 using CafeLibrary;
@@ -25,17 +25,17 @@ namespace UKingLibrary
         {
             Directory.CreateDirectory(cacheDir);
 
-            Dictionary<string, Dictionary<string, List<BymlFileData>>> fields = new Dictionary<string, Dictionary<string, List<BymlFileData>>>();
+            Dictionary<string, Dictionary<string, List<BymlFile>>> fields = new Dictionary<string, Dictionary<string, List<BymlFile>>>();
             foreach (string fieldName in GlobalData.FieldNames)
             {
-                Dictionary<string, List<BymlFileData>> field = new Dictionary<string, List<BymlFileData>>();
+                Dictionary<string, List<BymlFile>> field = new Dictionary<string, List<BymlFile>>();
                 foreach (string sectionName in GlobalData.SectionNames)
                 {
                     foreach (string muuntEnding in GlobalData.MuuntEndings)
                     {
                         string path = PluginConfig.GetContentPath($"Map/{fieldName}/{sectionName}/{sectionName}_{muuntEnding}.smubin");
-                        field.TryAdd(sectionName, new List<BymlFileData>());
-                        field[sectionName].Add(ByamlFile.LoadN(STFileLoader.TryDecompressFile(File.OpenRead(path), Path.GetFileName(path)).Stream));
+                        field.TryAdd(sectionName, new List<BymlFile>());
+                        field[sectionName].Add(BymlFile.FromBinary(STFileLoader.TryDecompressFile(File.OpenRead(path), Path.GetFileName(path)).Stream));
                     }
                 }
                 fields.Add(fieldName, field);
@@ -44,9 +44,9 @@ namespace UKingLibrary
             Dictionary<string, BakedCollisionShapeCacheable[]> actorShapes = new Dictionary<string, BakedCollisionShapeCacheable[]>();
             foreach (string fieldName in GlobalData.FieldNames)
             {
-                foreach (KeyValuePair<string, Dictionary<string, List<BymlFileData>>> field in fields)
+                foreach (KeyValuePair<string, Dictionary<string, List<BymlFile>>> field in fields)
                 {
-                    foreach (KeyValuePair<string, List<BymlFileData>> section in field.Value)
+                    foreach (KeyValuePair<string, List<BymlFile>> section in field.Value)
                     {
                         List<MapCollisionLoader> collisionLoaders = new List<MapCollisionLoader>(4);
                         for (int compoundIdx = 0; compoundIdx < 4; compoundIdx++)
@@ -58,17 +58,17 @@ namespace UKingLibrary
                         }
 
 
-                        foreach (BymlFileData muunt in section.Value)
+                        foreach (BymlFile muunt in section.Value)
                         {
-                            foreach (Dictionary<string, dynamic> obj in muunt.RootNode["Objs"])
+                            foreach (Dictionary<string, BymlNode> obj in muunt.RootNode.Hash["Objs"].Array.Select(x => x.Hash))
                             {
-                                if (!actorShapes.ContainsKey(obj["UnitConfigName"]))
+                                if (!actorShapes.ContainsKey(obj["UnitConfigName"].String))
                                 {
                                     foreach (MapCollisionLoader collisionLoader in collisionLoaders)
                                     {
-                                        BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(obj["HashId"]);
+                                        BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(obj["HashId"].UInt);
                                         if (infos != null)
-                                            actorShapes.Add(obj["UnitConfigName"], infos);
+                                            actorShapes.Add(obj["UnitConfigName"].String, infos);
                                     }
                                 }
                             }
@@ -139,13 +139,13 @@ namespace UKingLibrary
                         if (muuntSettings == null)
                             continue;
 
-                        BymlFileData muunt = ByamlFile.LoadN(muuntSettings.Stream);
+                        BymlFile muunt = BymlFile.FromBinary(muuntSettings.Stream);
 
-                        foreach (Dictionary<string, dynamic> obj in muunt.RootNode["Objs"])
+                        foreach (Dictionary<string, BymlNode> obj in muunt.RootNode.Hash["Objs"].Array.Select(x => x.Hash))
                         {
-                            BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(obj["HashId"]);
+                            BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(obj["HashId"].UInt);
                             if (infos != null)
-                                actorShapes.TryAdd(obj["UnitConfigName"], infos);
+                                actorShapes.TryAdd(obj["UnitConfigName"].String, infos);
                         }
                     }
                 }

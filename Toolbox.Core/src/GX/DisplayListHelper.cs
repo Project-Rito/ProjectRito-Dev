@@ -310,7 +310,7 @@ namespace Toolbox.Core.GX
             switch (layout.AttType)
             {
                 case GXAttributeType.INDEX16: return reader.ReadUInt16();
-                case GXAttributeType.INDEX8: return reader.ReadByte();
+                case GXAttributeType.INDEX8: return (byte)reader.ReadByte();
             }
             return 0;
         }

@@ -63,8 +63,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CafeLibrary\CafeLibrary.csproj" />
     <ProjectReference Include="..\GLFrameworkEngine\GLFrameworkEngine.csproj" />
     <ProjectReference Include="..\MapStudio.UI\MapStudio.UI.csproj" />
+    <ProjectReference Include="..\NCF-Library\AampLibrary\AampLibrary.csproj" />
+    <ProjectReference Include="..\NCF-Library\BfresLibrary\BfresLibrary.csproj" />
+    <ProjectReference Include="..\NCF-Library\BymlLibrary\BymlLibrary.csproj" />
+    <ProjectReference Include="..\NCF-Library\Yaz0Library\Yaz0Library.csproj" />
     <ProjectReference Include="..\Plugins\UKingLibrary\UKingLibrary.csproj" />
     <ProjectReference Include="..\Toolbox.Core\Toolbox.Core.csproj" />
   </ItemGroup>
@@ -194,9 +199,6 @@
     <None Update="Lib\AGraphicsLibrary.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Lib\BfresLibrary.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="Lib\BfresModelConverter.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -234,15 +236,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Lib\OpenTK.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Lib\Syroot.BinaryData.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Lib\Syroot.Maths.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Lib\Syroot.NintenTools.NSW.Bntx.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Presets\Collision\Mario Kart 8.json">

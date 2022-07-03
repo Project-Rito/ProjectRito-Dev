@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Collections.Generic;
-using ByamlExt.Byaml;
+using System.Linq;
+using Nintendo.Byml;
 
 namespace UKingLibrary
 {
@@ -116,9 +117,9 @@ namespace UKingLibrary
             foreach (var path in paths)
             {
                 var decompressed = Toolbox.Core.IO.YAZ0.Decompress(path);
-                var actorData = ByamlFile.LoadN(new MemoryStream(decompressed));
+                var actorData = BymlFile.FromBinary(new MemoryStream(decompressed));
 
-                foreach (IDictionary<string, dynamic> actorInfo in actorData.RootNode["Actors"])
+                foreach (IDictionary<string, dynamic> actorInfo in actorData.RootNode.Hash["Actors"].GetDynamic())
                 {
                     Actors[(string)actorInfo["name"]] = actorInfo;
                 }

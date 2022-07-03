@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using AampLibraryCSharp;
+using Nintendo.Aamp;
 using Toolbox.Core;
 
 namespace AGraphicsLibrary
@@ -80,25 +80,25 @@ namespace AGraphicsLibrary
 
         private ColorCorrection LoadColorCorrection(Stream file)
         {
-            var aamp = AampFile.LoadFile(file);
+            var aamp = AampFile.FromBinary(file);
             return new ColorCorrection(aamp);
         }
 
         private EnvironmentGraphics LoadEnvironmentGraphics(Stream file)
         {
-            var aamp = AampFile.LoadFile(file);
+            var aamp = AampFile.FromBinary(file);
             return new EnvironmentGraphics(aamp);
         }
 
         private ShadowGraphics LoadShadowGraphics(Stream file)
         {
-            var aamp = AampFile.LoadFile(file);
+            var aamp = AampFile.FromBinary(file);
             return new ShadowGraphics(aamp);
         }
 
         private CubeMapGraphics LoadCubemapGraphics(Stream file)
         {
-            var aamp = AampFile.LoadFile(file);
+            var aamp = AampFile.FromBinary(file);
             return new CubeMapGraphics(aamp);
         }
     }

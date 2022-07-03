@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Syroot.BinaryData;
+using Syroot.BinaryData.Core;
 using Toolbox.Core.IO;
 using Toolbox.Core;
 
@@ -13,7 +14,7 @@ namespace CafeLibrary
     public class SarcData
     {
         public Dictionary<string, byte[]> Files;
-        public ByteOrder endianness;
+        public Endian endianness;
         public bool HashOnly;
     }
 
@@ -159,16 +160,20 @@ namespace CafeLibrary
             int align = _align >= 0 ? _align : (int)GuessAlignment(data.Files);
 
             MemoryStream o = new MemoryStream();
-            BinaryDataWriter bw = new BinaryDataWriter(o, Encoding.UTF8, false);
-            bw.ByteOrder = data.endianness;
-            bw.Write("SARC", BinaryStringFormat.NoPrefixOrTermination);
+            FileWriter bw = new FileWriter(o, Encoding.UTF8, false);
+            if (data.endianness == Endian.Little)
+                bw.ByteConverter = ByteConverter.Little;
+            else if (data.endianness == Endian.Big)
+                bw.ByteConverter = ByteConverter.Big;
+            bw.StringCoding = StringCoding.Raw;
+            bw.Write("SARC");
             bw.Write((UInt16)0x14); // Chunk length
             bw.Write((UInt16)0xFEFF); // BOM
             bw.Write((UInt32)0x00); //filesize update later
             bw.Write((UInt32)0x00); //Beginning of data
             bw.Write((UInt16)0x100);
             bw.Write((UInt16)0x00);
-            bw.Write("SFAT", BinaryStringFormat.NoPrefixOrTermination);
+            bw.Write("SFAT");
             bw.Write((UInt16)0xc);
             bw.Write((UInt16)data.Files.Keys.Count);
             bw.Write((UInt32)0x00000065);
@@ -187,7 +192,7 @@ namespace CafeLibrary
                 bw.Write((UInt32)0);
                 bw.Write((UInt32)0);
             }
-            bw.Write("SFNT", BinaryStringFormat.NoPrefixOrTermination);
+            bw.Write("SFNT");
             bw.Write((UInt16)0x8);
             bw.Write((UInt16)0);
             List<uint> StringOffsets = new List<uint>();
@@ -197,7 +202,8 @@ namespace CafeLibrary
                 foreach (string k in Keys)
                 {
                     StringOffsets.Add((uint)bw.BaseStream.Position);
-                    bw.Write(k, BinaryStringFormat.ZeroTerminated);
+                    bw.StringCoding = StringCoding.ZeroTerminated;
+                    bw.Write(k);
                     bw.Align(4);
                 }
             }
@@ -239,11 +245,11 @@ namespace CafeLibrary
         public static SarcData UnpackRamN(Stream src, bool leaveOpen = false)
         {
             Dictionary<string, byte[]> res = new Dictionary<string, byte[]>();
-            BinaryDataReader br = new BinaryDataReader(src, Encoding.UTF8, leaveOpen);
-            br.ByteOrder = ByteOrder.LittleEndian;
+            FileReader br = new FileReader(src, Encoding.UTF8, leaveOpen);
+            br.ByteConverter = ByteConverter.Little;
             br.BaseStream.Position = 6;
             if (br.ReadUInt16() == 0xFFFE)
-                br.ByteOrder = ByteOrder.BigEndian;
+                br.ByteConverter = ByteConverter.Big;
             br.BaseStream.Position = 0;
             if (br.ReadString(4) != "SARC")
                 throw new Exception("Wrong magic");
@@ -284,7 +290,7 @@ namespace CafeLibrary
                 }
             }
 
-            return new SarcData() { endianness = br.ByteOrder, HashOnly = HashOnly, Files = res };
+            return new SarcData() { endianness = br.ByteConverter.Endian, HashOnly = HashOnly, Files = res };
         }
 
         public static string TryGetNameFromHashTable(string Hash)
@@ -299,7 +305,7 @@ namespace CafeLibrary
         }
 
         [Obsolete("This has been kept for compatibility, use PackN instead")]
-        public static byte[] pack(Dictionary<string, byte[]> files, int align = -1, ByteOrder endianness = ByteOrder.LittleEndian) =>
+        public static byte[] pack(Dictionary<string, byte[]> files, int align = -1, Endian endianness = Endian.Little) =>
             PackN(new SarcData() { Files = files, endianness = endianness, HashOnly = false }, align).Item2;
 
         [Obsolete("This has been kept for compatibility, use UnpackRamN instead")]
@@ -328,7 +334,7 @@ namespace CafeLibrary
                 public UInt32 EON;
             }
 
-            public void parse(BinaryDataReader br, int pos)
+            public void parse(FileReader br, int pos)
             {
                 br.ReadUInt32(); // Header;
                 chunkSize = br.ReadUInt16();
@@ -361,13 +367,13 @@ namespace CafeLibrary
             public UInt16 chunkSize;
             public UInt16 unknown1;
 
-            public void parse(BinaryDataReader br, int pos, SFAT sfat, int start)
+            public void parse(FileReader br, int pos, SFAT sfat, int start)
             {
                 chunkID = br.ReadUInt32();
                 chunkSize = br.ReadUInt16();
                 unknown1 = br.ReadUInt16();
 
-                char[] temp = br.ReadChars(start - (int)br.BaseStream.Position);
+                char[] temp = br.ReadBytes(start - (int)br.BaseStream.Position).Select(x=>(char)x).ToArray();
                 string temp2 = new string(temp);
                 char[] splitter = { (char)0x00 };
                 string[] names = temp2.Split(splitter);

@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using AampLibraryCSharp;
+using Nintendo.Aamp;
 using System.ComponentModel;
 using Syroot.Maths;
 

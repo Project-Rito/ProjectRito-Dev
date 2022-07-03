@@ -115,7 +115,7 @@ namespace UKingLibrary
 
                 return Enum.Parse(typeof(AreaShapes), Parameters["Shape"].Value);
             }
-            set { BymlHelper.SetValue(Parameters, "Shape", value.ToString()); }
+            set { Parameters["Shape"] = new MapData.Property<dynamic>(value.ToString()); }
         }
 
         /// <summary>
@@ -140,12 +140,10 @@ namespace UKingLibrary
         {
             MapData = mapData;
 
-            Properties = new Dictionary<string, dynamic>();
-            Properties.Add("UnitConfigName", unitConfigName);
-            Properties.Add("HashId", hashId);
-            Properties.Add("Translate", new List<float> { 0, 0, 0 });
-            Properties.Add("SRTHash", (int)0);
-            Properties = MapData.ValuesToProperties(Properties);
+            Properties.Add("UnitConfigName", new MapData.Property<dynamic>(unitConfigName));
+            Properties.Add("HashId", new MapData.Property<dynamic>(hashId));
+            Properties.Add("Translate", new List<dynamic> { new MapData.Property<dynamic>(0), new MapData.Property<dynamic>(0), new MapData.Property<dynamic>(0) });
+            Properties.Add("SRTHash", new MapData.Property<dynamic>(0));
 
             ActorInfo = actorInfo;
 
@@ -641,18 +639,18 @@ namespace UKingLibrary
             if (isRotation && (value.X == 0 && value.Z == 0))
             {
                 //Single rotation on the up axis
-                BymlHelper.SetValue(Properties, key, new MapData.Property<dynamic>(value.Y));
+                Properties[key] = new MapData.Property<dynamic>(value.Y);
             }
             else if (!isTransform && value.IsUniform())
-                BymlHelper.SetValue(Properties, key, new MapData.Property<dynamic>(value.X));
+                Properties [key] = new MapData.Property<dynamic>(value.X);
             else
             {
-                BymlHelper.SetValue(Properties, key, new List<dynamic>()
+                Properties[key] = new List<dynamic>()
                 {
                     new MapData.Property<dynamic>(value.X),
                     new MapData.Property<dynamic>(value.Y),
                     new MapData.Property<dynamic>(value.Z),
-                });
+                };
             }
         }
 

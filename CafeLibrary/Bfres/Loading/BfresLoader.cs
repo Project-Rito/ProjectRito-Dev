@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using GLFrameworkEngine;
-using BfresLibrary;
+using Nintendo.Bfres;
 using Toolbox.Core;
-using BfresLibrary.Helpers;
+using Nintendo.Bfres.Helpers;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using Toolbox.Core.IO;
@@ -83,7 +83,7 @@ namespace CafeLibrary.Rendering
 
         static void LoadAnimations(BfresRender renderer, System.IO.Stream stream)
         {
-            ResFile resFile = new ResFile(stream);
+            BfresFile resFile = new BfresFile(stream);
 
             foreach (var anim in resFile.SkeletalAnims.Values)
                 renderer.SkeletalAnimations.Add(new BfresSkeletalAnim(anim, renderer.Name));
@@ -101,7 +101,7 @@ namespace CafeLibrary.Rendering
         {
             Dictionary<string, GenericRenderer.TextureView> textures = new Dictionary<string, GenericRenderer.TextureView>();
 
-            ResFile resFile = new ResFile(stream);
+            BfresFile resFile = new BfresFile(stream);
 
             foreach (var tex in resFile.Textures.Values)
                 textures.Add(tex.Name, PrepareTexture(resFile, tex));
@@ -114,7 +114,7 @@ namespace CafeLibrary.Rendering
             //Render already has models so return
             if (renderer.Models.Count > 0) return true;
 
-            ResFile resFile = new ResFile(stream);
+            BfresFile resFile = new BfresFile(stream);
 
             //Find and load any external shader binaries
             if (renderer.UseGameShaders) {
@@ -152,7 +152,7 @@ namespace CafeLibrary.Rendering
             return true;
         }
 
-        static BfresModelRender PrepareModel(BfresRender renderer, ResFile resFile, Model model)
+        static BfresModelRender PrepareModel(BfresRender renderer, BfresFile resFile, Model model)
         {
             BfresModelRender modelRender = new BfresModelRender();
             modelRender.Name = model.Name;
@@ -281,8 +281,8 @@ namespace CafeLibrary.Rendering
             foreach (var mesh in shape.Meshes) {
                 groups.Add(new BfresPolygonGroupRender(meshRender, shape, mesh, 0, offset));
                 int stride = 4;
-                if (mesh.IndexFormat == BfresLibrary.GX2.GX2IndexFormat.UInt16 ||
-                    mesh.IndexFormat == BfresLibrary.GX2.GX2IndexFormat.UInt16LittleEndian)
+                if (mesh.IndexFormat == Nintendo.Bfres.GX2.GX2IndexFormat.UInt16 ||
+                    mesh.IndexFormat == Nintendo.Bfres.GX2.GX2IndexFormat.UInt16LittleEndian)
                 {
                     stride = 2;
                 }
@@ -291,13 +291,13 @@ namespace CafeLibrary.Rendering
             return groups;
         }
 
-        static Vector3[] GetVertices(ResFile resFile, BfresModelRender modelRender, Model model)
+        static Vector3[] GetVertices(BfresFile resFile, BfresModelRender modelRender, Model model)
         {
             List<Vector3> vertices = new List<Vector3>();
             foreach (var shape in model.Shapes.Values)
             {
                 VertexBufferHelper helper = new VertexBufferHelper(
-                     model.VertexBuffers[shape.VertexBufferIndex], resFile.ByteOrder);
+                     model.VertexBuffers[shape.VertexBufferIndex], resFile.Endian);
 
                 var positions = helper.Attributes.FirstOrDefault(x => x.Name == "_p0");
                 var indices = helper.Attributes.FirstOrDefault(x => x.Name == "_i0");
@@ -323,10 +323,10 @@ namespace CafeLibrary.Rendering
             return vertices.ToArray();
         }
 
-        static GLFrameworkEngine.BoundingNode CalculateBounding(ResFile resFile, BfresModelRender modelRender, Model model, Shape shape)
+        static GLFrameworkEngine.BoundingNode CalculateBounding(BfresFile resFile, BfresModelRender modelRender, Model model, Shape shape)
         {
             VertexBufferHelper helper = new VertexBufferHelper(
-                model.VertexBuffers[shape.VertexBufferIndex], resFile.ByteOrder);
+                model.VertexBuffers[shape.VertexBufferIndex], resFile.Endian);
 
             Vector3 min = new Vector3(float.MaxValue);
             Vector3 max = new Vector3(float.MinValue);
@@ -366,16 +366,16 @@ namespace CafeLibrary.Rendering
         };
         }
 
-        static GenericRenderer.TextureView PrepareTexture(ResFile resFile, TextureShared tex)
+        static GenericRenderer.TextureView PrepareTexture(BfresFile resFile, TextureShared tex)
         {
-            if (tex is BfresLibrary.WiiU.Texture)
+            if (tex is Nintendo.Bfres.WiiU.Texture)
             {
-                FtexTexture ftex = new FtexTexture(resFile, (BfresLibrary.WiiU.Texture)tex);
+                FtexTexture ftex = new FtexTexture(resFile, (Nintendo.Bfres.WiiU.Texture)tex);
                 return new GenericRenderer.TextureView(ftex);
             }
             else
             {
-                var texture = (BfresLibrary.Switch.SwitchTexture)tex;
+                var texture = (Nintendo.Bfres.Switch.SwitchTexture)tex;
                 BntxTexture bntxTexture = new BntxTexture(texture.BntxFile, texture.Texture);
                 return new GenericRenderer.TextureView(bntxTexture);
             }

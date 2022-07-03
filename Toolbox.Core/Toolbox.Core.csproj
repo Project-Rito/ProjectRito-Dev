@@ -49,16 +49,12 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
+    <PackageReference Include="Syroot.BinaryData" Version="5.2.2" />
+    <PackageReference Include="Syroot.Maths" Version="1.5.3" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="OpenTK">
       <HintPath>..\MapStudio\Lib\OpenTK.dll</HintPath>
-    </Reference>
-    <Reference Include="Syroot.BinaryData">
-      <HintPath>..\MapStudio\Lib\Syroot.BinaryData.dll</HintPath>
-    </Reference>
-    <Reference Include="Syroot.Maths">
-      <HintPath>..\MapStudio\Lib\Syroot.Maths.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

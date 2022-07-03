@@ -39,7 +39,7 @@ namespace Toolbox.Core
         {
             using (var reader = new FileReader(stream, true))
             {
-                byte type = reader.ReadByte();
+                byte type = (byte)reader.ReadByte();
                 if (type == 0x10)
                 {
                     uint decomp_size = reader.ReadUInt32();

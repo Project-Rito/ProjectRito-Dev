@@ -301,8 +301,8 @@ namespace Toolbox.Core
 
                             //Now we're looping through each pixel in a block, but a pixel is four bytes long. 
                             uint destIndex = (uint)(4 * (width * ((yBlock * 4) + pY) + (xBlock * 4) + pX));
-                            decodedData[destIndex + 3] = stream.ReadByte(); //Alpha
-                            decodedData[destIndex + 2] = stream.ReadByte(); //Red
+                            decodedData[destIndex + 3] = (byte)stream.ReadByte(); //Alpha
+                            decodedData[destIndex + 2] = (byte)stream.ReadByte(); //Red
                         }
                     }
 
@@ -317,8 +317,8 @@ namespace Toolbox.Core
 
                             //Now we're looping through each pixel in a block, but a pixel is four bytes long. 
                             uint destIndex = (uint)(4 * (width * ((yBlock * 4) + pY) + (xBlock * 4) + pX));
-                            decodedData[destIndex + 1] = stream.ReadByte(); //Green
-                            decodedData[destIndex + 0] = stream.ReadByte(); //Blue
+                            decodedData[destIndex + 1] = (byte)stream.ReadByte(); //Green
+                            decodedData[destIndex + 0] = (byte)stream.ReadByte(); //Blue
                         }
                     }
 
@@ -354,7 +354,7 @@ namespace Toolbox.Core
                                 continue;
                             }
 
-                            byte data = stream.ReadByte();
+                            byte data = (byte)stream.ReadByte();
                             byte t = (byte)(data & 0xF0);
                             byte t2 = (byte)(data & 0x0F);
 
@@ -408,7 +408,7 @@ namespace Toolbox.Core
                                 continue;
                             }
 
-                            byte data = stream.ReadByte();
+                            byte data = (byte)stream.ReadByte();
                             decodedData[width * ((yBlock * 4) + pY) + (xBlock * 8) + pX] = data;
                         }
                     }
@@ -620,8 +620,8 @@ namespace Toolbox.Core
 
                             //Now we're looping through each pixel in a block, but a pixel is four bytes long. 
                             uint destIndex = (uint)(4 * (width * ((yBlock * 4) + pY) + (xBlock * 4) + pX));
-                            byte byte0 = stream.ReadByte();
-                            byte byte1 = stream.ReadByte();
+                            byte byte0 = (byte)stream.ReadByte();
+                            byte byte1 = (byte)stream.ReadByte();
                             decodedData[destIndex + 3] = byte0;
                             decodedData[destIndex + 2] = byte1;
                             decodedData[destIndex + 1] = byte1;
@@ -655,7 +655,7 @@ namespace Toolbox.Core
                                 continue;
 
 
-                            byte value = stream.ReadByte();
+                            byte value = (byte)stream.ReadByte();
 
                             byte alpha = (byte)((value & 0xF0) >> 4);
                             byte lum = (byte)(value & 0x0F);
@@ -694,7 +694,7 @@ namespace Toolbox.Core
                             if ((xBlock * 8 + pX >= width) || (yBlock * 8 + pY >= height))
                                 continue;
 
-                            byte data = stream.ReadByte();
+                            byte data = (byte)stream.ReadByte();
                             byte t = (byte)((data & 0xF0) >> 4);
                             byte t2 = (byte)(data & 0x0F);
                             uint destIndex = (uint)(4 * (width * ((yBlock * 8) + pY) + (xBlock * 8) + pX));
@@ -736,7 +736,7 @@ namespace Toolbox.Core
                             if ((xBlock * 8 + pX >= width) || (yBlock * 4 + pY >= height))
                                 continue;
 
-                            byte data = stream.ReadByte();
+                            byte data = (byte)stream.ReadByte();
                             uint destIndex = (uint)(4 * (width * ((yBlock * 4) + pY) + (xBlock * 8) + pX));
 
                             decodedData[destIndex + 0] = data;

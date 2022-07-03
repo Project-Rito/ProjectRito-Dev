@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Toolbox.Core.Animations;
 using Toolbox.Core;
-using BfresLibrary;
+using Nintendo.Bfres;
 using GLFrameworkEngine;
 using OpenTK;
 using MapStudio.UI;

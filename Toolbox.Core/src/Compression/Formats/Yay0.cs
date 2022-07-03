@@ -8,6 +8,7 @@ using System.Text;
 using Toolbox.Core.IO;
 using System.Runtime.InteropServices;
 using Syroot.BinaryData;
+using Syroot.BinaryData.Core;
 
 namespace Toolbox.Core
 {
@@ -108,10 +109,10 @@ namespace Toolbox.Core
         }
 
         public Stream Compress(Stream stream) {
-            return new MemoryStream(Compress(stream, ByteOrder.BigEndian));
+            return new MemoryStream(Compress(stream, Endian.Big));
         }
 
-        public static byte[] Compress(Stream input, ByteOrder byteOrder)
+        public static byte[] Compress(Stream input, Endian byteOrder)
         {
             using (var br = new FileReader(input))
             {
@@ -197,9 +198,9 @@ namespace Toolbox.Core
 
                 List<byte> header = new List<byte>();
                 header.AddRange(Encoding.ASCII.GetBytes("Yay0"));
-                header.AddRange((byteOrder == ByteOrder.LittleEndian) ? BitConverter.GetBytes((int)sz) : BitConverter.GetBytes((int)sz).Reverse());
-                header.AddRange((byteOrder == ByteOrder.LittleEndian) ? BitConverter.GetBytes(l) : BitConverter.GetBytes(l).Reverse());
-                header.AddRange((byteOrder == ByteOrder.LittleEndian) ? BitConverter.GetBytes(o) : BitConverter.GetBytes(o).Reverse());
+                header.AddRange((byteOrder == Endian.Little) ? BitConverter.GetBytes((int)sz) : BitConverter.GetBytes((int)sz).Reverse());
+                header.AddRange((byteOrder == Endian.Little) ? BitConverter.GetBytes(l) : BitConverter.GetBytes(l).Reverse());
+                header.AddRange((byteOrder == Endian.Little) ? BitConverter.GetBytes(o) : BitConverter.GetBytes(o).Reverse());
                 header.AddRange(cmds);
                 header.AddRange(ctrl);
                 header.AddRange(raws);

@@ -137,7 +137,7 @@ namespace UKingLibrary.Rendering
                         ushort xAxisFlowRate = reader.ReadUInt16(); // xAxisFlowRate
                         ushort zAxisFlowRate = reader.ReadUInt16(); // zAxisFlowRate
                         reader.ReadByte(); // materialIndex + 3
-                        byte materialIndex = reader.ReadByte(); // materialIndex
+                        byte materialIndex = (byte)reader.ReadByte(); // materialIndex
                         //Terrain vertices range from 0 - 1
 
                         WaterVertexData vertexData = new WaterVertexData()

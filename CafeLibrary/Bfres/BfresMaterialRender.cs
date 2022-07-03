@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GLFrameworkEngine;
-using BfresLibrary;
+using Nintendo.Bfres;
 using Toolbox.Core;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
@@ -160,7 +160,7 @@ namespace CafeLibrary.Rendering
             return new T[length];
         }
 
-        private float[] CalculateSRT3x4(BfresLibrary.TexSrt texSrt)
+        private float[] CalculateSRT3x4(Nintendo.Bfres.TexSrt texSrt)
         {
             var m = CalculateSRT2x3(texSrt);
             return new float[12]
@@ -171,7 +171,7 @@ namespace CafeLibrary.Rendering
             };
         }
 
-        private float[] CalculateSRT2x3(BfresLibrary.TexSrt texSrt)
+        private float[] CalculateSRT2x3(Nintendo.Bfres.TexSrt texSrt)
         {
             var scaling = texSrt.Scaling;
             var translate = texSrt.Translation;
@@ -185,7 +185,7 @@ namespace CafeLibrary.Rendering
             switch (texSrt.Mode)
             {
                 default:
-                case BfresLibrary.TexSrtMode.ModeMaya:
+                case Nintendo.Bfres.TexSrtMode.ModeMaya:
                     return new float[8]
                     {
                         scalingXC, -scalingYS, //0 1
@@ -194,7 +194,7 @@ namespace CafeLibrary.Rendering
                         -0.5f * (scalingYC - scalingYS + scaling.Y) + scaling.Y * translate.Y + 1.0f, //13
                         0.0f, 0.0f,
                     };
-                case BfresLibrary.TexSrtMode.Mode3dsMax:
+                case Nintendo.Bfres.TexSrtMode.Mode3dsMax:
                     return new float[8]
                     {
                         scalingXC, -scalingYS,
@@ -202,7 +202,7 @@ namespace CafeLibrary.Rendering
                         -scalingXC * (translate.X + 0.5f) + scalingXS * (translate.Y - 0.5f) + 0.5f, scalingYS * (translate.X + 0.5f) + scalingYC * (translate.Y - 0.5f) + 0.5f,
                         0.0f, 0.0f
                     };
-                case BfresLibrary.TexSrtMode.ModeSoftimage:
+                case Nintendo.Bfres.TexSrtMode.ModeSoftimage:
                     return new float[8]
                     {
                         scalingXC, scalingYS,
@@ -213,7 +213,7 @@ namespace CafeLibrary.Rendering
             }
         }
 
-        private float[] CalculateSRT(BfresLibrary.Srt2D texSrt)
+        private float[] CalculateSRT(Nintendo.Bfres.Srt2D texSrt)
         {
             var scaling = texSrt.Scaling;
             var translate = texSrt.Translation;

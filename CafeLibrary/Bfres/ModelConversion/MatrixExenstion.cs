@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Numerics;
-using BfresLibrary;
+using Nintendo.Bfres;
 
 namespace CafeLibrary.ModelConversion
 {

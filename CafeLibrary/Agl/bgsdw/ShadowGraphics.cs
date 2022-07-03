@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AampLibraryCSharp;
+using Nintendo.Aamp;
 
 namespace AGraphicsLibrary
 {
@@ -25,7 +25,7 @@ namespace AGraphicsLibrary
 
         public ShadowGraphics(AampFile aamp)
         {
-            foreach (var obj in aamp.RootNode.paramObjects)
+            foreach (var obj in aamp.RootNode.ParamObjects)
             {
                 if (obj.HashString == "4137089673")
                     ShadowColors = new ShadowColorParams(obj);

@@ -1,4 +1,4 @@
-﻿using BfresLibrary;
+﻿using Nintendo.Bfres;
 using System;
 using System.Collections.Generic;
 using System.Text;

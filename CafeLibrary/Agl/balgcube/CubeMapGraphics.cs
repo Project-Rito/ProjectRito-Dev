@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AampLibraryCSharp;
+using Nintendo.Aamp;
 
 namespace AGraphicsLibrary
 {
@@ -28,7 +28,7 @@ namespace AGraphicsLibrary
 
         public CubeMapGraphics(AampFile aamp)
         {
-            foreach (var obj in aamp.RootNode.childParams)
+            foreach (var obj in aamp.RootNode.ChildParams)
                 CubeMapObjects.Add(new CubeMapObject(obj));
         }
     }

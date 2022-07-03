@@ -4,9 +4,9 @@ using System.Text;
 using Toolbox.Core;
 using Toolbox.Core.Imaging;
 using Toolbox.Core.WiiU;
-using BfresLibrary.WiiU;
-using BfresLibrary;
-using BfresLibrary.GX2;
+using Nintendo.Bfres.WiiU;
+using Nintendo.Bfres;
+using Nintendo.Bfres.GX2;
 
 namespace CafeLibrary.Rendering
 {
@@ -20,9 +20,9 @@ namespace CafeLibrary.Rendering
         /// <summary>
         /// The file in which the data in this section is parented to.
         /// </summary>
-        public ResFile ParentFile { get; set; }
+        public BfresFile ParentFile { get; set; }
 
-        public FtexTexture(ResFile resFile, Texture texture) : base() {
+        public FtexTexture(BfresFile resFile, Texture texture) : base() {
             ParentFile = resFile;
             Texture = texture;
             ReloadImage();

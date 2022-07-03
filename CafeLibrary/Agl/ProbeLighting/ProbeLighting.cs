@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AampLibraryCSharp;
+using Nintendo.Aamp;
 using OpenTK;
 
 namespace AGraphicsLibrary
@@ -23,12 +23,12 @@ namespace AGraphicsLibrary
         public void LoadValues(AampFile aamp)
         {
             Params = new ProbeParams();
-            foreach (var val in aamp.RootNode.paramObjects)
+            foreach (var val in aamp.RootNode.ParamObjects)
             {
                 if (val.HashString == "root_grid")
-                    RootGrid = LoadGridData(val.paramEntries);
+                    RootGrid = LoadGridData(val.ParamEntries);
                 if (val.HashString == "param_obj") {
-                    foreach (var param in val.paramEntries)
+                    foreach (var param in val.ParamEntries)
                     {
                         if (param.HashString == "version")
                             Params.Version = (uint)param.Value;
@@ -44,18 +44,18 @@ namespace AGraphicsLibrary
                 }
             }
 
-            foreach (var val in aamp.RootNode.childParams)
+            foreach (var val in aamp.RootNode.ChildParams)
             {
                 ProbeVolume box = new ProbeVolume();
                 Boxes.Add(box);
 
-                foreach (var param in val.paramObjects)
+                foreach (var param in val.ParamObjects)
                 {
                     if (param.HashString == "grid")
-                        box.Grid = LoadGridData(param.paramEntries);
+                        box.Grid = LoadGridData(param.ParamEntries);
                     if (param.HashString == "param_obj")
                     {
-                        foreach (var p in param.paramEntries)
+                        foreach (var p in param.ParamEntries)
                         {
                             if (p.HashString == "index")
                                 box.Index = (uint)p.Value;
@@ -64,9 +64,9 @@ namespace AGraphicsLibrary
                         }
                     }
                     if (param.HashString == "sh_data_buffer")
-                        box.DataBuffer = LoadDataBuffer(param.paramEntries);
+                        box.DataBuffer = LoadDataBuffer(param.ParamEntries);
                     if (param.HashString == "sh_index_buffer")
-                        box.IndexBuffer = LoadIndexBuffer(param.paramEntries);
+                        box.IndexBuffer = LoadIndexBuffer(param.ParamEntries);
                 }
             }
         }

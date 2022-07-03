@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Toolbox.Core;
 using Toolbox.Core.IO;
-using BfresLibrary;
-using BfresLibrary.GX2;
+using Nintendo.Bfres;
+using Nintendo.Bfres.GX2;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
 

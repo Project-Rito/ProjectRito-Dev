@@ -63,7 +63,7 @@ namespace CafeLibrary.Rendering
             uint samplerVarsOffset = reader.ReadUInt32();
             uint attribVarCount = reader.ReadUInt32();
             uint attribVarsOffset = reader.ReadUInt32();
-            byte hasStreamOut = reader.ReadByte();
+            byte hasStreamOut = (byte)reader.ReadByte();
             uint streamOutStride = reader.ReadUInt32();
 
             reader.SeekBegin(uniformVarsOffset);

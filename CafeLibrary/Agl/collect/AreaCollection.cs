@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BfresLibrary;
-using BfresLibrary.Helpers;
+using Nintendo.Bfres;
+using Nintendo.Bfres.Helpers;
 using System.IO;
 using System.Numerics;
 
@@ -16,7 +16,7 @@ namespace AGraphicsLibrary
     /// </summary>
     public class AreaCollection
     {
-        private ResFile ResFile;
+        private BfresFile BfresFile;
         private Model Model;
 
         public List<AreaEnvObject> Objects = new List<AreaEnvObject>();
@@ -30,15 +30,15 @@ namespace AGraphicsLibrary
         {
             Model = new Model();
             Model.Name = "area";
-            ResFile.Models.Add(Model.Name, Model);
+            BfresFile.Models.Add(Model.Name, Model);
         }
 
         public AreaCollection(byte[] fileData) {
-            Load(new ResFile(new MemoryStream(fileData)));
+            Load(new BfresFile(new MemoryStream(fileData)));
         }
 
         public AreaCollection(Stream fileData) {
-            Load(new ResFile(fileData));
+            Load(new BfresFile(fileData));
         }
 
         public AreaEnvObject GetArea(float positionX, float positionY, float positionZ)
@@ -56,10 +56,10 @@ namespace AGraphicsLibrary
             return Objects.FirstOrDefault();
         }
 
-        private void Load(ResFile resFile)
+        private void Load(BfresFile resFile)
         {
-            ResFile = resFile;
-            Model = ResFile.Models.Values.FirstOrDefault();
+            BfresFile = resFile;
+            Model = BfresFile.Models.Values.FirstOrDefault();
             foreach (var shape in Model.Shapes.Values)
             {
                 //For vertex data of the bounding cube
@@ -74,7 +74,7 @@ namespace AGraphicsLibrary
                     MeshData = shape,
                     VertexData = vertexData,
                     TransformData = boneData,
-                    ResFile = ResFile,
+                    BfresFile = BfresFile,
                 });
             }
             foreach (var obj in Objects)
@@ -108,7 +108,7 @@ namespace AGraphicsLibrary
             }
 
             var mem = new MemoryStream();
-            ResFile.Save(mem);
+            BfresFile.ToBinary(mem);
             return mem;
         }
     }
@@ -119,7 +119,7 @@ namespace AGraphicsLibrary
         public VertexBuffer VertexData { get; set; }
         public Bone TransformData { get; set; }
         public Material MaterialData { get; set; }
-        public ResFile ResFile { get; set; }
+        public BfresFile BfresFile { get; set; }
 
         public int AreaIndex => MeshData.MaterialIndex; //Areas are always split by materials
 
@@ -152,7 +152,7 @@ namespace AGraphicsLibrary
                               Matrix4x4.CreateRotationY(rotation.Y) *
                               Matrix4x4.CreateRotationZ(rotation.Z);
             var combined = scaleMat * rotationMat * translateMat;
-            var vertexHelper = new VertexBufferHelper(VertexData, ResFile.ByteOrder);
+            var vertexHelper = new VertexBufferHelper(VertexData, BfresFile.Endian);
 
             float minX = float.MaxValue;
             float minY = float.MaxValue;

@@ -104,7 +104,7 @@ namespace Toolbox.Core.IO
                 // Ignore static fields
                 if (field.IsStatic) continue;
 
-                if (fieldType.BaseType == typeof(Enum) && fieldType != typeof(ByteOrder))
+                if (fieldType.BaseType == typeof(Enum) && fieldType != typeof(ByteConverter))
                     fieldType = fieldType.GetFields()[0].FieldType;
 
                 var offset = Marshal.OffsetOf(type, field.Name).ToInt32();

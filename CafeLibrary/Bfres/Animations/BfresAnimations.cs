@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Toolbox.Core.Animations;
-using BfresLibrary;
+using Nintendo.Bfres;
 
 namespace CafeLibrary.Rendering
 {

@@ -57,10 +57,11 @@ namespace CafeLibrary
             public uint Hash { get; set; }
             public string Name { get; set; }
 
-            public void Read(BinaryDataReader reader)
+            public void Read(FileReader reader)
             {
                 Hash = reader.ReadUInt32();
-                Name = reader.ReadString(BinaryStringFormat.ZeroTerminated);
+                reader.StringCoding = StringCoding.ZeroTerminated;
+                Name = reader.ReadString();
             }
         }
     }

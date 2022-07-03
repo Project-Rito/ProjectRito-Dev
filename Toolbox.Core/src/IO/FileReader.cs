@@ -11,16 +11,16 @@ using System.Runtime.InteropServices;
 
 namespace Toolbox.Core.IO
 {
-    public class FileReader : BinaryDataReader
+    public class FileReader : BinaryStream
     {
         public FileReader(Stream stream, bool leaveOpen = false)
-            : base(stream, Encoding.ASCII, leaveOpen)
+            : base(stream, null, Encoding.ASCII, BooleanCoding.Byte, DateTimeCoding.NetTicks, StringCoding.ZeroTerminated, leaveOpen)
         {
             this.Position = 0;
         }
 
         public FileReader(Stream stream, Encoding encoding, bool leaveOpen = false)
-    : base(stream, encoding, leaveOpen)
+    : base(stream, null, encoding, BooleanCoding.Byte, DateTimeCoding.NetTicks, StringCoding.ZeroTerminated, leaveOpen)
         {
             this.Position = 0;
         }
@@ -36,7 +36,7 @@ namespace Toolbox.Core.IO
             this.Position = 0;
         }
 
-        public bool IsBigEndian => ByteOrder == ByteOrder.BigEndian;
+        public bool IsBigEndian => ByteConverter == ByteConverter.Big;
 
         //Checks signature (no stream advancement)
         public bool CheckSignature(int length, string Identifier, long position = 0)
@@ -45,7 +45,7 @@ namespace Toolbox.Core.IO
                 return false;
 
             Position = position;
-            string signature = ReadString(length, Encoding.ASCII);
+            string signature = ReadString(length);
 
             //Reset position
             Position = 0;
@@ -54,7 +54,7 @@ namespace Toolbox.Core.IO
         }
 
         //From kuriimu https://github.com/IcySon55/Kuriimu/blob/master/src/Kontract/IO/BinaryReaderX.cs#L40
-        public T ReadStruct<T>() => ReadBytes(Marshal.SizeOf<T>()).BytesToStruct<T>(ByteOrder == ByteOrder.BigEndian);
+        public T ReadStruct<T>() => ReadBytes(Marshal.SizeOf<T>()).BytesToStruct<T>(ByteConverter == ByteConverter.Big);
         public List<T> ReadMultipleStructs<T>(int count) => Enumerable.Range(0, count).Select(_ => ReadStruct<T>()).ToList();
         public List<T> ReadMultipleStructs<T>(uint count) => Enumerable.Range(0, (int)count).Select(_ => ReadStruct<T>()).ToList();
 
@@ -124,7 +124,7 @@ namespace Toolbox.Core.IO
                             NameLength = ReadUInt32();
                     }
 
-                    return ReadString(BinaryStringFormat.ZeroTerminated);
+                    return ReadString();
                 }
             }
             else
@@ -147,14 +147,14 @@ namespace Toolbox.Core.IO
 
         public string ReadZeroTerminatedString(Encoding encoding = null)
         {
-            return ReadString(BinaryStringFormat.ZeroTerminated, encoding ?? Encoding);
+            return ReadString();
         }
 
         public string[] ReadZeroTerminatedStrings(uint count, Encoding encoding = null)
         {
             string[] str = new string[count];
             for (int i = 0; i < count; i++)
-                str[i] = ReadString(BinaryStringFormat.ZeroTerminated, encoding ?? Encoding);
+                str[i] = ReadString();
             return str;
         }
 
@@ -188,14 +188,14 @@ namespace Toolbox.Core.IO
         public void SetByteOrder(bool IsBigEndian)
         {
             if (IsBigEndian)
-                ByteOrder = ByteOrder.BigEndian;
+                ByteConverter = ByteConverter.Big;
             else
-                ByteOrder = ByteOrder.LittleEndian;
+                ByteConverter = ByteConverter.Little;
         }
 
         public string ReadSignature(int length, string ExpectedSignature, bool TrimEnd = false)
         {
-            string RealSignature = ReadString(length, Encoding.ASCII);
+            string RealSignature = ReadString(length);
 
             if (TrimEnd) RealSignature = RealSignature.TrimEnd(' ');
 
@@ -332,7 +332,7 @@ namespace Toolbox.Core.IO
                 if (ReadStringLength == 4)
                     stringLength = ReadUInt32();
 
-                return ReadString(BinaryStringFormat.ZeroTerminated, encoding);
+                return ReadString();
             }
         }
 

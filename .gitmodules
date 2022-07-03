@@ -1,0 +1,3 @@
+[submodule "NCF-Library"]
+	path = NCF-Library
+	url = https://github.com/ArchLeaders/NCF-Library.git

@@ -40,7 +40,7 @@ namespace Toolbox.Core
         {
             using (FileReader reader = new FileReader(stream))
             {
-                reader.ByteOrder = Syroot.BinaryData.ByteOrder.LittleEndian;
+                reader.ByteConverter = Syroot.BinaryData.ByteConverter.Little;
 
                 magic = reader.ReadBytes(4);
 
@@ -49,9 +49,9 @@ namespace Toolbox.Core
                 if (magicval != MagicFileConstant)
                     throw new Exception("Invalid identifier");
 
-                BlockDimX = reader.ReadByte();
-                BlockDimY = reader.ReadByte();
-                BlockDimZ = reader.ReadByte();
+                BlockDimX = (byte)reader.ReadByte();
+                BlockDimY = (byte)reader.ReadByte();
+                BlockDimZ = (byte)reader.ReadByte();
                 xsize = reader.ReadBytes(3);
                 ysize = reader.ReadBytes(3);
                 zsize = reader.ReadBytes(3);
@@ -109,7 +109,7 @@ namespace Toolbox.Core
                 if (Depth == 0)
                     Depth = 1;
 
-                writer.ByteOrder = Syroot.BinaryData.ByteOrder.LittleEndian;
+                writer.ByteConverter = Syroot.BinaryData.ByteConverter.Little;
                 writer.Write(MagicFileConstant);
                 writer.Write(BlockDimX);
                 writer.Write(BlockDimY);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GLFrameworkEngine;
+using Nintendo.Byml;
 using UKingLibrary.UI;
 using Toolbox.Core.ViewModels;
 
@@ -33,7 +34,7 @@ namespace UKingLibrary
             set { Properties["RailType"] = new MapData.Property<dynamic>(value); }
         }
 
-        public void LoadRail(MapData mapData, IDictionary<string, dynamic> properties, NodeBase parent)
+        public void LoadRail(MapData mapData, BymlNode properties, NodeBase parent)
         {
             RenderablePath.BezierArrowLength = 2;
             RenderablePath.BezierLineWidth = 2;
@@ -41,7 +42,7 @@ namespace UKingLibrary
             RenderablePath.LinearPointScale = 2;
 
             Properties = MapData.ValuesToProperties(properties);
-            var translate = (IList<dynamic>)properties["Translate"]; // NOT the origin point - railpoints aren't relative.
+            IList<BymlNode> translate = properties.Hash["Translate"].Array; // NOT the origin point - railpoints aren't relative.
 
             PathRender.UINode.ContextMenus.Add(new MenuItemModel("Remove", () =>
             {

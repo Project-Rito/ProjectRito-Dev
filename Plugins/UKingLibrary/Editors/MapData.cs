@@ -7,7 +7,7 @@ using Toolbox.Core.ViewModels;
 using MapStudio.UI;
 using Toolbox.Core;
 using Toolbox.Core.IO;
-using ByamlExt.Byaml;
+using Nintendo.Byml;
 using CafeLibrary.Rendering;
 
 namespace UKingLibrary
@@ -28,7 +28,7 @@ namespace UKingLibrary
         public NodeFolder ObjectFolder = new NodeFolder(TranslationSource.GetText("OBJECTS"));
         public NodeFolder RailFolder = new NodeFolder(TranslationSource.GetText("RAIL_PATHS"));
 
-        BymlFileData Byaml;
+        BymlFile Byaml;
         STFileLoader.Settings FileSettings;
 
         public MapData() { }
@@ -40,10 +40,10 @@ namespace UKingLibrary
         public void Load(Stream stream, IMapLoader parentLoader, string fileName) {
             FileSettings = STFileLoader.TryDecompressFile(stream, fileName);
 
-            Load(ByamlFile.LoadN(FileSettings.Stream), parentLoader, fileName);
+            Load(BymlFile.FromBinary(FileSettings.Stream), parentLoader, fileName);
         }
 
-        public void Load(BymlFileData byaml, IMapLoader parentLoader, string fileName)
+        public void Load(BymlFile byaml, IMapLoader parentLoader, string fileName)
         {
             Byaml = byaml;
 
@@ -53,16 +53,16 @@ namespace UKingLibrary
             RootNode.AddChild(ObjectFolder);
             RootNode.AddChild(RailFolder);
 
-            int numObjs = byaml.RootNode["Objs"].Count;
+            int numObjs = byaml.RootNode.Hash["Objs"].Array.Count;
 
             ProcessLoading.Instance.Update(70, 100, "Loading map objs");
 
             for (int i = 0; i < numObjs; i++)
             {
-                var mapObj = (IDictionary<string, dynamic>)byaml.RootNode["Objs"][i];
-                if (mapObj.ContainsKey("UnitConfigName"))
+                BymlNode mapObj = byaml.RootNode.Hash["Objs"].Array[i];
+                if (mapObj.Hash.ContainsKey("UnitConfigName"))
                 {
-                    string name = mapObj["UnitConfigName"];
+                    string name = mapObj.Hash["UnitConfigName"].String;
                     //Get the actor in the database
                     var actorInfo = new Dictionary<string, dynamic>();
                     if (GlobalData.Actors.ContainsKey(name))
@@ -103,16 +103,16 @@ namespace UKingLibrary
 
             ProcessLoading.Instance.Update(90, 100, "Loading map rails");
 
-            if (byaml.RootNode.ContainsKey("Rails"))
+            if (byaml.RootNode.Hash.ContainsKey("Rails"))
             {
-                foreach (var obj in byaml.RootNode["Rails"])
+                foreach (var obj in byaml.RootNode.Hash["Rails"].Array)
                 {
                     RailPathData data = new RailPathData();
                     data.LoadRail(this, obj, RailFolder);
 
-                    string name = obj["UnitConfigName"];
-                    if (obj.ContainsKey("UniqueName"))
-                        name = obj["UniqueName"];
+                    string name = obj.Hash["UnitConfigName"].String;
+                    if (obj.Hash.ContainsKey("UniqueName"))
+                        name = obj.Hash["UniqueName"].String;
 
                     data.PathRender.UINode.Header = name;
                     data.AddToScene();
@@ -154,11 +154,11 @@ namespace UKingLibrary
             ObjectFolder.FolderChildren = nodeFolders;
 
             // Set the camera position to the map pos
-            if (byaml.RootNode.ContainsKey("LocationPosX") && byaml.RootNode.ContainsKey("LocationPosZ"))
+            if (byaml.RootNode.Hash.ContainsKey("LocationPosX") && byaml.RootNode.Hash.ContainsKey("LocationPosZ"))
             {
-                float posX = byaml.RootNode["LocationPosX"];
+                float posX = byaml.RootNode.Hash["LocationPosX"].Float;
                 float posY = 150;
-                float posZ = byaml.RootNode["LocationPosZ"];
+                float posZ = byaml.RootNode.Hash["LocationPosZ"].Float;
                 GLContext.ActiveContext.Camera.TargetPosition = new OpenTK.Vector3(posX, posY, posZ) * GLContext.PreviewScale;
             }
             // Fallback
@@ -212,9 +212,9 @@ namespace UKingLibrary
         public void Save(Stream stream)
         {
             SaveEditor();
-            var byamlData = Byaml;
-            byamlData.RootNode = PropertiesToValues(Byaml.RootNode);
-            ByamlFile.SaveN(stream, byamlData);
+            var bymlData = Byaml;
+            bymlData.RootNode = PropertiesToValues(Byaml.RootNode);
+            stream.Write(bymlData.ToBinary());
             stream.Position = 0;
 
             
@@ -226,26 +226,26 @@ namespace UKingLibrary
 
         private void SaveEditor()
         {
-            List<dynamic> objs = new List<dynamic>();
-            List<dynamic> rails = new List<dynamic>();
+            List<BymlNode> objs = new List<BymlNode>();
+            List<BymlNode> rails = new List<BymlNode>();
 
             //Save actors in order by their hash ID
             foreach (var obj in Objs.OrderBy(x => x.Key))
             {
                 obj.Value.SaveActor();
                 //Add objs
-                objs.Add(obj.Value.Properties);
+                objs.Add(PropertiesToValues(obj.Value.Properties));
             }
             //Save rails in order by their hash ID
             foreach (var rail in Rails.OrderBy(x => x.Key))
             {
                 rail.Value.SaveRail();
                 //Add rails
-                rails.Add(rail.Value.Properties);
+                rails.Add(PropertiesToValues(rail.Value.Properties));
             }
             //Apply the object and rails to the file
-            BymlHelper.SetValue(Byaml.RootNode, "Objs", objs);
-            BymlHelper.SetValue(Byaml.RootNode, "Rails", rails);
+            BymlHelper.SetValue(Byaml.RootNode, "Objs", new BymlNode(objs));
+            BymlHelper.SetValue(Byaml.RootNode, "Rails", new BymlNode(rails));
         }
 
         public void Dispose()
@@ -256,33 +256,33 @@ namespace UKingLibrary
                 rail.PathRender?.Dispose();
         }
 
-        public static dynamic ValuesToProperties(dynamic input)
+        public static dynamic ValuesToProperties(BymlNode input)
         {
-            if (input is IDictionary<string, dynamic>)
+            if (input.Type == NodeType.Hash)
             {
                 IDictionary<string, dynamic> output = new Dictionary<string, dynamic>();
-                foreach (KeyValuePair<string, dynamic> pair in input)
+                foreach (KeyValuePair<string, BymlNode> pair in input.Hash)
                 {
-                    if (pair.Value is IDictionary<string, dynamic>)
+                    if (pair.Value.Type == NodeType.Hash)
                         output.Add(pair.Key, ValuesToProperties(pair.Value));
-                    else if (pair.Value is IList<dynamic>)
+                    else if (pair.Value.Type == NodeType.Array)
                         output.Add(pair.Key, ValuesToProperties(pair.Value));
                     else
-                        output.Add(pair.Key, new MapData.Property<dynamic>(pair.Value));
+                        output.Add(pair.Key, new MapData.Property<dynamic>(pair.Value.GetDynamic()));
                 }
                 return output;
             }
-            else if (input is IList<dynamic>)
+            else if (input.Type == NodeType.Array)
             {
                 IList<dynamic> output = new List<dynamic>();
-                foreach (dynamic item in input)
+                foreach (BymlNode item in input.Array)
                 {
                     if (item is IDictionary<string, dynamic>)
                         output.Add(ValuesToProperties(item));
                     else if (item is IList<dynamic>)
                         output.Add(ValuesToProperties(item));
                     else
-                        output.Add(new MapData.Property<dynamic>(item));
+                        output.Add(new MapData.Property<dynamic>(item.GetDynamic()));
                 }
                 return output;
             }
@@ -292,43 +292,43 @@ namespace UKingLibrary
             }
         }
 
-        public static dynamic PropertiesToValues(dynamic input)
+        public static BymlNode PropertiesToValues(dynamic input)
         {
             if (input is IDictionary<string, dynamic>)
             {
-                IDictionary<string, dynamic> output = new Dictionary<string, dynamic>();
+                BymlNode output = new BymlNode(new Dictionary<string, BymlNode>(input.Count));
                 foreach (KeyValuePair<string, dynamic> pair in input)
                 {
                     if (pair.Value is IDictionary<string, dynamic>)
-                        output.Add(pair.Key, PropertiesToValues(pair.Value));
+                        output.Hash.Add(pair.Key, PropertiesToValues(pair.Value));
                     else if (pair.Value is IList<dynamic>)
-                        output.Add(pair.Key, PropertiesToValues(pair.Value));
+                        output.Hash.Add(pair.Key, PropertiesToValues(pair.Value));
                     else if (pair.Value is MapData.Property<dynamic>)
-                        output.Add(pair.Key, pair.Value.Value);
+                        output.Hash.Add(pair.Key, new BymlNode(pair.Value.Value));
                     else
-                        output.Add(pair.Key, pair.Value);
+                        output.Hash.Add(pair.Key, new BymlNode(pair.Value)); // This would indicate that the structure isn't fully made up of Properties
                 }
                 return output;
             }
             else if (input is IList<dynamic>)
             {
-                IList<dynamic> output = new List<dynamic>();
+                BymlNode output = new BymlNode(new List<BymlNode>(input.Count));
                 foreach (dynamic item in input)
                 {
                     if (item is IDictionary<string, dynamic>)
-                        output.Add(PropertiesToValues(item));
+                        output.Array.Add(PropertiesToValues(item));
                     else if (item is IList<dynamic>)
-                        output.Add(PropertiesToValues(item));
+                        output.Array.Add(PropertiesToValues(item));
                     else if (item is MapData.Property<dynamic>)
-                        output.Add(item.Value);
+                        output.Array.Add(item.Value);
                     else
-                        output.Add(item);
+                        output.Array.Add(item); // This would indicate that the structure isn't fully made up of Properties
                 }
                 return output;
             }
             else
             {
-                return new MapData.Property<dynamic>(input);
+                return new BymlNode(input);
             }
         }
 

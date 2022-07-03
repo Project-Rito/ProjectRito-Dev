@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using GLFrameworkEngine;
-using BfresLibrary;
-using BfresLibrary.Helpers;
+using Nintendo.Bfres;
+using Nintendo.Bfres.Helpers;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using Toolbox.Core.IO;
@@ -75,8 +75,8 @@ namespace CafeLibrary.Rendering
                     {
                         switch (mesh.IndexFormat)
                         {
-                            case BfresLibrary.GX2.GX2IndexFormat.UInt16:
-                            case BfresLibrary.GX2.GX2IndexFormat.UInt16LittleEndian:
+                            case Nintendo.Bfres.GX2.GX2IndexFormat.UInt16:
+                            case Nintendo.Bfres.GX2.GX2IndexFormat.UInt16LittleEndian:
                                 writer.Write((ushort)(lodFaces[i] + mesh.FirstVertex));
                                 break;
                             default:
@@ -90,11 +90,11 @@ namespace CafeLibrary.Rendering
             return mem.ToArray();
         }
 
-        public static byte[] LoadBufferData(ResFile resFile, Model mdl, Shape shape, List<VaoAttribute> attributes)
+        public static byte[] LoadBufferData(BfresFile resFile, Model mdl, Shape shape, List<VaoAttribute> attributes)
         {
             //Create a buffer instance which stores all the buffer data
             VertexBufferHelper helper = new VertexBufferHelper(
-                mdl.VertexBuffers[shape.VertexBufferIndex], resFile.ByteOrder);
+                mdl.VertexBuffers[shape.VertexBufferIndex], resFile.Endian);
 
             //Fill a byte array of data
             int vertexCount = helper.Attributes.FirstOrDefault().Data.Length;

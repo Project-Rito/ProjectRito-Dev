@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using AampLibraryCSharp;
+using Nintendo.Aamp;
 using System.ComponentModel;
 using Syroot.Maths;
 using Toolbox.Core;
@@ -16,9 +16,9 @@ namespace AGraphicsLibrary
         public ColorCorrection()
         {
             Root = new ParamList() { HashString = "param_root" };
-            Root.childParams = new ParamList[1] { new ParamList() { HashString = "color_correction" } };
+            Root.ChildParams = new ParamList[1] { new ParamList() { HashString = "color_correction" } };
             Parent = new ParamObject();
-            Root.childParams[0].paramObjects = new ParamObject[1] { Parent };
+            Root.ChildParams[0].ParamObjects = new ParamObject[1] { Parent };
             Enable = true;
             Hue = 0;
             Saturation = 1;
@@ -38,7 +38,7 @@ namespace AGraphicsLibrary
             var curve = new Curve() {
                 NumUses = 9,
                 CurveType = CurveType.Hermit2D,
-                valueFloats = new float[30] { 0,0,0.5f,0.5f,0.5f,0.5f,1,1,0.5f,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
+                ValueFloats = new float[30] { 0,0,0.5f,0.5f,0.5f,0.5f,1,1,0.5f,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
             };
 
             Level = new Curve[4]
@@ -159,7 +159,7 @@ namespace AGraphicsLibrary
         public Curve[] Level
         {
             get {
-                var param = Parent.paramEntries.FirstOrDefault(x => x.HashString == "level");
+                var param = Parent.ParamEntries.FirstOrDefault(x => x.HashString == "level");
                 return (Curve[])param.Value; }
             set { Parent.SetEntryValue("level", value); }
         }
@@ -168,7 +168,7 @@ namespace AGraphicsLibrary
         {
             //Note this file always has only one object
             this.Root = aamp.RootNode;
-            Parent = aamp.RootNode.paramObjects.FirstOrDefault();
+            Parent = aamp.RootNode.ParamObjects.FirstOrDefault();
         }
 
         public byte[] Save(bool isVersion2)
@@ -178,12 +178,12 @@ namespace AGraphicsLibrary
             aamp.ParameterIOType = "aglccr";
 
             if (isVersion2)
-                aamp = aamp.ConvertToVersion2();
+                aamp.ToVersion2();
             else
-                aamp = aamp.ConvertToVersion1();
+                aamp.ToVersion1();
 
             var mem = new System.IO.MemoryStream();
-            aamp.Save(mem);
+            mem.Write(aamp.ToBinary());
             return mem.ToArray();
         }
     }

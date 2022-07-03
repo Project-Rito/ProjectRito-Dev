@@ -21,7 +21,7 @@ namespace SmashForge
             var mem = new System.IO.MemoryStream();
             using (var writer = new FileWriter(mem))
             {
-                writer.ByteOrder = Syroot.BinaryData.ByteOrder.LittleEndian;
+                writer.ByteConverter = Syroot.BinaryData.ByteConverter.Little;
 
                 for (i = 0; i < height; i += 8)
                 {
@@ -111,7 +111,7 @@ namespace SmashForge
             var mem = new System.IO.MemoryStream();
             using (var writer = new FileWriter(mem))
             {
-                writer.ByteOrder = Syroot.BinaryData.ByteOrder.LittleEndian;
+                writer.ByteConverter = Syroot.BinaryData.ByteConverter.Little;
                 for (i = 0; i < height; i += 8)
                 {
                     for (j = 0; j < width; j += 8)

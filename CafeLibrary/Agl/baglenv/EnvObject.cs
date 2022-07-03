@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AampLibraryCSharp;
+using Nintendo.Aamp;
 using Toolbox.Core;
 
 namespace AGraphicsLibrary

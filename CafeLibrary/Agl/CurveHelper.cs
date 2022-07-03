@@ -6,18 +6,18 @@ namespace AGraphicsLibrary
 {
     public class CurveHelper
     {
-        public static float Interpolate(AampLibraryCSharp.Curve curve, float t)
+        public static float Interpolate(Nintendo.Aamp.Curve curve, float t)
         {
             switch (curve.CurveType)
             {
-                case AampLibraryCSharp.CurveType.Hermit: return InterpolateHermite(t, curve.NumUses, curve.valueFloats);
-                case AampLibraryCSharp.CurveType.Hermit2D: return InterpolateHermite2D(t, curve.NumUses, curve.valueFloats);
-                case AampLibraryCSharp.CurveType.Linear:   return InterpolateLinear(t, curve.NumUses, curve.valueFloats);
-                case AampLibraryCSharp.CurveType.Linear2D: return InterpolateLinear2D(t, curve.NumUses, curve.valueFloats);
-                case AampLibraryCSharp.CurveType.Step: return InterpolateStep(t, curve.NumUses, curve.valueFloats);
-                case AampLibraryCSharp.CurveType.Sin: return InterpolateSin(t, curve.NumUses, curve.valueFloats);
-                case AampLibraryCSharp.CurveType.Cos: return InterpolateCos(t, curve.NumUses, curve.valueFloats);
-                case AampLibraryCSharp.CurveType.SinPow2: return InterpolateSinPow2(t, curve.NumUses, curve.valueFloats);
+                case Nintendo.Aamp.CurveType.Hermit: return InterpolateHermite(t, curve.NumUses, curve.ValueFloats);
+                case Nintendo.Aamp.CurveType.Hermit2D: return InterpolateHermite2D(t, curve.NumUses, curve.ValueFloats);
+                case Nintendo.Aamp.CurveType.Linear:   return InterpolateLinear(t, curve.NumUses, curve.ValueFloats);
+                case Nintendo.Aamp.CurveType.Linear2D: return InterpolateLinear2D(t, curve.NumUses, curve.ValueFloats);
+                case Nintendo.Aamp.CurveType.Step: return InterpolateStep(t, curve.NumUses, curve.ValueFloats);
+                case Nintendo.Aamp.CurveType.Sin: return InterpolateSin(t, curve.NumUses, curve.ValueFloats);
+                case Nintendo.Aamp.CurveType.Cos: return InterpolateCos(t, curve.NumUses, curve.ValueFloats);
+                case Nintendo.Aamp.CurveType.SinPow2: return InterpolateSinPow2(t, curve.NumUses, curve.ValueFloats);
                 default:
                     return 0.0f;
                     //     throw new Exception($"Unsupported color type! {curve.CurveType}");

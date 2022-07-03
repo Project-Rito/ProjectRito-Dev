@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using AampLibraryCSharp;
+using Nintendo.Aamp;
 using OpenTK.Graphics.OpenGL;
 using GLFrameworkEngine;
 using Toolbox.Core;

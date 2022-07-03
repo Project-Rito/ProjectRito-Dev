@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using AampLibraryCSharp;
+using Nintendo.Aamp;
 using GLFrameworkEngine;
 using OpenTK.Graphics.OpenGL;
 
@@ -44,7 +44,7 @@ namespace AGraphicsLibrary
                     {
                         CurveType = type,
                         NumUses = numUses,
-                        valueFloats = curves
+                        ValueFloats = curves
                     },
                 };
             }
@@ -105,10 +105,10 @@ namespace AGraphicsLibrary
         }
 
         public AglLightMap(Stream stream) {
-            var aamp = AampFile.LoadFile(stream);
+            var aamp = AampFile.FromBinary(stream);
             LightAreas.Clear();
 
-            foreach (var ob in aamp.RootNode.paramObjects)
+            foreach (var ob in aamp.RootNode.ParamObjects)
             {
                 if (ob.HashString == "lut_param") {
                     //32 curves.
@@ -121,20 +121,20 @@ namespace AGraphicsLibrary
                     }
                 }
             }
-            foreach (var lightAreaParam in aamp.RootNode.childParams)
+            foreach (var lightAreaParam in aamp.RootNode.ChildParams)
             {
                 var lightArea = new LightArea();
                 LightAreas.Add(lightArea);
 
-                foreach (var ob in lightAreaParam.paramObjects)
+                foreach (var ob in lightAreaParam.ParamObjects)
                 {
                     if (ob.HashString == "setting")
                         lightArea.Settings = new LightSettings(ob);
                 }
-                foreach (var c in lightAreaParam.childParams) {
+                foreach (var c in lightAreaParam.ChildParams) {
                     if (c.HashString == "env_obj_ref_array")
                     {
-                        foreach (var childObj in c.paramObjects)
+                        foreach (var childObj in c.ParamObjects)
                             lightArea.Lights.Add(new LightEnvObject(childObj));
                     }
                 }
@@ -232,7 +232,7 @@ namespace AGraphicsLibrary
 
         static Curve[] GetCurve(ParamObject ob, string hashName)
         {
-            foreach (var entry in ob.paramEntries) {
+            foreach (var entry in ob.ParamEntries) {
                 if (entry.HashString == hashName) {
                     return (Curve[])entry.Value;
                 }

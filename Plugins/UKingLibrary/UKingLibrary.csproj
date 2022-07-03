@@ -35,16 +35,21 @@
     <ProjectReference Include="..\..\MapStudio.UI\MapStudio.UI.csproj">
       <Private>false</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\NCF-Library\AampLibrary\AampLibrary.csproj" />
+    <ProjectReference Include="..\..\NCF-Library\BfresLibrary\BfresLibrary.csproj" />
+    <ProjectReference Include="..\..\NCF-Library\BymlLibrary\BymlLibrary.csproj" />
+    <ProjectReference Include="..\..\NCF-Library\Yaz0Library\Yaz0Library.csproj" />
     <ProjectReference Include="..\..\Toolbox.Core\Toolbox.Core.csproj">
       <Private>false</Private>
     </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="ByamlExt">
-      <HintPath>..\..\MapStudio\Lib\ByamlExt.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+    <PackageReference Include="Syroot.BinaryData" Version="5.2.2" />
+    <PackageReference Include="Syroot.Maths" Version="1.5.3" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <Reference Include="ImGui.NET">
       <HintPath>..\..\MapStudio\Lib\ImGui.NET.dll</HintPath>
       <Private>false</Private>
@@ -54,14 +59,6 @@
     </Reference>
     <Reference Include="OpenTK">
       <HintPath>..\..\MapStudio\Lib\OpenTK.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Syroot.BinaryData">
-      <HintPath>..\..\MapStudio\Lib\Syroot.BinaryData.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Syroot.Maths">
-      <HintPath>..\..\MapStudio\Lib\Syroot.Maths.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="HKX2">
