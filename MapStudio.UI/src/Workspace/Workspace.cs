@@ -17,7 +17,7 @@ namespace MapStudio.UI
     /// <summary>
     /// Represents a workspace instance of a workspace window.
     /// </summary>
-    public class Workspace : ImGuiOwnershipObject, IDisposable
+    public class Workspace : DockWindow, IDisposable
     {
         public static Workspace ActiveWorkspace { get; set; }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
@@ -28,12 +29,14 @@ namespace MapStudio
 
         private ProcessLoading ProcessLoading;
 
-        private List<Workspace> Workspaces = new List<Workspace>();
+        private ObservableCollection<Workspace> Workspaces = new ObservableCollection<Workspace>();
 
         private JumpListHelper jumpList;
         private Program.Arguments _arguments;
 
         private IPluginConfig[] PluginSettingsUI;
+
+        private bool UpdateDockLayout = true;
 
         public MainWindow(GraphicsMode gMode, Program.Arguments arguments) : base(1600, 900, gMode,
                                 TranslationSource.GetText("RITO_EDITOR"),
@@ -49,6 +52,11 @@ namespace MapStudio
             ProcessLoading.OnUpdated += delegate
             {
                 this.Update();
+            };
+
+            Workspaces.CollectionChanged += delegate
+            {
+                UpdateDockLayout = true;
             };
         }
 
@@ -242,16 +250,9 @@ namespace MapStudio
             ImGui.PopStyleVar(2);
 
             LoadFileMenu();
-            dock_id = ImGui.GetID("##DockspaceRoot");
 
             if (Workspaces.Count == 0)
                 LoadStartScreen();
-
-            unsafe
-            {
-                //Create an inital dock space for docking workspaces.
-                ImGui.DockSpace(dock_id, new System.Numerics.Vector2(0.0f, 0.0f), 0, window_class);
-            }
 
             LoadWorkspaces();
 
@@ -289,12 +290,14 @@ namespace MapStudio
 
             renderingFrame = false;
         }
-        
+
 
         private unsafe void LoadWorkspaces()
         {
             //Window spawn sizes
             var contentSize = ImGui.GetWindowSize();
+
+            SetupDocks();
 
             List<Workspace> removedWindows = new List<Workspace>();
             for (int i = 0; i < Workspaces.Count; i++)
@@ -331,9 +334,7 @@ namespace MapStudio
                 workspace.PopStyling();
 
                 if (ImGui.DockBuilderGetNode(dockspaceId).NativePtr == null || workspace.UpdateDockLayout)
-                {
                     workspace.ReloadDockLayout(dockspaceId, (int)workspace.DockID);
-                }
 
                 if (visible && ImGui.IsWindowFocused())
                     Workspace.UpdateActive(workspace);
@@ -364,6 +365,41 @@ namespace MapStudio
             }
             if (Workspaces.Count == 0)
                 Workspace.ActiveWorkspace = null;
+        }
+
+        private void SetupDocks()
+        {
+            var dock_id = ImGui.GetID("##DockspaceRoot");
+
+            SetupParentDock(dock_id, Workspaces.Select(x => (DockWindow)x).ToList());
+        }
+
+        private unsafe void SetupParentDock(uint parentDockID, List<DockWindow> children)
+        {
+            //Check if the dock has been created or needs to be updated
+            if (ImGui.DockBuilderGetNode(parentDockID).NativePtr == null || UpdateDockLayout)
+            {
+                ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags.None;
+                uint main_id = parentDockID;
+
+                ImGui.DockBuilderRemoveNode(parentDockID); // Clear out existing layout
+                ImGui.DockBuilderAddNode(parentDockID, dockspace_flags); // Add empty node
+
+                for (int i = 0; i < children.Count; i++)
+                {
+                    DockWindow workspace = children[i];
+                    ImGui.DockBuilderDockWindow($"{workspace.Name}###window{ImGui.GetID($"###DOCKSPACE{i}")}", main_id);
+                }
+
+                ImGui.DockBuilderFinish(parentDockID);
+                UpdateDockLayout = false;
+            }
+
+            unsafe
+            {
+                //Create an inital dock space for docking workspaces.
+                ImGui.DockSpace(parentDockID, new System.Numerics.Vector2(0.0f, 0.0f), 0, window_class);
+            }
         }
 
         private void LoadStartScreen()
