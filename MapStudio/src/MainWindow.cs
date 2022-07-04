@@ -782,7 +782,7 @@ namespace MapStudio
             string oldProjectDir = $"{settings.Program.ProjectDirectory}/{workspace.Name}";
 
             ProjectSaveDialog projectDialog = new ProjectSaveDialog(workspace.Name);
-            DialogHandler.Show(TranslationSource.GetText("SAVE_PROJECT"), () =>
+            DialogHandler.Show(TranslationSource.GetText("MENU_SAVE_PROJECT"), () =>
             {
                 projectDialog.LoadUI();
             }, (confirmed) =>

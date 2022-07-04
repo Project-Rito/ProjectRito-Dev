@@ -147,9 +147,11 @@ MESSAGES - Messages
 CHECK_ERRORS - Check Errors
 
 ERROR_FILE_UNSUPPORTED - File not supported {0}.
+ERROR_CREATE_DIRECTORY - Could not create directory {0}.
 
 LOADING_FILE - Loading file {0}
 SAVED_FILE - Saved file {0}
+NOTHING_SAVED - Nothing was saved!
 
 # Asset Window
 

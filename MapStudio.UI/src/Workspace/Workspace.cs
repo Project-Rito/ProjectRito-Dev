@@ -464,7 +464,7 @@ namespace MapStudio.UI
             ProcessLoading.Instance.Update(100, 100, $"Saving {name}", "Saving");
             ProcessLoading.Instance.IsLoading = false;
 
-            TinyFileDialog.MessageBoxInfoOk($"File {filePath} has been saved!");
+            TinyFileDialog.MessageBoxInfoOk(string.Format(TranslationSource.GetText($"SAVED_FILE"), filePath));
 
             PrintErrors();
         }
@@ -472,7 +472,17 @@ namespace MapStudio.UI
         public void SaveProject(string folderPath)
         {
             if (!Directory.Exists(folderPath))
-                Directory.CreateDirectory(folderPath);
+            {
+                try
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+                catch
+                {
+                    TinyFileDialog.MessageBoxInfoOk($"{string.Format(TranslationSource.GetText("ERROR_CREATE_DIRECTORY"), folderPath)}\n{TranslationSource.GetText("NOTHING_SAVED")}");
+                    return;
+                }
+            }
 
             Name = new DirectoryInfo(folderPath).Name;
 
