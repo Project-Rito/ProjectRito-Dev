@@ -43,7 +43,7 @@ namespace UKingLibrary
         public static bool AreasSelectByBorders = true;
 
         [JsonProperty]
-        public static float AreaOpacity = 0.3f;
+        public static float AreaOpacity = 0.1f;
 
         [JsonProperty]
         public static bool FirstStartup = true;
