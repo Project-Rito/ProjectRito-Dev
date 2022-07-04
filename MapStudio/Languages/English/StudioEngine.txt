@@ -107,6 +107,7 @@ MENU_OPEN_PROJECT - Open Project
 MENU_RECENT_PROJECTS - Recent Projects
 MENU_SAVE_PROJECT - Save Project
 MENU_SAVE_PROJECT_AS - Save Project As
+MENU_RENAME_PROJECT - Rename Project
 MENU_CLEAR_WORKSPACE - Clear Workspace
 MENU_EXIT - Exit
 MENU_HELP - Help

@@ -1,6 +1,8 @@
 ﻿# Comments use # and will be ignored.
 # Label    - Translated Text
 
+RITO_EDITOR - Rito Editor
+
 SHOW_VISIBLE_ACTORS - Show Visible Actors
 SHOW_INVISIBLE_ACTORS - Show Invisible Actors
 SHOW_MAP_MODEL - Show Map Model

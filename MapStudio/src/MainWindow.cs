@@ -374,6 +374,7 @@ namespace MapStudio
         private void LoadFileMenu()
         {
             bool canSave = Workspace.ActiveWorkspace != null;
+            bool canRename = canSave && Workspace.ActiveWorkspace.Name != TranslationSource.GetText("NEW_PROJECT");
 
             if (ImGui.BeginMainMenuBar())
             {
@@ -439,6 +440,10 @@ namespace MapStudio
                     {
                         SaveProjectWithDialog();
                     }
+                    if (ImGui.MenuItem($"       {TranslationSource.GetText("MENU_RENAME_PROJECT")}##MAIN06", "", false, canRename))
+                    {
+                        RenameProjectWithDialog();
+                    }
                     ImGui.Separator();
                     if (ImGui.MenuItem($"       {TranslationSource.GetText("MENU_CLEAR_WORKSPACE")}##MAIN06"))
                     {
@@ -468,7 +473,7 @@ namespace MapStudio
                             plugin.DrawUI();
                     }
 
-                    ImguiCustomWidgets.PathSelector(TranslationSource.GetText("PROJECT_SAVE_PATH"), ref GlobalSettings.Program.ProjectDirectory);
+                    ImguiCustomWidgets.PathSelector(TranslationSource.GetText("PROJECT_SAVE_DIRECTORY"), ref GlobalSettings.Program.ProjectDirectory);
 
                     var language = TranslationSource.LanguageKey;
                     if (ImGui.BeginCombo($"{TranslationSource.GetText("LANGUAGE")}", language))
@@ -616,7 +621,7 @@ namespace MapStudio
                 }
                 if (ImGui.BeginMenu(TranslationSource.GetText("PLUGINS")))
                 {
-                    foreach (var plugin in PluginManager.LoadPlugins())
+                    foreach (var plugin in PluginManager.LoadPlugins().GroupBy(x => x.PluginHandler.Name).Select(x => x.First())) // Not sure why there are duplicate Toolbox.Cores... but....
                     {
                         ImGui.Text(plugin.PluginHandler.Name);
                     }
@@ -738,8 +743,7 @@ namespace MapStudio
             string oldProjectDir = $"{settings.Program.ProjectDirectory}/{workspace.Name}";
 
             ProjectSaveDialog projectDialog = new ProjectSaveDialog(workspace.Name);
-
-            DialogHandler.Show("Save Project", () =>
+            DialogHandler.Show(TranslationSource.GetText("SAVE_PROJECT"), () =>
             {
                 projectDialog.LoadUI();
             }, (confirmed) =>
@@ -749,6 +753,29 @@ namespace MapStudio
 
                 workspace.UpdateProjectAssetPaths(oldProjectDir, projectDialog.GetProjectDirectory());
                 workspace.SaveProject(projectDialog.GetProjectDirectory());
+                RecentFileHandler.SaveRecentFile(projectDialog.GetProjectDirectory(), "RecentProjects.txt", this.RecentProjects);
+            });
+        }
+
+        private void RenameProjectWithDialog()
+        {
+            var workspace = Workspace.ActiveWorkspace;
+            var settings = GlobalSettings.Current;
+
+            string oldProjectDir = $"{settings.Program.ProjectDirectory}/{workspace.Name}";
+
+            ProjectSaveDialog projectDialog = new ProjectSaveDialog(workspace.Name);
+            DialogHandler.Show(TranslationSource.GetText("RENAME_PROJECT"), () =>
+            {
+                projectDialog.LoadUI();
+            }, (confirmed) =>
+            {
+                if (!confirmed)
+                    return;
+
+                workspace.Name = projectDialog.GetProjectDirectory().Split("/").Last();
+                workspace.UpdateProjectAssetPaths(oldProjectDir, projectDialog.GetProjectDirectory());
+                Directory.Move(oldProjectDir, projectDialog.GetProjectDirectory());
                 RecentFileHandler.SaveRecentFile(projectDialog.GetProjectDirectory(), "RecentProjects.txt", this.RecentProjects);
             });
         }
