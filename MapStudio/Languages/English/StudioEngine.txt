@@ -2,7 +2,7 @@
 # Label    - Translated Text
 
 # Program
-TRACK_STUDIO - Track Studio
+RITO_EDITOR - Rito Editor
 OPENGL_VERSION - OpenGL Version
 
 # Themes

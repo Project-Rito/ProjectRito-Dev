@@ -35,7 +35,7 @@ namespace MapStudio
         private IPluginConfig[] PluginSettingsUI;
 
         public MainWindow(GraphicsMode gMode, Program.Arguments arguments) : base(1600, 900, gMode,
-                                TranslationSource.GetText("TRACK_STUDIO"),
+                                TranslationSource.GetText("RITO_EDITOR"),
                                 GameWindowFlags.Default,
                                 DisplayDevice.Default,
                                 3, 2, GraphicsContextFlags.Default)
