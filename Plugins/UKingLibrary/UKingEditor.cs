@@ -56,6 +56,11 @@ namespace UKingLibrary
 
         public UKingEditor() 
         {
+            PluginConfig.PathsChanged += delegate
+            {
+                SetupContextMenus();
+                GlobalData.LoadActorDatabase(true);
+            };
         }
 
         public void Load(Stream stream)
@@ -123,6 +128,8 @@ namespace UKingLibrary
 
         private void SetupContextMenus()
         {
+            Root.ContextMenus.Clear();
+
             MenuItemModel loadSectionMenuItem = new MenuItemModel(TranslationSource.GetText("LOAD_SECTION"));
             
             foreach (var fieldName in GlobalData.FieldNames)

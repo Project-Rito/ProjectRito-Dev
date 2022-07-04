@@ -48,6 +48,8 @@ namespace UKingLibrary
         [JsonProperty]
         public static bool FirstStartup = true;
 
+        public static Action PathsChanged = null;
+
         //Only load the config once when this constructor is activated.
         internal static bool init = false;
 
@@ -67,9 +69,9 @@ namespace UKingLibrary
                     {
                         ModPaths[i] = path;
                         Save();
+                        PathsChanged?.Invoke();
                     }
                 }
-                
 
                 ImGui.EndMenu();
             }
