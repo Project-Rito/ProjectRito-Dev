@@ -106,6 +106,17 @@ namespace MapStudio.UI
         }
 
         /// <summary>
+        /// Generates a themed icon for the program.
+        /// </summary>
+        public System.Drawing.Icon ThemeIcon(System.Drawing.Icon originalIcon)
+        {
+            var theme = ThemeHandler.Themes.FirstOrDefault(x => x.Name == Program.Theme);
+            if (theme != null)
+                return ThemeHandler.ThemeIcon(originalIcon, theme);
+            return null;
+        }
+
+        /// <summary>
         /// Updates the gl context settings from the configuration file.
         /// </summary>
         public void ReloadContext(GLContext context, Camera camera)

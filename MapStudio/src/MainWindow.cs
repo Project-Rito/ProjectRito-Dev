@@ -17,6 +17,7 @@ namespace MapStudio
 {
     public class MainWindow : GameWindow
     {
+        public System.Drawing.Icon OriginalIcon;
         bool ForceFocused = true;
 
         ImGuiController _controller;
@@ -99,6 +100,7 @@ namespace MapStudio
             GlobalSettings = GlobalSettings.Load();
             GlobalSettings.ReloadLanguage();
             GlobalSettings.ReloadTheme();
+            Icon = GlobalSettings.ThemeIcon(OriginalIcon);
 
             //Load recent file lists
             RecentFileHandler.LoadRecentList($"{Runtime.ExecutableDir}/Recent.txt", RecentFiles);
@@ -514,6 +516,7 @@ namespace MapStudio
                             {
                                 //Set the current theme instance
                                 ThemeHandler.UpdateTheme(colorTheme);
+                                Icon = ThemeHandler.ThemeIcon(OriginalIcon, colorTheme);
 
                                 GlobalSettings.Program.Theme = colorTheme.Name;
                                 GlobalSettings.Save();

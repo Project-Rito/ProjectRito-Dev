@@ -46,7 +46,7 @@ namespace MapStudio
             //Load the window and run the application
             GraphicsMode mode = new GraphicsMode(new ColorFormat(32), 24, 8, 4, new ColorFormat(32), 2, false);
             MainWindow wnd = new MainWindow(mode, argumentHandle);
-            wnd.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
+            wnd.OriginalIcon = wnd.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
             wnd.VSync = OpenTK.VSyncMode.On;
             wnd.Run();
         }
