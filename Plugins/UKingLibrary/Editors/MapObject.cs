@@ -782,6 +782,7 @@ namespace UKingLibrary
         {
             string texpathNX = PluginConfig.GetContentPath($"Model/{bfres}.Tex.sbfres");
             string texpath1 = PluginConfig.GetContentPath($"Model/{bfres}.Tex1.sbfres");
+            string[] texpath1_x = Enumerable.Range(1, 9).Select(x => PluginConfig.GetContentPath($"Model/{bfres}.Tex1.{x}.sbfres")).ToArray();
 
             string teratexpathNX = PluginConfig.GetContentPath($"Model/Terrain.Tex.sbfres");
             string teratexpath1 = PluginConfig.GetContentPath($"Model/Terrain.Tex1.sbfres");
@@ -797,6 +798,14 @@ namespace UKingLibrary
                 candidate = BfresLoader.GetTextures(texpath1);
                 if (candidate != null)
                     render.Textures = candidate;
+
+                foreach (string texpath in texpath1_x)
+                {
+                    candidate = BfresLoader.GetTextures(texpath);
+                    if (candidate != null)
+                        foreach (KeyValuePair<string, GenericRenderer.TextureView> tex in candidate)
+                            render.Textures.TryAdd(tex.Key, tex.Value);
+                }
 
                 
                 // Attach terrain textures in case we need them
