@@ -681,13 +681,13 @@ namespace UKingLibrary
             string name = obj["UnitConfigName"].Value;
 
             if (actor.ContainsKey("profile") && ((string)actor["profile"] == "Area" || (string)actor["profile"] == "SpotBgmTag"))
-                return new AreaRender(parent, AreaShape, new Vector4(0, 0, 0, 1));
+                return new AreaRender(parent, AreaShape, new Vector3(0, 0, 0));
 
             if (name == "BoxWater")
-                return new AreaWaterRender(parent, new Vector4(0, 0, 1, 1));
+                return new AreaWaterRender(parent, new Vector3(0, 0, 1));
 
             if (name == "AscendingCurrent")
-                return new AscendingCurrentRender(parent, new Vector4(1, 1, 1, 1));
+                return new AscendingCurrentRender(parent, new Vector3(1, 1, 1));
 
             if (TagRender.IsTag(name))
                 return new TagRender(name, parent);

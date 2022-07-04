@@ -43,6 +43,9 @@ namespace UKingLibrary
         public static bool AreasSelectByBorders = true;
 
         [JsonProperty]
+        public static float AreaOpacity = 0.3f;
+
+        [JsonProperty]
         public static bool FirstStartup = true;
 
         //Only load the config once when this constructor is activated.
@@ -93,6 +96,8 @@ namespace UKingLibrary
             }
 
             ImGui.Checkbox($"{TranslationSource.GetText("AREAS_SELECT_BY_BORDERS")}", ref AreasSelectByBorders);
+
+            ImGui.SliderFloat($"{TranslationSource.GetText("AREA_OPACITY")}", ref AreaOpacity, 0f, 1f, "%.1f");
         }
 
         public static string GetContentPath(string relativePath)

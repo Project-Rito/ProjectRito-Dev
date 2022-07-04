@@ -16,8 +16,21 @@ namespace UKingLibrary.Rendering
     {
         public static bool DrawFilled = true;
 
-        public Vector4 Color = Vector4.One;
-        public Vector4 FillColor = new Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+        public Vector4 OutlineColor = Vector4.One;
+        private Vector3 _fillColor = new Vector3(1.0f, 1.0f, 1.0f);
+        public Vector4 FillColor
+        {
+            get
+            {
+                return new Vector4(_fillColor, PluginConfig.AreaOpacity);
+            }
+            set
+            {
+                //if (_fillColor != value.Xyz)
+                //    UpdateInstanceGroup = true;
+                _fillColor = value.Xyz;
+            }
+        }
 
         RenderMesh<VertexPositionNormal> OutlineRenderer = null;
         RenderMesh<VertexPositionNormal> FillRenderer = null;
@@ -45,13 +58,14 @@ namespace UKingLibrary.Rendering
             return context.Camera.InFustrum(BoundingNode);
         }
 
-        public AscendingCurrentRender(NodeBase parent, Vector4 color) : base(parent)
+        public AscendingCurrentRender(NodeBase parent, Vector3 color) : base(parent)
         {
             //Update boundings on transform changed
             this.Transform.TransformUpdated += delegate {
                 BoundingNode.UpdateTransform(Transform.TransformMatrix);
             };
-            Color = color;
+            OutlineColor = new Vector4(color, 1f);
+            FillColor = new Vector4(color, 1f);
         }
 
 
@@ -96,14 +110,14 @@ namespace UKingLibrary.Rendering
             {
                 GLMaterialBlendState.TranslucentAlphaOne.RenderBlendState();
                 GLMaterialBlendState.TranslucentAlphaOne.RenderDepthTest();
-                FillRenderer.DrawSolid(context, new List<Matrix4> { InitalTransform * Transform.TransformMatrix }, new Vector4(Color.Xyz, 0.1f));
+                FillRenderer.DrawSolid(context, new List<Matrix4> { InitalTransform * Transform.TransformMatrix }, FillColor);
                 GLMaterialBlendState.Opaque.RenderBlendState();
                 GLMaterialBlendState.Opaque.RenderDepthTest();
             }
 
             //Draw lines of the region
             GL.LineWidth(1);
-            OutlineRenderer.DrawSolidWithSelection(context, new List<Matrix4> { InitalTransform * Transform.TransformMatrix }, Color, IsSelected | IsHovered);
+            OutlineRenderer.DrawSolidWithSelection(context, new List<Matrix4> { InitalTransform * Transform.TransformMatrix }, OutlineColor, IsSelected | IsHovered);
 
             //Draw debug boundings
             if (Runtime.RenderBoundingBoxes)
