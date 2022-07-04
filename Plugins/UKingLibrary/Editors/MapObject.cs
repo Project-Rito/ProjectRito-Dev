@@ -292,7 +292,7 @@ namespace UKingLibrary
             };
 
             foreach (var property in Properties.ToList())
-                ValidateProperty(property.Key);
+                ValidateProperty(property.Key, property.Value);
 
             //Load the transform attached to the object
             LoadObjectTransform();
@@ -368,13 +368,18 @@ namespace UKingLibrary
             Render.DestObjectLinks = destLinks;
         }
 
-        private void OnPropertyUpdate(string key) {
-            if (!ValidateProperty(key))
+        private void OnPropertyUpdate(string key, MapData.Property<dynamic> property) {
+            if (!ValidateProperty(key, property))
                 return;
             if (key == "UnitConfigName")
             {
                 ActorInfo = GlobalData.Actors[Properties[key].Value];
                 BakeCollision = true;
+                SaveTransform();
+                UpdateActorModel();
+            }
+            if (key == "Shape")
+            {
                 SaveTransform();
                 UpdateActorModel();
             }
@@ -385,19 +390,34 @@ namespace UKingLibrary
         /// </summary>
         /// <param name="key">The property key</param>
         /// <returns>True if the property value is valid or the property is unknown</returns>
-        private bool ValidateProperty(string key)
+        private bool ValidateProperty(string key, dynamic property)
         {
-            if (key == "UnitConfigName")
+            if (property is not MapData.Property<dynamic>)
+                return true;
+            switch (key)
             {
-                if (!GlobalData.Actors.ContainsKey(Properties[key].Value))
-                {
-                    // Oh no! We can't find this actor in ActorInfo...
-                    Render.UINode.Icon = "Warning";
-                    Render.UINode.Header = Properties[key].Value;
-                    Properties[key].Invalid = true;
-                    return false;
-                }
-                Properties[key].Invalid = false;
+                case "UnitConfigName":
+                    if (!GlobalData.Actors.ContainsKey(property.Value))
+                    {
+                        // Oh no! We can't find this actor in ActorInfo...
+                        Render.UINode.Icon = "Warning";
+                        Render.UINode.Header = property.Value;
+                        property.Invalid = true;
+                        return false;
+                    }
+                    property.Invalid = false;
+                    break;
+                case "Shape":
+                    if (!Enum.IsDefined(typeof(AreaShapes), property.Value))
+                    {
+                        // Oh no! This shape type doesn't exist...
+                        Render.UINode.Icon = "Warning";
+                        Render.UINode.Header = property.Value;
+                        property.Invalid = true;
+                        return false;
+                    }
+                    property.Invalid = false;
+                    break;
             }
             return true;
         }
