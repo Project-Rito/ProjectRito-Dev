@@ -314,6 +314,8 @@ namespace MapStudio.UI
             menus.Add(new MenuItemModel($"   {IconManager.UNDO_ICON}    {TranslationSource.GetText("UNDO")}", () => Pipeline._context.Scene.Undo()));
             menus.Add(new MenuItemModel($"   {IconManager.REDO_ICON}    {TranslationSource.GetText("REDO")}", () => Pipeline._context.Scene.Redo()));
 
+            menus.Add(new MenuItemModel($"       {TranslationSource.GetText("CLICK_TO_SELECT")}", () => Pipeline._context.Scene.ClickToSelect = !Pipeline._context.Scene.ClickToSelect) { CanCheck = true, IsChecked = Pipeline._context.Scene.ClickToSelect });
+
             return menus;
         }
 

@@ -127,6 +127,8 @@ LANGUAGE - Language
 PROJECT_NAME - Project Name
 PROJECT_SAVE_DIRECTORY - Project Save Directory
 
+CLICK_TO_SELECT - Click To Select
+
 # Dock Windows
 
 OUTLINER - Outliner

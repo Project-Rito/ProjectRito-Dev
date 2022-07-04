@@ -46,6 +46,8 @@ namespace GLFrameworkEngine
         //Use for updating UI events like outliner
         public EventHandler SelectionUIChanged;
 
+        public bool ClickToSelect = true;
+
         /// <summary>
         /// Gets objects which can be transformed and edited.
         /// </summary>

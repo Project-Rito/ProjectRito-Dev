@@ -46,7 +46,8 @@ namespace GLFrameworkEngine
             }
 
             if (MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
-                PickScene(context, true);
+                if (context.Scene.ClickToSelect) // It's possible to disable this
+                    PickScene(context, true);
         }
 
         public void OnMouseMove(GLContext context)

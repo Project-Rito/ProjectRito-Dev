@@ -184,7 +184,7 @@ namespace MapStudio.UI
         {
             List<MenuItemModel> menus = new List<MenuItemModel>();
             if (ViewportWindow != null)
-                menus.AddRange(ViewportWindow?.GetEditMenuItems());
+                menus.AddRange(ViewportWindow.GetEditMenuItems());
             if (ActiveEditor != null)
                 menus.AddRange(ActiveEditor.GetEditMenuItems());
             return menus;

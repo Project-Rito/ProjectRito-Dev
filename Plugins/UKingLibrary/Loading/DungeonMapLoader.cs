@@ -84,7 +84,7 @@ namespace UKingLibrary
         public void Load(string fileName, Stream stream, UKingEditor editor)
         {
             ParentEditor = editor;
-            ParentEditor.Workspace.Windows.Add(new ActorLinkNodeUI());
+            //ParentEditor.Workspace.Windows.Add(new ActorLinkNodeUI());
             DungeonName = Path.GetFileNameWithoutExtension(fileName);
 
             RootNode.Header = fileName;

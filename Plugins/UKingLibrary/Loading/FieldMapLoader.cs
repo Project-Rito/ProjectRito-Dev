@@ -76,7 +76,7 @@ namespace UKingLibrary
         public MapData LoadMuunt(string fileName, Stream stream, UKingEditor editor)
         {
             ParentEditor = editor;
-            ParentEditor.Workspace.Windows.Add(new ActorLinkNodeUI());
+            //ParentEditor.Workspace.Windows.Add(new ActorLinkNodeUI());
 
             ProcessLoading.Instance.Update(0, 100, "Loading map files");
 
