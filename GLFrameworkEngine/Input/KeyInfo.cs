@@ -26,7 +26,7 @@ namespace GLFrameworkEngine
         public bool IsKeyDown(string key)
         {
             string[] keys = key.Split('+');
-            if (!KeyChars.Contains(keys.Last()))
+            if (!KeyChars.Contains(keys.Last()) && keys.Last() != "Ctrl" && keys.Last() != "Shift" && keys.Last() != "Alt")
                 return false;
             if (keys.Contains("Ctrl") != KeyCtrl && (!keys.Contains("!Ctrl") != KeyCtrl))
                 return false;

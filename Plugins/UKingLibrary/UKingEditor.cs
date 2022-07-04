@@ -526,7 +526,15 @@ namespace UKingLibrary
 
             Scene.DeselectAll(context);
 
-            obj.Render.Transform.Position = context.ScreenToWorld(context.Width / 2, context.Height / 2, 5 * GLContext.PreviewScale);
+            switch (GlobalSettings.Current.Editor.NewObjectLocation)
+            {
+                case GlobalSettings.NewObjectLocation.Camera:
+                    obj.Render.Transform.Position = context.ScreenToWorld(context.Width / 2, context.Height / 2, 5 * GLContext.PreviewScale);
+                    break;
+                case GlobalSettings.NewObjectLocation.Cursor3D:
+                    obj.Render.Transform.Position = context.Cursor3DPosition;
+                    break;
+            }
             obj.Render.Transform.UpdateMatrix(true);
 
             obj.Render.IsSelected = true;

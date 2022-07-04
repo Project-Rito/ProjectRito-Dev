@@ -35,6 +35,11 @@ namespace MapStudio.UI
         public ViewerSettings Viewer { get; set; } = new ViewerSettings();
 
         /// <summary>
+        /// The global editor settings
+        /// </summary>
+        public EditorSettings Editor { get; set; } = new EditorSettings();
+
+        /// <summary>
         /// The global settings used by the asset window.
         /// </summary>
         public AssetSettings Asset { get; set; } = new AssetSettings();
@@ -230,6 +235,11 @@ namespace MapStudio.UI
             public bool DisplayBloom { get; set; } = false;
         }
 
+        public class EditorSettings
+        {
+            public NewObjectLocation NewObjectLocation { get; set; } = NewObjectLocation.Camera;
+        }
+
         public class AssetSettings
         {
             /// <summary>
@@ -334,5 +344,12 @@ namespace MapStudio.UI
             /// </summary>
             public float ZFar { get; set; } = 100000.0f;
         }
+
+        public enum NewObjectLocation : int
+        {
+            Cursor3D,
+            Camera
+        }
+        public static string[] PlaceObjectLocationNames => new string[] { TranslationSource.GetText("CURSOR3D"), TranslationSource.GetText("CAMERA") };
     }
 }

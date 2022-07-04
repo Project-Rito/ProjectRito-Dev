@@ -18,6 +18,7 @@ TERRAIN - Terrain
 FIELD_NAME - Field Name
 MAX_DETAIL - Max Detail
 DEBUG_SECTIONS - Debug Sections
+AREAS_SELECT_BY_BORDERS - Areas Select By Borders
 
 CACHE_BAKED_COLLISION - Cache Baked Collision
 BAKE_COLLISION - Bake Collision

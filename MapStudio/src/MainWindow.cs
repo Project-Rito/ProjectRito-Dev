@@ -559,7 +559,13 @@ namespace MapStudio
 #endif
                         ImGui.EndMenu();
                     }
+
+                    int newObjectLoc = (int)GlobalSettings.Editor.NewObjectLocation;
+                    updateSettings |= ImGui.SliderInt($"{TranslationSource.GetText("NEW_OBJECT_LOCATION")}", ref newObjectLoc, 0, Enum.GetValues(typeof(GlobalSettings.NewObjectLocation)).Length - 1, GlobalSettings.PlaceObjectLocationNames[newObjectLoc]);
+                    GlobalSettings.Editor.NewObjectLocation = (GlobalSettings.NewObjectLocation)newObjectLoc;
+
                     ImGui.Checkbox($"{TranslationSource.GetText("CREATE_NEW_WORKSPACE")}", ref createNewWorkspace);
+
                     if (updateSettings && GLContext.ActiveContext != null)
                     {
                         //Reload existing set values then save

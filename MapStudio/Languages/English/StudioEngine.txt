@@ -41,6 +41,7 @@ PIVOT - Pivot
 CONTROL_POINT - Control Point
 WORKSPACES - Workspaces
 EDITORS - Editors
+EDITOR - Editor
 IMPORT - Import
 EXPORT - Export
 LOADING - Loading
@@ -62,6 +63,7 @@ PLAY - Play
 STOP - Stop
 POINT - Point
 CONTROL_POINTS - Control Points
+CURSOR3D - 3D Cursor
 DEBUG - Debug
 WINDOWS - Windows
 DISPLAY_RADIUS - Display Radius
@@ -181,10 +183,10 @@ ENABLE_BLOOM - Enable Bloom
 ENABLE_FOG - Enable Fog
 
 SHADOWS - Shadows
-
 SHADING - Shading
-
 CULLING - Culling
+
+NEW_OBJECT_LOCATION - New Object Location
 
 CREATE_NEW_WORKSPACE - File Load Creates New Workspace
 

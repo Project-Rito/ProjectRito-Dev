@@ -172,6 +172,11 @@ namespace UKingLibrary.Rendering
 
         public void DrawColorPicking(GLContext context, List<GLTransform> transforms)
         {
+            // Until MapObject serves as an editable object and passes fn calls to its render, this will have to exist here.
+            // But once that happens this can be applicable to any actor profile just by blocking the DrawColorPicking call.
+            if (KeyInfo.EventInfo.IsKeyDown(UKingInputSettings.INPUT.Scene.PassthroughAreas))
+                return;
+
             List<Matrix4> modelMatrices = new List<Matrix4>(transforms.Count);
             foreach (var transform in transforms)
                 modelMatrices.Add(InitalTransform * transform.TransformMatrix);
@@ -180,7 +185,10 @@ namespace UKingLibrary.Rendering
 
             //Thicker picking region
             GL.LineWidth(32);
-            OutlineRenderer.DrawPicking(context, this, modelMatrices);
+            if (PluginConfig.AreasSelectByBorders)
+                OutlineRenderer.DrawPicking(context, this, modelMatrices);
+            else
+                FillRenderer.DrawPicking(context, this, modelMatrices);
             GL.LineWidth(1);
         }
 

@@ -160,7 +160,7 @@ namespace GLFrameworkEngine
 
 
         public void OnMouseDown(GLContext context) {
-            if (KeyInfo.EventInfo.KeyAlt && MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
+            if (KeyInfo.EventInfo.KeyCtrl && MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
                 SetCursor(context, MouseEventInfo.X, MouseEventInfo.Y);
 
             foreach (IDrawableInput ob in Objects.Where(x => x is IDrawableInput))

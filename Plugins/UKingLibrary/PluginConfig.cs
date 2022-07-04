@@ -40,6 +40,9 @@ namespace UKingLibrary
         public static bool DebugTerrainSections = false;
 
         [JsonProperty]
+        public static bool AreasSelectByBorders = true;
+
+        [JsonProperty]
         public static bool FirstStartup = true;
 
         //Only load the config once when this constructor is activated.
@@ -88,6 +91,8 @@ namespace UKingLibrary
 #endif
                 ImGui.EndMenu();
             }
+
+            ImGui.Checkbox($"{TranslationSource.GetText("AREAS_SELECT_BY_BORDERS")}", ref AreasSelectByBorders);
         }
 
         public static string GetContentPath(string relativePath)
@@ -197,6 +202,6 @@ namespace UKingLibrary
 
             if (GLContext.ActiveContext != null)
                 GLContext.ActiveContext.UpdateViewport = true;
-        }
+        }   
     }
 }
