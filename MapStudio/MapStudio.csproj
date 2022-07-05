@@ -65,7 +65,6 @@
   <ItemGroup>
     <ProjectReference Include="..\GLFrameworkEngine\GLFrameworkEngine.csproj" />
     <ProjectReference Include="..\HKX2Builders\HKX2Builders\HKX2Builders.csproj" />
-    <ProjectReference Include="..\HKX2Library\HKX2\HKX2.csproj" />
     <ProjectReference Include="..\MapStudio.UI\MapStudio.UI.csproj" />
     <ProjectReference Include="..\Plugins\UKingLibrary\UKingLibrary.csproj" />
     <ProjectReference Include="..\Toolbox.Core\Toolbox.Core.csproj" />
