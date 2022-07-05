@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <OutputPath>bin</OutputPath>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
@@ -122,14 +122,14 @@
   
   <Target Name="CopyFiles" AfterTargets="Build">
     <ItemGroup>
-      <CopyFiles Include="$(ProjectDir)bin/net5.0/*.*" />
+      <CopyFiles Include="$(ProjectDir)bin/net6.0/*.*" />
     </ItemGroup>
     
-    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\" />
-    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\x86\$(Configuration)\net5.0\Plugins\" />
-    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\x64\$(Configuration)\net5.0\Plugins\" />
-    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net5.0\Plugins\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\x86\$(Configuration)\net5.0\Plugins\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\x64\$(Configuration)\net5.0\Plugins\" SkipUnchangedFiles="true" />
+    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net6.0\Plugins\" />
+    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\x86\$(Configuration)\net6.0\Plugins\" />
+    <MakeDir Directories="$(ProjectDir)..\..\MapStudio\bin\x64\$(Configuration)\net6.0\Plugins\" />
+    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\$(Configuration)\net6.0\Plugins\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\x86\$(Configuration)\net6.0\Plugins\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(CopyFiles)" DestinationFolder="$(ProjectDir)..\..\MapStudio\bin\x64\$(Configuration)\net6.0\Plugins\" SkipUnchangedFiles="true" />
   </Target>
 </Project>

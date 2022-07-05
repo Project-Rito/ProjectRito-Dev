@@ -130,7 +130,7 @@ namespace GLFrameworkEngine
 
         public static GLTexture2D FromBitmap(byte[] imageFile)
         {
-            Bitmap image =  (Bitmap)Bitmap.FromStream(new System.IO.MemoryStream(imageFile));
+            Bitmap image =  (Bitmap)Image.FromStream(new System.IO.MemoryStream(imageFile));
 
             GLTexture2D texture = new GLTexture2D();
             texture.Target = TextureTarget.Texture2D;
