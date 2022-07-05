@@ -32,7 +32,12 @@ namespace UKingLibrary
 
                 GL.Enable(EnableCap.CullFace);
                 GL.Enable(EnableCap.Blend);
+                GL.Enable(EnableCap.PolygonOffsetFill);
+                GL.PolygonOffset(-4f, 1f);
                 ShapeMesh.Draw(context);
+                GL.Disable(EnableCap.PolygonOffsetFill);
+                GL.Disable(EnableCap.CullFace);
+                GL.Disable(EnableCap.Blend);
 
                 BoundingNode?.Box.DrawSolid(context, Matrix4.Identity, Vector4.One);
             }
