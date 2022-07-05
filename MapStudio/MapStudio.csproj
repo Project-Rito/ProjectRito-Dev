@@ -64,6 +64,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GLFrameworkEngine\GLFrameworkEngine.csproj" />
+    <ProjectReference Include="..\HKX2Builders\HKX2Builders\HKX2Builders.csproj" />
+    <ProjectReference Include="..\HKX2Library\HKX2\HKX2.csproj" />
     <ProjectReference Include="..\MapStudio.UI\MapStudio.UI.csproj" />
     <ProjectReference Include="..\Plugins\UKingLibrary\UKingLibrary.csproj" />
     <ProjectReference Include="..\Toolbox.Core\Toolbox.Core.csproj" />
@@ -106,40 +108,7 @@
     <None Update="Icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="libgcc_s_seh-1.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="libgomp-1.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="libNavGen.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="libstdc++-6.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="libwinpthread-1.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="Lib\Fonts\FontBold.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Lib\HKX2.deps.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Lib\HKX2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Lib\HKX2.pdb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Lib\HKX2Builders.deps.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Lib\HKX2Builders.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Lib\HKX2Builders.pdb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Lib\libgcc_s_seh-1.dll">
@@ -172,11 +141,8 @@
     <None Update="tinyfiledialogs.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    
     <None Update="x86/cimgui.dll" Condition="'$(Platform)'=='x86' or '$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>%(Filename)%(Extension)</Link>
-    </None>
-    <None Update="x86/tinyfiledialogs.dll" Condition="'$(Platform)'=='x86' or '$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>%(Filename)%(Extension)</Link>
     </None>
@@ -184,7 +150,51 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>%(Filename)%(Extension)</Link>
     </None>
+    <None Update="x86/tinyfiledialogs.dll" Condition="'$(Platform)'=='x86' or '$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
     <None Update="x64/tinyfiledialogs.dll" Condition="'$(Platform)'=='x64' or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+    <None Update="x86/libNavGen.dll" Condition="'$(Platform)'=='x86' or '$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+    <None Update="x64/libNavGen.dll" Condition="'$(Platform)'=='x64' or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+    <None Update="x86/libgcc_s_seh-1.dll" Condition="'$(Platform)'=='x86' or '$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+    <None Update="x64/libgcc_s_seh-1.dll" Condition="'$(Platform)'=='x64' or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+    <None Update="x86/libgomp-1.dll" Condition="'$(Platform)'=='x86' or '$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+    <None Update="x64/libgomp-1.dll" Condition="'$(Platform)'=='x64' or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+    <None Update="x86/libstdc++-6.dll" Condition="'$(Platform)'=='x86' or '$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+    <None Update="x64/libstdc++-6.dll" Condition="'$(Platform)'=='x64' or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+    <None Update="x86/libwinpthread-1.dll" Condition="'$(Platform)'=='x86' or '$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>%(Filename)%(Extension)</Link>
+    </None>
+    <None Update="x64/libwinpthread-1.dll" Condition="'$(Platform)'=='x64' or '$(Configuration)|$(Platform)'=='Release|AnyCPU'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>%(Filename)%(Extension)</Link>
     </None>

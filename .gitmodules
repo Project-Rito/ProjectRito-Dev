@@ -1,0 +1,3 @@
+[submodule "HKX2Builders"]
+	path = HKX2Builders
+	url = https://github.com/Project-Rito/HKX2Builders.git
