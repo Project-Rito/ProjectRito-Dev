@@ -415,8 +415,11 @@ namespace UKingLibrary
             }
 
             var titleBgPath = PluginConfig.GetContentPath("Pack/TitleBG.pack");
-            TitleBG = new SARC();
-            TitleBG.Load(File.OpenRead(titleBgPath), "TitleBG.pack");
+            if (File.Exists(titleBgPath))
+            {
+                TitleBG = new SARC();
+                TitleBG.Load(File.OpenRead(titleBgPath), "TitleBG.pack");
+            }
         }
 
         public override List<MenuItemModel> GetViewportMenuIcons()
