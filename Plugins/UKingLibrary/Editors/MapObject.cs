@@ -67,6 +67,8 @@ namespace UKingLibrary
         /// </summary>
         public EditableObject Render;
 
+        public HavokMeshShapeRender CollisionRender;
+
         private IMapLoader ParentLoader;
 
         /// <summary>
@@ -174,6 +176,8 @@ namespace UKingLibrary
             {
                 Render?.Dispose();
             }
+            if (CollisionRender != null)
+                CollisionRender?.Dispose();
 
             //Get the renderable object
             Render = LoadRenderObject(ActorInfo, Properties, Parent);
@@ -188,7 +192,7 @@ namespace UKingLibrary
                     header += " " + TranslationSource.GetText($"ACTOR_NAME {Name}");
                 return header;
             };
-            
+
             Render.UINode.CustomHeaderDraw = () =>
             {
                 ImGui.BeginGroup(); // Set this to a single group so that the tooltip applies to the whole text section
@@ -202,11 +206,11 @@ namespace UKingLibrary
                 }
                 else
                     ImGui.Text(Name);
-                
+
                 ImGui.EndGroup();
             };
 
-            
+
             Render.UINode.GetTooltip = () =>
             {
                 if (TranslationSource.HasKey($"ACTOR_DOCS {Name}"))
@@ -214,7 +218,7 @@ namespace UKingLibrary
                 else
                     return TranslationSource.GetText("NO_ACTOR_DOCUMENTATION_FOUND");
             };
-            
+
             //Property drawer for gui node
             Render.UINode.TagUI = new NodePropertyUI();
             Render.IsVisibleCallback += delegate
@@ -291,6 +295,13 @@ namespace UKingLibrary
                 return ((MapObject)Clone()).Render;
             };
 
+            Render.DrawCallback += delegate
+            {
+                RenderAdditional();
+            };
+
+
+
             foreach (var property in Properties.ToList())
                 ValidateProperty(property.Key, property.Value);
 
@@ -317,7 +328,7 @@ namespace UKingLibrary
             return clone;
         }
 
-        public IDictionary<string, dynamic> DeepCloneDictionary(IDictionary<string, dynamic> properties)
+        private static IDictionary<string, dynamic> DeepCloneDictionary(IDictionary<string, dynamic> properties)
         {
             IDictionary<string, dynamic> clonedDictionary = new Dictionary<string, dynamic>();
             foreach (KeyValuePair<string, dynamic> entry in properties)
@@ -332,7 +343,7 @@ namespace UKingLibrary
             return clonedDictionary;
         }
 
-        public IList<dynamic> DeepCloneList(IList<dynamic> properties)
+        private static IList<dynamic> DeepCloneList(IList<dynamic> properties)
         {
             IList<dynamic> clonedList = new List<dynamic>();
             foreach (dynamic value in properties)
@@ -347,7 +358,7 @@ namespace UKingLibrary
             return clonedList;
         }
 
-        public void UpdateActorModel()
+        private void UpdateActorModel()
         {
             var context = GLContext.ActiveContext;
             var srcLinks = Render.SourceObjectLinks;
@@ -368,7 +379,8 @@ namespace UKingLibrary
             Render.DestObjectLinks = destLinks;
         }
 
-        private void OnPropertyUpdate(string key, MapData.Property<dynamic> property) {
+        private void OnPropertyUpdate(string key, MapData.Property<dynamic> property)
+        {
             if (!ValidateProperty(key, property))
                 return;
             if (key == "UnitConfigName")
@@ -558,7 +570,8 @@ namespace UKingLibrary
         /// <summary>
         /// Adds the object to the current scene.
         /// </summary>
-        public void AddToScene() {
+        public void AddToScene()
+        {
             ParentLoader.Scene.AddRenderObject(Render);
             //Add the actor to the animation player
             ParentLoader.ParentEditor.Workspace.StudioSystem.AddActor(this);
@@ -567,7 +580,8 @@ namespace UKingLibrary
         /// <summary>
         /// Removes the object from the current scene.
         /// </summary>
-        public void RemoveFromScene() {
+        public void RemoveFromScene()
+        {
             ParentLoader.Scene.RemoveRenderObject(Render);
             //Remove the actor from the animation player
             ParentLoader.ParentEditor.Workspace.StudioSystem.RemoveActor(this);
@@ -646,7 +660,7 @@ namespace UKingLibrary
             if (Properties.ContainsKey("LinksToObj"))
                 Properties.Remove("LinksToObj");
             Properties.Add("LinksToObj", new List<dynamic>());
-            
+
             foreach (LinkInstance link in DestLinks)
             {
                 Properties["LinksToObj"].Add(link.Properties);
@@ -676,7 +690,12 @@ namespace UKingLibrary
             }
         }
 
-        public virtual EditableObject LoadRenderObject(IDictionary<string, dynamic> actor, IDictionary<string, dynamic> obj, NodeBase parent)
+        private void RenderAdditional()
+        {
+
+        }
+
+        private EditableObject LoadRenderObject(IDictionary<string, dynamic> actor, IDictionary<string, dynamic> obj, NodeBase parent)
         {
             string name = obj["UnitConfigName"].Value;
 
@@ -750,7 +769,12 @@ namespace UKingLibrary
             return render;
         }
 
-        private BfresRender GetActorSpecificBfresRender(IDictionary<string, dynamic> actor, BfresRender render)
+        private static HavokMeshShapeRender LoadCollisionRenderObject(IDictionary<string, dynamic> actor, NodeBase parent)
+        {
+            return new HavokMeshShapeRender(parent);
+        }
+
+        private static BfresRender GetActorSpecificBfresRender(IDictionary<string, dynamic> actor, BfresRender render)
         {
             bool containsActorMainModel = false;
             foreach (var model in render.Models)
@@ -827,7 +851,7 @@ namespace UKingLibrary
                             render.Textures.TryAdd(tex.Key, tex.Value);
                 }
 
-                
+
                 // Attach terrain textures in case we need them
                 candidate = BfresLoader.GetTextures(teratexpathNX);
                 if (candidate != null)

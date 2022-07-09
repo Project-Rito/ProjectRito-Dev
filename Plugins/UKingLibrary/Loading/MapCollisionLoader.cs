@@ -579,6 +579,7 @@ namespace UKingLibrary
             public ShapeInfo ShapeInfo;
             public hkpStaticCompoundShapeInstance Instance;
             public int RigidBodyIndex;
+            public int SystemIndex;
             public BVNode LeafNode;
             public bool NullActorInfoPtr;
         }
@@ -612,32 +613,57 @@ namespace UKingLibrary
         /// <summary>
         /// Looks through all rigid bodies and finds a shape instance based on userData. Returns the index.
         /// </summary>
-        private uint? GetShapeInstanceIndexByUserData(ulong userData)
+        private int GetShapeInstanceIndexByUserData(ulong userData)
         {
-            foreach (var rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies)
+            foreach (var system in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems)
             {
-                for (int i = 0; i < ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances.Count; i++)
-                    if (((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances[i].m_userData == userData)
-                        return (uint)i;
+                foreach (var rigidBody in system.m_rigidBodies)
+                {
+                    for (int i = 0; i < ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances.Count; i++)
+                        if (((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances[i].m_userData == userData)
+                            return i;
+                }
             }
 
-            return null;
+            return -1;
         }
         /// <summary>
         /// Finds which rigid body contains a shape instance with the given userData.
         /// </summary>
         private int GetShapeRigidBodyIndexByUserData(ulong userData)
         {
-            for (int index = 0; index < ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.Count; index++)
+            foreach (var system in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems)
             {
-                foreach (var shapeInstance in ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[index].m_collidable.m_shape).m_instances)
+                for (int index = 0; index < system.m_rigidBodies.Count; index++)
                 {
-                    if (shapeInstance.m_userData == userData)
-                        return index;
+                    foreach (var shapeInstance in ((hkpStaticCompoundShape)system.m_rigidBodies[index].m_collidable.m_shape).m_instances)
+                    {
+                        if (shapeInstance.m_userData == userData)
+                            return index;
+                    }
                 }
             }
 
-            return 0;
+            return -1;
+        }
+        /// <summary>
+        /// Finds which system contains the rigid body that contains a shape instance with the given userData.
+        /// </summary>
+        private int GetShapeSystemIndexByUserData(ulong userData)
+        {
+            for (int index = 0; index < ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems.Count; index++)
+            {
+                foreach (var rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[index].m_rigidBodies)
+                {
+                    foreach (var shapeInstance in ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances)
+                    {
+                        if (shapeInstance.m_userData == userData)
+                            return index;
+                    }
+                }
+            }
+
+            return -1;
         }
         /// <summary>
         /// Find ActorInfo based on a shapeInfo index it points to.
@@ -658,12 +684,11 @@ namespace UKingLibrary
         /// <summary>
         /// Finds a BVH leaf node containing the given primative.
         /// </summary>
-        private BVNode GetShapeLeafNodeByPrimitive(uint? primitive)
+        private BVNode GetShapeLeafNodeByPrimitive(int primitive, int systemIndex)
         {
-            if (primitive == null)
+            if (primitive == -1)
                 return null;
-
-            foreach (var rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies)
+            foreach (var rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[systemIndex].m_rigidBodies)
             {
                 BVNode rigidBodyBVH = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_tree.GetBVH();
                 var test = BVNode.GetLeafNodes(rigidBodyBVH);
@@ -687,7 +712,8 @@ namespace UKingLibrary
                     ShapeInfo = shapeInfo,
                     Instance = GetShapeInstanceByUserData((ulong)i),
                     RigidBodyIndex = GetShapeRigidBodyIndexByUserData((ulong)i),
-                    LeafNode = GetShapeLeafNodeByPrimitive(GetShapeInstanceIndexByUserData((ulong)i)),
+                    SystemIndex = GetShapeSystemIndexByUserData((ulong)i),
+                    LeafNode = GetShapeLeafNodeByPrimitive(GetShapeInstanceIndexByUserData((ulong)i), GetShapeSystemIndexByUserData((ulong)i)),
                     NullActorInfoPtr = shapeInfo.m_ActorInfoIndex == -1
                 };
 
@@ -713,8 +739,9 @@ namespace UKingLibrary
         {
             StaticCompound.m_ActorInfo.Clear();
             StaticCompound.m_ShapeInfo.Clear();
-            foreach (hkpRigidBody rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies)
-                ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances.Clear();
+            foreach (hkpPhysicsSystem system in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems)
+                foreach (hkpRigidBody rigidBody in system.m_rigidBodies)
+                    ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances.Clear();
 
             foreach (ActorShapePairing pairing in shapePairings)
                 if (pairing.ActorInfo != null)
@@ -770,33 +797,43 @@ namespace UKingLibrary
                 foreach (ShapeInfoShapeInstancePairing shapeData in pairing.Shapes)
                 {
                     shapeData.Instance.m_userData = (ulong)StaticCompound.m_ShapeInfo.FindIndex(x => x == shapeData.ShapeInfo);
-                    ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[shapeData.RigidBodyIndex].m_collidable.m_shape).m_instances.Add(shapeData.Instance);
-                }
-            }
-            
-            foreach (var rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies)
-            {
-                ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances.Sort(delegate (hkpStaticCompoundShapeInstance x, hkpStaticCompoundShapeInstance y)
-                {
-                    if (x.m_userData == y.m_userData)
-                        return 0;
-                    return (x.m_userData > y.m_userData) ? 1 : -1;
-                });
-            }
-
-            foreach (var rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies)
-            {
-                for (int i = 0; i < ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances.Count; i++)
-                {
-                    hkpStaticCompoundShapeInstance instance = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances[i];
-                    StaticCompound.m_ShapeInfo[(int)instance.m_userData].m_InstanceId = i;
+                    ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[shapeData.SystemIndex].m_rigidBodies[shapeData.RigidBodyIndex].m_collidable.m_shape).m_instances.Add(shapeData.Instance);
                 }
             }
 
+            foreach (var system in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems)
+            {
+                foreach (var rigidBody in system.m_rigidBodies)
+                {
+                    ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances.Sort(delegate (hkpStaticCompoundShapeInstance x, hkpStaticCompoundShapeInstance y)
+                    {
+                        if (x.m_userData == y.m_userData)
+                            return 0;
+                        return (x.m_userData > y.m_userData) ? 1 : -1;
+                    });
+                }
+            }
 
-            List<List<BVNode>> rigidBodyLeafNodes = new List<List<BVNode>>();
-            foreach (hkpRigidBody rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies)
-                rigidBodyLeafNodes.Add(new List<BVNode>());
+            foreach (var system in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems)
+            {
+                foreach (var rigidBody in system.m_rigidBodies)
+                {
+                    for (int i = 0; i < ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances.Count; i++)
+                    {
+                        hkpStaticCompoundShapeInstance instance = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_instances[i];
+                        StaticCompound.m_ShapeInfo[(int)instance.m_userData].m_InstanceId = i;
+                    }
+                }
+            }
+
+
+            List<List<List<BVNode>>> leafNodes = new List<List<List<BVNode>>>();
+            foreach (hkpPhysicsSystem system in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems)
+            {
+                leafNodes.Add(new List<List<BVNode>>());
+                foreach (hkpRigidBody rigidBody in system.m_rigidBodies)
+                    leafNodes.Last().Add(new List<BVNode>());
+            }
 
             foreach (ActorShapePairing pairing in shapePairings)
             {
@@ -805,19 +842,22 @@ namespace UKingLibrary
                     if (shapeData.LeafNode == null)
                         continue;
                     shapeData.LeafNode.Primitive = (uint)GetShapeInstanceIndexByUserData(shapeData.Instance.m_userData);
-                    rigidBodyLeafNodes[shapeData.RigidBodyIndex].Add(shapeData.LeafNode);
+                    leafNodes[shapeData.SystemIndex][shapeData.RigidBodyIndex].Add(shapeData.LeafNode);
                 }
             }
 
-            for (int i = 0; i < ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.Count; i++)
+            for (int systemIndex = 0; systemIndex < ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems.Count; systemIndex++)
             {
-                if (rigidBodyLeafNodes[i].Count == 0)
-                    continue;
-                BVNode rigidBodyBVH = new BVNode() { IsLeaf = false };
-                rigidBodyBVH = BVNode.InsertLeafs(rigidBodyBVH, rigidBodyLeafNodes[i]);
-                ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_nodes = rigidBodyBVH.BuildAxis6Tree();
-                ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_domain.m_min = new Vector4(rigidBodyBVH.Min, 0);
-                ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[i].m_collidable.m_shape).m_tree.m_domain.m_max = new Vector4(rigidBodyBVH.Max, 0);
+                for (int rigidBodyIndex = 0; rigidBodyIndex < ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[systemIndex].m_rigidBodies.Count; rigidBodyIndex++)
+                {
+                    if (leafNodes[systemIndex][rigidBodyIndex].Count == 0)
+                        continue;
+                    BVNode rigidBodyBVH = new BVNode() { IsLeaf = false };
+                    rigidBodyBVH = BVNode.InsertLeafs(rigidBodyBVH, leafNodes[systemIndex][rigidBodyIndex]);
+                    ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[systemIndex].m_rigidBodies[rigidBodyIndex].m_collidable.m_shape).m_tree.m_nodes = rigidBodyBVH.BuildAxis6Tree();
+                    ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[systemIndex].m_rigidBodies[rigidBodyIndex].m_collidable.m_shape).m_tree.m_domain.m_min = new Vector4(rigidBodyBVH.Min, 0);
+                    ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[systemIndex].m_rigidBodies[rigidBodyIndex].m_collidable.m_shape).m_tree.m_domain.m_max = new Vector4(rigidBodyBVH.Max, 0);
+                }
             }
         }
         #endregion
