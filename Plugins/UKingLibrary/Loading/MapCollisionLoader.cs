@@ -685,18 +685,14 @@ namespace UKingLibrary
         /// <summary>
         /// Finds a BVH leaf node containing the given primative.
         /// </summary>
-        private BVNode GetShapeLeafNodeByPrimitive(int primitive, int systemIndex)
+        private BVNode GetShapeLeafNodeByPrimitive(int primitive, int rigidBodyIndex, int systemIndex)
         {
             if (primitive == -1)
                 return null;
-            foreach (var rigidBody in ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[systemIndex].m_rigidBodies)
-            {
-                BVNode rigidBodyBVH = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_tree.GetBVH();
-                var test = BVNode.GetLeafNodes(rigidBodyBVH);
-                foreach (BVNode leafNode in BVNode.GetLeafNodes(rigidBodyBVH))
-                    if (leafNode.Primitive == primitive)
-                        return leafNode;
-            }
+            BVNode rigidBodyBVH = ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[systemIndex].m_rigidBodies[rigidBodyIndex].m_collidable.m_shape).m_tree.GetBVH();
+            foreach (BVNode leafNode in BVNode.GetLeafNodes(rigidBodyBVH))
+                if (leafNode.Primitive == primitive)
+                    return leafNode;
 
             return null;
         }
@@ -714,7 +710,7 @@ namespace UKingLibrary
                     Instance = GetShapeInstanceByUserData((ulong)i),
                     RigidBodyIndex = GetShapeRigidBodyIndexByUserData((ulong)i),
                     SystemIndex = GetShapeSystemIndexByUserData((ulong)i),
-                    LeafNode = GetShapeLeafNodeByPrimitive(GetShapeInstanceIndexByUserData((ulong)i), GetShapeSystemIndexByUserData((ulong)i)),
+                    LeafNode = GetShapeLeafNodeByPrimitive(GetShapeInstanceIndexByUserData((ulong)i), GetShapeRigidBodyIndexByUserData((ulong)i), GetShapeSystemIndexByUserData((ulong)i)),
                     NullActorInfoPtr = shapeInfo.m_ActorInfoIndex == -1
                 };
 
@@ -936,6 +932,16 @@ namespace UKingLibrary
                         ImGui.Separator();
                         ImGui.Text("Null ActorInfo Ptr:");
                         ImGui.Text(shapePairing.NullActorInfoPtr.ToString());
+                        ImGui.Separator();
+                        if (!shapePairing.NullActorInfoPtr)
+                        {
+                            ImGui.Text("HashId:");
+                            ImGui.Text(actorPairing.ActorInfo?.m_HashId.ToString());
+                            ImGui.Separator();
+                            ImGui.Text("SRTHash:");
+                            ImGui.Text(actorPairing.ActorInfo.m_SRTHash.ToString());
+                            ImGui.Separator();
+                        }
                     };
 
                     ShapeRenders.Add(render);
