@@ -11,6 +11,7 @@ using HKX2;
 using HKX2Builders;
 using HKX2Builders.Extensions;
 using GLFrameworkEngine;
+using ImGuiNET;
 
 /*
  THE STORY OF THE BORED PROGRAMMER
@@ -25,7 +26,7 @@ and got to work.
 
 namespace UKingLibrary
 {
-    public class MapCollisionLoader : IDrawable
+    public class MapCollisionLoader
     {
         public NodeBase RootNode;
 
@@ -39,7 +40,7 @@ namespace UKingLibrary
 
         private STFileLoader.Settings FileSettings;
 
-        public void Load(Stream stream, string fileName)
+        public void Load(Stream stream, string fileName, GLScene scene = null)
         {
             FileSettings = STFileLoader.TryDecompressFile(stream, fileName);
 
@@ -63,7 +64,7 @@ namespace UKingLibrary
 
             ShapePairings = GenerateActorShapePairings();
 
-            UpdateRenders(); // Rendering functionality
+            UpdateRenders(scene); // Rendering functionality
         }
 
         #region Interfacing for collision manipulation
@@ -886,17 +887,10 @@ namespace UKingLibrary
 
         private List<HavokMeshShapeRender> ShapeRenders = new List<HavokMeshShapeRender>();
 
-        public void DrawModel(GLContext context, Pass pass)
+        private void UpdateRenders(GLScene scene = null)
         {
-            if (!IsVisible)
-                return;
-
             foreach (HavokMeshShapeRender render in ShapeRenders)
-                render.DrawModel(context, pass);
-        }
-
-        private void UpdateRenders()
-        {
+                scene?.RemoveRenderObject(render);
             ShapeRenders.Clear();
             foreach (ActorShapePairing actorPairing in ShapePairings)
             {
@@ -916,7 +910,37 @@ namespace UKingLibrary
                     if (shapePairing.LeafNode != null)
                         render.SetBounding(new BoundingNode(shapePairing.LeafNode.Min * GLContext.PreviewScale, shapePairing.LeafNode.Max * GLContext.PreviewScale));
 
+                    ((EditableObjectNode)render.UINode).UIProperyDrawer += delegate
+                    {
+                        ImGui.Separator();
+                        ImGui.Text("Debug Shape Info:");
+                        ImGui.Separator();
+                        ImGui.Text("System Index:");
+                        ImGui.Text(shapePairing.SystemIndex.ToString());
+                        ImGui.Separator();
+                        ImGui.Text("RigidBody Index:");
+                        ImGui.Text(shapePairing.RigidBodyIndex.ToString());
+                        ImGui.Separator();
+                        ImGui.Text("LeafNode:");
+                        if (shapePairing.LeafNode == null)
+                        {
+                            ImGui.Text("Null");
+                        }
+                        else
+                        {
+                            ImGui.Text("Min:");
+                            ImGui.Text(shapePairing.LeafNode.Min.ToString());
+                            ImGui.Text("Max:");
+                            ImGui.Text(shapePairing.LeafNode.Max.ToString());
+                        }
+                        ImGui.Separator();
+                        ImGui.Text("Null ActorInfo Ptr:");
+                        ImGui.Text(shapePairing.NullActorInfoPtr.ToString());
+                    };
+
                     ShapeRenders.Add(render);
+
+                    scene?.AddRenderObject(render);
                 }
             }
         }

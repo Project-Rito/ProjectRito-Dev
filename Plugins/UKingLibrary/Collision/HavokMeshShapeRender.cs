@@ -11,15 +11,27 @@ using HKX2Builders.Extensions;
 
 namespace UKingLibrary
 {
-    public class HavokMeshShapeRender : EditableObject
+    public class HavokMeshShapeRender : EditableObject, IColorPickable
     {
         RenderMesh<HavokMeshShapeVertex> ShapeMesh;
 
         private BoundingNode _boundingNode;
         public override BoundingNode BoundingNode => _boundingNode;
 
+        private const bool COLLISIONSHAPE_DEBUG = true;
+
         public HavokMeshShapeRender(NodeBase parent) : base(parent)
         {
+            UINode.Tag = this;
+            UINode.Header = "Havok Shape";
+
+            IsVisibleCallback += delegate
+            {
+                return MapData.ShowCollisionShapes;
+            };
+
+            if (!COLLISIONSHAPE_DEBUG)
+                CanSelect = false;
         }
 
         public override void DrawModel(GLContext context, Pass pass)
@@ -41,6 +53,26 @@ namespace UKingLibrary
 
                 BoundingNode?.Box.DrawSolid(context, Matrix4.Identity, Vector4.One);
             }
+        }
+
+        public void DrawColorPicking(GLContext context)
+        {
+            if (!COLLISIONSHAPE_DEBUG)
+                return; // We want to be able to click through this.
+
+            var shader = GlobalShaders.GetShader("PICKING");
+            context.CurrentShader = shader;
+
+            shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
+
+            context.ColorPicker.SetPickingColor(this, shader);
+            GL.Enable(EnableCap.CullFace);
+            GL.Disable(EnableCap.Blend);
+            GL.Enable(EnableCap.PolygonOffsetFill);
+            GL.PolygonOffset(-4f, 1f);
+            ShapeMesh.Draw(context);
+            GL.Disable(EnableCap.PolygonOffsetFill);
+            GL.Disable(EnableCap.CullFace);
         }
 
         public void LoadShape(hkpBvCompressedMeshShape shape)

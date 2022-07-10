@@ -238,6 +238,7 @@ UVTESTPATTERN - UVTestPattern
 WEIGHTS - Weights
 TANGENTS - Tangents
 BITANGENTS - Bitangents
+COLOR_PICKING - Color Picking
 
 # Debug Stats
 
