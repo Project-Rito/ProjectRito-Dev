@@ -156,9 +156,12 @@ namespace UKingLibrary
             {
                 MapCollisionLoader collisionLoader = new MapCollisionLoader();
                 collisionLoader.CreateForCaching();
+
+                bool failure = false;
                 foreach (BakedCollisionShapeCacheable info in actor.Value)
-                    if (!collisionLoader.AddShape(info, 0, System.Numerics.Vector3.Zero, System.Numerics.Quaternion.Identity, System.Numerics.Vector3.One))
-                        continue; // Do not cache if part of the collision is not obtainable
+                    failure |= !collisionLoader.AddShape(info, 0, System.Numerics.Vector3.Zero, System.Numerics.Quaternion.Identity, System.Numerics.Vector3.One);
+                if (failure)
+                    continue; // Do not cache if part of the collision is not obtainable
                 collisionLoader.Save(File.Create(Path.Join(cacheDir, $"{actor.Key}.hksc")));
             }
         }
