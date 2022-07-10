@@ -18,7 +18,7 @@ namespace UKingLibrary
         private BoundingNode _boundingNode;
         public override BoundingNode BoundingNode => _boundingNode;
 
-        private const bool COLLISIONSHAPE_DEBUG = true;
+        private const bool COLLISIONSHAPE_DEBUG = false;
 
         public HavokMeshShapeRender(NodeBase parent) : base(parent)
         {
