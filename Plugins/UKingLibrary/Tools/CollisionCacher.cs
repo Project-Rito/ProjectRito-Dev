@@ -9,6 +9,7 @@ using Toolbox.Core;
 using Toolbox.Core.IO;
 using CafeLibrary;
 using HKX2;
+using MapStudio.UI;
 
 namespace UKingLibrary
 {
@@ -18,7 +19,7 @@ namespace UKingLibrary
         {
             CacheDungeonCollision(cacheDir);
             CacheFieldCollision(cacheDir);
-            
+            TinyFileDialog.MessageBoxInfoOk(TranslationSource.GetText($"BAKED_COLLISION_CACHED"));
         }
 
         public static void CacheFieldCollision(string cacheDir)
@@ -156,7 +157,8 @@ namespace UKingLibrary
                 MapCollisionLoader collisionLoader = new MapCollisionLoader();
                 collisionLoader.CreateForCaching();
                 foreach (BakedCollisionShapeCacheable info in actor.Value)
-                    collisionLoader.AddShape(info, 0, System.Numerics.Vector3.Zero, System.Numerics.Quaternion.Identity, System.Numerics.Vector3.One);
+                    if (!collisionLoader.AddShape(info, 0, System.Numerics.Vector3.Zero, System.Numerics.Quaternion.Identity, System.Numerics.Vector3.One))
+                        continue; // Do not cache if part of the collision is not obtainable
                 collisionLoader.Save(File.Create(Path.Join(cacheDir, $"{actor.Key}.hksc")));
             }
         }

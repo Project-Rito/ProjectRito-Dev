@@ -22,6 +22,7 @@ namespace UKingLibrary
         }
 
         public hkpRigidBody RigidBody;
+        public int SystemIndex; // As far as I can tell, the game references systems by index. Probably why there are always 17 systems.
         public sbyte BodyGroup;
         public byte BodyLayerType;
         public bool NullActorInfoPtr;

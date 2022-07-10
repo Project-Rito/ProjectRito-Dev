@@ -80,7 +80,7 @@ namespace UKingLibrary
                     for (int i = 0; i < pairing.Shapes.Count; i++)
                     {
                         ShapeInfoShapeInstancePairing shape = pairing.Shapes[i];
-                        hkpRigidBody rigidBody = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[shape.RigidBodyIndex];
+                        hkpRigidBody rigidBody = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[shape.SystemIndex].m_rigidBodies[shape.RigidBodyIndex];
 
                         BakedCollisionShapeCacheable cacheable = new BakedCollisionShapeCacheable
                         {
@@ -144,6 +144,7 @@ namespace UKingLibrary
                                 m_storageIndex = rigidBody.m_storageIndex,
                                 m_uid = rigidBody.m_uid
                             },
+                            SystemIndex = shape.SystemIndex,
                             BodyGroup = shape.ShapeInfo.m_BodyGroup,
                             BodyLayerType = shape.ShapeInfo.m_BodyLayerType,
                             NullActorInfoPtr = shape.NullActorInfoPtr
@@ -158,11 +159,14 @@ namespace UKingLibrary
             return null;
         }
 
-        public void AddShape(BakedCollisionShapeCacheable cacheable, uint hashId, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
+        /// <summary>
+        /// Add shape to collision for actor. Returns true on success.
+        /// </summary>
+        public bool AddShape(BakedCollisionShapeCacheable cacheable, uint hashId, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
         {
             // Some shapes we can't find the aabb for yet.
             if (cacheable.Shape is not hkpBvCompressedMeshShape && cacheable.Shape is not hkpConvexVerticesShape)
-                return;
+                return false;
 
             #region Build Instance
             InstanceFlags instanceFlags = cacheable.Instance.m_instanceFlags;
@@ -193,25 +197,25 @@ namespace UKingLibrary
             // Generate rigidbody if needed
             cacheable.RigidBody.m_name = Prefix + cacheable.RigidBody.m_name.Substring(cacheable.RigidBody.m_name.IndexOf('_')); // Update name to match compound
 
-            int rigidBodyIdx = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.FindIndex(x => x.m_name == cacheable.RigidBody.m_name);
+            int rigidBodyIdx = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[cacheable.SystemIndex].m_rigidBodies.FindIndex(x => x.m_name == cacheable.RigidBody.m_name);
             if (rigidBodyIdx == -1)
             {
-                ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.Add(cacheable.RigidBody);
-                rigidBodyIdx = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies.Count - 1;
+                ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[cacheable.SystemIndex].m_rigidBodies.Add(cacheable.RigidBody);
+                rigidBodyIdx = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[cacheable.SystemIndex].m_rigidBodies.Count - 1;
             }
             else // When merging into an existing rigidbody we might need to update some stuff.
             {
-                hkpRigidBody rigidBody = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[rigidBodyIdx];
+                hkpRigidBody rigidBody = ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[cacheable.SystemIndex].m_rigidBodies[rigidBodyIdx];
 
                 sbyte oldNumBitsForChildShapeKey = ((hkpStaticCompoundShape)rigidBody.m_collidable.m_shape).m_numBitsForChildShapeKey;
                 sbyte newNumBitsForChildShapeKey = ((hkpStaticCompoundShape)cacheable.RigidBody.m_collidable.m_shape).m_numBitsForChildShapeKey;
                 if (newNumBitsForChildShapeKey > oldNumBitsForChildShapeKey)
-                    ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[rigidBodyIdx].m_collidable.m_shape).m_numBitsForChildShapeKey = newNumBitsForChildShapeKey;
+                    ((hkpStaticCompoundShape)((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[cacheable.SystemIndex].m_rigidBodies[rigidBodyIdx].m_collidable.m_shape).m_numBitsForChildShapeKey = newNumBitsForChildShapeKey;
 
                 byte oldNumShapeKeysInContactPointProperties = rigidBody.m_numShapeKeysInContactPointProperties;
                 byte newNumShapeKeysInContactPointProperties = cacheable.RigidBody.m_numShapeKeysInContactPointProperties;
                 if (newNumShapeKeysInContactPointProperties > oldNumShapeKeysInContactPointProperties)
-                    ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[0].m_rigidBodies[rigidBodyIdx].m_numShapeKeysInContactPointProperties = newNumShapeKeysInContactPointProperties;
+                    ((hkpPhysicsData)Root.m_namedVariants[0].m_variant).m_systems[cacheable.SystemIndex].m_rigidBodies[rigidBodyIdx].m_numShapeKeysInContactPointProperties = newNumShapeKeysInContactPointProperties;
             }
 
             // Add our data
@@ -227,6 +231,7 @@ namespace UKingLibrary
                     },
                     Instance = shapeInstance,
                     RigidBodyIndex = rigidBodyIdx, // Which rigid body should this live in?
+                    SystemIndex = cacheable.SystemIndex, // Which system should this live in?
                     LeafNode = leafBvhNode,
                     NullActorInfoPtr = cacheable.NullActorInfoPtr
                 });
@@ -254,6 +259,7 @@ namespace UKingLibrary
                             },
                             Instance = shapeInstance,
                             RigidBodyIndex = rigidBodyIdx, // Which rigid body should this live in?
+                            SystemIndex = cacheable.SystemIndex, // Which system should this live in?
                             LeafNode = leafBvhNode,
                             NullActorInfoPtr = cacheable.NullActorInfoPtr
                         }
@@ -261,6 +267,8 @@ namespace UKingLibrary
                 });
             }
             #endregion
+
+            return true;
         }
         
         public void RemoveShape(uint hashId)

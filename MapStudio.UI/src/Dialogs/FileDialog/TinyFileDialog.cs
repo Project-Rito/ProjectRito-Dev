@@ -50,12 +50,12 @@ namespace MapStudio.UI
 
         public static int MessageBoxInfoOk(string message)
         {
-            return tinyfd_messageBox("Cafe Shader Studio", message, "ok", "info", 1);
+            return tinyfd_messageBox(TranslationSource.GetText("RITO_EDITOR"), message, "ok", "info", 1);
         }
 
         public static int MessageBoxInfoYesNo(string message)
         {
-            return tinyfd_messageBox("Cafe Shader Studio", message, "yesno", "question", 2);
+            return tinyfd_messageBox(TranslationSource.GetText("RITO_EDITOR"), message, "yesno", "question", 2);
         }
 
         private static string[] toFilterArray(List<FileFilter> filters)

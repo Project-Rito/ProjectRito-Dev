@@ -28,6 +28,7 @@ CACHE_BAKED_COLLISION - Cache Baked Collision
 BAKE_COLLISION - Bake Collision
 
 COLLISION_TOOLS - Collision Tools
+BAKED_COLLISION_CACHED - Baked collision cached
 
 ONLYONE_TOOLS - OnlyOne Tools
 REMOVE_ONLYONE - Remove OnlyOne
