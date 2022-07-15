@@ -277,9 +277,9 @@ namespace UKingLibrary
                 IList<dynamic> output = new List<dynamic>();
                 foreach (BymlNode item in input.Array)
                 {
-                    if (item is IDictionary<string, dynamic>)
+                    if (item.Type is NodeType.Hash)
                         output.Add(ValuesToProperties(item));
-                    else if (item is IList<dynamic>)
+                    else if (item.Type is NodeType.Array)
                         output.Add(ValuesToProperties(item));
                     else
                         output.Add(new MapData.Property<dynamic>(item.GetDynamic()));

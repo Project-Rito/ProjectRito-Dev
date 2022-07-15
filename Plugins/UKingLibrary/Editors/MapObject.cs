@@ -140,6 +140,7 @@ namespace UKingLibrary
         {
             MapData = mapData;
 
+            Properties = new Dictionary<string, dynamic>();
             Properties.Add("UnitConfigName", new MapData.Property<dynamic>(unitConfigName));
             Properties.Add("HashId", new MapData.Property<dynamic>(hashId));
             Properties.Add("Translate", new List<dynamic> { new MapData.Property<dynamic>(0), new MapData.Property<dynamic>(0), new MapData.Property<dynamic>(0) });
