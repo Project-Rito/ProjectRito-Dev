@@ -105,9 +105,9 @@ namespace UKingLibrary
             "Dynamic"
         };
 
-    public static void LoadActorDatabase()
+    public static void LoadActorDatabase(bool force = false)
         {
-            if (Actors.Count > 0)
+            if (Actors.Count > 0 && !force)
                 return;
 
             MapStudio.UI.ProcessLoading.Instance.Update(60, 100, "Loading actor database");

@@ -10,7 +10,7 @@ namespace UKingLibrary
 {
     public class Plugin : IPlugin
     {
-        public string Name => "BOTW Map Editor";
+        public string Name => TranslationSource.GetText("RITO_EDITOR");
 
         private static bool FirstLoad = true;
 

@@ -46,6 +46,8 @@ namespace GLFrameworkEngine
         //Use for updating UI events like outliner
         public EventHandler SelectionUIChanged;
 
+        public bool ClickToSelect = true;
+
         /// <summary>
         /// Gets objects which can be transformed and edited.
         /// </summary>
@@ -160,7 +162,7 @@ namespace GLFrameworkEngine
 
 
         public void OnMouseDown(GLContext context) {
-            if (KeyInfo.EventInfo.KeyAlt && MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
+            if (KeyInfo.EventInfo.KeyCtrl && MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
                 SetCursor(context, MouseEventInfo.X, MouseEventInfo.Y);
 
             foreach (IDrawableInput ob in Objects.Where(x => x is IDrawableInput))

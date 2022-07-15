@@ -2,7 +2,7 @@
 # Label    - Translated Text
 
 # Program
-TRACK_STUDIO - Track Studio
+RITO_EDITOR - Rito Editor
 OPENGL_VERSION - OpenGL Version
 
 # Themes
@@ -41,6 +41,7 @@ PIVOT - Pivot
 CONTROL_POINT - Control Point
 WORKSPACES - Workspaces
 EDITORS - Editors
+EDITOR - Editor
 IMPORT - Import
 EXPORT - Export
 LOADING - Loading
@@ -62,6 +63,7 @@ PLAY - Play
 STOP - Stop
 POINT - Point
 CONTROL_POINTS - Control Points
+CURSOR3D - 3D Cursor
 DEBUG - Debug
 WINDOWS - Windows
 DISPLAY_RADIUS - Display Radius
@@ -76,6 +78,7 @@ SOLID - Solid
 LINKS - Links
 SELECT_ALL - Select All
 DESELECT_ALL - Deselect All
+NEW_PROJECT - New Project
 
 SHOW_VISIBLE_ACTORS - Show Visible Actors
 SHOW_INVISIBLE_ACTORS - Show Invisible Actors
@@ -97,13 +100,14 @@ MENU_FILE - File
 MENU_NEW - New
 MENU_OPEN - Open
 MENU_RECENT - Recent
-MENU_SAVE - Save
-MENU_SAVE_AS - Save As
+MENU_SAVE_EDITOR - Save Editor
+MENU_SAVE_EDITOR_AS - Save Editor As
 MENU_CANCEL - Cancel
 MENU_OPEN_PROJECT - Open Project
 MENU_RECENT_PROJECTS - Recent Projects
 MENU_SAVE_PROJECT - Save Project
 MENU_SAVE_PROJECT_AS - Save Project As
+MENU_RENAME_PROJECT - Rename Project
 MENU_CLEAR_WORKSPACE - Clear Workspace
 MENU_EXIT - Exit
 MENU_HELP - Help
@@ -121,7 +125,9 @@ HIDE_ALL - Hide All
 LANGUAGE - Language
 
 PROJECT_NAME - Project Name
-PROJECT_FOLDER - Project Folder
+PROJECT_SAVE_DIRECTORY - Project Save Directory
+
+CLICK_TO_SELECT - Click To Select
 
 # Dock Windows
 
@@ -141,9 +147,11 @@ MESSAGES - Messages
 CHECK_ERRORS - Check Errors
 
 ERROR_FILE_UNSUPPORTED - File not supported {0}.
+ERROR_CREATE_DIRECTORY - Could not create directory {0}.
 
 LOADING_FILE - Loading file {0}
 SAVED_FILE - Saved file {0}
+NOTHING_SAVED - Nothing was saved!
 
 # Asset Window
 
@@ -180,10 +188,10 @@ ENABLE_BLOOM - Enable Bloom
 ENABLE_FOG - Enable Fog
 
 SHADOWS - Shadows
-
 SHADING - Shading
-
 CULLING - Culling
+
+NEW_OBJECT_LOCATION - New Object Location
 
 CREATE_NEW_WORKSPACE - File Load Creates New Workspace
 
@@ -230,6 +238,7 @@ UVTESTPATTERN - UVTestPattern
 WEIGHTS - Weights
 TANGENTS - Tangents
 BITANGENTS - Bitangents
+COLOR_PICKING - Color Picking
 
 # Debug Stats
 

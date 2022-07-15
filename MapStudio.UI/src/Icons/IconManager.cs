@@ -64,10 +64,10 @@ namespace MapStudio.UI
         public const char DELETE_ICON = '\uf2ed';
         public const char THUMB_RESIZE_ICON = '\uf00a';
 
-        public const char DESELECT_ICON = ' ';
-        public const char SELECT_ICON = ' ';
+        public const string DESELECT_ICON = ""; // Empty string since we have no icon for this yet
+        public const string SELECT_ICON = ""; // Empty string since we have no icon for this yet
 
-        
+
         public const char VIDEO_ICON = '\uf03d';
         public const char AUDIO_UP_ICON = '\uf028';
         public const char FLAG_CHECKERED = '\uf11e';

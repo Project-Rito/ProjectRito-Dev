@@ -30,6 +30,8 @@ namespace GLFrameworkEngine
             {
                 if (e.IsKeyDown(InputSettings.INPUT.Scene.SelectAll))
                     SelectAll(context);
+                if (e.IsKeyDown(InputSettings.INPUT.Scene.DeselectAll))
+                    DeselectAll(context);
                 if (e.IsKeyDown(InputSettings.INPUT.Scene.EditMode))
                     ToggleEditMode();
                 if (e.IsKeyDown(InputSettings.INPUT.Scene.Copy))

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using ImGuiNET;
 using Newtonsoft.Json;
 
@@ -92,6 +95,53 @@ namespace MapStudio.UI
             ImGui.GetStyle().Colors[(int)ImGuiCol.NavHighlight] = theme.NavHighlight;
             ImGui.GetStyle().Colors[(int)ImGuiCol.Button] = theme.Button;
             ImGui.GetStyle().Colors[(int)ImGuiCol.MenuBarBg] = theme.WindowBg;
+        }
+
+        /// <summary>
+        /// Generates a themed icon for the program. Modified some code from https://stackoverflow.com/questions/8949968/changing-an-images-color
+        /// </summary>
+        public static Icon ThemeIcon(Icon originalIcon, ThemeHandler theme)
+        {
+            Bitmap bitmap = originalIcon.ToBitmap();
+            BitmapData bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadWrite,
+                PixelFormat.Format24bppRgb
+            );
+
+            int numPixels = bitmap.Width * bitmap.Height;
+            byte[] pixels = new byte[numPixels * 3]; // rgb
+
+            Marshal.Copy(bitmapData.Scan0, pixels, 0, pixels.Length);
+
+            byte red, green, blue;
+            for (int i = 0; i < pixels.Length; i += 3)
+            {
+                blue = pixels[i];
+                green = pixels[i + 1];
+                red = pixels[i + 2];
+
+                // Change the stuff
+                if (red == 0) // We want to change the color of only the black color. We only really need to check the red value for this.
+                {
+                    if (theme.Border.X > 0.95f && theme.Border.Y > 0.95f && theme.Border.Z > 0.95f) // If the theme is too bright, leave it
+                    {
+                        red = (byte)(theme.Border.X * 255);
+                        green = (byte)(theme.Border.Y * 255);
+                        blue = (byte)(theme.Border.Z * 255);
+                    }
+                }
+
+                pixels[i] = blue;
+                pixels[i + 1] = green;
+                pixels[i + 2] = red;
+            }
+
+            Marshal.Copy(pixels, 0, bitmapData.Scan0, pixels.Length);
+
+            bitmap.UnlockBits(bitmapData);
+
+            return Icon.FromHandle(bitmap.GetHicon());
         }
 
         public static void Load()

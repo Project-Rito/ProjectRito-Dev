@@ -40,7 +40,15 @@ namespace UKingLibrary
         public static bool DebugTerrainSections = false;
 
         [JsonProperty]
+        public static bool AreasSelectByBorders = true;
+
+        [JsonProperty]
+        public static float AreaOpacity = 0.1f;
+
+        [JsonProperty]
         public static bool FirstStartup = true;
+
+        public static Action PathsChanged = null;
 
         //Only load the config once when this constructor is activated.
         internal static bool init = false;
@@ -52,7 +60,7 @@ namespace UKingLibrary
             if (ImGui.Button(TranslationSource.GetText("UPDATE_ACTORDOCS")))
                 ActorDocs.Update();
 
-            if (ImGui.BeginMenu($"{TranslationSource.GetText("MOD PATHS")}##uk_vmenu01"))
+            if (ImGui.BeginMenu($"{TranslationSource.GetText("MOD_PATHS")}##uk_vmenu01"))
             {
                 for (int i = 0; i < ModPaths.Count; i++)
                 {
@@ -61,20 +69,20 @@ namespace UKingLibrary
                     {
                         ModPaths[i] = path;
                         Save();
+                        PathsChanged?.Invoke();
                     }
                 }
-                
 
                 ImGui.EndMenu();
             }
 
-            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW GAME PATH"), ref GamePath, HasValidGamePath))
+            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW_GAME_PATH"), ref GamePath, HasValidGamePath))
                 Save();
 
-            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW UPDATE PATH"), ref UpdatePath, HasValidUpdatePath))
+            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW_UPDATE_PATH"), ref UpdatePath, HasValidUpdatePath))
                 Save();
 
-            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW DLC Path"), ref AocPath, HasValidAocPath))
+            if (ImguiCustomWidgets.PathSelector(TranslationSource.GetText("BOTW_DLC_PATH"), ref AocPath, HasValidAocPath))
                 Save();
 
             // All of this should eventually be moved per-3D-scene
@@ -88,6 +96,10 @@ namespace UKingLibrary
 #endif
                 ImGui.EndMenu();
             }
+
+            ImGui.Checkbox($"{TranslationSource.GetText("AREAS_SELECT_BY_BORDERS")}", ref AreasSelectByBorders);
+
+            ImGui.SliderFloat($"{TranslationSource.GetText("AREA_OPACITY")}", ref AreaOpacity, 0f, 1f, "%.1f");
         }
 
         public static string GetContentPath(string relativePath)
@@ -197,6 +209,6 @@ namespace UKingLibrary
 
             if (GLContext.ActiveContext != null)
                 GLContext.ActiveContext.UpdateViewport = true;
-        }
+        }   
     }
 }

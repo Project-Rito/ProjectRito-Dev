@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace MapStudio
 {
     public class MainWindow : GameWindow
     {
+        public System.Drawing.Icon OriginalIcon;
         bool ForceFocused = true;
 
         ImGuiController _controller;
@@ -27,15 +29,17 @@ namespace MapStudio
 
         private ProcessLoading ProcessLoading;
 
-        private List<Workspace> Workspaces = new List<Workspace>();
+        private ObservableCollection<Workspace> Workspaces = new ObservableCollection<Workspace>();
 
         private JumpListHelper jumpList;
         private Program.Arguments _arguments;
 
         private IPluginConfig[] PluginSettingsUI;
 
+        private bool UpdateDockLayout = true;
+
         public MainWindow(GraphicsMode gMode, Program.Arguments arguments) : base(1600, 900, gMode,
-                                TranslationSource.GetText("TRACK_STUDIO"),
+                                TranslationSource.GetText("RITO_EDITOR"),
                                 GameWindowFlags.Default,
                                 DisplayDevice.Default,
                                 3, 2, GraphicsContextFlags.Default)
@@ -48,6 +52,11 @@ namespace MapStudio
             ProcessLoading.OnUpdated += delegate
             {
                 this.Update();
+            };
+
+            Workspaces.CollectionChanged += delegate
+            {
+                UpdateDockLayout = true;
             };
         }
 
@@ -99,6 +108,7 @@ namespace MapStudio
             GlobalSettings = GlobalSettings.Load();
             GlobalSettings.ReloadLanguage();
             GlobalSettings.ReloadTheme();
+            Icon = GlobalSettings.ThemeIcon(OriginalIcon);
 
             //Load recent file lists
             RecentFileHandler.LoadRecentList($"{Runtime.ExecutableDir}/Recent.txt", RecentFiles);
@@ -240,16 +250,9 @@ namespace MapStudio
             ImGui.PopStyleVar(2);
 
             LoadFileMenu();
-            dock_id = ImGui.GetID("##DockspaceRoot");
 
             if (Workspaces.Count == 0)
                 LoadStartScreen();
-
-            unsafe
-            {
-                //Create an inital dock space for docking workspaces.
-                ImGui.DockSpace(dock_id, new System.Numerics.Vector2(0.0f, 0.0f), 0, window_class);
-            }
 
             LoadWorkspaces();
 
@@ -287,12 +290,14 @@ namespace MapStudio
 
             renderingFrame = false;
         }
-        
+
 
         private unsafe void LoadWorkspaces()
         {
             //Window spawn sizes
             var contentSize = ImGui.GetWindowSize();
+
+            SetupDocks();
 
             List<Workspace> removedWindows = new List<Workspace>();
             for (int i = 0; i < Workspaces.Count; i++)
@@ -329,9 +334,7 @@ namespace MapStudio
                 workspace.PopStyling();
 
                 if (ImGui.DockBuilderGetNode(dockspaceId).NativePtr == null || workspace.UpdateDockLayout)
-                {
                     workspace.ReloadDockLayout(dockspaceId, (int)workspace.DockID);
-                }
 
                 if (visible && ImGui.IsWindowFocused())
                     Workspace.UpdateActive(workspace);
@@ -364,6 +367,41 @@ namespace MapStudio
                 Workspace.ActiveWorkspace = null;
         }
 
+        private void SetupDocks()
+        {
+            var dock_id = ImGui.GetID("##DockspaceRoot");
+
+            SetupParentDock(dock_id, Workspaces.Select(x => (DockWindow)x).ToList());
+        }
+
+        private unsafe void SetupParentDock(uint parentDockID, List<DockWindow> children)
+        {
+            //Check if the dock has been created or needs to be updated
+            if (ImGui.DockBuilderGetNode(parentDockID).NativePtr == null || UpdateDockLayout)
+            {
+                ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags.None;
+                uint main_id = parentDockID;
+
+                ImGui.DockBuilderRemoveNode(parentDockID); // Clear out existing layout
+                ImGui.DockBuilderAddNode(parentDockID, dockspace_flags); // Add empty node
+
+                for (int i = 0; i < children.Count; i++)
+                {
+                    DockWindow workspace = children[i];
+                    ImGui.DockBuilderDockWindow($"{workspace.Name}###window{ImGui.GetID($"###DOCKSPACE{i}")}", main_id);
+                }
+
+                ImGui.DockBuilderFinish(parentDockID);
+                UpdateDockLayout = false;
+            }
+
+            unsafe
+            {
+                //Create an inital dock space for docking workspaces.
+                ImGui.DockSpace(parentDockID, new System.Numerics.Vector2(0.0f, 0.0f), 0, window_class);
+            }
+        }
+
         private void LoadStartScreen()
         {
         }
@@ -374,6 +412,7 @@ namespace MapStudio
         private void LoadFileMenu()
         {
             bool canSave = Workspace.ActiveWorkspace != null;
+            bool canRename = canSave && Workspace.ActiveWorkspace.Name != TranslationSource.GetText("NEW_PROJECT");
 
             if (ImGui.BeginMainMenuBar())
             {
@@ -402,11 +441,11 @@ namespace MapStudio
                         }
                         ImGui.EndMenu();
                     }
-                    if (ImGui.MenuItem($"  {IconManager.SAVE_ICON}    {TranslationSource.GetText("MENU_SAVE")}##MAIN08", "Ctrl+S", false, canSave))
+                    if (ImGui.MenuItem($"  {IconManager.SAVE_ICON}    {TranslationSource.GetText("MENU_SAVE_EDITOR")}##MAIN08", "", false, canSave))
                     {
                         Workspace.ActiveWorkspace.SaveFileData();
                     }
-                    if (ImGui.MenuItem($"  {IconManager.SAVE_ICON}    {TranslationSource.GetText("MENU_SAVE_AS")}##MAIN08", "Ctrl+Alt+S", false, canSave))
+                    if (ImGui.MenuItem($"  {IconManager.SAVE_ICON}    {TranslationSource.GetText("MENU_SAVE_EDITOR_AS")}##MAIN08", "", false, canSave))
                     {
                         Workspace.ActiveWorkspace.SaveFileWithDialog();
                     }
@@ -431,13 +470,17 @@ namespace MapStudio
                         }
                         ImGui.EndMenu();
                     }
-                    if (ImGui.MenuItem($"       {TranslationSource.GetText("MENU_SAVE_PROJECT")}##MAIN04", "", false, canSave))
+                    if (ImGui.MenuItem($"       {TranslationSource.GetText("MENU_SAVE_PROJECT")}##MAIN04", "Ctrl+S", false, canSave))
                     {
                         SaveProject();
                     }
-                    if (ImGui.MenuItem($"       {TranslationSource.GetText("MENU_SAVE_PROJECT_AS")}##MAIN05", "", false, canSave))
+                    if (ImGui.MenuItem($"       {TranslationSource.GetText("MENU_SAVE_PROJECT_AS")}##MAIN05", "Ctrl+Alt+S", false, canSave))
                     {
                         SaveProjectWithDialog();
+                    }
+                    if (ImGui.MenuItem($"       {TranslationSource.GetText("MENU_RENAME_PROJECT")}##MAIN06", "", false, canRename))
+                    {
+                        RenameProjectWithDialog();
                     }
                     ImGui.Separator();
                     if (ImGui.MenuItem($"       {TranslationSource.GetText("MENU_CLEAR_WORKSPACE")}##MAIN06"))
@@ -467,6 +510,8 @@ namespace MapStudio
                         foreach (var plugin in PluginSettingsUI)
                             plugin.DrawUI();
                     }
+
+                    ImguiCustomWidgets.PathSelector(TranslationSource.GetText("PROJECT_SAVE_DIRECTORY"), ref GlobalSettings.Program.ProjectDirectory);
 
                     var language = TranslationSource.LanguageKey;
                     if (ImGui.BeginCombo($"{TranslationSource.GetText("LANGUAGE")}", language))
@@ -507,6 +552,7 @@ namespace MapStudio
                             {
                                 //Set the current theme instance
                                 ThemeHandler.UpdateTheme(colorTheme);
+                                Icon = ThemeHandler.ThemeIcon(OriginalIcon, colorTheme);
 
                                 GlobalSettings.Program.Theme = colorTheme.Name;
                                 GlobalSettings.Save();
@@ -557,7 +603,13 @@ namespace MapStudio
 #endif
                         ImGui.EndMenu();
                     }
+
+                    int newObjectLoc = (int)GlobalSettings.Editor.NewObjectLocation;
+                    updateSettings |= ImGui.SliderInt($"{TranslationSource.GetText("NEW_OBJECT_LOCATION")}", ref newObjectLoc, 0, Enum.GetValues(typeof(GlobalSettings.NewObjectLocation)).Length - 1, GlobalSettings.PlaceObjectLocationNames[newObjectLoc]);
+                    GlobalSettings.Editor.NewObjectLocation = (GlobalSettings.NewObjectLocation)newObjectLoc;
+
                     ImGui.Checkbox($"{TranslationSource.GetText("CREATE_NEW_WORKSPACE")}", ref createNewWorkspace);
+
                     if (updateSettings && GLContext.ActiveContext != null)
                     {
                         //Reload existing set values then save
@@ -608,7 +660,7 @@ namespace MapStudio
                 }
                 if (ImGui.BeginMenu(TranslationSource.GetText("PLUGINS")))
                 {
-                    foreach (var plugin in PluginManager.LoadPlugins())
+                    foreach (var plugin in PluginManager.LoadPlugins().GroupBy(x => x.PluginHandler.Name).Select(x => x.First())) // Not sure why there are duplicate Toolbox.Cores... but....
                     {
                         ImGui.Text(plugin.PluginHandler.Name);
                     }
@@ -706,9 +758,15 @@ namespace MapStudio
 
         private void SaveProject()
         {
-            var workspace = Workspace.ActiveWorkspace;
+            if (Workspace.ActiveWorkspace.Name == TranslationSource.GetText("NEW_PROJECT"))
+            {
+                SaveProjectWithDialog();
+                return;
+            }
 
+            var workspace = Workspace.ActiveWorkspace;
             var settings = GlobalSettings.Current;
+
             string dir = $"{settings.Program.ProjectDirectory}/{workspace.Name}";
 
             workspace.SaveProject(dir);
@@ -724,17 +782,39 @@ namespace MapStudio
             string oldProjectDir = $"{settings.Program.ProjectDirectory}/{workspace.Name}";
 
             ProjectSaveDialog projectDialog = new ProjectSaveDialog(workspace.Name);
-
-            DialogHandler.Show("Save Project", () =>
+            DialogHandler.Show(TranslationSource.GetText("MENU_SAVE_PROJECT"), () =>
             {
                 projectDialog.LoadUI();
-            }, (result) =>
+            }, (confirmed) =>
             {
-                if (!result)
+                if (!confirmed)
                     return;
 
                 workspace.UpdateProjectAssetPaths(oldProjectDir, projectDialog.GetProjectDirectory());
                 workspace.SaveProject(projectDialog.GetProjectDirectory());
+                RecentFileHandler.SaveRecentFile(projectDialog.GetProjectDirectory(), "RecentProjects.txt", this.RecentProjects);
+            });
+        }
+
+        private void RenameProjectWithDialog()
+        {
+            var workspace = Workspace.ActiveWorkspace;
+            var settings = GlobalSettings.Current;
+
+            string oldProjectDir = $"{settings.Program.ProjectDirectory}/{workspace.Name}";
+
+            ProjectSaveDialog projectDialog = new ProjectSaveDialog(workspace.Name);
+            DialogHandler.Show(TranslationSource.GetText("RENAME_PROJECT"), () =>
+            {
+                projectDialog.LoadUI();
+            }, (confirmed) =>
+            {
+                if (!confirmed)
+                    return;
+
+                workspace.Name = projectDialog.GetProjectDirectory().Split("/").Last();
+                workspace.UpdateProjectAssetPaths(oldProjectDir, projectDialog.GetProjectDirectory());
+                Directory.Move(oldProjectDir, projectDialog.GetProjectDirectory());
                 RecentFileHandler.SaveRecentFile(projectDialog.GetProjectDirectory(), "RecentProjects.txt", this.RecentProjects);
             });
         }
@@ -813,7 +893,10 @@ namespace MapStudio
             {
                 if (Keyboard.GetState().IsKeyDown(Key.ControlLeft) && e.Key == Key.S && Workspace.ActiveWorkspace != null)
                 {
-                    Workspace.ActiveWorkspace.SaveFileData();
+                    if (Keyboard.GetState().IsKeyDown(Key.AltLeft))
+                        SaveProjectWithDialog();
+                    else
+                        SaveProject();
                 }
             }
 

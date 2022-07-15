@@ -67,6 +67,8 @@ namespace UKingLibrary
         /// </summary>
         public EditableObject Render;
 
+        public HavokMeshShapeRender CollisionRender;
+
         private IMapLoader ParentLoader;
 
         /// <summary>
@@ -173,6 +175,8 @@ namespace UKingLibrary
             {
                 Render?.Dispose();
             }
+            if (CollisionRender != null)
+                CollisionRender?.Dispose();
 
             //Get the renderable object
             Render = LoadRenderObject(ActorInfo, Properties, Parent);
@@ -187,7 +191,7 @@ namespace UKingLibrary
                     header += " " + TranslationSource.GetText($"ACTOR_NAME {Name}");
                 return header;
             };
-            
+
             Render.UINode.CustomHeaderDraw = () =>
             {
                 ImGui.BeginGroup(); // Set this to a single group so that the tooltip applies to the whole text section
@@ -201,11 +205,11 @@ namespace UKingLibrary
                 }
                 else
                     ImGui.Text(Name);
-                
+
                 ImGui.EndGroup();
             };
 
-            
+
             Render.UINode.GetTooltip = () =>
             {
                 if (TranslationSource.HasKey($"ACTOR_DOCS {Name}"))
@@ -213,7 +217,7 @@ namespace UKingLibrary
                 else
                     return TranslationSource.GetText("NO_ACTOR_DOCUMENTATION_FOUND");
             };
-            
+
             //Property drawer for gui node
             Render.UINode.TagUI = new NodePropertyUI();
             Render.IsVisibleCallback += delegate
@@ -290,8 +294,15 @@ namespace UKingLibrary
                 return ((MapObject)Clone()).Render;
             };
 
+            Render.DrawCallback += delegate
+            {
+                RenderAdditional();
+            };
+
+
+
             foreach (var property in Properties.ToList())
-                ValidateProperty(property.Key);
+                ValidateProperty(property.Key, property.Value);
 
             //Load the transform attached to the object
             LoadObjectTransform();
@@ -316,7 +327,7 @@ namespace UKingLibrary
             return clone;
         }
 
-        public IDictionary<string, dynamic> DeepCloneDictionary(IDictionary<string, dynamic> properties)
+        private static IDictionary<string, dynamic> DeepCloneDictionary(IDictionary<string, dynamic> properties)
         {
             IDictionary<string, dynamic> clonedDictionary = new Dictionary<string, dynamic>();
             foreach (KeyValuePair<string, dynamic> entry in properties)
@@ -331,7 +342,7 @@ namespace UKingLibrary
             return clonedDictionary;
         }
 
-        public IList<dynamic> DeepCloneList(IList<dynamic> properties)
+        private static IList<dynamic> DeepCloneList(IList<dynamic> properties)
         {
             IList<dynamic> clonedList = new List<dynamic>();
             foreach (dynamic value in properties)
@@ -346,7 +357,7 @@ namespace UKingLibrary
             return clonedList;
         }
 
-        public void UpdateActorModel()
+        private void UpdateActorModel()
         {
             var context = GLContext.ActiveContext;
             var srcLinks = Render.SourceObjectLinks;
@@ -367,13 +378,19 @@ namespace UKingLibrary
             Render.DestObjectLinks = destLinks;
         }
 
-        private void OnPropertyUpdate(string key) {
-            if (!ValidateProperty(key))
+        private void OnPropertyUpdate(string key, MapData.Property<dynamic> property)
+        {
+            if (!ValidateProperty(key, property))
                 return;
             if (key == "UnitConfigName")
             {
                 ActorInfo = GlobalData.Actors[Properties[key].Value];
                 BakeCollision = true;
+                SaveTransform();
+                UpdateActorModel();
+            }
+            if (key == "Shape")
+            {
                 SaveTransform();
                 UpdateActorModel();
             }
@@ -384,19 +401,34 @@ namespace UKingLibrary
         /// </summary>
         /// <param name="key">The property key</param>
         /// <returns>True if the property value is valid or the property is unknown</returns>
-        private bool ValidateProperty(string key)
+        private bool ValidateProperty(string key, dynamic property)
         {
-            if (key == "UnitConfigName")
+            if (property is not MapData.Property<dynamic>)
+                return true;
+            switch (key)
             {
-                if (!GlobalData.Actors.ContainsKey(Properties[key].Value))
-                {
-                    // Oh no! We can't find this actor in ActorInfo...
-                    Render.UINode.Icon = "Warning";
-                    Render.UINode.Header = Properties[key].Value;
-                    Properties[key].Invalid = true;
-                    return false;
-                }
-                Properties[key].Invalid = false;
+                case "UnitConfigName":
+                    if (!GlobalData.Actors.ContainsKey(property.Value))
+                    {
+                        // Oh no! We can't find this actor in ActorInfo...
+                        Render.UINode.Icon = "Warning";
+                        Render.UINode.Header = property.Value;
+                        property.Invalid = true;
+                        return false;
+                    }
+                    property.Invalid = false;
+                    break;
+                case "Shape":
+                    if (!Enum.IsDefined(typeof(AreaShapes), property.Value))
+                    {
+                        // Oh no! This shape type doesn't exist...
+                        Render.UINode.Icon = "Warning";
+                        Render.UINode.Header = property.Value;
+                        property.Invalid = true;
+                        return false;
+                    }
+                    property.Invalid = false;
+                    break;
             }
             return true;
         }
@@ -537,7 +569,8 @@ namespace UKingLibrary
         /// <summary>
         /// Adds the object to the current scene.
         /// </summary>
-        public void AddToScene() {
+        public void AddToScene()
+        {
             ParentLoader.Scene.AddRenderObject(Render);
             //Add the actor to the animation player
             ParentLoader.ParentEditor.Workspace.StudioSystem.AddActor(this);
@@ -546,7 +579,8 @@ namespace UKingLibrary
         /// <summary>
         /// Removes the object from the current scene.
         /// </summary>
-        public void RemoveFromScene() {
+        public void RemoveFromScene()
+        {
             ParentLoader.Scene.RemoveRenderObject(Render);
             //Remove the actor from the animation player
             ParentLoader.ParentEditor.Workspace.StudioSystem.RemoveActor(this);
@@ -625,7 +659,7 @@ namespace UKingLibrary
             if (Properties.ContainsKey("LinksToObj"))
                 Properties.Remove("LinksToObj");
             Properties.Add("LinksToObj", new List<dynamic>());
-            
+
             foreach (LinkInstance link in DestLinks)
             {
                 Properties["LinksToObj"].Add(link.Properties);
@@ -655,18 +689,23 @@ namespace UKingLibrary
             }
         }
 
-        public virtual EditableObject LoadRenderObject(IDictionary<string, dynamic> actor, IDictionary<string, dynamic> obj, NodeBase parent)
+        private void RenderAdditional()
+        {
+
+        }
+
+        private EditableObject LoadRenderObject(IDictionary<string, dynamic> actor, IDictionary<string, dynamic> obj, NodeBase parent)
         {
             string name = obj["UnitConfigName"].Value;
 
             if (actor.ContainsKey("profile") && ((string)actor["profile"] == "Area" || (string)actor["profile"] == "SpotBgmTag"))
-                return new AreaRender(parent, AreaShape, new Vector4(0, 0, 0, 1));
+                return new AreaRender(parent, AreaShape, new Vector3(0, 0, 0));
 
             if (name == "BoxWater")
-                return new AreaWaterRender(parent, new Vector4(0, 0, 1, 1));
+                return new AreaWaterRender(parent, new Vector3(0, 0, 1));
 
             if (name == "AscendingCurrent")
-                return new AscendingCurrentRender(parent, new Vector4(1, 1, 1, 1));
+                return new AscendingCurrentRender(parent, new Vector3(1, 1, 1));
 
             if (TagRender.IsTag(name))
                 return new TagRender(name, parent);
@@ -729,7 +768,12 @@ namespace UKingLibrary
             return render;
         }
 
-        private BfresRender GetActorSpecificBfresRender(IDictionary<string, dynamic> actor, BfresRender render)
+        private static HavokMeshShapeRender LoadCollisionRenderObject(IDictionary<string, dynamic> actor, NodeBase parent)
+        {
+            return new HavokMeshShapeRender(parent);
+        }
+
+        private static BfresRender GetActorSpecificBfresRender(IDictionary<string, dynamic> actor, BfresRender render)
         {
             bool containsActorMainModel = false;
             foreach (var model in render.Models)
@@ -781,6 +825,7 @@ namespace UKingLibrary
         {
             string texpathNX = PluginConfig.GetContentPath($"Model/{bfres}.Tex.sbfres");
             string texpath1 = PluginConfig.GetContentPath($"Model/{bfres}.Tex1.sbfres");
+            string[] texpath1_x = Enumerable.Range(1, 9).Select(x => PluginConfig.GetContentPath($"Model/{bfres}.Tex1.{x}.sbfres")).ToArray();
 
             string teratexpathNX = PluginConfig.GetContentPath($"Model/Terrain.Tex.sbfres");
             string teratexpath1 = PluginConfig.GetContentPath($"Model/Terrain.Tex1.sbfres");
@@ -797,7 +842,15 @@ namespace UKingLibrary
                 if (candidate != null)
                     render.Textures = candidate;
 
-                
+                foreach (string texpath in texpath1_x)
+                {
+                    candidate = BfresLoader.GetTextures(texpath);
+                    if (candidate != null)
+                        foreach (KeyValuePair<string, GenericRenderer.TextureView> tex in candidate)
+                            render.Textures.TryAdd(tex.Key, tex.Value);
+                }
+
+
                 // Attach terrain textures in case we need them
                 candidate = BfresLoader.GetTextures(teratexpathNX);
                 if (candidate != null)

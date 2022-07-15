@@ -35,6 +35,11 @@ namespace MapStudio.UI
         public ViewerSettings Viewer { get; set; } = new ViewerSettings();
 
         /// <summary>
+        /// The global editor settings
+        /// </summary>
+        public EditorSettings Editor { get; set; } = new EditorSettings();
+
+        /// <summary>
         /// The global settings used by the asset window.
         /// </summary>
         public AssetSettings Asset { get; set; } = new AssetSettings();
@@ -98,6 +103,17 @@ namespace MapStudio.UI
             var theme = ThemeHandler.Themes.FirstOrDefault(x => x.Name == Program.Theme);
             if (theme != null)
                 ThemeHandler.UpdateTheme(theme);
+        }
+
+        /// <summary>
+        /// Generates a themed icon for the program.
+        /// </summary>
+        public System.Drawing.Icon ThemeIcon(System.Drawing.Icon originalIcon)
+        {
+            var theme = ThemeHandler.Themes.FirstOrDefault(x => x.Name == Program.Theme);
+            if (theme != null)
+                return ThemeHandler.ThemeIcon(originalIcon, theme);
+            return null;
         }
 
         /// <summary>
@@ -194,29 +210,17 @@ namespace MapStudio.UI
 
         public class ProgramSettings
         {
-            public string Theme { get; set; } = "DARK_BLUE_THEME";
+            public string Theme = "DARK_BLUE_THEME";
 
             /// <summary>
             /// The language of the program.
             /// </summary>
-            public string Language { get; set; } = "English";
+            public string Language = "English";
 
             /// <summary>
             /// Gets the current project directory.
             /// </summary>
-            private string _projectDirectory = DefaultProjectPath();
-            public string ProjectDirectory {
-                get
-                {
-                    Directory.CreateDirectory(_projectDirectory);
-                    return _projectDirectory;
-                }
-                set
-                {
-                    Directory.CreateDirectory(value);
-                    _projectDirectory = value;
-                }
-            }
+            public string ProjectDirectory = DefaultProjectPath();
 
             /// <summary>
             /// Gets the default project directory from the user's local application directory.
@@ -240,6 +244,11 @@ namespace MapStudio.UI
             /// Toggles displaying bloom in the 3D view.
             /// </summary>
             public bool DisplayBloom { get; set; } = false;
+        }
+
+        public class EditorSettings
+        {
+            public NewObjectLocation NewObjectLocation { get; set; } = NewObjectLocation.Camera;
         }
 
         public class AssetSettings
@@ -346,5 +355,12 @@ namespace MapStudio.UI
             /// </summary>
             public float ZFar { get; set; } = 100000.0f;
         }
+
+        public enum NewObjectLocation : int
+        {
+            Cursor3D,
+            Camera
+        }
+        public static string[] PlaceObjectLocationNames => new string[] { TranslationSource.GetText("CURSOR3D"), TranslationSource.GetText("CAMERA") };
     }
 }

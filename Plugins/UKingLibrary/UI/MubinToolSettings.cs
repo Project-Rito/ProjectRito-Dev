@@ -29,6 +29,7 @@ namespace UKingLibrary
                 refreshScene |= ImGui.Checkbox($"{TranslationSource.GetText("SHOW_MAP_MODEL")}", ref MapData.ShowMapModel);
                 refreshScene |= ImGui.Checkbox($"{TranslationSource.GetText("SHOW_ACTOR_LINKS")}", ref MapData.ShowActorLinks);
                 refreshScene |= ImGui.Checkbox($"{TranslationSource.GetText("SHOW_COLLISION_SHAPES")}", ref MapData.ShowCollisionShapes);
+                refreshScene |= ImGui.Checkbox($"{TranslationSource.GetText("SHOW_NAVMESH_SHAPES")}", ref MapData.ShowNavmeshShapes);
             }
             if (ImGui.CollapsingHeader(TranslationSource.GetText("RAILS"), ImGuiTreeNodeFlags.DefaultOpen))
             {

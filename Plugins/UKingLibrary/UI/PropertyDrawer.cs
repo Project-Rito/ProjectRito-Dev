@@ -442,7 +442,7 @@ namespace UKingLibrary.UI
             {
                 properties[key].Value = (string)value;
                 if (callback != null)
-                    callback(key);
+                    callback(key, properties[key]);
             }
         }
 
@@ -453,7 +453,7 @@ namespace UKingLibrary.UI
             {
                 properties[key].Value = (double)value;
                 if (callback != null)
-                    callback(key);
+                    callback(key, properties[key]);
             }
         }
 
@@ -464,7 +464,7 @@ namespace UKingLibrary.UI
             {
                 properties[key].Value = (float)value;
                 if (callback != null)
-                    callback(key);
+                    callback(key, properties[key]);
             }
         }
 
@@ -475,7 +475,7 @@ namespace UKingLibrary.UI
             {
                 properties[key].Value = (int)value;
                 if (callback != null)
-                    callback(key);
+                    callback(key, properties[key]);
             }
         }
 
@@ -486,7 +486,7 @@ namespace UKingLibrary.UI
             {
                 properties[key].Value = (uint)value;
                 if (callback != null)
-                    callback(key);
+                    callback(key, properties[key]);
             }
         }
 
@@ -497,10 +497,10 @@ namespace UKingLibrary.UI
             {
                 properties[key].Value = (bool)value;
                 if (callback != null)
-                    callback(key);
+                    callback(key, properties[key]);
             }
         }
 
-        public delegate void PropertyChangedCallback(string key);
+        public delegate void PropertyChangedCallback(string key, MapData.Property<dynamic> property);
     }
 }

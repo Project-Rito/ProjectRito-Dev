@@ -76,7 +76,7 @@ namespace UKingLibrary
         public MapData LoadMuunt(string fileName, Stream stream, UKingEditor editor)
         {
             ParentEditor = editor;
-            ParentEditor.Workspace.Windows.Add(new ActorLinkNodeUI());
+            //ParentEditor.Workspace.Windows.Add(new ActorLinkNodeUI());
 
             ProcessLoading.Instance.Update(0, 100, "Loading map files");
 
@@ -109,7 +109,21 @@ namespace UKingLibrary
             InitSectionFolder(GetSectionName(fileName));
             ((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Collision"].AddChild(loader.RootNode);
             BakedCollision.Add(loader);
-            Scene.AddRenderObject(loader);
+        }
+
+        public void LoadNavmesh(string fileName, Stream stream, Vector3 origin)
+        {
+            string sectionName = new FieldSectionInfo(origin).Name;
+
+            if (RootNode.FolderChildren.ContainsKey(sectionName))
+                if (((NodeFolder)RootNode.FolderChildren[sectionName]).FolderChildren["NavMesh"].Children.Any(x => x.Header == fileName))
+                    return;
+
+            MapNavmeshLoader loader = new MapNavmeshLoader();
+            loader.Load(stream, fileName, origin, Scene);
+
+            InitSectionFolder(sectionName);
+            ((NodeFolder)RootNode.FolderChildren[sectionName]).FolderChildren["NavMesh"].AddChild(loader.RootNode);
         }
 
         public void AddBakedCollisionShape(uint hashId, string muuntFileName, BakedCollisionShapeCacheable info, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
@@ -179,7 +193,8 @@ namespace UKingLibrary
                 FolderChildren = new Dictionary<string, NodeBase> 
                 { 
                     { "Muunt", new NodeFolder("Muunt") }, 
-                    { "Collision", new NodeFolder("Collision") } 
+                    { "Collision", new NodeFolder("Collision") },
+                    { "NavMesh", new NodeFolder("NavMesh") }
                 } 
             });
         }

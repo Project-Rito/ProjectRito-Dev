@@ -88,7 +88,7 @@ namespace MapStudio.UI
             }
 
             //Make the whole menu item region selectable
-            var width = ImGui.CalcItemWidth();
+            var width = ImGui.GetContentRegionAvail().X;
             var size = new System.Numerics.Vector2(width, 64);
 
             bool isSelected = SelectedProject == folder;
@@ -105,20 +105,16 @@ namespace MapStudio.UI
             ImGui.AlignTextToFramePadding();
             ImGui.Image((IntPtr)icon, new System.Numerics.Vector2(64, 64));
             //Project name
-            ImGui.SameLine();
 
+            ImGui.SameLine();
             var textpos = ImGui.GetCursorPos();
             ImGui.Text(projectName);
 
             var endPos = ImGui.GetCursorPos();
-
             ImGui.SameLine();
-
             ImGui.SetCursorPos(textpos);
             ImGuiHelper.IncrementCursorPosY(30);
-
             ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1.0f), folder);
-
 
             ImGui.SetCursorPos(endPos);
 

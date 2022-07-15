@@ -75,7 +75,8 @@ namespace UKingLibrary
             RootNode.FolderChildren = new Dictionary<string, NodeBase>
                 {
                     { "Muunt", new NodeFolder("Muunt") },
-                    { "Collision", new NodeFolder("Collision") }
+                    { "Collision", new NodeFolder("Collision") },
+                    { "NavMesh", new NodeFolder("NavMesh") },
                 };
 
             Scene.Init();
@@ -84,7 +85,7 @@ namespace UKingLibrary
         public void Load(string fileName, Stream stream, UKingEditor editor)
         {
             ParentEditor = editor;
-            ParentEditor.Workspace.Windows.Add(new ActorLinkNodeUI());
+            //ParentEditor.Workspace.Windows.Add(new ActorLinkNodeUI());
             DungeonName = Path.GetFileNameWithoutExtension(fileName);
 
             RootNode.Header = fileName;
@@ -109,10 +110,14 @@ namespace UKingLibrary
 
             // Load baked collision data
             MapCollisionLoader bakedCollisionLoader = new MapCollisionLoader();
-            bakedCollisionLoader.Load(GetStaticCompound(), $"{DungeonName}.shksc");
+            bakedCollisionLoader.Load(GetStaticCompound(), $"{DungeonName}.shksc", Scene);
             RootNode.FolderChildren["Collision"].Children.Add(bakedCollisionLoader.RootNode);
             BakedCollision.Add(bakedCollisionLoader);
-            Scene.AddRenderObject(bakedCollisionLoader);
+
+            // Load navmesh data
+            MapNavmeshLoader navmeshLoader = new MapNavmeshLoader();
+            navmeshLoader.Load(GetNavmesh(), $"{DungeonName}.shknm2", Vector3.Zero, Scene);
+            RootNode.FolderChildren["NavMesh"].Children.Add(navmeshLoader.RootNode);
 
             //Static and dynamic actors
             var staticFile = GetMubin("Static");
@@ -239,6 +244,17 @@ namespace UKingLibrary
                 return new MemoryStream(Toolbox.Core.IO.YAZ0.Decompress(data));
 
             if (DungeonData.SarcData.Files.TryGetValue($"Physics/StaticCompound/MainFieldDungeon/{DungeonName}.shksc", out data))
+                return new MemoryStream(Toolbox.Core.IO.YAZ0.Decompress(data));
+            return null;
+        }
+
+        private Stream GetNavmesh()
+        {
+            byte[] data;
+            if (DungeonData.SarcData.Files.TryGetValue($"NavMesh/CDungeon/{DungeonName}/{DungeonName}.shknm2", out data))
+                return new MemoryStream(Toolbox.Core.IO.YAZ0.Decompress(data));
+
+            if (DungeonData.SarcData.Files.TryGetValue($"Physics/MainFieldDungeon/{DungeonName}/{DungeonName}.shknm2", out data))
                 return new MemoryStream(Toolbox.Core.IO.YAZ0.Decompress(data));
             return null;
         }

@@ -31,7 +31,7 @@ namespace UKingLibrary.Rendering
         public static bool DrawFilled = true;
 
         private Vector4 _color = Vector4.One;
-        public Vector4 Color 
+        public Vector4 OutlineColor 
         {
             get
             {
@@ -44,18 +44,18 @@ namespace UKingLibrary.Rendering
                 _color = value;
             }
         }
-        private Vector4 _fillColor = new Vector4(0.4f, 0.7f, 1.0f, 0.3f);
+        private Vector3 _fillColor = new Vector3(0.4f, 0.7f, 1.0f);
         public Vector4 FillColor
         {
             get
             {
-                return _fillColor;
+                return new Vector4(_fillColor, PluginConfig.AreaOpacity);
             }
             set
             {
-                if (_fillColor != value)
+                if (_fillColor != value.Xyz)
                     UpdateInstanceGroup = true;
-                _fillColor = value;
+                _fillColor = value.Xyz;
             }
         }
 
@@ -115,7 +115,7 @@ namespace UKingLibrary.Rendering
             return context.Camera.InFustrum(BoundingNode);
         }
 
-        public AreaRender(NodeBase parent, AreaShapes shape, Vector4 color) : base(parent)
+        public AreaRender(NodeBase parent, AreaShapes shape, Vector3 color) : base(parent)
         {
             UpdateInstanceGroup = true;
             VisibilityChanged += (object sender, EventArgs e) =>
@@ -132,7 +132,8 @@ namespace UKingLibrary.Rendering
                 BoundingNode.UpdateTransform(Transform.TransformMatrix);
             };
             AreaShape = shape;
-            Color = color;
+            OutlineColor = new Vector4(color, 1f);
+            FillColor = new Vector4(color, 1f);
         }
 
 
@@ -155,7 +156,7 @@ namespace UKingLibrary.Rendering
 
             if (((AreaRender)drawable).InFrustum != InFrustum)
                 return false;
-            if (((AreaRender)drawable).Color != Color)
+            if (((AreaRender)drawable).OutlineColor != OutlineColor)
                 return false;
             if (((AreaRender)drawable).AreaShape != AreaShape)
                 return false;
@@ -172,6 +173,11 @@ namespace UKingLibrary.Rendering
 
         public void DrawColorPicking(GLContext context, List<GLTransform> transforms)
         {
+            // Until MapObject serves as an editable object and passes fn calls to its render, this will have to exist here.
+            // But once that happens this can be applicable to any actor profile just by blocking the DrawColorPicking call.
+            if (KeyInfo.EventInfo.IsKeyDown(UKingInputSettings.INPUT.Scene.PassthroughAreas))
+                return;
+
             List<Matrix4> modelMatrices = new List<Matrix4>(transforms.Count);
             foreach (var transform in transforms)
                 modelMatrices.Add(InitalTransform * transform.TransformMatrix);
@@ -180,7 +186,10 @@ namespace UKingLibrary.Rendering
 
             //Thicker picking region
             GL.LineWidth(32);
-            OutlineRenderer.DrawPicking(context, this, modelMatrices);
+            if (PluginConfig.AreasSelectByBorders)
+                OutlineRenderer.DrawPicking(context, this, modelMatrices);
+            else
+                FillRenderer.DrawPicking(context, this, modelMatrices);
             GL.LineWidth(1);
         }
 
@@ -208,14 +217,14 @@ namespace UKingLibrary.Rendering
             {
                 GLMaterialBlendState.TranslucentAlphaOne.RenderBlendState();
                 GLMaterialBlendState.TranslucentAlphaOne.RenderDepthTest();
-                FillRenderer.DrawSolid(context, modelMatrices, new Vector4(Color.Xyz, 0.1f));
+                FillRenderer.DrawSolid(context, modelMatrices, FillColor);
                 GLMaterialBlendState.Opaque.RenderBlendState();
                 GLMaterialBlendState.Opaque.RenderDepthTest();
             }
 
             //Draw lines of the region
             GL.LineWidth(1);
-            OutlineRenderer.DrawSolidWithSelection(context, modelMatrices, Color, IsSelected | IsHovered);
+            OutlineRenderer.DrawSolidWithSelection(context, modelMatrices, OutlineColor, IsSelected | IsHovered);
             /*
             switch (AreaShape)
             {
@@ -244,7 +253,7 @@ namespace UKingLibrary.Rendering
             if (AreaShape == AreaShapes.Sphere)
             {
                 if (FillRenderer == null)
-                    FillRenderer = new SphereRender(1, 10, 10);
+                    FillRenderer = new SphereRender(1, 50, 50);
             }
             else
             {

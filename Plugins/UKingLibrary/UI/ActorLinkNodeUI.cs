@@ -9,6 +9,7 @@ namespace UKingLibrary.UI
 {
     public class ActorLinkNodeUI : Window
     {
+        public override string Name => "ACTOR_LINK_NODES";
         public override void Render()
         {
         }
