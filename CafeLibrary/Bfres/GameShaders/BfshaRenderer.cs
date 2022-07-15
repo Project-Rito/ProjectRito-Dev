@@ -267,6 +267,19 @@ namespace CafeLibrary.Rendering
                     return (BfshaLibrary.BfshaFile)file;
                 }
             }
+
+            //Check global shader cache
+            foreach (var file in GlobalShaderCache.ShaderFiles.Values)
+            {
+                if (file is BfshaLibrary.BfshaFile)
+                {
+                    if (((BfshaLibrary.BfshaFile)file).Name.Contains(shaderFile))
+                    {
+                        return (BfshaLibrary.BfshaFile)file;
+                    }
+                }
+            }
+
             return null;
         }
 

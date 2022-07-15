@@ -161,10 +161,7 @@ namespace CafeLibrary
 
             MemoryStream o = new MemoryStream();
             FileWriter bw = new FileWriter(o, Encoding.UTF8, false);
-            if (data.endianness == Endian.Little)
-                bw.ByteConverter = ByteConverter.Little;
-            else if (data.endianness == Endian.Big)
-                bw.ByteConverter = ByteConverter.Big;
+            bw.ByteConverter = ByteConverter.GetConverter(data.endianness);
             bw.StringCoding = StringCoding.Raw;
             bw.Write("SARC");
             bw.Write((UInt16)0x14); // Chunk length

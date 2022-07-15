@@ -33,6 +33,7 @@ namespace UKingLibrary
         public IMapLoader ActiveMapLoader;
 
         public SARC TitleBG;
+        public SARC BootupGfx;
 
         /// <summary>
         /// Psuedo-project info that applies to the editor
@@ -74,6 +75,7 @@ namespace UKingLibrary
 
             SetupContextMenus();
             CacheBackgroundFiles();
+            LoadGlobalData();
             SetupRoot();
 
             foreach (string fieldName in EditorConfig.OpenMapUnits.Keys)
@@ -406,10 +408,25 @@ namespace UKingLibrary
                     }
                 }
             }
+        }
 
+        private void LoadGlobalData()
+        {
             var titleBgPath = PluginConfig.GetContentPath("Pack/TitleBG.pack");
             TitleBG = new SARC();
             TitleBG.Load(File.OpenRead(titleBgPath), "TitleBG.pack");
+
+            var bootupGfxPath = PluginConfig.GetContentPath("Pack/Bootup_Graphics.pack");
+            BootupGfx = new SARC();
+            BootupGfx.Load(File.OpenRead(bootupGfxPath), "TitleBG.pack");
+            LoadGlobalShaderCache();
+        }
+
+        private void LoadGlobalShaderCache()
+        {
+            STFileLoader.Settings uking_mat_settings = STFileLoader.TryDecompressFile(new MemoryStream(BootupGfx.SarcData.Files["Shader/uking_mat.product.sbfsha"]), "uking_mat_product.sbfsha");
+            BfshaLibrary.BfshaFile uking_mat = new BfshaLibrary.BfshaFile(uking_mat_settings.Stream);
+            GlobalShaderCache.ShaderFiles.Add("uking_mat_product.sbfsha", uking_mat);
         }
 
         public override List<MenuItemModel> GetViewportMenuIcons()

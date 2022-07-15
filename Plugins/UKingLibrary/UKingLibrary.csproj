@@ -61,6 +61,10 @@
       <HintPath>..\..\MapStudio\Lib\OpenTK.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="BfshaLibrary">
+      <HintPath>..\..\MapStudio\Lib\BfshaLibrary.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="HKX2">
       <HintPath>..\..\MapStudio\Lib\HKX2.dll</HintPath>
       <Private>false</Private>
