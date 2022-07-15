@@ -277,9 +277,9 @@ namespace UKingLibrary
                 IList<dynamic> output = new List<dynamic>();
                 foreach (BymlNode item in input.Array)
                 {
-                    if (item.Type is NodeType.Hash)
+                    if (item.Type == NodeType.Hash)
                         output.Add(ValuesToProperties(item));
-                    else if (item.Type is NodeType.Array)
+                    else if (item.Type == NodeType.Array)
                         output.Add(ValuesToProperties(item));
                     else
                         output.Add(new MapData.Property<dynamic>(item.GetDynamic()));
@@ -320,11 +320,15 @@ namespace UKingLibrary
                     else if (item is IList<dynamic>)
                         output.Array.Add(PropertiesToValues(item));
                     else if (item is MapData.Property<dynamic>)
-                        output.Array.Add(item.Value);
+                        output.Array.Add(new BymlNode(item.Value));
                     else
-                        output.Array.Add(item); // This would indicate that the structure isn't fully made up of Properties
+                        output.Array.Add(new BymlNode(item)); // This would indicate that the structure isn't fully made up of Properties
                 }
                 return output;
+            }
+            else if (input is BymlNode)
+            {
+                return input;
             }
             else
             {

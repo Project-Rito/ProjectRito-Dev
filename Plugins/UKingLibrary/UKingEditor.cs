@@ -426,7 +426,7 @@ namespace UKingLibrary
         {
             STFileLoader.Settings uking_mat_settings = STFileLoader.TryDecompressFile(new MemoryStream(BootupGfx.SarcData.Files["Shader/uking_mat.product.sbfsha"]), "uking_mat_product.sbfsha");
             BfshaLibrary.BfshaFile uking_mat = new BfshaLibrary.BfshaFile(uking_mat_settings.Stream);
-            GlobalShaderCache.ShaderFiles.Add("uking_mat_product.sbfsha", uking_mat);
+            GlobalShaderCache.ShaderFiles.TryAdd("uking_mat_product.sbfsha", uking_mat);
         }
 
         public override List<MenuItemModel> GetViewportMenuIcons()
