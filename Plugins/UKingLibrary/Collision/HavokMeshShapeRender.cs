@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GLFrameworkEngine;
 using Toolbox.Core.ViewModels;
@@ -25,11 +26,6 @@ namespace UKingLibrary
             UINode.Tag = this;
             UINode.Header = "Havok Shape";
 
-            IsVisibleCallback += delegate
-            {
-                return MapData.ShowCollisionShapes;
-            };
-
             if (!COLLISIONSHAPE_DEBUG)
                 CanSelect = false;
         }
@@ -42,6 +38,7 @@ namespace UKingLibrary
                 context.CurrentShader = shader;
                 shader.SetTransform(GLConstants.ModelMatrix, Transform);
 
+                //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
                 GL.Enable(EnableCap.CullFace);
                 GL.Enable(EnableCap.Blend);
                 GL.Enable(EnableCap.PolygonOffsetFill);
@@ -50,6 +47,7 @@ namespace UKingLibrary
                 GL.Disable(EnableCap.PolygonOffsetFill);
                 GL.Disable(EnableCap.CullFace);
                 GL.Disable(EnableCap.Blend);
+                //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
 
                 BoundingNode?.Box.DrawSolid(context, Matrix4.Identity, Vector4.One);
             }
@@ -128,6 +126,46 @@ namespace UKingLibrary
                 vertices[i].VertexColor = new Vector4(0, 0.5f, 1, 0.5f);
             }
 
+
+            ShapeMesh = new RenderMesh<HavokMeshShapeVertex>(vertices, indices.ToArray(), OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
+        }
+
+        public void LoadNavmesh(hkaiNavMesh navmesh)
+        {
+            HavokMeshShapeVertex[] vertices = navmesh.m_vertices.Select(v => new HavokMeshShapeVertex
+            {
+                Position = new Vector3(v.X, v.Y, v.Z) * GLContext.PreviewScale
+            }).ToArray();
+
+            List<int> indices = new List<int>(vertices.Length); // Setting capacity just as rough estimate.
+            foreach (hkaiNavMeshFace face in navmesh.m_faces)
+            {
+                if (face.m_numEdges == 3)
+                {
+                    // Version for triangles is pretty simple
+                    indices.Add(navmesh.m_edges[face.m_startEdgeIndex + 0].m_a);
+                    indices.Add(navmesh.m_edges[face.m_startEdgeIndex + 0].m_b);
+                    indices.Add(navmesh.m_edges[face.m_startEdgeIndex + 1].m_b);
+                    continue;
+                }
+
+                List<Tuple<Vector3, int>> faceVertices = new List<Tuple<Vector3, int>>(face.m_numEdges + 1);
+                System.Numerics.Vector4 firstVertex = navmesh.m_vertices[navmesh.m_edges[face.m_startEdgeIndex + 0].m_a];
+                faceVertices.Add(new Tuple<Vector3, int>(new Vector3(firstVertex.X, firstVertex.Y, firstVertex.Z), navmesh.m_edges[face.m_startEdgeIndex + 0].m_a));
+                for (int i = 1; i < face.m_numEdges; i++)
+                {
+                    System.Numerics.Vector4 vertex = navmesh.m_vertices[navmesh.m_edges[face.m_startEdgeIndex + i].m_a];
+                    faceVertices.Add(new Tuple<Vector3, int>(new Vector3(vertex.X, vertex.Y, vertex.Z), navmesh.m_edges[face.m_startEdgeIndex + i].m_a));
+                }
+                indices.AddRange(DrawingHelper.TriangulateEarClip(faceVertices.Select(x=>x.Item1).ToArray()).Select(x => faceVertices[x].Item2));
+            }
+
+            Vector3[] normals = DrawingHelper.CalculateNormals(vertices.Select(x => x.Position).ToList(), indices);
+            for (int i = 0; i < vertices.Count(); i++)
+            {
+                vertices[i].Normal = normals[i];
+                vertices[i].VertexColor = new Vector4(0, 1f, 0.5f, 0.5f);
+            }
 
             ShapeMesh = new RenderMesh<HavokMeshShapeVertex>(vertices, indices.ToArray(), OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
         }

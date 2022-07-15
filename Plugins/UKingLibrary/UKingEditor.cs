@@ -254,7 +254,7 @@ namespace UKingLibrary
 
         private void LoadFieldMuunt(string fieldName, string fileName, Stream stream)
         {
-            string sectionName = fileName.Substring(0, 3);
+            FieldSectionInfo sectionInfo = new FieldSectionInfo(fileName.Substring(0, 3));
 
             FieldMapLoader loader;
             if (!((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren.ContainsKey(fieldName))
@@ -285,17 +285,34 @@ namespace UKingLibrary
             for (int i = 0; i < 4; i++)
             {
                 string filePath = null;
-                if (File.Exists(Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/Physics/StaticCompound/{fieldName}/{sectionName}-{i}.shksc"), FileInfo.FolderPath)))
-                    filePath = Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/Physics/StaticCompound/{fieldName}/{sectionName}-{i}.shksc"), FileInfo.FolderPath);
-                else if (File.Exists(PluginConfig.GetContentPath($"Physics/StaticCompound/{fieldName}/{sectionName}-{i}.shksc")))
-                    filePath = PluginConfig.GetContentPath($"Physics/StaticCompound/{fieldName}/{sectionName}-{i}.shksc");
+                if (File.Exists(Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/Physics/StaticCompound/{fieldName}/{sectionInfo.Name}-{i}.shksc"), FileInfo.FolderPath)))
+                    filePath = Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/Physics/StaticCompound/{fieldName}/{sectionInfo.Name}-{i}.shksc"), FileInfo.FolderPath);
+                else if (File.Exists(PluginConfig.GetContentPath($"Physics/StaticCompound/{fieldName}/{sectionInfo.Name}-{i}.shksc")))
+                    filePath = PluginConfig.GetContentPath($"Physics/StaticCompound/{fieldName}/{sectionInfo.Name}-{i}.shksc");
 
                 if (filePath != null) // Just in case, ya know?
                 {
                     Stream compoundStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     loader.LoadBakedCollision(Path.GetFileName(filePath), compoundStream);
                     compoundStream.Close();
-                }                    
+                }
+            }
+
+            // Load Navmesh
+            foreach (FieldNavmeshSectionInfo navmeshSection in sectionInfo.NavmeshSections)
+            {
+                string filePath = null;
+                if (File.Exists(Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/NavMesh/{fieldName}/{navmeshSection.Name}.shknm2"), FileInfo.FolderPath)))
+                    filePath = Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/NavMesh/{fieldName}/{navmeshSection.Name}.shknm2"), FileInfo.FolderPath);
+                else if (File.Exists(PluginConfig.GetContentPath($"NavMesh/{fieldName}/{navmeshSection.Name}.shknm2")))
+                    filePath = PluginConfig.GetContentPath($"NavMesh/{fieldName}/{navmeshSection.Name}.shknm2");
+
+                if (filePath != null)
+                {
+                    Stream navmeshStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    loader.LoadNavmesh(Path.GetFileName(filePath), navmeshStream, new Vector3(navmeshSection.Origin.X, 0, navmeshSection.Origin.Y));
+                    navmeshStream.Close();
+                }
             }
 
             // Load map file

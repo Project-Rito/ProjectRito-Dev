@@ -8,6 +8,7 @@ SHOW_INVISIBLE_ACTORS - Show Invisible Actors
 SHOW_MAP_MODEL - Show Map Model
 SHOW_ACTOR_LINKS - Show Actor Links
 SHOW_COLLISION_SHAPES - Show Collision Shapes
+SHOW_NAVMESH_SHAPES - Show NavMesh Shapes
 
 OBJ - Obj
 PARAMETERS - Parameters

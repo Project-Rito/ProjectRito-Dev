@@ -914,6 +914,11 @@ namespace UKingLibrary
                     if (shapePairing.LeafNode != null)
                         render.SetBounding(new BoundingNode(shapePairing.LeafNode.Min * GLContext.PreviewScale, shapePairing.LeafNode.Max * GLContext.PreviewScale));
 
+                    render.IsVisibleCallback += delegate
+                    {
+                        return MapData.ShowCollisionShapes;
+                    };
+
                     ((EditableObjectNode)render.UINode).UIProperyDrawer += delegate
                     {
                         ImGui.Separator();

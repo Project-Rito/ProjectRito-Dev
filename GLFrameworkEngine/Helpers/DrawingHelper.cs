@@ -300,5 +300,159 @@ namespace GLFrameworkEngine
             }
             return normals;
         }
+
+        /// <summary>
+        /// Checks if a point is inside a triangle.
+        /// </summary>
+        public static bool PointInTriangle(Vector2 a, Vector2 b, Vector2 c, Vector2 point)
+        {
+            float abcArea = (float)Math.Abs((a.X * (b.Y - c.Y) +
+                         b.X * (c.Y - a.Y) +
+                         c.X * (a.Y - b.Y)) / 2.0);
+
+            float pbcArea = (float)Math.Abs((point.X * (b.Y - c.Y) +
+                         b.X * (c.Y - point.Y) +
+                         c.X * (point.Y - b.Y)) / 2.0);
+
+            float pacArea = (float)Math.Abs((a.X * (point.Y - c.Y) +
+                         point.X * (c.Y - a.Y) +
+                         c.X * (a.Y - point.Y)) / 2.0);
+
+            float pabArea = (float)Math.Abs((a.X * (b.Y - point.Y) +
+                         b.X * (point.Y - a.Y) +
+                         point.X * (a.Y - b.Y)) / 2.0);
+
+            return (abcArea == pbcArea + pacArea + pabArea);
+        }
+
+        /// <summary>
+        /// Ensure an array of vertices is in a specific order.
+        /// </summary>
+        /// <param name="vertices">The vertices to reorder.</param>
+        /// <param name="clockwise">True for clockwise. False for counterclockwise.</param>
+        public static Vector2[] EnsureVertexOrder(Vector2[] vertices, bool clockwise = true)
+        {
+            if (vertices.Length <= 1)
+                return vertices.ToArray();
+            float sum = 0;
+            for (int i = 0; i < vertices.Length - 1; i++)
+                sum += (vertices[i + 1].X - vertices[i].X) * (vertices[i + 1].Y + vertices[i].Y);
+            sum += (vertices.First().X - vertices.Last().X) * (vertices.First().Y + vertices.Last().Y);
+            if (clockwise && sum <= 0)
+                return vertices.Reverse().ToArray();
+            else if (!clockwise && sum > 0)
+                return vertices.Reverse().ToArray();
+
+            return vertices;
+        }
+
+        public static int[] GetCollinearIndices(Vector3[] vertices)
+        {
+            List<int> collinearIndices = new List<int>();
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                Vector3d previousVertex = (Vector3d)(i != 0 ? vertices[i - 1] : vertices.Last());
+                Vector3d nextVertex = (Vector3d)(i != vertices.Length - 1 ? vertices[i + 1] : vertices.First());
+
+                if (Vector3d.Normalize((Vector3d)vertices[i] - previousVertex) == Vector3d.Normalize(nextVertex - (Vector3d)vertices[i]))
+                    collinearIndices.Add(i);
+            }
+
+            return collinearIndices.ToArray();
+        }
+
+        /// <summary>
+        /// Triangulate an ngon using the ear clipping method.
+        /// Vertices should be inputted in counter-clockwise order.
+        /// </summary>
+        public static int[] TriangulateEarClip(Vector3[] vertices)
+        {
+            int[] collinearIndices = GetCollinearIndices(vertices);
+
+            Matrix3 flatten;
+            {
+                List<Vector3> _verticesNoCollinear = vertices.ToList();
+                for (int i = collinearIndices.Length - 1; i >= 0; i--)
+                    _verticesNoCollinear.RemoveAt(collinearIndices[i]);
+
+                Vector3 x = _verticesNoCollinear[1] - _verticesNoCollinear[0];
+                Vector3 y = Vector3.Cross(_verticesNoCollinear[1] - _verticesNoCollinear[0], _verticesNoCollinear[2] - _verticesNoCollinear[1]); // We're assuming the ngon is flat
+                Vector3 z = Vector3.Cross(x, y);
+                flatten = new Matrix3(Vector3.Normalize(x), Vector3.Normalize(y), Vector3.Normalize(z)); // A matrix to flatten to 2D
+            }
+
+            LinkedList<Tuple<Vector2, int>> flattenedVertices = new LinkedList<Tuple<Vector2, int>>();
+            {
+                Vector2[] _flattenedVertices = EnsureVertexOrder(vertices.Select(x => (x * flatten).Xz).ToArray(), false);
+                for (int i = 0; i < _flattenedVertices.Length; i++)
+                {
+                    if (collinearIndices.Contains(i))
+                        continue;
+                    flattenedVertices.AddLast(new Tuple<Vector2, int>(_flattenedVertices[i], i));
+                }
+            }
+
+            LinkedList<int> indices = new LinkedList<int>();
+
+            if (flattenedVertices.Count == 3)
+            {
+                for (LinkedListNode<Tuple<Vector2, int>> vertexNode = flattenedVertices.First; vertexNode != null; vertexNode = vertexNode.Next)
+                {
+                    indices.AddLast(vertexNode.Value.Item2);
+                }
+                return indices.ToArray();
+            }
+            else if (flattenedVertices.Count <= 3)
+                return new int[0];
+            
+            LinkedListNode<Tuple<Vector2, int>> nextNode;
+            for (LinkedListNode<Tuple<Vector2, int>> convexVertexNode = flattenedVertices.First; convexVertexNode != null; convexVertexNode = nextNode)
+            {
+                nextNode = convexVertexNode.Next;
+                Tuple<Vector2, int>[] convexTri = new Tuple<Vector2, int>[3];
+                convexTri[0] = (convexVertexNode.Previous ?? convexVertexNode.List.Last).Value;
+                convexTri[1] = convexVertexNode.Value;
+                convexTri[2] = (convexVertexNode.Next ?? convexVertexNode.List.First).Value;
+
+                bool convex = (convexTri[1].Item1.X - convexTri[0].Item1.X) * (convexTri[2].Item1.Y - convexTri[1].Item1.Y) - (convexTri[2].Item1.X - convexTri[1].Item1.X) * (convexTri[1].Item1.Y - convexTri[0].Item1.Y) > 0;
+
+                if (!convex)
+                    continue;
+
+                bool vertexContained = false;
+                for (LinkedListNode<Tuple<Vector2, int>> reflexVertexNode = flattenedVertices.First; reflexVertexNode != null; reflexVertexNode = reflexVertexNode.Next)
+                {
+                    Tuple<Vector2, int>[] reflexTri = new Tuple<Vector2, int>[3];
+                    reflexTri[0] = (reflexVertexNode.Previous ?? reflexVertexNode.List.Last).Value;
+                    reflexTri[1] = reflexVertexNode.Value;
+                    reflexTri[2] = (reflexVertexNode.Next ?? reflexVertexNode.List.First).Value;
+                    bool reflex = (convexTri[1].Item1.X - convexTri[0].Item1.X) * (convexTri[2].Item1.Y - convexTri[1].Item1.Y) - (convexTri[2].Item1.X - convexTri[1].Item1.X) * (convexTri[1].Item1.Y - convexTri[0].Item1.Y) < 0;
+                    if (reflex && PointInTriangle(convexTri[0].Item1, convexTri[1].Item1, convexTri[2].Item1, reflexVertexNode.Value.Item1))
+                    {
+                        vertexContained = true;
+                        break;
+                    }
+
+                }
+                if (vertexContained)
+                    continue;
+
+                indices.AddLast(convexTri[0].Item2);
+                indices.AddLast(convexTri[1].Item2);
+                indices.AddLast(convexTri[2].Item2);
+                flattenedVertices.Remove(convexVertexNode);
+
+                if (flattenedVertices.Count == 3)
+                {
+                    for (LinkedListNode<Tuple<Vector2, int>> vertexNode = flattenedVertices.First; vertexNode != null; vertexNode = vertexNode.Next)
+                    {
+                        indices.AddLast(vertexNode.Value.Item2);
+                    }
+                    break;
+                }
+            }
+
+            return indices.ToArray();
+        }
     }
 }
