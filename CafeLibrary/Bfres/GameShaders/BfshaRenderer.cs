@@ -18,7 +18,7 @@ namespace CafeLibrary.Rendering
     [Serializable]
     public class BfshaRenderer : ShaderRenderBase
     {
-        private ShaderProgram shaderProgram;
+        private ShaderProgram ShaderProgram;
 
         /// <summary>
         /// A list of programs used for multiple passes.
@@ -45,7 +45,7 @@ namespace CafeLibrary.Rendering
         /// <summary>
         /// The opengl shader used to render.
         /// </summary>
-        public ShaderProgram Shader => shaderProgram;
+        public ShaderProgram Shader => ShaderProgram;
 
         /// <summary>
         /// A list of blocks which are cached to not update after the next frame.
@@ -301,7 +301,7 @@ namespace CafeLibrary.Rendering
                 watch.Stop();
                 StudioLogger.WriteLine($"Shader program for mesh {mesh.Name} compiled in: {watch.ElapsedMilliseconds} ms");
             }
-            shaderProgram = GLShaders[pass].Program;
+            ShaderProgram = GLShaders[pass].Program;
         }
 
         /// <summary>
@@ -330,7 +330,7 @@ namespace CafeLibrary.Rendering
         private void DecodeSwitchBinary(BfshaLibrary.ResShaderProgram program)
         {
             GLShaders[ShaderIndex] = TegraShaderDecoder.LoadShaderProgram(ShaderModel, ShaderModel.GetShaderVariation(program));
-            shaderProgram = GLShaderInfo.Program;
+            ShaderProgram = GLShaderInfo.Program;
         }
 
         private void DecodeWiiUBinary(BfshaLibrary.ResShaderProgram program)
@@ -339,7 +339,7 @@ namespace CafeLibrary.Rendering
             var pixelShader = BfshaGX2ShaderHelper.CreatePixelShader(ShaderModel, program);
 
             GLShaders[ShaderIndex] = CafeShaderDecoder.LoadShaderProgram(vertexShader, pixelShader);
-            shaderProgram = GLShaderInfo.Program;
+            ShaderProgram = GLShaderInfo.Program;
         }
 
         /// <summary>

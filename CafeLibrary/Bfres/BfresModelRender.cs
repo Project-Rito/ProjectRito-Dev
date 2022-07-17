@@ -305,7 +305,7 @@ namespace CafeLibrary.Rendering
 
         private void DrawCustomShaderRender(GLContext context, BfresRender parentRender, BfresMeshRender mesh, int instanceCount, int stage = 0)
         {
-            var materialAsset = ((TurboNXRender)mesh.MaterialAsset);
+            var materialAsset = ((BfshaRenderer)mesh.MaterialAsset);
             if (!materialAsset.HasValidProgram) {
                 DrawSolid(context, parentRender, mesh, instanceCount);
                 return;

@@ -200,8 +200,8 @@ namespace CafeLibrary.Rendering
         static BfresMaterialRender LoadMaterial(BfresRender render, BfresModelRender model, BfresMeshRender meshRender, Material mat, Shape shape)
         {
             BfresMaterialRender matRender = new BfresMaterialRender(render, model);
-            if (render.UseGameShaders && render.ShaderFiles.Count > 0) {
-                matRender = new TurboNXRender(render, model);
+            if (render.UseGameShaders && (render.ShaderFiles.Count > 0 || GlobalShaderCache.ShaderFiles.Count > 0)) {
+                matRender = new UKingNXRender(render, model);
             }
 
             matRender.Name = mat.Name;

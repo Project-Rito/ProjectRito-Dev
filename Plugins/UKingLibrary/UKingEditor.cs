@@ -448,6 +448,17 @@ namespace UKingLibrary
 
         private void LoadGlobalShaderCache()
         {
+            if (!Directory.Exists($"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/MapStudio/UKing/GlobalShaders/"))
+                Directory.CreateDirectory($"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/MapStudio/UKing/GlobalShaders/");
+            foreach (string filePath in Directory.EnumerateFiles($"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/MapStudio/UKing/GlobalShaders/"))
+            {
+                string fileName = Path.GetFileName(filePath);
+                STFileLoader.Settings fileSettings = STFileLoader.TryDecompressFile(File.OpenRead(filePath), fileName);
+                BfshaLibrary.BfshaFile bfsha = new BfshaLibrary.BfshaFile(fileSettings.Stream);
+                GlobalShaderCache.ShaderFiles.TryAdd(fileName, bfsha);
+            }
+            return; // Unfortunatly, the Wii U versions of bfsha files are in a new and updated format that's hard to read. We load switch shaders from a folder instead.
+
             STFileLoader.Settings uking_mat_settings = STFileLoader.TryDecompressFile(new MemoryStream(BootupGfx.SarcData.Files["Shader/uking_mat.product.sbfsha"]), "uking_mat_product.sbfsha");
             BfshaLibrary.BfshaFile uking_mat = new BfshaLibrary.BfshaFile(uking_mat_settings.Stream);
             GlobalShaderCache.ShaderFiles.TryAdd("uking_mat_product.sbfsha", uking_mat);
