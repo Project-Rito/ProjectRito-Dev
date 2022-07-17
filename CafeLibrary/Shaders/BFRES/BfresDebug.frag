@@ -1,7 +1,19 @@
 ﻿#version 330 core
 
-uniform sampler2D DiffuseTexture;
 uniform sampler2D UVTestPattern;
+
+//Samplers
+uniform sampler2D u_TextureAlbedo0;   // _a0
+uniform sampler2D u_TextureAlpha;     // _ms0
+uniform sampler2D u_TextureSpecMask;  // _s0
+uniform sampler2D u_TextureNormal0;   // _n0
+uniform sampler2D u_TextureNormal1;   // _n1
+uniform sampler2D u_TextureEmission0; // _e0
+uniform sampler2D u_TextureBake0;     // _b0
+uniform sampler2D u_TextureBake1;     // _b1
+uniform sampler2D u_TextureMultiA;    // _a1
+uniform sampler2D u_TextureMultiB;    // _a2
+uniform sampler2D u_TextureIndirect;  // _a3
 
 uniform int debugShading;
 uniform vec4 highlight_color;
@@ -46,6 +58,12 @@ void main(){
         vec3 displayNormal = (N * 0.5) + 0.5;
         float halfLambert = max(displayNormal.y,0.5);
         outputColor.rgb = vec3(0.5) * halfLambert;
+    }
+
+    if (debugShading == DISPLAY_DIFFUSE)
+    {
+        vec4 displayDiffuse = texture(u_TextureAlbedo0, texCoord0);
+        outputColor = displayDiffuse;
     }
 
     if (debugShading == DISPLAY_UV)

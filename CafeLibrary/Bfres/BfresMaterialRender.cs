@@ -343,7 +343,7 @@ namespace CafeLibrary.Rendering
                 GL.Disable(EnableCap.CullFace);
         }
 
-        public virtual void SetTextureUniforms(GLContext control, ShaderProgram shader)
+        public virtual int SetTextureUniforms(GLContext control, ShaderProgram shader)
         {
             GL.ActiveTexture(TextureUnit.Texture0 + 1);
             GL.BindTexture(TextureTarget.Texture2D, RenderTools.defaultTex.ID);
@@ -422,6 +422,8 @@ namespace CafeLibrary.Rendering
                 if (hasTexture)
                     shader.SetInt(uniformName, id++);
             }
+
+            return id; // Might not be the best way to implement this...
         }
 
         private string GetUniformName(string sampler)

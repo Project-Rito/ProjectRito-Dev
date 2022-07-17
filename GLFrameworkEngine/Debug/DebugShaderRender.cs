@@ -29,14 +29,14 @@ namespace GLFrameworkEngine
             Bitangents,
         }
 
-        public static void RenderMaterial(GLContext context)
+        public static void RenderMaterial(GLContext context, int startSlot = 1)
         {
             var debugShader = context.CurrentShader;
             debugShader.SetInt("debugShading", (int)DebugShaderRender.DebugRendering);
             debugShader.SetInt("weightRampType", 2);
             debugShader.SetInt("selectedBoneIndex", Runtime.SelectedBoneIndex);
 
-            int slot = 1;
+            int slot = startSlot;
             debugShader.SetTexture(RenderTools.uvTestPattern, "UVTestPattern", slot++);
             debugShader.SetTexture(RenderTools.boneWeightGradient, "weightRamp1", slot++);
             debugShader.SetTexture(RenderTools.boneWeightGradient2, "weightRamp2", slot++);
