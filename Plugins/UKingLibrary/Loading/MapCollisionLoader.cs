@@ -64,7 +64,9 @@ namespace UKingLibrary
 
             ShapePairings = GenerateActorShapePairings();
 
-            UpdateRenders(scene); // Rendering functionality
+
+            Scene = scene;
+            UpdateRenders(); // Rendering functionality
         }
 
         #region Interfacing for collision manipulation
@@ -890,11 +892,12 @@ namespace UKingLibrary
         }
 
         private List<HavokMeshShapeRender> ShapeRenders = new List<HavokMeshShapeRender>();
+        private GLScene Scene = null;
 
-        private void UpdateRenders(GLScene scene = null)
+        private void UpdateRenders()
         {
             foreach (HavokMeshShapeRender render in ShapeRenders)
-                scene?.RemoveRenderObject(render);
+                Scene?.RemoveRenderObject(render);
             ShapeRenders.Clear();
             foreach (ActorShapePairing actorPairing in ShapePairings)
             {
@@ -959,7 +962,7 @@ namespace UKingLibrary
 
                     ShapeRenders.Add(render);
 
-                    scene?.AddRenderObject(render);
+                    Scene?.AddRenderObject(render);
                 }
             }
         }

@@ -104,7 +104,7 @@ namespace UKingLibrary
                     return;
 
             MapCollisionLoader loader = new MapCollisionLoader();
-            loader.Load(stream, fileName);
+            loader.Load(stream, fileName, Scene);
 
             InitSectionFolder(GetSectionName(fileName));
             ((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Collision"].AddChild(loader.RootNode);

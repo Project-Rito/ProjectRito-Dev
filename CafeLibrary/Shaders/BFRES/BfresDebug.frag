@@ -53,36 +53,36 @@ void main(){
         outputColor.rgb = displayNormal;
     }
 
-    if (debugShading == DISPLAY_LIGHTING)
+    else if (debugShading == DISPLAY_LIGHTING)
     {
         vec3 displayNormal = (N * 0.5) + 0.5;
         float halfLambert = max(displayNormal.y,0.5);
         outputColor.rgb = vec3(0.5) * halfLambert;
     }
 
-    if (debugShading == DISPLAY_DIFFUSE)
+    else if (debugShading == DISPLAY_DIFFUSE)
     {
         vec4 displayDiffuse = texture(u_TextureAlbedo0, texCoord0);
         outputColor = displayDiffuse;
     }
 
-    if (debugShading == DISPLAY_UV)
+    else if (debugShading == DISPLAY_UV)
          outputColor.rgb = vec3(displayTexCoord.x, displayTexCoord.y, 1.0);
-    if (debugShading == DISPLAY_UV_PATTERN)
+    else if (debugShading == DISPLAY_UV_PATTERN)
         outputColor.rgb = texture(UVTestPattern, displayTexCoord).rgb;
-    if (debugShading == DISPLAY_WEIGHTS)
+    else if (debugShading == DISPLAY_WEIGHTS)
         outputColor.rgb = boneWeightsColored;
-    if (debugShading == DISPLAY_TANGENT)
+    else if (debugShading == DISPLAY_TANGENT)
     {
         vec3 displayTangent = (tangent * 0.5) + 0.5;
         outputColor.rgb = displayTangent;
     }
-    if (debugShading == DISPLAY_BITANGENT)
+    else if (debugShading == DISPLAY_BITANGENT)
     {
         vec3 displayBitangent = (bitangent * 0.5) + 0.5;
         outputColor.rgb = displayBitangent;
     }
-    if (debugShading == DISPLAY_VTX_CLR)
+    else if (debugShading == DISPLAY_VTX_CLR)
     {
         outputColor.rgb = vertexColor.rgb;
     }

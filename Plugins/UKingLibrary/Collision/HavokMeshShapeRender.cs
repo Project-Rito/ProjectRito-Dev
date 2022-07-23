@@ -39,7 +39,8 @@ namespace UKingLibrary
                 shader.SetTransform(GLConstants.ModelMatrix, Transform);
 
                 //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-                GL.Enable(EnableCap.CullFace);
+                GL.PointSize(4);
+                GL.Disable(EnableCap.CullFace);
                 GL.Enable(EnableCap.Blend);
                 GL.Enable(EnableCap.PolygonOffsetFill);
                 GL.PolygonOffset(-4f, 1f);
@@ -47,7 +48,7 @@ namespace UKingLibrary
                 GL.Disable(EnableCap.PolygonOffsetFill);
                 GL.Disable(EnableCap.CullFace);
                 GL.Disable(EnableCap.Blend);
-                //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
 
                 BoundingNode?.Box.DrawSolid(context, Matrix4.Identity, Vector4.One);
             }
@@ -150,20 +151,30 @@ namespace UKingLibrary
                 }
 
                 List<Tuple<Vector3, int>> faceVertices = new List<Tuple<Vector3, int>>(face.m_numEdges + 1);
-                System.Numerics.Vector4 firstVertex = navmesh.m_vertices[navmesh.m_edges[face.m_startEdgeIndex + 0].m_a];
-                faceVertices.Add(new Tuple<Vector3, int>(new Vector3(firstVertex.X, firstVertex.Y, firstVertex.Z), navmesh.m_edges[face.m_startEdgeIndex + 0].m_a));
-                for (int i = 1; i < face.m_numEdges; i++)
+
+                List<hkaiNavMeshEdge> faceEdges = navmesh.m_edges.GetRange(face.m_startEdgeIndex, face.m_numEdges);
+                int edgeIdx = 0;
+                for (int i = 0; i < faceEdges.Count; i++)
                 {
-                    System.Numerics.Vector4 vertex = navmesh.m_vertices[navmesh.m_edges[face.m_startEdgeIndex + i].m_a];
-                    faceVertices.Add(new Tuple<Vector3, int>(new Vector3(vertex.X, vertex.Y, vertex.Z), navmesh.m_edges[face.m_startEdgeIndex + i].m_a));
+                    System.Numerics.Vector4 vertex = navmesh.m_vertices[faceEdges[edgeIdx].m_b];
+                    faceVertices.Add(new Tuple<Vector3, int>(new Vector3(vertex.X, vertex.Y, vertex.Z), faceEdges[edgeIdx].m_b));
+
+                    edgeIdx = faceEdges.FindIndex(x => x.m_a == faceEdges[edgeIdx].m_b);
                 }
+                // Improper way but should work just as well:
+                //for (int i = 0; i < face.m_numEdges; i++)
+                //{
+                //    System.Numerics.Vector4 vertex = navmesh.m_vertices[navmesh.m_edges[face.m_startEdgeIndex + i].m_a];
+                //    faceVertices.Add(new Tuple<Vector3, int>(new Vector3(vertex.X, vertex.Y, vertex.Z), navmesh.m_edges[face.m_startEdgeIndex + i].m_a));
+                //}
+
                 indices.AddRange(DrawingHelper.TriangulateEarClip(faceVertices.Select(x=>x.Item1).ToArray()).Select(x => faceVertices[x].Item2));
             }
 
             Vector3[] normals = DrawingHelper.CalculateNormals(vertices.Select(x => x.Position).ToList(), indices);
             for (int i = 0; i < vertices.Count(); i++)
             {
-                vertices[i].Normal = normals[i];
+                vertices[i].Normal = new Vector3(0, 1, 0);
                 vertices[i].VertexColor = new Vector4(0, 1f, 0.5f, 0.5f);
             }
 

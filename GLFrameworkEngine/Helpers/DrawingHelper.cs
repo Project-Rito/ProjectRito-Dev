@@ -330,23 +330,27 @@ namespace GLFrameworkEngine
         /// </summary>
         /// <param name="vertices">The vertices to reorder.</param>
         /// <param name="clockwise">True for clockwise. False for counterclockwise.</param>
-        public static Vector2[] EnsureVertexOrder(Vector2[] vertices, bool clockwise = true)
+        public static Tuple<Vector2, int>[] EnsureVertexOrder(Vector2[] vertices, bool clockwise = true)
         {
+            Tuple<Vector2, int>[] indexedVertices = new Tuple<Vector2, int>[vertices.Length];
+            for (int i = 0; i < vertices.Length; i++)
+                indexedVertices[i] = new Tuple<Vector2, int>(vertices[i], i);
+
             if (vertices.Length <= 1)
-                return vertices.ToArray();
+                return indexedVertices;
             float sum = 0;
             for (int i = 0; i < vertices.Length - 1; i++)
                 sum += (vertices[i + 1].X - vertices[i].X) * (vertices[i + 1].Y + vertices[i].Y);
             sum += (vertices.First().X - vertices.Last().X) * (vertices.First().Y + vertices.Last().Y);
             if (clockwise && sum <= 0)
-                return vertices.Reverse().ToArray();
+                return indexedVertices.Reverse().ToArray();
             else if (!clockwise && sum > 0)
-                return vertices.Reverse().ToArray();
+                return indexedVertices.Reverse().ToArray();
 
-            return vertices;
+            return indexedVertices;
         }
 
-        public static int[] GetCollinearIndices(Vector3[] vertices)
+        public static int[] GetCollinearIndices(Vector3[] vertices, float tolerance = 0.00001f)
         {
             List<int> collinearIndices = new List<int>();
             for (int i = 0; i < vertices.Length; i++)
@@ -354,7 +358,21 @@ namespace GLFrameworkEngine
                 Vector3d previousVertex = (Vector3d)(i != 0 ? vertices[i - 1] : vertices.Last());
                 Vector3d nextVertex = (Vector3d)(i != vertices.Length - 1 ? vertices[i + 1] : vertices.First());
 
-                if (Vector3d.Normalize((Vector3d)vertices[i] - previousVertex) == Vector3d.Normalize(nextVertex - (Vector3d)vertices[i]))
+                if (Math.Abs(Vector3d.Dot(Vector3d.Normalize((Vector3d)vertices[i] - previousVertex), Vector3d.Normalize(nextVertex - (Vector3d)vertices[i])) - 1) <= tolerance)
+                    collinearIndices.Add(i);
+            }
+
+            return collinearIndices.ToArray();
+        }
+        public static int[] GetCollinearIndices(Vector2[] vertices, float tolerance = 0.00001f)
+        {
+            List<int> collinearIndices = new List<int>();
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                Vector2d previousVertex = (Vector2d)(i != 0 ? vertices[i - 1] : vertices.Last());
+                Vector2d nextVertex = (Vector2d)(i != vertices.Length - 1 ? vertices[i + 1] : vertices.First());
+
+                if (Math.Abs(Vector2d.Dot(Vector2d.Normalize((Vector2d)vertices[i] - previousVertex), Vector2d.Normalize(nextVertex - (Vector2d)vertices[i])) - 1) <= tolerance)
                     collinearIndices.Add(i);
             }
 
@@ -368,27 +386,49 @@ namespace GLFrameworkEngine
         public static int[] TriangulateEarClip(Vector3[] vertices)
         {
             int[] collinearIndices = GetCollinearIndices(vertices);
-
             Matrix3 flatten;
             {
                 List<Vector3> _verticesNoCollinear = vertices.ToList();
                 for (int i = collinearIndices.Length - 1; i >= 0; i--)
                     _verticesNoCollinear.RemoveAt(collinearIndices[i]);
 
-                Vector3 x = _verticesNoCollinear[1] - _verticesNoCollinear[0];
-                Vector3 y = Vector3.Cross(_verticesNoCollinear[1] - _verticesNoCollinear[0], _verticesNoCollinear[2] - _verticesNoCollinear[1]); // We're assuming the ngon is flat
-                Vector3 z = Vector3.Cross(x, y);
-                flatten = new Matrix3(Vector3.Normalize(x), Vector3.Normalize(y), Vector3.Normalize(z)); // A matrix to flatten to 2D
+                Vector3 x = Vector3.Zero;
+                Vector3 y = Vector3.Zero;
+                Vector3 z = Vector3.Zero;
+                for (int i = 0; i < _verticesNoCollinear.Count; i++)
+                {
+                    Vector3 previous = i > 0 ? _verticesNoCollinear[i - 1] : _verticesNoCollinear[_verticesNoCollinear.Count - 1];
+                    Vector3 next = i < _verticesNoCollinear.Count - 1 ? _verticesNoCollinear[i + 1] : _verticesNoCollinear[0];
+
+                    Vector3 _x = _verticesNoCollinear[i] - previous;
+                    _x.X = Math.Abs(_x.X);
+                    _x.Y = Math.Abs(_x.Y);
+                    _x.Z = Math.Abs(_x.Z);
+                    Vector3 _y = Vector3.Cross(_verticesNoCollinear[i] - previous, next - _verticesNoCollinear[i]); // We're assuming the ngon is flat
+                    _y.X = Math.Abs(_y.X);
+                    _y.Y = Math.Abs(_y.Y);
+                    _y.Z = Math.Abs(_y.Z);
+                    Vector3 _z = Vector3.Cross(x, y);
+                    _z.X = Math.Abs(_z.X);
+                    _z.Y = Math.Abs(_z.Y);
+                    _z.Z = Math.Abs(_z.Z);
+
+                    x += _x;
+                    y += _y;
+                    z += _z;
+                }
+                flatten = Matrix3.Invert(new Matrix3(Vector3.Normalize(x), Vector3.Normalize(y), Vector3.Normalize(z))); // A matrix to flatten to 2
             }
 
             LinkedList<Tuple<Vector2, int>> flattenedVertices = new LinkedList<Tuple<Vector2, int>>();
             {
-                Vector2[] _flattenedVertices = EnsureVertexOrder(vertices.Select(x => (x * flatten).Xz).ToArray(), false);
+                Tuple<Vector2, int>[] _flattenedVertices = EnsureVertexOrder(vertices.Select(x => (x * flatten).Xz).ToArray(), false);
+
                 for (int i = 0; i < _flattenedVertices.Length; i++)
                 {
-                    if (collinearIndices.Contains(i))
+                    if (collinearIndices.Contains(_flattenedVertices[i].Item2))
                         continue;
-                    flattenedVertices.AddLast(new Tuple<Vector2, int>(_flattenedVertices[i], i));
+                    flattenedVertices.AddLast(new Tuple<Vector2, int>(_flattenedVertices[i].Item1, _flattenedVertices[i].Item2));
                 }
             }
 
@@ -402,8 +442,8 @@ namespace GLFrameworkEngine
                 }
                 return indices.ToArray();
             }
-            else if (flattenedVertices.Count <= 3)
-                return new int[0];
+            else if (flattenedVertices.Count <= 2)
+                throw new ArgumentException("Not a valid shape!");
             
             LinkedListNode<Tuple<Vector2, int>> nextNode;
             for (LinkedListNode<Tuple<Vector2, int>> convexVertexNode = flattenedVertices.First; convexVertexNode != null; convexVertexNode = nextNode)
@@ -432,7 +472,6 @@ namespace GLFrameworkEngine
                         vertexContained = true;
                         break;
                     }
-
                 }
                 if (vertexContained)
                     continue;
