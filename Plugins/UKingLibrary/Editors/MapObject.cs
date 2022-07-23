@@ -464,6 +464,9 @@ namespace UKingLibrary
                     collisionLoader.Load(File.OpenRead(actorCollisionPath), Path.GetFileName(actorCollisionPath));
                     BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(0);
 
+                    if (infos == null) // Just in case...
+                        return;
+
                     foreach (BakedCollisionShapeCacheable info in infos)
                         ParentLoader.AddBakedCollisionShape(HashId, MapData.RootNode.Header, info, translation, rotation, scale);
                 }

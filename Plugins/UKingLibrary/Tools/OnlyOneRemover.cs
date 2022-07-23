@@ -36,7 +36,7 @@ namespace UKingLibrary
                     BymlFile muunt = section.Value[ending];
 
                     bool modified = false;
-                    foreach (Dictionary<string, BymlNode> obj in muunt.RootNode.Hash["Objs"].Array.Select(x => x.Hash))
+                    foreach (IDictionary<string, BymlNode> obj in muunt.RootNode.Hash["Objs"].Array.Select(x => x.Hash))
                     {
                         if (obj["UnitConfigName"].String == actorName && obj.ContainsKey("OnlyOne"))
                         {
