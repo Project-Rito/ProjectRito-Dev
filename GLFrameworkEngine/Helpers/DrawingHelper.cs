@@ -443,7 +443,7 @@ namespace GLFrameworkEngine
                 return indices.ToArray();
             }
             else if (flattenedVertices.Count <= 2)
-                throw new ArgumentException("Not a valid shape!");
+                return new int[0];
             
             LinkedListNode<Tuple<Vector2, int>> nextNode;
             for (LinkedListNode<Tuple<Vector2, int>> convexVertexNode = flattenedVertices.First; convexVertexNode != null; convexVertexNode = nextNode)

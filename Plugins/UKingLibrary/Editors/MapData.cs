@@ -127,6 +127,9 @@ namespace UKingLibrary
                 {
                     foreach (IDictionary<string, dynamic> link in obj.Properties["LinksToObj"])
                     {
+                        if (link["DestUnitHashId"].Value is not uint)
+                            continue;
+
                         uint dest = link["DestUnitHashId"].Value;
 
                         if (!Objs.ContainsKey(dest)) // Make sure the dest object exists in this file
