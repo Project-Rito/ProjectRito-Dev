@@ -256,11 +256,12 @@ namespace CafeLibrary.Rendering
             shader.SetBool("alphaTest", BlendState.AlphaTest);
             shader.SetFloat("alphaRefValue", BlendState.AlphaValue);
             shader.SetInt("alphaFunc", GetAlphaFunc(BlendState.AlphaFunction));
+            shader.SetFloat("specMaskScalar", ShaderOptions.ContainsKey("uking_specmask_scaler") ? float.Parse(ShaderOptions["uking_specmask_scaler"]) : 1f);
 
             shader.SetBoolToInt("drawDebugAreaID", BfresRender.DrawDebugAreaID);
             shader.SetInt("areaID", AreaIndex);
 
-            //UpdateMaterialBlock();
+            UpdateMaterialBlock();
             MaterialBlock.RenderBuffer(shader.program, "ub_MaterialParams");
         }
 
