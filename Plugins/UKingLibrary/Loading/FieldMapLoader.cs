@@ -82,6 +82,7 @@ namespace UKingLibrary
 
             ApplyPreviewScale();
             GlobalData.LoadActorDatabase();
+            ParentEditor.LoadAssetList();
 
             var mapData = new MapData(stream, this, fileName);
             InitSectionFolder(GetSectionName(fileName));

@@ -61,6 +61,7 @@ namespace UKingLibrary
             {
                 SetupContextMenus();
                 GlobalData.LoadActorDatabase(true);
+                LoadAssetList();
             };
         }
 
@@ -109,8 +110,6 @@ namespace UKingLibrary
                 if (filePath != null)
                     LoadDungeon(packName, File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
             }
-
-            LoadAssetList();
         }
 
         private void SetupRoot()
@@ -170,35 +169,13 @@ namespace UKingLibrary
             Root.ContextMenus.Add(loadDungeonMenuItem);
         }
 
-        private void LoadAssetList()
+        public void LoadAssetList()
         {
-            //Allow actor objects to be loaded in the asset list
-            //Todo add more profiles and add a proper tree hiearchy to asset viewer
-            var profiles = new string[] {
-                "Dragon",
-                "Enemy",
-                "EnemySwarm",
-                "GiantEnemy",
-                "Guardian",
-                "Item",
-                "LastBoss",
-                "Horse",
-                "MapDynamicActive",
-                "MapConstActive",
-                "MergedDungeonParts",
-                "NPC",
-                "Prey",
-                "Sandworm",
-                "SiteBoss",
-                "System",
-                "Weapon",
-                "WeaponBow",
-                "WeaponShield",
-                "WeaponLargeSword",
-                "WeaponSmallSword" };
+            if (this.Workspace.AssetViewWindow.AssetCategories.Count > 0)
+                return;
 
-            foreach (var profile in profiles)
-                this.Workspace.AddAssetCategory(new AssetViewMapObject(profile));
+            foreach (var actor in GlobalData.Actors.Values)
+                this.Workspace.AddAssetCategory(new AssetViewMapObject(actor["profile"]));
         }
 
         public override void DrawToolWindow()

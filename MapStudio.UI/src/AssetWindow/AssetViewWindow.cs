@@ -35,11 +35,22 @@ namespace MapStudio.UI
         /// </summary>
         public AssetItem SelectedAsset
         {
-            get { return selectedAsset; }
-            set { selectedAsset = value; }
+            get { return _selectedAsset; }
+            set { _selectedAsset = value; }
         }
 
-        private AssetItem selectedAsset = null;
+        /// <summary>
+        /// All asset categories
+        /// </summary>
+        public IList<IAssetCategory> AssetCategories
+        {
+            get
+            {
+                return _assetCategories.Where(x => !(x is FavoritesCategory || x is AssetViewFileExplorer)).ToList();
+            }
+        }
+
+        private AssetItem _selectedAsset = null;
 
         private string _searchText = "";
         private bool isSearch = false;
@@ -51,7 +62,7 @@ namespace MapStudio.UI
         private List<AssetItem> Assets = new List<AssetItem>();
         private List<AssetItem> FilteredAssets = new List<AssetItem>();
 
-        private List<IAssetCategory> AssetCategories = new List<IAssetCategory>();
+        private List<IAssetCategory> _assetCategories = new List<IAssetCategory>();
 
         private IAssetCategory ActiveCategory = null;
         private IAssetViewFileTypeList FileTypeList = null;
@@ -67,7 +78,9 @@ namespace MapStudio.UI
         /// Adds a category representing a collection of assets.
         /// </summary>
         public void AddCategory(IAssetCategory category) {
-            AssetCategories.Add(category);
+            if (_assetCategories.Any(x => x.Name == category.Name))
+                return;
+            _assetCategories.Add(category);
         }
 
         /// <summary>
@@ -89,7 +102,7 @@ namespace MapStudio.UI
                 Assets.Add(asset);
             }
 
-            if (ActiveCategory.IsFilterMode)
+            if (ActiveCategory.IsFilterMode || isSearch)
                 FilteredAssets = UpdateSearch(Assets);
         }
 
@@ -99,7 +112,7 @@ namespace MapStudio.UI
         public override void Render()
         {
             if (ActiveCategory == null) {
-                Reload(AssetCategories.FirstOrDefault());
+                Reload(_assetCategories.FirstOrDefault());
             }
 
             var width = ImGui.GetWindowWidth();
@@ -122,8 +135,8 @@ namespace MapStudio.UI
             ImGui.SameLine();
             if (ImGui.Button("->"))
             {
-                if (selectedAsset is AssetFolder)
-                    ReloadFromFolder((AssetFolder)selectedAsset);
+                if (_selectedAsset is AssetFolder)
+                    ReloadFromFolder((AssetFolder)_selectedAsset);
             }
             ImGui.SameLine();
 
@@ -149,7 +162,7 @@ namespace MapStudio.UI
             {
                 //Category filter
                 ImGui.PushItemWidth(200);
-                foreach (var category in AssetCategories)
+                foreach (var category in _assetCategories)
                 {
                     bool isSelected = category == ActiveCategory;
                     if (ImGui.Selectable(category.Name, isSelected)) {
@@ -196,7 +209,7 @@ namespace MapStudio.UI
             float itemWidth = Config.IconSize;
             float itemHeight = Config.IconSize;
 
-            if (selectedAsset != null && selectedAsset.Favorited) {
+            if (_selectedAsset != null && _selectedAsset.Favorited) {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 0, 1)));
             }
             else {
@@ -204,8 +217,8 @@ namespace MapStudio.UI
             }
             if (ImGui.Button($"  {IconManager.STAR_ICON}   "))
             {
-                if (selectedAsset != null)
-                    selectedAsset.Favorited = !selectedAsset.Favorited;
+                if (_selectedAsset != null)
+                    _selectedAsset.Favorited = !_selectedAsset.Favorited;
             }
             ImGui.PopStyleColor();
             ImGui.SameLine();
@@ -247,7 +260,7 @@ namespace MapStudio.UI
             ImGui.PushItemWidth(200);
             if (ImGui.BeginCombo("##category", ActiveCategory.Name))
             {
-                foreach (var category in AssetCategories)
+                foreach (var category in _assetCategories)
                 {
                     bool isSelected = category == ActiveCategory;
                     if (ImGui.Selectable(category.Name, isSelected))
@@ -319,7 +332,7 @@ namespace MapStudio.UI
                             obj.DisplayName = TextEplislon(obj.Name, textWidth, itemWidth);
 
                         string name = obj.DisplayName;
-                        bool isSelected = selectedAsset == obj;
+                        bool isSelected = _selectedAsset == obj;
 
                         //Get the icon
                         var icon = IconManager.GetTextureIcon("Node");
@@ -405,7 +418,7 @@ namespace MapStudio.UI
                         }
 
                         if (select) {
-                            selectedAsset = obj;
+                            _selectedAsset = obj;
                         }
                         if (isDoubleClicked)
                             doubleClickedAsset = obj;

@@ -37,11 +37,11 @@ namespace UKingLibrary.UI
             assets.Clear();
             foreach (IDictionary<string, dynamic> obj in objectList.OrderBy(x => x["name"]))
             {
-                if (!obj.ContainsKey("bfres") || !obj.ContainsKey("name"))
+                if (!obj.ContainsKey("name") || !obj.ContainsKey("profile"))
                     continue;
 
                 string name = obj["name"];
-                string bfres = obj["bfres"];
+                string bfres = obj.ContainsKey("bfres") ? obj["bfres"] : null;
                 string profile = obj["profile"];
 
                 if (profile != Category)
@@ -51,7 +51,7 @@ namespace UKingLibrary.UI
                     folders.Add(profile, new AssetFolder(profile));
                 }
 
-                if (folders[profile].Items.Any(x => ((MapObjectAsset)x).BfresPath == bfres))
+                if (folders[profile].Items.Any(x => ((MapObjectAsset)x).Name == name))
                     continue;
 
                 folders[profile].Items.Add(new MapObjectAsset()
@@ -113,6 +113,9 @@ namespace UKingLibrary.UI
         public override void Background_LoadThumbnail()
         {
             return; //Todo the icon loader does not work correctly
+
+            if (BfresPath == null)
+                return;
 
             string modelpath = PluginConfig.GetContentPath($"Model/{BfresPath}.sbfres");
             string texpath = PluginConfig.GetContentPath($"Model/{BfresPath}.Tex.sbfres");

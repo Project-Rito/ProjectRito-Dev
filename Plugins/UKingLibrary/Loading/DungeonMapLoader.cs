@@ -107,6 +107,7 @@ namespace UKingLibrary
 
             ApplyPreviewScale();
             GlobalData.LoadActorDatabase();
+            ParentEditor.LoadAssetList();
 
             // Load baked collision data
             MapCollisionLoader bakedCollisionLoader = new MapCollisionLoader();
