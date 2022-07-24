@@ -74,6 +74,7 @@ uniform sampler2D u_TextureIndirect;  // _a3
 
 //Array Samplers
 uniform sampler2DArray u_TextureArrAlbedo; // tma
+uniform sampler2DArray u_TextureArrSpecMask; // ???
 uniform sampler2DArray u_TextureArrNormal; // tmc
 
 uniform float u_TextureArrAlbedo_Index;
@@ -82,7 +83,7 @@ uniform float u_TextureArrSpecMask_Index;
 uniform float u_TextureArrNormal_Index;
 
 #define enable_diffuse
-#define enable_alpha_map;
+#define enable_alpha_map
 #define enable_diffuse2
 #define enable_albedo
 #define enable_emission
@@ -105,15 +106,18 @@ uniform int hasDiffuseMap;
 uniform int hasDiffuseMultiA;
 uniform int hasDiffuseMultiB;
 uniform int hasAlphaMap;
+uniform int hasSpecMap;
 uniform int hasNormalMap0;
 uniform int hasNormalMap1;
 
 uniform int hasDiffuseArray;
 uniform int hasAlphaArray;
+uniform int hasSpecArray;
 uniform int hasNormalArray;
 
 //GL
 uniform mat4 mtxCam;
+uniform vec3 camPosition;
 uniform int colorOverride;
 uniform vec4 highlight_color;
 
@@ -200,6 +204,35 @@ vec4 getDiffuse(vec2 texCoord0) {
     return diffuseMapColor;
 }
 
+float getSpec(vec2 texCoord0) {
+    vec4 specMapColor = vec4(0);
+
+    float averageCountRGB = 0.f;
+    uint averageCountA = 0u;
+    if (hasSpecMap == 1) {
+        vec4 tex = texture(u_TextureSpecMask, texCoord0);
+        specMapColor.rgb += tex.rgb * tex.a;
+        specMapColor.a += tex.a;
+        averageCountRGB += tex.a;
+        averageCountA++;
+    }
+    if (hasSpecArray == 1) {
+        //vec4 tex = texture(u_TextureArrSpecMask, vec3(texCoord0, u_TextureArrSpecMask_Index));
+        //specMapColor.rgb += tex.rgb * tex.a;
+        //specMapColor.a += tex.a;
+        //averageCountRGB += tex.a;
+        //averageCountA++;
+    }
+    specMapColor.rgb /= averageCountRGB;
+    specMapColor.a /= averageCountA;
+
+    vec3 test = vec3(mtxCam[0][3], mtxCam[1][3], mtxCam[2][3]) - v_PositionWorld;
+
+    return specMapColor.r;
+}
+
+
+
 void main(){
     vec2 texCoord0 = v_TexCoord0;
 
@@ -215,11 +248,14 @@ void main(){
 
     // Diffuse
     vec4 diffuseMapColor = getDiffuse(texCoord0);
+
+    // Spec
+    float specMapIntensity = getSpec(texCoord0);
     
 
     // Lighting
     float halfLambert = max(worldNormal.y,0.5);
-    fragOutput = vec4(diffuseMapColor.rgb * halfLambert, diffuseMapColor.a);
+    fragOutput = vec4(diffuseMapColor.rgb * (halfLambert), diffuseMapColor.a);
     fragOutput.rgb *= uBrightness;
 
     //Highlight color

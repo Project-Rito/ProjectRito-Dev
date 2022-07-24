@@ -12,6 +12,7 @@ namespace GLFrameworkEngine
         public const string ViewMatrix = "mtxView";
         public const string ProjMatrix = "mtxProj";
         public const string ViewProjMatrix = "mtxCam";
+        public const string CamPosition = "camPosition";
 
         public const string VPosition = "vPosition";
         public const string VNormal = "vNormal";

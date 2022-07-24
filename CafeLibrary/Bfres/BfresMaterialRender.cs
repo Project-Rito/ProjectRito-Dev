@@ -355,6 +355,7 @@ namespace CafeLibrary.Rendering
             shader.SetBoolToInt("hasDiffuseMultiB", false);
             shader.SetBoolToInt("hasDiffuseArray", false);
             shader.SetBoolToInt("hasAlphaMap", false);
+            shader.SetBoolToInt("hasSpecMap", false);
             shader.SetBoolToInt("hasNormalMap0", false);
             shader.SetBoolToInt("hasNormalMap1", false);
             shader.SetBoolToInt("hasNormalArray", false);
@@ -409,6 +410,10 @@ namespace CafeLibrary.Rendering
                 else if (sampler == "_ms0")
                 {
                     shader.SetBoolToInt("hasAlphaMap", hasTexture);
+                }
+                else if (sampler == "_s0")
+                {
+                    shader.SetBoolToInt("hasSpecMap", hasTexture);
                 }
                 else if (sampler == "_n0")
                 {
