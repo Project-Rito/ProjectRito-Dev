@@ -13,7 +13,7 @@ namespace UKingLibrary
         {
             get
             {
-                return Origin + new OpenTK.Vector2(500);
+                return Origin + new OpenTK.Vector2(500, -500);
             }
         }
 
@@ -21,7 +21,7 @@ namespace UKingLibrary
         {
             get
             {
-                return new OpenTK.Vector2((XIndex - 3) * 1000, (ZIndex - 2) * 1000);
+                return new OpenTK.Vector2((XIndex - 5) * 1000, (ZIndex - 3) * 1000);
             }
         }
 
