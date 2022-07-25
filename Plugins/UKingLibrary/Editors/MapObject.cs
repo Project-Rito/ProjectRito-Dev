@@ -220,13 +220,20 @@ namespace UKingLibrary
 
             //Property drawer for gui node
             Render.UINode.TagUI = new NodePropertyUI();
-            Render.IsVisibleCallback += delegate
+            if (Render is BfresRender)
             {
-                if (Render is BfresRender)
+                Render.IsVisibleCallback += delegate
+                {
                     return MapData.ShowVisibleActors;
-                else
+                };
+            }
+            else
+            {
+                Render.IsVisibleCallback += delegate
+                {
                     return MapData.ShowInvisibleActors;
-            };
+                };
+            }
 
             ((EditableObjectNode)Render.UINode).UIProperyDrawer += delegate
             {

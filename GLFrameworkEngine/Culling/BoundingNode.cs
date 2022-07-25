@@ -38,15 +38,15 @@ namespace GLFrameworkEngine
         /// </summary>
         public bool TransformByScale { get; set; } = true;
 
-        private Vector3 transformedCenter;
-        private float transformedRadius;
+        private Vector3 TransformedCenter;
+        private float TransformedRadius;
 
         /// <summary>
         /// Gets the center point of the bounding node in world coordinates used to place the sphere.
         /// </summary>
         /// <returns></returns>
         public Vector3 GetCenter() {
-            return transformedCenter;
+            return TransformedCenter;
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace GLFrameworkEngine
         /// </summary>
         /// <returns></returns>
         public float GetRadius() {
-            return transformedRadius;
+            return TransformedRadius;
         }
 
         /// <summary>
@@ -63,8 +63,11 @@ namespace GLFrameworkEngine
         /// <param name="transform"></param>
         public void UpdateTransform(Matrix4 transform)
         {
-            transformedCenter = Vector3.TransformPosition(Center, transform);
-            transformedRadius = Radius;
+            Vector3 transformedCenter = Vector3.TransformPosition(Center, transform);
+            if (TransformedCenter == transformedCenter) // optimization
+                return;
+            TransformedCenter = transformedCenter;
+            TransformedRadius = Radius;
             Box.UpdateTransform(transform);
         }
 

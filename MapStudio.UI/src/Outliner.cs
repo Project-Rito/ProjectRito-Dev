@@ -674,8 +674,8 @@ namespace MapStudio.UI
             if (isSearch || node.IsExpanded)
             {
                 //Todo find a better alternative to clip parents
-                //Clip only the last level. Don't clip more than 3 levels to prevent clipping issues.
-                if (ClipNodes && node.Children.Count > 0 && node.Children.All(x => x.Children.Count == 0) && level < 3)
+                //Clip only the last level.
+                if (ClipNodes && node.Children.Count > 0 && node.Children.All(x => x.Children.Count == 0))
                 {
                     var children = node.Children.ToList();
                     if (isSearch)
