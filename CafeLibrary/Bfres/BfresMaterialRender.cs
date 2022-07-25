@@ -359,7 +359,7 @@ namespace CafeLibrary.Rendering
             shader.SetBoolToInt("hasSpecMap", false);
             shader.SetBoolToInt("hasNormalMap0", false);
             shader.SetBoolToInt("hasNormalMap1", false);
-            shader.SetBoolToInt("hasNormalArray", false);
+            shader.SetBoolToInt("hasCombinedArray", false);
 
             int id = 2;
             int arrIdx = 0;
@@ -404,9 +404,9 @@ namespace CafeLibrary.Rendering
                 }
                 else if (sampler == "tmc")
                 {
-                    shader.SetBoolToInt("hasNormalArray", hasTexture);
+                    shader.SetBoolToInt("hasCombinedArray", hasTexture);
                     if (ShaderParams.ContainsKey("texture_array_index" + arrIdx))
-                        shader.SetFloat("u_TextureArrNormal_Index", (float)ShaderParams["texture_array_index" + arrIdx].DataValue); arrIdx++;
+                        shader.SetFloat("u_TextureArrCombined_Index", (float)ShaderParams["texture_array_index" + arrIdx].DataValue); arrIdx++;
                 }
                 else if (sampler == "_ms0")
                 {
@@ -440,7 +440,7 @@ namespace CafeLibrary.Rendering
                 case "tma": return "u_TextureArrAlbedo";
                 case "_ms0": return "u_TextureAlpha";
                 case "_s0": return "u_TextureSpecMask";
-                case "tmc": return "u_TextureArrNormal"; // Looks like normal data though... kinda
+                case "tmc": return "u_TextureArrCombined"; // Theory: normal data in xyz, specular mask in w
                 case "_n0": return "u_TextureNormal0";
                 case "_n1": return "u_TextureNormal1";
                 case "_e0": return "u_TextureEmission0";

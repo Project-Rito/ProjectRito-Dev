@@ -148,7 +148,7 @@ namespace GLFrameworkEngine
 
             context.UseSRBFrameBuffer = false;
 
-            if (DebugShaderRender.DebugRendering != DebugShaderRender.DebugRender.Default)
+            if (DebugShaderRender.DebugRendering != DebugShaderRender.DebugRenderMode.DEFAULT)
             {
                 DebugMaterial.Render(context);
                 context.CurrentShader.SetTransform(GLConstants.ModelMatrix, this.Transform);

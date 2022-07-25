@@ -84,7 +84,7 @@ namespace CafeLibrary.Rendering
             if (pass == Pass.OPAQUE && (parentRender.IsSelected || parentRender.IsHovered))
                 DrawFrontFaceSelection(context, parentRender.IsSelected);
 
-            if (DebugShaderRender.DebugRendering != DebugShaderRender.DebugRender.Default) {
+            if (DebugShaderRender.DebugRendering != DebugShaderRender.DebugRenderMode.DEFAULT) {
                 DrawMeshes(context, parentRender, pass, RenderPass.DEBUG, transforms);
             }
             else
@@ -195,7 +195,7 @@ namespace CafeLibrary.Rendering
                 }
                 else if (renderMode == RenderPass.DEBUG)
                 {
-                    if (DebugShaderRender.DebugRendering != DebugShaderRender.DebugRender.Diffuse)
+                    if (DebugShaderRender.DebugRendering != DebugShaderRender.DebugRenderMode.DIFFUSE)
                         context.UseSRBFrameBuffer = false;
 
                     ((BfresMaterialRender)mesh.MaterialAsset).SetRenderState();

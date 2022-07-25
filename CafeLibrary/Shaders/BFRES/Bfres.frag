@@ -74,13 +74,12 @@ uniform sampler2D u_TextureIndirect;  // _a3
 
 //Array Samplers
 uniform sampler2DArray u_TextureArrAlbedo; // tma
-uniform sampler2DArray u_TextureArrSpecMask; // ???
-uniform sampler2DArray u_TextureArrNormal; // tmc
+uniform sampler2DArray u_TextureArrCombined; // tmc
 
 uniform float u_TextureArrAlbedo_Index;
 uniform float u_TextureArrAlpha_Index;
 uniform float u_TextureArrSpecMask_Index;
-uniform float u_TextureArrNormal_Index;
+uniform float u_TextureArrCombined_Index;
 
 #define enable_diffuse
 #define enable_alpha_map
@@ -113,8 +112,7 @@ uniform int hasNormalMap1;
 
 uniform int hasDiffuseArray;
 uniform int hasAlphaArray;
-uniform int hasSpecArray;
-uniform int hasNormalArray;
+uniform int hasCombinedArray;
 
 //GL
 uniform mat4 mtxCam;
@@ -146,8 +144,8 @@ vec3 getWorldNormal(vec2 texCoord0) {
         averageCountRGB += tex.a;
         averageCountA++;
     }
-    if (hasNormalArray == 1) {
-        vec4 tex = texture(u_TextureArrNormal, vec3(texCoord0, u_TextureArrNormal_Index));
+    if (hasCombinedArray == 1) {
+        vec4 tex = texture(u_TextureArrCombined, vec3(texCoord0, u_TextureArrCombined_Index));
         texNormal.rgb += tex.rgb * tex.a;
         texNormal.a += tex.a;
         averageCountRGB += tex.a;
@@ -206,28 +204,26 @@ vec4 getDiffuse(vec2 texCoord0) {
 }
 
 float getSpec(vec2 texCoord0) {
-    vec4 specMapColor = vec4(0.f);
+    if (hasSpecMap == 0 && hasCombinedArray == 0) {
+        return 1.f;
+    }
 
-    float averageCountRGB = 0.f;
-    uint averageCountA = 0u;
+    float specMask = 0.f;
+
+    uint averageCount = 0u;
     if (hasSpecMap == 1) {
         vec4 tex = texture(u_TextureSpecMask, texCoord0);
-        specMapColor.rgb += tex.rgb * tex.a;
-        specMapColor.a += tex.a;
-        averageCountRGB += tex.a;
-        averageCountA++;
+        specMask += tex.x;
+        averageCount += 1u;
     }
-    if (hasSpecArray == 1) {
-        //vec4 tex = texture(u_TextureArrSpecMask, vec3(texCoord0, u_TextureArrSpecMask_Index));
-        //specMapColor.rgb += tex.rgb * tex.a;
-        //specMapColor.a += tex.a;
-        //averageCountRGB += tex.a;
-        //averageCountA++;
+    if (hasCombinedArray == 1) {
+        vec4 tex = texture(u_TextureArrCombined, vec3(texCoord0, u_TextureArrSpecMask_Index));
+        specMask += tex.w;
+        averageCount += 1u;
     }
-    specMapColor.rgb /= averageCountRGB;
-    specMapColor.a /= averageCountA;
+    specMask /= averageCount;
 
-    return specMapColor.r;
+    return specMask;
 }
 
 
@@ -253,7 +249,7 @@ void main(){
     vec3 i = vec3(0.f, 1.f, 0.f);
     vec3 o = i - (2 * (dot(i, worldNormal)) * worldNormal);
     vec3 c = camPosition - v_PositionWorld;
-    float spec = dot(normalize(c), normalize(o)) * specMask;
+    float spec = min(dot(normalize(c), normalize(o)) * specMask, 1.f);
 
     // Lighting
     float halfLambert = max(spec,0.5f);

@@ -28,6 +28,7 @@ uniform int selectedBoneIndex;
 uniform int weightRampType;
 
 out vec2 texCoord0;
+out vec3 posWorld;
 out vec3 normal;
 out vec3 boneWeightsColored;
 out vec3 tangent;
@@ -104,7 +105,7 @@ float BoneWeightDisplay(ivec4 index)
 }
 
 void main(){
-    vec4 worldPosition = vec4(vPosition.xyz, 1);
+    vec4 pos = vec4(vPosition.xyz, 1);
     normal = normalize(mat3(mtxMdl[gl_InstanceID]) * vNormal.xyz);
 
     //Vertex Rigging
@@ -113,18 +114,18 @@ void main(){
         ivec4 index = vBoneIndex;
         //Apply skinning to vertex position and normal
 	    if (SkinCount > 0)
-		    worldPosition = skin(worldPosition.xyz, index);
+		    pos = skin(pos.xyz, index);
 	    if (SkinCount > 0)
 		    normal = skinNormal(normal.xyz, index);
         //Single bind models that have no skinning to the bone they are mapped to
         if (SkinCount == 0)
         {
-            worldPosition = RigidBindTransform * worldPosition;
+            pos = RigidBindTransform * pos;
             normal = mat3(RigidBindTransform) * normal;
         }
     }
 
-    vec3 fragPosition = (mtxMdl[gl_InstanceID] * worldPosition).xyz;
+    vec3 fragPosition = (mtxMdl[gl_InstanceID] * pos).xyz;
     gl_Position = mtxCam*vec4(fragPosition, 1);
 
     float totalWeight = BoneWeightDisplay(vBoneIndex);
@@ -134,4 +135,5 @@ void main(){
     bitangent = vBitangent;
     vertexColor = vColor;
     fragPosLightSpace = mtxLightVP * vec4(fragPosition, 1.0);
+    posWorld = (mtxMdl[gl_InstanceID] * pos).xyz;
 }

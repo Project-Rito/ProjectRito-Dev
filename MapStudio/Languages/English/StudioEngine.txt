@@ -228,10 +228,10 @@ RIGHT - Right
 
 # Shading Menu
 
-DEFAULT - DEFAULT
+DEFAULT - Default
 NORMAL - Normal
 LIGHTING - Lighting
-DIFFUSE - DIFFUSE
+DIFFUSE - Diffuse
 VERTEX_COLORS - Vertex Colors
 UVCOORDS - UVCoords
 UVTESTPATTERN - UVTestPattern
@@ -239,6 +239,7 @@ WEIGHTS - Weights
 TANGENTS - Tangents
 BITANGENTS - Bitangents
 COLOR_PICKING - Color Picking
+SPECULAR - Specular
 
 # Debug Stats
 

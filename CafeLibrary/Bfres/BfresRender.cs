@@ -227,7 +227,7 @@ namespace CafeLibrary.Rendering
             //Make sure cubemaps can look seamless in lower mip levels
             GL.Enable(EnableCap.TextureCubeMapSeamless);
 
-            if (DebugShaderRender.DebugRendering != DebugShaderRender.DebugRender.Default || DrawDebugAreaID)
+            if (DebugShaderRender.DebugRendering != DebugShaderRender.DebugRenderMode.DEFAULT || DrawDebugAreaID)
                 control.CurrentShader = GlobalShaders.GetShader("DEBUG");
             else
                 control.UseSRBFrameBuffer = true;

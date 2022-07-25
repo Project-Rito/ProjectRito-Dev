@@ -16,12 +16,18 @@ uniform sampler2D u_TextureMultiB;    // _a2
 uniform sampler2D u_TextureIndirect;  // _a3
 
 uniform int debugShading;
-uniform vec4 highlight_color;
 
 uniform int DrawAreaID;
 uniform int AreaIndex;
 
+//GL
+uniform mat4 mtxCam;
+uniform vec3 camPosition;
+uniform int colorOverride;
+uniform vec4 highlight_color;
+
 in vec2 texCoord0;
+in vec3 posWorld;
 in vec3 normal;
 in vec3 boneWeightsColored;
 in vec3 tangent;
@@ -40,22 +46,20 @@ const int DISPLAY_UV_PATTERN = 6;
 const int DISPLAY_WEIGHTS = 7;
 const int DISPLAY_TANGENT = 8;
 const int DISPLAY_BITANGENT = 9;
+const int DISPLAY_SPECULAR = 10;
 
 void main(){
     vec4 outputColor = vec4(1);
-    vec2 displayTexCoord = texCoord0;
-
-    vec3 N = normal;
 
     if (debugShading == DISPLAY_NORMALS)
     {
-        vec3 displayNormal = (N * 0.5) + 0.5;
+        vec3 displayNormal = (normal * 0.5) + 0.5;
         outputColor.rgb = displayNormal;
     }
 
     else if (debugShading == DISPLAY_LIGHTING)
     {
-        vec3 displayNormal = (N * 0.5) + 0.5;
+        vec3 displayNormal = (normal * 0.5) + 0.5;
         float halfLambert = max(displayNormal.y,0.5);
         outputColor.rgb = vec3(0.5) * halfLambert;
     }
@@ -67,9 +71,9 @@ void main(){
     }
 
     else if (debugShading == DISPLAY_UV)
-         outputColor.rgb = vec3(displayTexCoord.x, displayTexCoord.y, 1.0);
+         outputColor.rgb = vec3(texCoord0.x, texCoord0.y, 1.0);
     else if (debugShading == DISPLAY_UV_PATTERN)
-        outputColor.rgb = texture(UVTestPattern, displayTexCoord).rgb;
+        outputColor.rgb = texture(UVTestPattern, texCoord0).rgb;
     else if (debugShading == DISPLAY_WEIGHTS)
         outputColor.rgb = boneWeightsColored;
     else if (debugShading == DISPLAY_TANGENT)
@@ -85,6 +89,23 @@ void main(){
     else if (debugShading == DISPLAY_VTX_CLR)
     {
         outputColor.rgb = vertexColor.rgb;
+    }
+    else if (debugShading == DISPLAY_SPECULAR)
+    {
+        float specMask = texture(u_TextureSpecMask, texCoord0).r;
+
+        vec4 texNormal = texture(u_TextureNormal0, texCoord0);
+        vec3 N = normal;
+        vec3 T = tangent.xyz;
+        vec3 BiT = cross(N, T) * texNormal.w;
+        vec3 worldNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
+
+        vec3 i = vec3(0.f, 1.f, 0.f);
+        vec3 o = i - (2 * (dot(i, worldNormal)) * worldNormal);
+        vec3 c = camPosition - posWorld;
+        float displaySpec = dot(normalize(c), normalize(o)) * specMask;
+
+        outputColor.rgb = vec3(min(displaySpec, 1.f));
     }
 
     fragOutput = outputColor;

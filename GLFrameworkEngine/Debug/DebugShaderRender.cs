@@ -13,20 +13,21 @@ namespace GLFrameworkEngine
         /// <summary>
         /// Toggles debug shader rendering in 3D view.
         /// </summary>
-        public static DebugRender DebugRendering = DebugRender.Default;
+        public static DebugRenderMode DebugRendering = DebugRenderMode.DEFAULT;
 
-        public enum DebugRender
+        public enum DebugRenderMode
         {
-            Default,
-            Normal,
-            Lighting,
-            Diffuse,
-            VertexColors,
-            UVCoords,
-            UVTestPattern,
-            Weights,
-            Tangents,
-            Bitangents,
+            DEFAULT,
+            NORMAL,
+            LIGHTING,
+            DIFFUSE,
+            VERTEX_COLORS,
+            UVCOORDS,
+            UVTESTPATTERN,
+            WEIGHTS,
+            TANGENTS,
+            BITANGENTS,
+            SPECULAR,
         }
 
         public static void RenderMaterial(GLContext context, int startSlot = 1)

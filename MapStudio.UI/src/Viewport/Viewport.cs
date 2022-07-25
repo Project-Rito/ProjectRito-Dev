@@ -158,13 +158,13 @@ namespace MapStudio.UI
 
         private void DrawShadingMenu()
         {
-            string text = $"{TranslationSource.GetText("SHADING")} : [{DebugShaderRender.DebugRendering}]";
+            string text = $"{TranslationSource.GetText("SHADING")} : [{TranslationSource.GetText(DebugShaderRender.DebugRendering.ToString())}]";
 
             ImGui.PushItemWidth(150);
             ImguiCustomWidgets.ComboScrollable($"##debugShading", text, ref DebugShaderRender.DebugRendering, () =>
                 {
                     GLContext.ActiveContext.UpdateViewport = true;
-                }, ImGuiComboFlags.NoArrowButton);
+                }, ImGuiComboFlags.NoArrowButton, true);
 
             ImGui.PopItemWidth();
         }
