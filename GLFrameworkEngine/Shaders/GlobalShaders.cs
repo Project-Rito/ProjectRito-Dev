@@ -147,6 +147,9 @@ namespace GLFrameworkEngine
 
         static IList<Shader> LoadShaderDeps(string source)
         {
+            if (!intDefault)
+                InitPaths();
+
             List<Shader> shaders = new List<Shader>();
 
             foreach (string depline in source.Split('\n').Where(x => x.StartsWith("//#using")))
