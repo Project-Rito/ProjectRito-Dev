@@ -24,7 +24,7 @@ namespace GLFrameworkEngine
         {
             intDefault = true;
 
-            ShaderPaths.Add("DEBUG", "BFRES/BfresDebug");
+            ShaderPaths.Add("BFRES_DEBUG", "BFRES/BfresDebug");
             ShaderPaths.Add("BILLBOARD", "Billboard/BillboardTexture");
             ShaderPaths.Add("CUBEMAP_HDRENCODE", "Cubemap/HdrEncode");
             ShaderPaths.Add("CUBEMAP_HDRDECODE", "Cubemap/HdrDecode");
@@ -54,6 +54,8 @@ namespace GLFrameworkEngine
             ShaderPaths.Add("SHADOW", "Shadows/Shadow");
             ShaderPaths.Add("SHADOWPREPASS", "Shadows/ShadowPrepass");
             ShaderPaths.Add("SHADOWQUAD", "Shadows/ShadowQuad");
+            ShaderPaths.Add("UTILITY", "Utility/Utility");
+            ShaderPaths.Add("BFRES_UTILITY", "Utility/BfresUtility");
             ShaderPaths.Add("NORMALIZE_DEPTH", "Utility/NormalizeDepth");
             ShaderPaths.Add("PICKING", "Utility/Picking");
             ShaderPaths.Add("SELECTION", "Utility/Selection");
@@ -114,17 +116,69 @@ namespace GLFrameworkEngine
             List<Shader> shaders = new List<Shader>();
 
             string shaderFolder = $"{Runtime.ExecutableDir}/Shaders/";
-            string frag = $"{shaderFolder}{name}.frag";
-            string vert = $"{shaderFolder}{name}.vert";
-            string geom = $"{shaderFolder}{name}.geom";
-            if (File.Exists(vert)) shaders.Add(new VertexShader(File.ReadAllText(vert)));
-            if (File.Exists(frag)) shaders.Add(new FragmentShader(File.ReadAllText(frag)));
-            if (File.Exists(geom)) shaders.Add(new GeomertyShader(File.ReadAllText(geom)));
+            string vertFile = $"{shaderFolder}{name}.vert";
+            string fragFile = $"{shaderFolder}{name}.frag";
+            string geomFile = $"{shaderFolder}{name}.geom";
+
+            if (File.Exists(vertFile))
+            {
+                string vertSource = File.ReadAllText(vertFile);
+                shaders.AddRange(LoadShaderDeps(vertSource));
+                shaders.Add(new VertexShader(vertSource));
+            }
+            if (File.Exists(fragFile))
+            {
+                string fragSource = File.ReadAllText(fragFile);
+                shaders.AddRange(LoadShaderDeps(fragSource));
+                shaders.Add(new FragmentShader(fragSource));
+            }
+            if (File.Exists(geomFile))
+            {
+                string geomSource = File.ReadAllText(geomFile);
+                shaders.AddRange(LoadShaderDeps(geomSource));
+                shaders.Add(new GeomertyShader(geomSource));
+            }
 
             if (shaders.Count == 0)
                 throw new Exception($"Failed to find shaders at {name}");
 
             return new ShaderProgram(shaders.ToArray());
+        }
+
+        static IList<Shader> LoadShaderDeps(string source)
+        {
+            List<Shader> shaders = new List<Shader>();
+
+            foreach (string depline in source.Split('\n').Where(x => x.StartsWith("//#using")))
+            {
+                string name = ShaderPaths[depline.Split(' ', 2)[1].Replace("\r", "")];
+
+                string shaderFolder = $"{Runtime.ExecutableDir}/Shaders/";
+                string vertFile = $"{shaderFolder}{name}.vert";
+                string fragFile = $"{shaderFolder}{name}.frag";
+                string geomFile = $"{shaderFolder}{name}.geom";
+
+                if (File.Exists(vertFile))
+                {
+                    string vertSource = File.ReadAllText(vertFile);
+                    shaders.AddRange(LoadShaderDeps(vertSource));
+                    shaders.Add(new VertexShader(vertSource));
+                }
+                if (File.Exists(fragFile))
+                {
+                    string fragSource = File.ReadAllText(fragFile);
+                    shaders.AddRange(LoadShaderDeps(fragSource));
+                    shaders.Add(new FragmentShader(fragSource));
+                }
+                if (File.Exists(geomFile))
+                {
+                    string geomSource = File.ReadAllText(geomFile);
+                    shaders.AddRange(LoadShaderDeps(geomSource));
+                    shaders.Add(new GeomertyShader(geomSource));
+                }
+            }
+
+            return shaders;
         }
     }
 }

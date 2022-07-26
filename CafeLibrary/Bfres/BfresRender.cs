@@ -228,7 +228,7 @@ namespace CafeLibrary.Rendering
             GL.Enable(EnableCap.TextureCubeMapSeamless);
 
             if (DebugShaderRender.DebugRendering != DebugShaderRender.DebugRenderMode.DEFAULT || DrawDebugAreaID)
-                control.CurrentShader = GlobalShaders.GetShader("DEBUG");
+                control.CurrentShader = GlobalShaders.GetShader("BFRES_DEBUG");
             else
                 control.UseSRBFrameBuffer = true;
 

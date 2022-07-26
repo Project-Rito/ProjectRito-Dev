@@ -1,5 +1,7 @@
 ﻿#version 330 core
 
+//#using BFRES_UTILITY
+
 in vec3 v_PositionWorld;
 in vec2 v_TexCoord0;
 in vec4 v_TexCoordBake;
@@ -125,41 +127,51 @@ out vec4 fragOutput;
 
 float GetComponent(int Type, vec4 Texture);
 
+// Used for passing vertex info to BfresUtility
+struct VertexAttributes
+{
+    vec3 worldPosition;
+    vec2 texCoord;
+    vec4 vertexColor;
+    vec3 normal;
+    vec3 tangent;
+    vec3 bitangent;
+};
+
+// Defined in BfresUtility.frag.
+vec3 CalcBumpedNormal(vec3 texNormal, VertexAttributes vert);
+
 vec3 getWorldNormal(vec2 texCoord0) {
-    vec4 texNormal = vec4(0);
+    vec3 worldNormal = vec3(0);
+
+    VertexAttributes vert;
+    vert.worldPosition = v_PositionWorld;
+    vert.texCoord = texCoord0;
+    vert.vertexColor = v_VtxColor;
+    vert.normal = v_NormalWorld;
+    vert.tangent = v_TangentWorld.xyz;
+    vert.bitangent = cross(v_NormalWorld, v_TangentWorld.xyz);
     
-    float averageCountRGB = 0.f;
-    uint averageCountA = 0u;
+    float averageCount = 0u;
     if (hasNormalMap0 == 1) {
         vec4 tex = texture(u_TextureNormal0, texCoord0);
-        texNormal.rgb += tex.rgb * tex.a;
-        texNormal.a += tex.a;
-        averageCountRGB += tex.a;
-        averageCountA++;
+        vec3 normal = CalcBumpedNormal(tex.xyz, vert);
+        worldNormal.rgb += normal;
+        averageCount++;;
     }
     if (hasNormalMap1 == 1) {
         vec4 tex = texture(u_TextureNormal1, texCoord0);
-        texNormal.rgb += tex.rgb * tex.a;
-        texNormal.a += tex.a;
-        averageCountRGB += tex.a;
-        averageCountA++;
+        vec3 normal = CalcBumpedNormal(tex.xyz, vert);
+        worldNormal.rgb += normal;
+        averageCount++;
     }
     if (hasCombinedArray == 1) {
         vec4 tex = texture(u_TextureArrCombined, vec3(texCoord0, u_TextureArrCombined_Index));
-        texNormal.rgb += tex.rgb * tex.a;
-        texNormal.a += tex.a;
-        averageCountRGB += tex.a;
-        averageCountA++;
+        vec3 normal = CalcBumpedNormal(tex.xyz, vert);
+        worldNormal += normal;
+        averageCount++;
     }
-    texNormal.rgb /= averageCountRGB;
-    texNormal.a /= averageCountA;
-
-
-
-    vec3 N = v_NormalWorld;
-    vec3 T = v_TangentWorld.xyz;
-    vec3 BiT = cross(N, T) * texNormal.w;
-    vec3 worldNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
+    worldNormal /= averageCount;
 
     return worldNormal;
 }
@@ -246,7 +258,7 @@ void main(){
 
     // Spec
     float specMask = getSpec(texCoord0);
-    vec3 i = vec3(0.f, 1.f, 0.f);
+    vec3 i = vec3(0.f, -1.f, 0.f);
     vec3 o = i - (2 * (dot(i, worldNormal)) * worldNormal);
     vec3 c = camPosition - v_PositionWorld;
     float spec = min(dot(normalize(c), normalize(o)) * specMask, 1.f);

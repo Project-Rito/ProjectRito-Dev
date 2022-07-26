@@ -33,3 +33,4 @@ float GetComponent(int Type, vec4 Texture)
 		 default: return 1.0;
 	 }
 }
+

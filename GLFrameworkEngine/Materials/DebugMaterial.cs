@@ -9,7 +9,7 @@ namespace GLFrameworkEngine
     {
         public void Render(GLContext context)
         {
-            context.CurrentShader = GlobalShaders.GetShader("DEBUG");
+            context.CurrentShader = GlobalShaders.GetShader("BFRES_DEBUG");
 
             var debugShader = context.CurrentShader;
             debugShader.SetInt("debugShading", (int)DebugShaderRender.DebugRendering);
