@@ -36,7 +36,13 @@ namespace UKingLibrary
                     {
                         string path = PluginConfig.GetContentPath($"Map/{fieldName}/{sectionName}/{sectionName}_{muuntEnding}.smubin");
                         field.TryAdd(sectionName, new List<BymlFile>());
-                        field[sectionName].Add(BymlFile.FromBinary(STFileLoader.TryDecompressFile(File.OpenRead(path), Path.GetFileName(path)).Stream));
+                        STFileLoader.Settings mubinSettings = STFileLoader.TryDecompressFile(File.OpenRead(path), Path.GetFileName(path));
+                        if (mubinSettings.Stream == null)
+                        {
+                            StudioLogger.WriteError($"Trouble reading {path}!");
+                            continue;
+                        }
+                        field[sectionName].Add(BymlFile.FromBinary(mubinSettings.Stream));
                     }
                 }
                 fields.Add(fieldName, field);
@@ -107,6 +113,11 @@ namespace UKingLibrary
                     }))
                 {
                     STFileLoader.Settings packSettings = STFileLoader.TryDecompressFile(File.OpenRead(packfile), packfile);
+                    if (packSettings.Stream == null)
+                    {
+                        StudioLogger.WriteError($"Trouble reading {packfile}!");
+                        continue;
+                    }
                     SARC pack = new SARC();
                     pack.Load(packSettings.Stream, packfile);
 
