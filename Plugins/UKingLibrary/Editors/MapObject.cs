@@ -607,8 +607,8 @@ namespace UKingLibrary
         {
             if (MapData.Objs.ContainsKey(HashId))
             {
-                StudioLogger.WriteError($"Multiple actors share the HashId: {HashId}. Only one has been added to the scene.");
-                return;
+                StudioLogger.WriteWarning($"Multiple actors share the HashId: {HashId}. Found a new HashId. Note that some links may have been invalidated.");
+                HashId = UKingEditor.GetHashId(MapData);
             }
             MapData.Objs.Add(HashId, this);
         }
