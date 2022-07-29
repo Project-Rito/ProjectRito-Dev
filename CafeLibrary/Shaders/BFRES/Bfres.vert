@@ -11,6 +11,7 @@ layout(std140) uniform ub_MaterialParams {
     mat3x4 u_TexCoordSRT0;
     vec4 u_TexCoordBake0ScaleBias;
     vec4 u_TexCoordBake1ScaleBias;
+    mat3x4 u_TexCoordSRT1;
     mat3x4 u_TexCoordSRT2;
     mat3x4 u_TexCoordSRT3;
     vec4 u_AlbedoColorAndTransparency;
@@ -27,12 +28,12 @@ layout (location = 1) in vec3 vNormal;
 layout (location = 2) in vec2 vTexCoord0;
 layout (location = 3) in vec2 vTexCoord1;
 layout (location = 4) in vec2 vTexCoord2;
-layout (location = 5) in vec4 vColor;
-layout (location = 6) in ivec4 vBoneIndex;
-layout (location = 7) in vec4 vBoneWeight;
-layout (location = 8) in vec4 vTangent;
-layout (location = 9) in vec4 vBitangent;
-layout (location = 10) in vec2 vTexCoord3;
+layout (location = 5) in vec2 vTexCoord3;
+layout (location = 6) in vec4 vColor;
+layout (location = 7) in ivec4 vBoneIndex;
+layout (location = 8) in vec4 vBoneWeight;
+layout (location = 9) in vec4 vTangent;
+layout (location = 10) in vec4 vBitangent;
 
 uniform mat4[64] mtxMdl;
 uniform mat4 mtxCam;
@@ -46,11 +47,17 @@ uniform mat4 RigidBindTransform;
 
 out vec3 v_PositionWorld;
 out vec2 v_TexCoord0;
-out vec4 v_TexCoordBake;
-out vec4 v_TexCoord23;
+out vec2 v_TexCoord1;
+out vec2 v_TexCoord2;
+out vec2 v_TexCoord3;
 out vec4 v_VtxColor;
 out vec3 v_NormalWorld;
 out vec4 v_TangentWorld;
+
+// Defined in Utility.frag
+vec3 SRT_Scale(mat3x4 matrix);
+vec3 SRT_Rot(mat3x4 matrix);
+vec3 SRT_Trans(mat3x4 matrix);
 
 vec2 CalcScaleBias(in vec2 t_Pos, in vec4 t_SB) {
     return t_Pos.xy * t_SB.xy + t_SB.zw;
@@ -117,12 +124,11 @@ void main(){
     gl_Position = mtxCam * vec4(fragPosition, 1);
 
     v_PositionWorld = fragPosition.xyz;
-  //  v_TexCoord0 = mat4x2(u_TexCoordSRT0) * vec4(vTexCoord0.xy, 1.0, 1.0);
-    v_TexCoord0 = vTexCoord0.xy;
-    v_TexCoordBake.xy = CalcScaleBias(vTexCoord1.xy, u_TexCoordBake0ScaleBias);
-    v_TexCoordBake.zw = CalcScaleBias(vTexCoord1.xy, u_TexCoordBake1ScaleBias);
-    v_TexCoord23.xy = mat4x2(u_TexCoordSRT2) * vec4(vTexCoord2.xy, 1.0, 1.0);
-    v_TexCoord23.zw = mat4x2(u_TexCoordSRT3) * vec4(vTexCoord3.xy, 1.0, 1.0);
+
+    v_TexCoord0 = mat4x2(u_TexCoordSRT0) * vec4(vTexCoord0, 1.0, 1.0);
+    v_TexCoord1 = mat4x2(u_TexCoordSRT1) * vec4(vTexCoord1, 1.0, 1.0); // I'm not sure what's supposed to go on here..
+    v_TexCoord2 = mat4x2(u_TexCoordSRT2) * vec4(vTexCoord2, 1.0, 1.0); 
+    v_TexCoord3 = mat4x2(u_TexCoordSRT3) * vec4(vTexCoord3, 1.0, 1.0);
     v_VtxColor = vColor;
     v_NormalWorld.xyz = normalize(normal.xyz);
     v_TangentWorld.xyzw = vTangent.xyzw;

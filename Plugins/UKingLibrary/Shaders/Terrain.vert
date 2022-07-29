@@ -12,6 +12,7 @@ out vec4 v_TexCoords;
 out vec3 v_NormalWorld;
 out vec3 v_TangentWorld;
 out float materialWeight;
+out vec3 v_PositionWorld;
 flat out vec2 texIndex;
 out vec3 v_DebugHighlight;
 
@@ -26,6 +27,7 @@ void main()
     v_TexCoords = vTexCoord;
     v_NormalWorld = vNormalWorld;
     v_TangentWorld = vTangentWorld;
+    v_PositionWorld = (mtxMdl[gl_InstanceID] * vec4(vPosition, 1.0)).xyz;
 
     v_DebugHighlight = vDebugHighlight;
 

@@ -4,8 +4,9 @@
 
 in vec3 v_PositionWorld;
 in vec2 v_TexCoord0;
-in vec4 v_TexCoordBake;
-in vec4 v_TexCoord23;
+in vec2 v_TexCoord1;
+in vec2 v_TexCoord2;
+in vec2 v_TexCoord3;
 in vec4 v_VtxColor;
 in vec3 v_NormalWorld;
 in vec4 v_TangentWorld;
@@ -50,6 +51,7 @@ layout(std140) uniform ub_MaterialParams {
     mat3x4 u_TexCoordSRT0;
     vec4 u_TexCoordBake0ScaleBias;
     vec4 u_TexCoordBake1ScaleBias;
+    mat3x4 u_TexCoordSRT1;
     mat3x4 u_TexCoordSRT2;
     mat3x4 u_TexCoordSRT3;
     vec4 u_AlbedoColorAndTransparency;
@@ -61,62 +63,108 @@ layout(std140) uniform ub_MaterialParams {
     EnvLightParam u_EnvLightParams[2];
 };
 
-//Samplers
+
+struct StandardSamplerInfo {
+    int Enabled;
+    int TexcoordIdx;
+};
+struct ArraySamplerInfo {
+    int Enabled;
+    int TexcoordIdx;
+    float Index;
+};
+// Samplers - we assume that all standard samplers have 4 variants.
+// -------------------------------------------
 uniform sampler2D u_TextureAlbedo0;   // _a0
-uniform sampler2D u_TextureAlpha;     // _ms0
-uniform sampler2D u_TextureSpecMask;  // _s0
+uniform StandardSamplerInfo u_TextureAlbedo0_Info;
+
+uniform sampler2D u_TextureAlbedo1;   // _a1
+uniform StandardSamplerInfo u_TextureAlbedo1_Info;
+
+uniform sampler2D u_TextureAlbedo2;   // _a2
+uniform StandardSamplerInfo u_TextureAlbedo2_Info;
+
+uniform sampler2D u_TextureAlbedo3;   // _a3
+uniform StandardSamplerInfo u_TextureAlbedo3_Info;
+// -------------------------------------------
+uniform sampler2D u_TextureAlpha0;    // _ms0
+uniform StandardSamplerInfo u_TextureAlpha0_Info;
+
+uniform sampler2D u_TextureAlpha1;    // _ms1
+uniform StandardSamplerInfo u_TextureAlpha1_Info;
+
+uniform sampler2D u_TextureAlpha2;    // _ms2
+uniform StandardSamplerInfo u_TextureAlpha2_Info;
+
+uniform sampler2D u_TextureAlpha3;    // _ms3
+uniform StandardSamplerInfo u_TextureAlpha3_Info;
+// -------------------------------------------
+uniform sampler2D u_TextureSpec0;     // _s0
+uniform StandardSamplerInfo u_TextureSpec0_Info;
+
+uniform sampler2D u_TextureSpec1;     // _s1
+uniform StandardSamplerInfo u_TextureSpec1_Info;
+
+uniform sampler2D u_TextureSpec2;     // _s2
+uniform StandardSamplerInfo u_TextureSpec2_Info;
+
+uniform sampler2D u_TextureSpec3;     // _s3
+uniform StandardSamplerInfo u_TextureSpec3_Info;
+// -------------------------------------------
 uniform sampler2D u_TextureNormal0;   // _n0
+uniform StandardSamplerInfo u_TextureNormal0_Info;
+
 uniform sampler2D u_TextureNormal1;   // _n1
+uniform StandardSamplerInfo u_TextureNormal1_Info;
+
+uniform sampler2D u_TextureNormal2;   // _n2
+uniform StandardSamplerInfo u_TextureNormal2_Info;
+
+uniform sampler2D u_TextureNormal3;   // _n3
+uniform StandardSamplerInfo u_TextureNormal3_Info;
+// -------------------------------------------
 uniform sampler2D u_TextureEmission0; // _e0
+uniform StandardSamplerInfo u_TextureEmission0_Info;
+
+uniform sampler2D u_TextureEmission1; // _e1
+uniform StandardSamplerInfo u_TextureEmission1_Info;
+
+uniform sampler2D u_TextureEmission2; // _e2
+uniform StandardSamplerInfo u_TextureEmission2_Info;
+
+uniform sampler2D u_TextureEmission3; // _e3
+uniform StandardSamplerInfo u_TextureEmission3_Info;
+// -------------------------------------------
 uniform sampler2D u_TextureBake0;     // _b0
+uniform StandardSamplerInfo u_TextureBake0_Info;
+
 uniform sampler2D u_TextureBake1;     // _b1
-uniform sampler2D u_TextureMultiA;    // _a1
-uniform sampler2D u_TextureMultiB;    // _a2
-uniform sampler2D u_TextureIndirect;  // _a3
+uniform StandardSamplerInfo u_TextureBake1_Info;
 
-//Array Samplers
-uniform sampler2DArray u_TextureArrAlbedo; // tma
-uniform sampler2DArray u_TextureArrCombined; // tmc
+uniform sampler2D u_TextureBake2;     // _b2
+uniform StandardSamplerInfo u_TextureBake2_Info;
 
-uniform float u_TextureArrAlbedo_Index;
-uniform float u_TextureArrAlpha_Index;
-uniform float u_TextureArrSpecMask_Index;
-uniform float u_TextureArrCombined_Index;
+uniform sampler2D u_TextureBake3;     // _b3
+uniform StandardSamplerInfo u_TextureBake3_Info;
+// -------------------------------------------
 
-#define enable_diffuse
-#define enable_alpha_map
-#define enable_diffuse2
-#define enable_albedo
-#define enable_emission
-#define enable_emission_map
-#define enable_specular
-#define enable_specular_mask
-#define enable_specular_mask_rougness
-#define enable_specular_physical
-#define enable_vtx_color_diff
-#define enable_vtx_color_emission
-#define enable_vtx_color_spec
-#define enable_vtx_alpha_trans
+// Array Samplers
+// -------------------------------------------
+uniform sampler2DArray u_TextureArrTma; // tma
+uniform ArraySamplerInfo u_TextureArrTma_Info;
+// -------------------------------------------
+uniform sampler2DArray u_TextureArrTmc; // tmc
+uniform ArraySamplerInfo u_TextureArrTmc_Info;
+// -------------------------------------------
 
+
+// Extra stuff
 uniform bool alphaTest;
 uniform int alphaFunc;
 uniform float alphaRefValue;
 uniform float specMaskScalar;
 
-//Toggles
-uniform int hasDiffuseMap;
-uniform int hasDiffuseMultiA;
-uniform int hasDiffuseMultiB;
-uniform int hasAlphaMap;
-uniform int hasSpecMap;
-uniform int hasNormalMap0;
-uniform int hasNormalMap1;
-
-uniform int hasDiffuseArray;
-uniform int hasAlphaArray;
-uniform int hasCombinedArray;
-
-//GL
+// GL
 uniform mat4 mtxCam;
 uniform vec3 camPosition;
 uniform int colorOverride;
@@ -131,7 +179,10 @@ float GetComponent(int Type, vec4 Texture);
 struct VertexAttributes
 {
     vec3 worldPosition;
-    vec2 texCoord;
+    vec2 texCoord0;
+    vec2 texCoord1;
+    vec2 texCoord2;
+    vec2 texCoord3;
     vec4 vertexColor;
     vec3 normal;
     vec3 tangent;
@@ -139,129 +190,124 @@ struct VertexAttributes
 };
 
 // Defined in BfresUtility.frag.
-vec3 CalcBumpedNormal(vec3 texNormal, VertexAttributes vert);
+vec3 CalcBumpedNormal(vec2 texNormal, VertexAttributes vert);
+float CalcSpec(vec3 worldNormal, vec3 camPosition, vec3 lightVec, float specMask, VertexAttributes vert);
+vec2 GetTexcoord(StandardSamplerInfo samplerInfo, VertexAttributes vert);
+vec2 GetTexcoord(ArraySamplerInfo samplerInfo, VertexAttributes vert);
+vec4 Blend_OneMinusSourceAlpha(vec4[4] colors);
 
-vec3 getWorldNormal(vec2 texCoord0) {
-    vec3 worldNormal = vec3(0);
+vec3 getWorldNormal(VertexAttributes vert) {
+    vec4[4] colors;
 
-    VertexAttributes vert;
-    vert.worldPosition = v_PositionWorld;
-    vert.texCoord = texCoord0;
-    vert.vertexColor = v_VtxColor;
-    vert.normal = v_NormalWorld;
-    vert.tangent = v_TangentWorld.xyz;
-    vert.bitangent = cross(v_NormalWorld, v_TangentWorld.xyz);
-    
-    float averageCount = 0u;
-    if (hasNormalMap0 == 1) {
-        vec4 tex = texture(u_TextureNormal0, texCoord0);
-        vec3 normal = CalcBumpedNormal(tex.xyz, vert);
-        worldNormal.rgb += normal;
-        averageCount++;;
+    if (u_TextureNormal0_Info.Enabled == 1 || (u_TextureNormal1_Info.Enabled == 0 && u_TextureNormal2_Info.Enabled == 0 && u_TextureNormal3_Info.Enabled == 0 && u_TextureArrTmc_Info.Enabled == 0)) {
+        vec4 tex = texture(u_TextureAlbedo0, GetTexcoord(u_TextureAlbedo0_Info, vert));
+        colors[0] = tex;
     }
-    if (hasNormalMap1 == 1) {
-        vec4 tex = texture(u_TextureNormal1, texCoord0);
-        vec3 normal = CalcBumpedNormal(tex.xyz, vert);
-        worldNormal.rgb += normal;
-        averageCount++;
+    if (u_TextureNormal1_Info.Enabled == 1) {
+        vec4 tex = texture(u_TextureNormal1, GetTexcoord(u_TextureNormal1_Info, vert));
+        colors[1] = tex;
     }
-    if (hasCombinedArray == 1) {
-        vec4 tex = texture(u_TextureArrCombined, vec3(texCoord0, u_TextureArrCombined_Index));
-        vec3 normal = CalcBumpedNormal(tex.xyz, vert);
-        worldNormal += normal;
-        averageCount++;
+    if (u_TextureNormal2_Info.Enabled == 1) {
+        vec4 tex = texture(u_TextureNormal2, GetTexcoord(u_TextureNormal2_Info, vert));
+        colors[2] = tex;
     }
-    worldNormal /= averageCount;
+    if (u_TextureNormal3_Info.Enabled == 1) {
+        vec4 tex = texture(u_TextureNormal3, GetTexcoord(u_TextureNormal3_Info, vert));
+        colors[3] = tex;
+    }
+    if (u_TextureArrTmc_Info.Enabled == 1) {
+        vec4 tex = texture(u_TextureArrTmc, vec3(GetTexcoord(u_TextureArrTmc_Info, vert), u_TextureArrTmc_Info.Index));
+        colors[1] = tex;
+    }
 
-    return worldNormal;
+    return CalcBumpedNormal(Blend_OneMinusSourceAlpha(colors).xy, vert);
 }
 
-vec4 getDiffuse(vec2 texCoord0) {
-    vec4 diffuseMapColor = vec4(0);
+// Todo: Make multiple blend modes
+vec4 getDiffuse(VertexAttributes vert) {
+    vec4[4] colors;
 
-    float averageCountRGB = 0.f;
-    uint averageCountA = 0u;
-    if (hasDiffuseMap == 1 || (hasDiffuseArray == 0 && hasDiffuseMultiA == 0 && hasDiffuseMultiB == 0)) {
-        vec4 tex = texture(u_TextureAlbedo0, texCoord0);
-        diffuseMapColor.rgb += tex.rgb * tex.a;
-        diffuseMapColor.a += tex.a;
-        averageCountRGB += tex.a;
-        averageCountA++;
+    if (u_TextureAlbedo0_Info.Enabled == 1 || (u_TextureAlbedo1_Info.Enabled == 0 && u_TextureAlbedo2_Info.Enabled == 0 && u_TextureAlbedo3_Info.Enabled == 0 && u_TextureArrTma_Info.Enabled == 0)) {
+        vec4 tex = texture(u_TextureAlbedo0, GetTexcoord(u_TextureAlbedo0_Info, vert));
+        colors[0] = tex;
     }
-    if (hasDiffuseArray == 1) {
-        vec4 tex = texture(u_TextureArrAlbedo, vec3(texCoord0, u_TextureArrAlbedo_Index));
-        diffuseMapColor.rgb += tex.rgb * tex.a;
-        diffuseMapColor.a += tex.a;
-        averageCountRGB += tex.a;
-        averageCountA++;
+    if (u_TextureAlbedo1_Info.Enabled == 1) {
+        vec4 tex = texture(u_TextureAlbedo1, GetTexcoord(u_TextureAlbedo1_Info, vert));
+        colors[1] = tex;
     }
-    if (hasDiffuseMultiA == 1) {
-        vec4 tex = texture(u_TextureMultiA, texCoord0);
-        diffuseMapColor.rgb += tex.rgb * tex.a;
-        diffuseMapColor.a += tex.a;
-        averageCountRGB += tex.a;
-        averageCountA++;
+    if (u_TextureAlbedo2_Info.Enabled == 1) {
+        vec4 tex = texture(u_TextureAlbedo2, GetTexcoord(u_TextureAlbedo2_Info, vert));
+        colors[2] = tex;
     }
-    if (hasDiffuseMultiB == 1) {
-        vec4 tex = texture(u_TextureMultiB, texCoord0);
-        diffuseMapColor.rgb += tex.rgb * tex.a;
-        diffuseMapColor.a += tex.a;
-        averageCountRGB += tex.a;
-        averageCountA++;
+    if (u_TextureAlbedo3_Info.Enabled == 1) {
+        vec4 tex = texture(u_TextureAlbedo3, GetTexcoord(u_TextureAlbedo3_Info, vert));
+        colors[3] = tex;
     }
-    diffuseMapColor.rgb /= averageCountRGB;
-    diffuseMapColor.a /= averageCountA;
+    if (u_TextureArrTma_Info.Enabled == 1) {
+        vec4 tex = texture(u_TextureArrTma, vec3(GetTexcoord(u_TextureArrTma_Info, vert), u_TextureArrTma_Info.Index));
+        colors[1] = tex;
+    }
 
-    return diffuseMapColor;
+    return Blend_OneMinusSourceAlpha(colors);
 }
 
-float getSpec(vec2 texCoord0) {
-    if (hasSpecMap == 0 && hasCombinedArray == 0) {
-        return 1.f;
+float getSpecMask(VertexAttributes vert) {
+    vec4[4] colors;
+
+    if (u_TextureSpec0_Info.Enabled == 1 || (u_TextureSpec1_Info.Enabled == 0 && u_TextureSpec2_Info.Enabled == 0 && u_TextureSpec3_Info.Enabled == 0 && u_TextureArrTmc_Info.Enabled == 0)) {
+        vec4 tex = texture(u_TextureSpec0, GetTexcoord(u_TextureAlbedo0_Info, vert));
+        colors[0] = tex;
+    }
+    if (u_TextureSpec1_Info.Enabled == 1) {
+        vec4 tex = texture(u_TextureSpec1, GetTexcoord(u_TextureSpec1_Info, vert));
+        colors[1] = tex;
+    }
+    if (u_TextureSpec2_Info.Enabled == 1) {
+        vec4 tex = texture(u_TextureSpec2, GetTexcoord(u_TextureSpec2_Info, vert));
+        colors[2] = tex;
+    }
+    if (u_TextureSpec3_Info.Enabled == 1) {
+        vec4 tex = texture(u_TextureSpec3, GetTexcoord(u_TextureSpec3_Info, vert));
+        colors[3] = tex;
+    }
+    if (u_TextureArrTmc_Info.Enabled == 1) {
+        vec4 tex = texture(u_TextureArrTmc, vec3(GetTexcoord(u_TextureArrTmc_Info, vert), u_TextureArrTmc_Info.Index));
+        colors[1] = vec4(tex.z, tex.w, 0.f, 0.f);
     }
 
-    float specMask = 0.f;
-
-    uint averageCount = 0u;
-    if (hasSpecMap == 1) {
-        vec4 tex = texture(u_TextureSpecMask, texCoord0);
-        specMask += tex.x;
-        averageCount += 1u;
-    }
-    if (hasCombinedArray == 1) {
-        vec4 tex = texture(u_TextureArrCombined, vec3(texCoord0, u_TextureArrSpecMask_Index));
-        specMask += tex.w;
-        averageCount += 1u;
-    }
-    specMask /= averageCount;
-
-    return specMask;
+    return Blend_OneMinusSourceAlpha(colors).x;
 }
 
 
 
 void main(){
-    vec2 texCoord0 = v_TexCoord0;
-
     if (colorOverride == 1)
     {
         fragOutput = vec4(1);
         return;
     }
 
+    VertexAttributes vert;
+    vert.worldPosition = v_PositionWorld;
+    vert.texCoord0 = v_TexCoord0;
+    vert.texCoord1 = v_TexCoord1;
+    vert.texCoord2 = v_TexCoord2;
+    vert.texCoord3 = v_TexCoord3;
+    vert.vertexColor = v_VtxColor;
+    vert.normal = v_NormalWorld;
+    vert.tangent = v_TangentWorld.xyz;
+    vert.bitangent = cross(v_NormalWorld, v_TangentWorld.xyz);
+
     // Normals
-    vec3 worldNormal = getWorldNormal(texCoord0);
+    vec3 worldNormal = getWorldNormal(vert);
 
 
     // Diffuse
-    vec4 diffuseMapColor = getDiffuse(texCoord0);
+    vec4 diffuseMapColor = getDiffuse(vert);
 
     // Spec
-    float specMask = getSpec(texCoord0);
-    vec3 i = vec3(0.f, -1.f, 0.f);
-    vec3 o = i - (2 * (dot(i, worldNormal)) * worldNormal);
-    vec3 c = camPosition - v_PositionWorld;
-    float spec = min(dot(normalize(c), normalize(o)) * specMask, 1.f);
+    float specMask = getSpecMask(vert);
+    float spec = CalcSpec(worldNormal, camPosition, vec3(0.f, -1.f, 0.f), specMask, vert);
 
     // Lighting
     float halfLambert = max(spec,0.5f);
@@ -279,9 +325,9 @@ void main(){
     //Alpha test
     if (alphaTest)
     {
-        if (hasAlphaMap == 1) {
+        if (u_TextureAlpha0_Info.Enabled == 1) {
             vec4 alphaMapColor = vec4(1);
-            alphaMapColor = texture(u_TextureAlpha, texCoord0);
+            alphaMapColor = texture(u_TextureAlpha0, GetTexcoord(u_TextureAlpha0_Info, vert));
             fragOutput.a = alphaMapColor.r;
         }
 

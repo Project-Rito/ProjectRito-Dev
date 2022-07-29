@@ -636,7 +636,9 @@ namespace GLFrameworkEngine
             dashMaterial.Render(context);
 
             GL.Enable(EnableCap.AlphaTest);
+#if !RENDERDOC
             GL.AlphaFunc(AlphaFunction.Gequal, 0.5F);
+#endif
 
             GL.LineWidth(1.0f);
             render.Draw(start, end, new Vector4(1), true);

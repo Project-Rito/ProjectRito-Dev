@@ -120,22 +120,24 @@ namespace GLFrameworkEngine
             string fragFile = $"{shaderFolder}{name}.frag";
             string geomFile = $"{shaderFolder}{name}.geom";
 
+            List<string> loadedDeps = new List<string>(); // Make sure we don't load deps twice into same program
+
             if (File.Exists(vertFile))
             {
                 string vertSource = File.ReadAllText(vertFile);
-                shaders.AddRange(LoadShaderDeps(vertSource));
+                shaders.AddRange(LoadShaderDeps(vertSource, ref loadedDeps));
                 shaders.Add(new VertexShader(vertSource));
             }
             if (File.Exists(fragFile))
             {
                 string fragSource = File.ReadAllText(fragFile);
-                shaders.AddRange(LoadShaderDeps(fragSource));
+                shaders.AddRange(LoadShaderDeps(fragSource, ref loadedDeps));
                 shaders.Add(new FragmentShader(fragSource));
             }
             if (File.Exists(geomFile))
             {
                 string geomSource = File.ReadAllText(geomFile);
-                shaders.AddRange(LoadShaderDeps(geomSource));
+                shaders.AddRange(LoadShaderDeps(geomSource, ref loadedDeps));
                 shaders.Add(new GeomertyShader(geomSource));
             }
 
@@ -145,16 +147,22 @@ namespace GLFrameworkEngine
             return new ShaderProgram(shaders.ToArray());
         }
 
-        static IList<Shader> LoadShaderDeps(string source)
+        static IList<Shader> LoadShaderDeps(string source, ref List<string> loadedDeps)
         {
             if (!intDefault)
                 InitPaths();
+
+            if (loadedDeps == null)
+                loadedDeps = new List<string>();
 
             List<Shader> shaders = new List<Shader>();
 
             foreach (string depline in source.Split('\n').Where(x => x.StartsWith("//#using")))
             {
                 string name = ShaderPaths[depline.Split(' ', 2)[1].Replace("\r", "")];
+                if (loadedDeps.Contains(name))
+                    continue;
+                loadedDeps.Add(name);
 
                 string shaderFolder = $"{Runtime.ExecutableDir}/Shaders/";
                 string vertFile = $"{shaderFolder}{name}.vert";
@@ -164,19 +172,19 @@ namespace GLFrameworkEngine
                 if (File.Exists(vertFile))
                 {
                     string vertSource = File.ReadAllText(vertFile);
-                    shaders.AddRange(LoadShaderDeps(vertSource));
+                    shaders.AddRange(LoadShaderDeps(vertSource, ref loadedDeps));
                     shaders.Add(new VertexShader(vertSource));
                 }
                 if (File.Exists(fragFile))
                 {
                     string fragSource = File.ReadAllText(fragFile);
-                    shaders.AddRange(LoadShaderDeps(fragSource));
+                    shaders.AddRange(LoadShaderDeps(fragSource, ref loadedDeps));
                     shaders.Add(new FragmentShader(fragSource));
                 }
                 if (File.Exists(geomFile))
                 {
                     string geomSource = File.ReadAllText(geomFile);
-                    shaders.AddRange(LoadShaderDeps(geomSource));
+                    shaders.AddRange(LoadShaderDeps(geomSource, ref loadedDeps));
                     shaders.Add(new GeomertyShader(geomSource));
                 }
             }

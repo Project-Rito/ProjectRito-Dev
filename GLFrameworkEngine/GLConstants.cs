@@ -19,6 +19,7 @@ namespace GLFrameworkEngine
         public const string VTexCoord0 = "vTexCoord0";
         public const string VTexCoord1 = "vTexCoord1";
         public const string VTexCoord2 = "vTexCoord2";
+        public const string VTexCoord3 = "vTexCoord3";
         public const string VColor = "vColor";
         public const string vBoneIndex = "vBoneIndex";
         public const string VBoneWeight = "vBoneWeight";

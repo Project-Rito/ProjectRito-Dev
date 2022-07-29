@@ -6,16 +6,16 @@ uniform sampler2D UVTestPattern;
 
 //Samplers
 uniform sampler2D u_TextureAlbedo0;   // _a0
-uniform sampler2D u_TextureAlpha;     // _ms0
-uniform sampler2D u_TextureSpecMask;  // _s0
+uniform sampler2D u_TextureAlpha0;     // _ms0
+uniform sampler2D u_TextureSpec0;  // _s0
 uniform sampler2D u_TextureNormal0;   // _n0
 uniform sampler2D u_TextureNormal1;   // _n1
 uniform sampler2D u_TextureEmission0; // _e0
 uniform sampler2D u_TextureBake0;     // _b0
 uniform sampler2D u_TextureBake1;     // _b1
-uniform sampler2D u_TextureMultiA;    // _a1
-uniform sampler2D u_TextureMultiB;    // _a2
-uniform sampler2D u_TextureIndirect;  // _a3
+uniform sampler2D u_TextureAlbedo1;    // _a1
+uniform sampler2D u_TextureAlbedo2;    // _a2
+uniform sampler2D u_TextureAlbedo3;  // _a3
 
 uniform int debugShading;
 
@@ -54,7 +54,10 @@ const int DISPLAY_SPECULAR = 10;
 struct VertexAttributes
 {
     vec3 worldPosition;
-    vec2 texCoord;
+    vec2 texCoord0;
+    vec2 texCoord1;
+    vec2 texCoord2;
+    vec2 texCoord3;
     vec4 vertexColor;
     vec3 normal;
     vec3 tangent;
@@ -62,14 +65,14 @@ struct VertexAttributes
 };
 
 // Defined in BfresUtility.frag.
-vec3 CalcBumpedNormal(vec3 texNormal, VertexAttributes vert);
+vec3 CalcBumpedNormal(vec2 texNormal, VertexAttributes vert);
 
 void main(){
     vec4 outputColor = vec4(1);
 
     VertexAttributes vert;
     vert.worldPosition = posWorld;
-    vert.texCoord = texCoord0;
+    vert.texCoord0 = texCoord0;
     vert.vertexColor = vertexColor;
     vert.normal = normal;
     vert.tangent = tangent;
@@ -116,8 +119,8 @@ void main(){
     }
     else if (debugShading == DISPLAY_SPECULAR)
     {
-        float specMask = texture(u_TextureSpecMask, texCoord0).r;
-        vec3 worldNormal = CalcBumpedNormal(texture(u_TextureNormal0, texCoord0).xyz, vert);
+        float specMask = texture(u_TextureSpec0, texCoord0).r;
+        vec3 worldNormal = CalcBumpedNormal(texture(u_TextureNormal0, texCoord0).xy, vert);
 
         vec3 i = vec3(0.f, -1.f, 0.f);
         vec3 o = i - (2 * (dot(i, worldNormal)) * worldNormal);

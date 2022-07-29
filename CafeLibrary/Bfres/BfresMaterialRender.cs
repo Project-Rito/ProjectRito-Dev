@@ -87,9 +87,10 @@ namespace CafeLibrary.Rendering
 
         private void UpdateMaterialBlock()
         {
-            TexSrt texSrt0 = GetParameter<TexSrt>("tex_mtx0");
-            TexSrt texSrt1 = GetParameter<TexSrt>("tex_mtx1");
-            TexSrt texSrt2 = GetParameter<TexSrt>("tex_mtx2");
+            TexSrt texcoordSrt0 = GetTexcoordSRT(0);
+            TexSrt texcoordSrt1 = GetTexcoordSRT(1);
+            TexSrt texcoordSrt2 = GetTexcoordSRT(2);
+            TexSrt texcoordSrt3 = GetTexcoordSRT(3);
             float[] bake0ScaleBias = GetParameterArray<float>("gsys_bake_st0");
             float[] bake1ScaleBias = GetParameterArray<float>("gsys_bake_st1");
             float[] bakeLightScale = GetParameterArray<float>("gsys_bake_light_scale");
@@ -111,11 +112,12 @@ namespace CafeLibrary.Rendering
             var mem = new System.IO.MemoryStream();
             using (var writer = new Toolbox.Core.IO.FileWriter(mem))
             {
-                writer.Write(CalculateSRT3x4(texSrt0));
+                writer.Write(CalculateSRT3x4(texcoordSrt0));
                 writer.Write(bake0ScaleBias);
                 writer.Write(bake1ScaleBias);
-                writer.Write(CalculateSRT3x4(texSrt1));
-                writer.Write(CalculateSRT3x4(texSrt2));
+                writer.Write(CalculateSRT3x4(texcoordSrt1));
+                writer.Write(CalculateSRT3x4(texcoordSrt2));
+                writer.Write(CalculateSRT3x4(texcoordSrt3));
 
                 writer.Write(albedoColor);
                 writer.Write(transparency);
@@ -229,6 +231,44 @@ namespace CafeLibrary.Rendering
             };
         }
 
+        private TexSrt GetTexcoordSRT(int texCoord)
+        {
+            string optionsKey = $"uking_texcoord{texCoord}_srt";
+
+            if (!ShaderOptions.ContainsKey(optionsKey))
+                return GetIdentitySRT(); // Idk what to do so we'll just do this
+
+            int idx = int.Parse(ShaderOptions[optionsKey]);
+            if (idx == -1)
+                return GetIdentitySRT(); // Idk what to do so we'll just do this
+
+            string paramsKey = $"tex_srt{idx}";
+
+            TexSrt? res = GetParameter<TexSrt?>(paramsKey);
+            if (res == null)
+                return GetIdentitySRT();
+            return (TexSrt)res;
+        }
+
+        private TexSrt GetIdentitySRT()
+        {
+            return new TexSrt // I hope this is identity
+            {
+                Translation = new Syroot.Maths.Vector2F(0.0f, 0.0f),
+                Rotation = 0.0f,
+                Scaling = new Syroot.Maths.Vector2F(1.0f, 1.0f)
+            };
+        }
+
+        private int GetTexTexcoordIdx(int texIdx)
+        {
+            string optionsKey = $"uking_texture{texIdx}_texcoord";
+            if (!ShaderOptions.ContainsKey(optionsKey))
+                return 0;
+
+            return int.Parse(ShaderOptions[optionsKey]);
+        }
+
         public Dictionary<string, GenericRenderer.TextureView> GetTextures()
         {
             return ParentRenderer.Textures;
@@ -281,7 +321,7 @@ namespace CafeLibrary.Rendering
             shader.SetBoolToInt("drawDebugAreaID", BfresRender.DrawDebugAreaID);
             shader.SetInt("areaID", AreaIndex);
 
-           // UpdateMaterialBlock();
+            UpdateMaterialBlock();
             MaterialBlock.RenderBuffer(shader.program, "ub_MaterialParams");
         }
 
@@ -351,18 +391,40 @@ namespace CafeLibrary.Rendering
             shader.SetInt("u_TextureAlbedo0", 1); // Attach default texture
 
 
-            shader.SetBoolToInt("hasDiffuseMap", false);
-            shader.SetBoolToInt("hasDiffuseMultiA", false);
-            shader.SetBoolToInt("hasDiffuseMultiB", false);
-            shader.SetBoolToInt("hasDiffuseArray", false);
-            shader.SetBoolToInt("hasAlphaMap", false);
-            shader.SetBoolToInt("hasSpecMap", false);
-            shader.SetBoolToInt("hasNormalMap0", false);
-            shader.SetBoolToInt("hasNormalMap1", false);
-            shader.SetBoolToInt("hasCombinedArray", false);
+            shader.SetBoolToInt("u_TextureAlbedo0_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureAlbedo1_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureAlbedo2_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureAlbedo3_Info.Enabled", false);
+            
+            shader.SetBoolToInt("u_TextureAlpha0_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureAlpha1_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureAlpha2_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureAlpha3_Info.Enabled", false);
+
+            shader.SetBoolToInt("u_TextureSpec0_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureSpec1_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureSpec2_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureSpec3_Info.Enabled", false);
+
+            shader.SetBoolToInt("u_TextureNormal0_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureNormal1_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureNormal2_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureNormal3_Info.Enabled", false);
+
+            shader.SetBoolToInt("u_TextureEmission0_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureEmission1_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureEmission2_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureEmission3_Info.Enabled", false);
+
+            shader.SetBoolToInt("u_TextureBake0_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureBake1_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureBake2_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureBake3_Info.Enabled", false);
+
+            shader.SetBoolToInt("u_TextureArrTma_Info.Enabled", false);
+            shader.SetBoolToInt("u_TextureArrTmc_Info.Enabled", false);
 
             int id = 2;
-            int arrIdx = 0;
             for (int i = 0; i < this.TextureMaps?.Count; i++)
             {
                 var name = TextureMaps[i].Name;
@@ -384,45 +446,117 @@ namespace CafeLibrary.Rendering
                 var binded = BindTexture(shader, GetTextures(), TextureMaps[i], name, id);
                 bool hasTexture = binded != null;
 
-                if (sampler == "_a0")
+                switch (sampler)
                 {
-                    shader.SetBoolToInt("hasDiffuseMap", hasTexture);
-                }
-                else if (sampler == "_a1")
-                {
-                    shader.SetBoolToInt("hasDiffuseMultiA", hasTexture);
-                }
-                else if (sampler == "_a2")
-                {
-                    shader.SetBoolToInt("hasDiffuseMultiB", hasTexture);
-                }
-                else if (sampler == "tma")
-                {
-                    shader.SetBoolToInt("hasDiffuseArray", hasTexture);
-                    if (ShaderParams.ContainsKey("texture_array_index" + arrIdx))
-                        shader.SetFloat("u_TextureArrAlbedo_Index", (float)ShaderParams["texture_array_index" + arrIdx].DataValue); arrIdx++;
-                }
-                else if (sampler == "tmc")
-                {
-                    shader.SetBoolToInt("hasCombinedArray", hasTexture);
-                    if (ShaderParams.ContainsKey("texture_array_index" + arrIdx))
-                        shader.SetFloat("u_TextureArrCombined_Index", (float)ShaderParams["texture_array_index" + arrIdx].DataValue); arrIdx++;
-                }
-                else if (sampler == "_ms0")
-                {
-                    shader.SetBoolToInt("hasAlphaMap", hasTexture);
-                }
-                else if (sampler == "_s0")
-                {
-                    shader.SetBoolToInt("hasSpecMap", hasTexture);
-                }
-                else if (sampler == "_n0")
-                {
-                    shader.SetBoolToInt("hasNormalMap0", hasTexture);
-                }
-                else if (sampler == "_n1")
-                {
-                    shader.SetBoolToInt("hasNormalMap0", hasTexture);
+                    case "_a0":
+                        shader.SetBoolToInt("u_TextureAlbedo0_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureAlbedo0_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_a1":
+                        shader.SetBoolToInt("u_TextureAlbedo1_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureAlbedo1_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_a2":
+                        shader.SetBoolToInt("u_TextureAlbedo2_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureAlbedo2_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_a3":
+                        shader.SetBoolToInt("u_TextureAlbedo3_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureAlbedo3_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_ms0":
+                        shader.SetBoolToInt("u_TextureAlpha0_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureAlpha0_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_ms1":
+                        shader.SetBoolToInt("u_TextureAlpha1_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureAlpha1_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_ms2":
+                        shader.SetBoolToInt("u_TextureAlpha2_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureAlpha2_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_ms3":
+                        shader.SetBoolToInt("u_TextureAlpha3_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureAlpha3_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_s0":
+                        shader.SetBoolToInt("u_TextureSpec0_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureSpec0_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_s1":
+                        shader.SetBoolToInt("u_TextureSpec1_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureSpec1_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_s2":
+                        shader.SetBoolToInt("u_TextureSpec2_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureSpec2_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_s3":
+                        shader.SetBoolToInt("u_TextureSpec3_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureSpec3_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_n0":
+                        shader.SetBoolToInt("u_TextureNormal0_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureNormal0_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_n1":
+                        shader.SetBoolToInt("u_TextureNormal1_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureNormal1_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_n2":
+                        shader.SetBoolToInt("u_TextureNormal2_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureNormal2_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_n3":
+                        shader.SetBoolToInt("u_TextureNormal3_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureNormal3_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_e0":
+                        shader.SetBoolToInt("u_TextureEmission0_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureEmission0_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_e1":
+                        shader.SetBoolToInt("u_TextureEmission1_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureEmission1_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_e2":
+                        shader.SetBoolToInt("u_TextureEmission2_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureEmission2_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_e3":
+                        shader.SetBoolToInt("u_TextureEmission3_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureEmission3_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_b0":
+                        shader.SetBoolToInt("u_TextureBake0_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureBake0_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_b1":
+                        shader.SetBoolToInt("u_TextureBake1_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureBake1_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_b2":
+                        shader.SetBoolToInt("u_TextureBake2_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureBake2_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "_b3":
+                        shader.SetBoolToInt("u_TextureBake3_Info.Enabled", hasTexture);
+                        shader.SetInt("u_TextureBake3_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+
+                    case "tma":
+                        shader.SetBoolToInt("u_TextureArrTma_Info.Enabled", hasTexture);
+                        if (ShaderParams.ContainsKey("texture_array_index" + i))
+                            shader.SetFloat("u_TextureArrTma_Info.Index", (float)ShaderParams["texture_array_index" + i].DataValue);
+                        shader.SetInt("u_TextureArrTma_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
+                    case "tmc":
+                        shader.SetBoolToInt("u_TextureArrTmc_Info.Enabled", hasTexture);
+                        if (ShaderParams.ContainsKey("texture_array_index" + i))
+                            shader.SetFloat("u_TextureArrTmc_Info.Index", (float)ShaderParams["texture_array_index" + i].DataValue);
+                        shader.SetInt("u_TextureArrTmc_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        break;
                 }
 
                 if (hasTexture)
@@ -437,18 +571,37 @@ namespace CafeLibrary.Rendering
             switch (sampler)
             {
                 case "_a0": return "u_TextureAlbedo0";
-                case "tma": return "u_TextureArrAlbedo";
-                case "_ms0": return "u_TextureAlpha";
-                case "_s0": return "u_TextureSpecMask";
-                case "tmc": return "u_TextureArrCombined"; // Theory: normal data in xyz, specular mask in w
+                case "_a1": return "u_TextureAlbedo1";
+                case "_a2": return "u_TextureAlbedo2";
+                case "_a3": return "u_TextureAlbedo3";
+                
+                case "_ms0": return "u_TextureAlpha0";
+                case "_ms1": return "u_TextureAlpha1";
+                case "_ms2": return "u_TextureAlpha2";
+                case "_ms3": return "u_TextureAlpha3";
+
+                case "_s0": return "u_TextureSpec0";
+                case "_s1": return "u_TextureSpec1";
+                case "_s2": return "u_TextureSpec2";
+                case "_s3": return "u_TextureSpec3";
+
                 case "_n0": return "u_TextureNormal0";
                 case "_n1": return "u_TextureNormal1";
+                case "_n2": return "u_TextureNormal2";
+                case "_n3": return "u_TextureNormal3";
+
                 case "_e0": return "u_TextureEmission0";
+                case "_e1": return "u_TextureEmission1";
+                case "_e2": return "u_TextureEmission2";
+                case "_e3": return "u_TextureEmission3";
+
                 case "_b0": return "u_TextureBake0";
                 case "_b1": return "u_TextureBake1";
-                case "_a1": return "u_TextureMultiA";
-                case "_a2": return "u_TextureMultiB";
-                case "_a3": return "u_TextureIndirect";
+                case "_b2": return "u_TextureBake2";
+                case "_b3": return "u_TextureBake3";
+
+                case "tma": return "u_TextureArrTma";
+                case "tmc": return "u_TextureArrTmc"; // Theory: normal data in xy, specular in zw
                 default:
                     return "";
             }

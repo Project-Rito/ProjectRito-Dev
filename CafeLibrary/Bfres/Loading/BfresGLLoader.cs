@@ -168,6 +168,7 @@ namespace CafeLibrary.Rendering
                         case "_u0": return GLConstants.VTexCoord0;
                         case "_u1": return GLConstants.VTexCoord1;
                         case "_u2": return GLConstants.VTexCoord2;
+                        case "_u3": return GLConstants.VTexCoord3;
                         case "_c0": return GLConstants.VColor;
                         case "_t0": return GLConstants.VTangent;
                         case "_b0": return GLConstants.VBitangent;

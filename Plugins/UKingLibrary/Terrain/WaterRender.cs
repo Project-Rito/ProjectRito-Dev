@@ -111,7 +111,7 @@ namespace UKingLibrary.Rendering
             shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
             shader.SetTexture(WaterTexture_Emm, "texWater_Emm", 1);
             shader.SetTexture(WaterTexture_Nrm, "texWater_Nrm", 2);
-            shader.SetFloat("uBrightness", 2.0f); // Hack to fit in (normals calculation is kinda off or something)
+            shader.SetFloat("uBrightness", 1.0f);
             shader.SetBool("uDebugSections", PluginConfig.DebugTerrainSections);
 
             GL.Enable(EnableCap.Blend);

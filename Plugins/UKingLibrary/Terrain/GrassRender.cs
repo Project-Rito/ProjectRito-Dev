@@ -105,7 +105,7 @@ namespace UKingLibrary.Rendering
             var shader = GlobalShaders.GetShader("GRASS");
             context.CurrentShader = shader;
             shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
-            shader.SetFloat("uBrightness", 2.0f); // Hack to fit in (normals calculation is kinda off or something)
+            shader.SetFloat("uBrightness", 1.0f);
             shader.SetBool("uDebugSections", PluginConfig.DebugTerrainSections);
 
             GL.Enable(EnableCap.Blend);
