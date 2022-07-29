@@ -451,7 +451,7 @@ namespace MapStudio.UI
                     hasContextMenu = true;
 
                 //Apply a pop up menu for context items. Only do this if the menu has possible items used
-                if (hasContextMenu && SelectedNodes.Contains(node))
+                if (hasContextMenu)
                 {
                     ImGui.PushID(node.Header);
                     if (ImGui.BeginPopupContextItem("##OUTLINER_POPUP", ImGuiPopupFlags.MouseButtonRight))
