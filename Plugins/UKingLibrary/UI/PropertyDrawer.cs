@@ -15,9 +15,7 @@ namespace UKingLibrary.UI
 
         public static void Draw(MapObject mapObject, IDictionary<string, dynamic> values, PropertyChangedCallback callback = null)
         {
-            IDictionary<string, dynamic> parameters = null;
-            if (values.ContainsKey("!Parameters"))
-                parameters = (IDictionary<string, dynamic>)values["!Parameters"];
+            IDictionary<string, dynamic> parameters = mapObject.Parameters;
 
             float width = ImGui.GetWindowWidth();
 
@@ -31,7 +29,7 @@ namespace UKingLibrary.UI
                 ImGui.Columns(1);
             }
 
-            if (parameters != null && ImGui.CollapsingHeader(TranslationSource.GetText("PARAMETERS"), ImGuiTreeNodeFlags.DefaultOpen))
+            if (ImGui.CollapsingHeader(TranslationSource.GetText("PARAMETERS"), ImGuiTreeNodeFlags.DefaultOpen))
             {
                 if (ImGui.Button($"{TranslationSource.GetText("EDIT")}##param", new System.Numerics.Vector2(width, 22)))
                     DialogHandler.Show($"{TranslationSource.GetText("PROPERTY_WINDOW")}", () => PropertiesDialog(parameters), null);

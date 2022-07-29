@@ -98,7 +98,6 @@ namespace UKingLibrary
             {
                 if (!Properties.ContainsKey("!Parameters"))
                     return new Dictionary<string, dynamic>();
-
                 return Properties["!Parameters"];
             }
             set { Properties["!Parameters"] = value; }
@@ -147,6 +146,7 @@ namespace UKingLibrary
             Properties.Add("HashId", new MapData.Property<dynamic>(hashId));
             Properties.Add("Translate", new List<dynamic> { new MapData.Property<dynamic>(0), new MapData.Property<dynamic>(0), new MapData.Property<dynamic>(0) });
             Properties.Add("SRTHash", new MapData.Property<dynamic>(0));
+            Properties.Add("!Parameters", new Dictionary<string, dynamic>());
 
             ActorInfo = actorInfo;
 
@@ -159,6 +159,9 @@ namespace UKingLibrary
             MapData = mapData;
 
             Properties = UKingLibrary.MapData.ValuesToProperties(properties);
+            if (!Properties.ContainsKey("!Parameters"))
+                Properties.Add("!Parameters", new Dictionary<string, dynamic>());
+
             _bakeCollision = ParentLoader.BakedCollisionShapeExists(HashId);
 
             ActorInfo = actorInfo;
@@ -489,6 +492,7 @@ namespace UKingLibrary
         /// </summary>
         public void SaveActor()
         {
+            SaveParameters();
             SaveTransform();
             SaveLinks();
             SaveBakedCollision();
@@ -646,6 +650,17 @@ namespace UKingLibrary
                         array[2].Value);
             }
             return defaultValue;
+        }
+
+        /// <summary>
+        /// Lol mostly just makes sure empty parameters aren't saved.
+        /// </summary>
+        void SaveParameters()
+        {
+            if (!Properties.ContainsKey("!Parameters") || Properties["!Parameters"] is not IDictionary<string, dynamic>)
+                return;
+            if (((IDictionary<string, dynamic>)Properties["!Parameters"]).Count == 0)
+                Properties.Remove("!Parameters");
         }
 
         /// <summary>
