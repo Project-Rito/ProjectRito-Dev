@@ -605,6 +605,11 @@ namespace UKingLibrary
         /// </summary>
         public void AddToMap()
         {
+            if (MapData.Objs.ContainsKey(HashId))
+            {
+                StudioLogger.WriteError($"Multiple actors share the HashId: {HashId}. Only one has been added to the scene.");
+                return;
+            }
             MapData.Objs.Add(HashId, this);
         }
 
