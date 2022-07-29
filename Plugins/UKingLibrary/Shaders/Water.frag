@@ -1,11 +1,14 @@
 ﻿#version 330 core
 
+//#using BFRES_UTILITY
+
 uniform sampler2DArray texWater_Emm;
 uniform sampler2DArray texWater_Nrm;
 
 uniform float uBrightness;
 uniform bool uDebugSections;
 
+in vec3 v_PositionWorld;
 in vec2 v_TexCoords;
 in vec3 v_NormalWorld;
 in vec3 v_TangentWorld;
@@ -15,16 +18,43 @@ flat in uint texIndex;
 
 out vec4 fragColor;
 
+// GL
+uniform vec3 camPosition;
+
+// Used for passing vertex info to BfresUtility
+struct VertexAttributes
+{
+    vec3 worldPosition;
+    vec2 texCoord0;
+    vec2 texCoord1;
+    vec2 texCoord2;
+    vec2 texCoord3;
+    vec4 vertexColor;
+    vec3 normal;
+    vec3 tangent;
+    vec3 bitangent;
+};
+
+// Defined in BfresUtility.frag.
+vec3 CalcBumpedNormal(vec2 texNormal, VertexAttributes vert);
+float CalcSpec(vec3 worldNormal, vec3 camPosition, vec3 lightVec, float specMask, VertexAttributes vert);
+
 void main(void)
 {
+    VertexAttributes vert;
+    vert.worldPosition = v_PositionWorld;
+    vert.texCoord0 = v_TexCoords;
+    vert.texCoord1 = v_TexCoords;
+    vert.texCoord2 = v_TexCoords;
+    vert.texCoord3 = v_TexCoords;
+    vert.vertexColor = vec4(1.f);
+    vert.normal = v_NormalWorld;
+    vert.tangent = v_TangentWorld.xyz;
+    vert.bitangent = cross(v_NormalWorld, v_TangentWorld.xyz);
+
     // Normals
     vec4 texNormal = texture(texWater_Nrm, vec3(v_TexCoords.xy, texIndex));
-    vec3 N = v_NormalWorld;
-    vec3 T = v_TangentWorld;
-    vec3 BiT = cross(N, T) * texNormal.w;
-
-    // World normal calculation
-    vec3 worldNormal = texNormal.r * T + texNormal.g * N + texNormal.b * BiT;
+    vec3 worldNormal = CalcBumpedNormal(texNormal.xy, vert);
 
     // Base water color
     if (texIndex == 0u) // Water
@@ -52,8 +82,11 @@ void main(void)
     float emm = texture(texWater_Emm, vec3(v_TexCoords.xy, texIndex)).r;
     fragColor = vec4(fragColor.rgb * (emm + 1), fragColor.a);
 
+    // Spec
+    float spec = CalcSpec(worldNormal, camPosition, vec3(0.f, -1.f, 0.f), 1.f, vert);
+
     // Lighting
-    float halfLambert = max(worldNormal.y,0.5);
+    float halfLambert = max(spec, 0.5f);
     fragColor = vec4(fragColor.rgb * halfLambert, fragColor.a); // Use that lighting here
     fragColor.rgb *= uBrightness;
 }

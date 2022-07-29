@@ -7,6 +7,7 @@ in vec3 vNormalWorld;
 in vec3 vTangentWorld;
 in vec3 vDebugHighlight;
 
+out vec3 v_PositionWorld;
 out vec2 v_TexCoords;
 out vec3 v_NormalWorld;
 out vec3 v_TangentWorld;
@@ -20,6 +21,7 @@ void main()
 {
     texIndex = vMaterialIndex;
 
+    v_PositionWorld = (mtxMdl[gl_InstanceID] * vec4(vPosition, 1.0)).xyz;
     v_TexCoords = vTexCoord;
     v_NormalWorld = vNormalWorld;
     v_TangentWorld = vTangentWorld;

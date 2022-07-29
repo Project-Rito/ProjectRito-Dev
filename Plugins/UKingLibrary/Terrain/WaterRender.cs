@@ -300,7 +300,7 @@ namespace UKingLibrary.Rendering
             // Nrm ------------------------------------------------
             for (int i = 0; i < WaterTexture_Nrm.ArrayCount; i++)
             {
-                string tex = $"{cache}/WaterNm_{i}.png";
+                string tex = $"{cache}/WaterNrm_{i}.png";
                 if (System.IO.File.Exists(tex))
                 {
                     var image = new System.Drawing.Bitmap(tex);
