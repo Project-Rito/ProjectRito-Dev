@@ -425,6 +425,7 @@ namespace CafeLibrary.Rendering
             shader.SetBoolToInt("u_TextureArrTmc_Info.Enabled", false);
 
             int id = 2;
+            int arrayIdx = 0;
             for (int i = 0; i < this.TextureMaps?.Count; i++)
             {
                 var name = TextureMaps[i].Name;
@@ -548,13 +549,13 @@ namespace CafeLibrary.Rendering
                     case "tma":
                         shader.SetBoolToInt("u_TextureArrTma_Info.Enabled", hasTexture);
                         if (ShaderParams.ContainsKey("texture_array_index" + i))
-                            shader.SetFloat("u_TextureArrTma_Info.Index", (float)ShaderParams["texture_array_index" + i].DataValue);
+                            shader.SetFloat("u_TextureArrTma_Info.Index", (float)ShaderParams["texture_array_index" + arrayIdx++].DataValue);
                         shader.SetInt("u_TextureArrTma_Info.TexcoordIdx", GetTexTexcoordIdx(i));
                         break;
                     case "tmc":
                         shader.SetBoolToInt("u_TextureArrTmc_Info.Enabled", hasTexture);
                         if (ShaderParams.ContainsKey("texture_array_index" + i))
-                            shader.SetFloat("u_TextureArrTmc_Info.Index", (float)ShaderParams["texture_array_index" + i].DataValue);
+                            shader.SetFloat("u_TextureArrTmc_Info.Index", (float)ShaderParams["texture_array_index" + arrayIdx++].DataValue);
                         shader.SetInt("u_TextureArrTmc_Info.TexcoordIdx", GetTexTexcoordIdx(i));
                         break;
                 }
