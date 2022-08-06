@@ -109,17 +109,23 @@ namespace CafeLibrary.Rendering
             float[] multiTexReg2 = GetParameterArray<float>("multi_tex_reg2");
             float[] indirectMag = GetParameterArray<float>("indirect_mag");
 
+            int uking_enable_wind_vtx_transform = GetOption("uking_enable_wind_vtx_transform");
+            float uking_wind_vtx_transform_intensity = GetParameter<float>("uking_wind_vtx_transform_intensity");
+            float uking_wind_vtx_transform_lie_intensity = GetParameter<float>("uking_wind_vtx_transform_lie_intensity");
+            float uking_wind_vtx_transform_lie_height = GetParameter<float>("uking_wind_vtx_transform_lie_height");
+
+
             var mem = new System.IO.MemoryStream();
             using (var writer = new Toolbox.Core.IO.FileWriter(mem))
             {
                 writer.Write(CalculateSRT3x4(texcoordSrt0));
-                writer.Write(bake0ScaleBias);
-                writer.Write(bake1ScaleBias);
+                writer.Write(bake0ScaleBias.Length == 4 ? bake0ScaleBias : new float[4]);
+                writer.Write(bake1ScaleBias.Length == 4 ? bake1ScaleBias : new float[4]);
                 writer.Write(CalculateSRT3x4(texcoordSrt1));
                 writer.Write(CalculateSRT3x4(texcoordSrt2));
                 writer.Write(CalculateSRT3x4(texcoordSrt3));
 
-                writer.Write(albedoColor);
+                writer.Write(albedoColor.Length == 3 ? albedoColor : new float[3]);
                 writer.Write(transparency);
 
                 writer.Write(emissionColor[0] * emissionIntensity);
@@ -127,18 +133,30 @@ namespace CafeLibrary.Rendering
                 writer.Write(emissionColor[2] * emissionIntensity);
                 writer.Write(normalmapWeight);
 
-                writer.Write(specularColor);
+                writer.Write(specularColor.Length == 3 ? specularColor : new float[3]);
                 writer.Write(specularIntensity);
 
-                writer.Write(bakeLightScale);
+                writer.Write(bakeLightScale.Length == 3 ? bakeLightScale : new float[3]);
                 writer.Write(specularRoughness);
 
-                writer.Write(multiTexReg0);
-                writer.Write(multiTexReg1);
-                writer.Write(multiTexReg2);
+                writer.Write(multiTexReg0.Length == 4 ? multiTexReg0 : new float[4]);
+                writer.Write(multiTexReg1.Length == 4 ? multiTexReg1 : new float[4]);
+                writer.Write(multiTexReg2.Length == 4 ? multiTexReg2 : new float[4]);
 
-                writer.Write(indirectMag);
+                writer.Write(indirectMag.Length == 2 ? indirectMag : new float[2]);
                 writer.Write(new float[2]);
+
+                // Light stuff I don't care about atm
+                writer.Write(Vector4.Zero);
+                writer.Write(Vector4.Zero);
+                writer.Write(Vector4.Zero);
+                writer.Write(Vector4.Zero);
+                writer.Write(Vector4.Zero);
+                writer.Write(Vector4.Zero);
+
+                writer.Write(uking_enable_wind_vtx_transform == 1 ? uking_wind_vtx_transform_intensity * GLContext.PreviewScale : 0f);
+                writer.Write(uking_wind_vtx_transform_lie_intensity);
+                writer.Write(uking_wind_vtx_transform_lie_height);
             }
             MaterialBlock.Buffer.Clear();
             MaterialBlock.Add(mem.ToArray());
@@ -160,6 +178,14 @@ namespace CafeLibrary.Rendering
             if (ShaderParams.ContainsKey(name))
                 return (T[])ShaderParams[name].DataValue;
             return new T[length];
+        }
+
+        private int GetOption(string name)
+        {
+            if (ShaderOptions.ContainsKey(name))
+                return int.Parse(ShaderOptions[name]);
+
+            return 0;
         }
 
         private float[] CalculateSRT3x4(Nintendo.Bfres.TexSrt texSrt)

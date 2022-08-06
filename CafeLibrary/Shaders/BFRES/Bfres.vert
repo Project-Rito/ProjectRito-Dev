@@ -1,5 +1,7 @@
 ﻿#version 330 core
 
+#define PI 3.1415926538
+
 precision mediump float;
 
 struct EnvLightParam {
@@ -21,6 +23,10 @@ layout(std140) uniform ub_MaterialParams {
     vec4 u_MultiTexReg[3];
     vec4 u_Misc[1];
     EnvLightParam u_EnvLightParams[2];
+
+    float u_uking_wind_vtx_transform_intensity;
+    float u_uking_wind_vtx_transform_lie_intensity;
+    float u_uking_wind_vtx_transform_lie_height;
 };
 
 layout (location = 0) in vec3 vPosition;
@@ -35,8 +41,11 @@ layout (location = 8) in vec4 vBoneWeight;
 layout (location = 9) in vec4 vTangent;
 layout (location = 10) in vec4 vBitangent;
 
+// GL
 uniform mat4[64] mtxMdl;
 uniform mat4 mtxCam;
+uniform float previewScale;
+uniform float millisecond;
 
 // Skinning uniforms
 uniform mat4 bones[170];
@@ -98,8 +107,25 @@ vec3 skinNRM(vec3 nr, ivec4 index)
     return newNormal;
 }
 
+vec3 uking_wind_vtx_transform(vec3 pos, vec3 origin, vec3 normal) {
+    vec3 offset;
+
+    float t = float(millisecond) / 1000.f; // Scale down the time to (floating-point) seconds.
+
+    offset.x = sin(t * 1);
+    offset.y = sin(t * 2);
+    offset.z = sin(t * 3);
+
+    float distFromCenter = length(pos - origin) / previewScale;
+
+    float windCatch = 1.f - normalize(normal).y;
+    float scale = u_uking_wind_vtx_transform_intensity * vColor.b * distFromCenter * 0.05f * windCatch; // The 0.1 is just for fun.
+
+    return pos + (offset * scale);
+}
+
 void main(){
-    vec4 worldPosition = vec4(vPosition.xyz, 1);
+    vec4 worldPosition = vec4(uking_wind_vtx_transform(vPosition.xyz, vec3(0.f), vNormal.xyz), 1);
     vec3 normal = normalize(mat3(mtxMdl[gl_InstanceID]) * vNormal.xyz);
 
     //Vertex Rigging

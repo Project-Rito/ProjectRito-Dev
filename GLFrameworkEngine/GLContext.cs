@@ -248,6 +248,8 @@ namespace GLFrameworkEngine
                 shader.SetMatrix4x4(GLConstants.ModelMatrix, ref mtxMdl); // Not sure how much this does...
                 shader.SetMatrix4x4(GLConstants.ViewProjMatrix, ref mtxCam);
                 shader.SetVector3(GLConstants.CamPosition, camPosition);
+                shader.SetFloat(GLConstants.PreviewScale, PreviewScale);
+                shader.SetFloat(GLConstants.Millisecond, (float)(DateTime.UtcNow - System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime()).TotalMilliseconds);
             }
         }
 

@@ -61,6 +61,10 @@ layout(std140) uniform ub_MaterialParams {
     vec4 u_MultiTexReg[3];
     vec4 u_Misc[1];
     EnvLightParam u_EnvLightParams[2];
+
+    float u_uking_wind_vtx_transform_intensity;
+    float u_uking_wind_vtx_transform_lie_intensity;
+    float u_uking_wind_vtx_transform_lie_height;
 };
 
 
@@ -169,6 +173,7 @@ uniform mat4 mtxCam;
 uniform vec3 camPosition;
 uniform int colorOverride;
 uniform vec4 highlight_color;
+uniform float millisecond;
 
 
 out vec4 fragOutput;
