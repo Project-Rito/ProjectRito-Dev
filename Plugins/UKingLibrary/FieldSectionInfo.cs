@@ -83,6 +83,11 @@ namespace UKingLibrary
 
         public static bool operator ==(FieldSectionInfo a, FieldSectionInfo b)
         {
+            if ((a is null) != (b is null))
+                return false;
+            if (a is null && b is null)
+                return true;
+
             return a.XIndex == b.XIndex && a.ZIndex == b.ZIndex;
         }
         public static bool operator !=(FieldSectionInfo a, FieldSectionInfo b)
