@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Toolbox.Core.ViewModels
 {
@@ -49,6 +50,11 @@ namespace Toolbox.Core.ViewModels
                 Children.Add(child);
                 child.Parent = this;
             }
+        }
+
+        public void RemoveChild(string key)
+        {
+            Children.Remove(Children.First(x => x.Header == key));
         }
 
         public NodeFolder() : base() { }

@@ -23,7 +23,7 @@ namespace UKingLibrary
         /// <summary>
         /// The file this is in
         /// </summary>
-        MapData MapData;
+        public MapData MapData;
 
         /// <summary>
         /// Properties related to the object instance.

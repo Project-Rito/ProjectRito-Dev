@@ -51,6 +51,12 @@ namespace UKingLibrary
         public List<MapCollisionLoader> BakedCollision { get; set; } = new List<MapCollisionLoader>();
 
         /// <summary>
+        /// All navmesh for the field. Included here for convenience,
+        /// but references are also present in MapNavmeshLoader.RootNode.Tag.
+        /// </summary>
+        public List<MapNavmeshLoader> Navmesh { get; set; } = new List<MapNavmeshLoader>();
+
+        /// <summary>
         /// Instancing info related to trees.
         /// </summary>
         public ProdInfo TeraTreeInstances;
@@ -112,13 +118,14 @@ namespace UKingLibrary
             // Load baked collision data
             MapCollisionLoader bakedCollisionLoader = new MapCollisionLoader();
             bakedCollisionLoader.Load(GetStaticCompound(), $"{DungeonName}.shksc", Scene);
-            RootNode.FolderChildren["Collision"].Children.Add(bakedCollisionLoader.RootNode);
+            RootNode.FolderChildren["Collision"].AddChild(bakedCollisionLoader.RootNode);
             BakedCollision.Add(bakedCollisionLoader);
 
             // Load navmesh data
             MapNavmeshLoader navmeshLoader = new MapNavmeshLoader();
             navmeshLoader.Load(GetNavmesh(), $"{DungeonName}.shknm2", Vector3.Zero, Scene);
-            RootNode.FolderChildren["NavMesh"].Children.Add(navmeshLoader.RootNode);
+            RootNode.FolderChildren["NavMesh"].AddChild(navmeshLoader.RootNode);
+            Navmesh.Add(navmeshLoader);
 
             //Static and dynamic actors
             var staticFile = GetMubin("Static");
@@ -158,6 +165,32 @@ namespace UKingLibrary
             }
             else
                 StudioLogger.WriteWarning("Couldn't find dungeon model!");
+        }
+
+        public void Unload()
+        {
+            // Unload muunt
+            foreach (MapData mapData in MapData)
+            {
+                mapData.RootNode.RemoveFromParent();
+                mapData.Unload();
+            }
+
+            // Unload baked collision
+            foreach (MapCollisionLoader bakedCollision in BakedCollision)
+            {
+                bakedCollision.RootNode.RemoveFromParent();
+                bakedCollision.Unload();
+            }
+
+            // Unload navmesh
+            foreach (MapNavmeshLoader navmesh in Navmesh)
+            {
+                navmesh.RootNode.RemoveFromParent();
+                navmesh.Unload();
+            }
+
+            Scene.RemoveRenderObject(MapRender);
         }
 
         public void AddBakedCollisionShape(uint hashId, string muuntFileName, BakedCollisionShapeCacheable info, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)

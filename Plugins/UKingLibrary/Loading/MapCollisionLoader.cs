@@ -69,6 +69,11 @@ namespace UKingLibrary
             UpdateRenders(); // Rendering functionality
         }
 
+        public void Unload()
+        {
+            RemoveRenders();
+        }
+
         #region Interfacing for collision manipulation
         public BakedCollisionShapeCacheable[] GetCacheables(uint hashId)
         {
@@ -896,9 +901,8 @@ namespace UKingLibrary
 
         private void UpdateRenders()
         {
-            foreach (HavokMeshShapeRender render in ShapeRenders)
-                Scene?.RemoveRenderObject(render);
-            ShapeRenders.Clear();
+            RemoveRenders();
+
             foreach (ActorShapePairing actorPairing in ShapePairings)
             {
                 foreach (ShapeInfoShapeInstancePairing shapePairing in actorPairing.Shapes)
@@ -965,6 +969,13 @@ namespace UKingLibrary
                     Scene?.AddRenderObject(render);
                 }
             }
+        }
+
+        private void RemoveRenders()
+        {
+            foreach (HavokMeshShapeRender render in ShapeRenders)
+                Scene?.RemoveRenderObject(render);
+            ShapeRenders.Clear();
         }
         #endregion
 

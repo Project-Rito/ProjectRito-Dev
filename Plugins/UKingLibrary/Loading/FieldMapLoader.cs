@@ -50,6 +50,12 @@ namespace UKingLibrary
         public List<MapCollisionLoader> BakedCollision { get; set; } = new List<MapCollisionLoader>();
 
         /// <summary>
+        /// All navmesh for the field. Included here for convenience,
+        /// but references are also present in MapNavmeshLoader.RootNode.Tag.
+        /// </summary>
+        public List<MapNavmeshLoader> Navmesh { get; set; } = new List<MapNavmeshLoader>();
+
+        /// <summary>
         /// The terrain for this field
         /// </summary>
         public Terrain Terrain { get; set; } = new Terrain();
@@ -64,8 +70,20 @@ namespace UKingLibrary
         /// </summary>
         public List<ProdInfo> Clusters = new List<ProdInfo>();
 
-        public FieldMapLoader(string fieldName)
+        /// <summary>
+        /// Find what sections are loaded
+        /// </summary>
+        public List<FieldSectionInfo> LoadedSections
         {
+            get
+            {
+                return RootNode.FolderChildren.Select(x => new FieldSectionInfo(x.Key)).ToList();
+            }
+        }
+
+        public FieldMapLoader(string fieldName, UKingEditor editor)
+        {
+            ParentEditor = editor;
             RootNode.Header = fieldName;
             RootNode.Tag = this;
             Scene.Init();
@@ -73,18 +91,15 @@ namespace UKingLibrary
             Terrain.LoadTerrainTable(fieldName);
         }
 
-        public MapData LoadMuunt(string fileName, Stream stream, UKingEditor editor)
+        public MapData LoadMuunt(string fileName, Stream stream)
         {
-            ParentEditor = editor;
-            //ParentEditor.Workspace.Windows.Add(new ActorLinkNodeUI());
-
             ProcessLoading.Instance.Update(0, 100, "Loading map files");
 
             ApplyPreviewScale();
             GlobalData.LoadActorDatabase();
             ParentEditor.LoadAssetList();
 
-            var mapData = new MapData(stream, this, fileName);
+            MapData mapData = new MapData(stream, this, fileName);
             InitSectionFolder(GetSectionName(fileName));
             ((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Muunt"].AddChild(mapData.RootNode);
             MapData.Add(mapData);
@@ -92,10 +107,28 @@ namespace UKingLibrary
             return mapData;
         }
 
-        public void LoadTerrain(string fieldName, int areaID, int sectionID, int lodLevel = 8)
+        public void UnloadMuunt(string fileName)
+        {
+            if (!RootNode.FolderChildren.ContainsKey(GetSectionName(fileName)))
+                return;
+            if (!((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren.ContainsKey("Muunt"))
+                return;
+
+            MapData mapData = (MapData)((NodeFolder)((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Muunt"]).FolderChildren[fileName].Tag;
+            mapData.Unload();
+            ((NodeFolder)((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Muunt"]).RemoveChild(fileName);
+        }
+
+        public void LoadTerrain(string fieldName, FieldSectionInfo sectionInfo, int lodLevel = 8)
         {
             ApplyPreviewScale();
-            Terrain.LoadTerrainSection(fieldName, areaID, sectionID, this, lodLevel);
+            Terrain.LoadTerrainSection(fieldName, sectionInfo, this, lodLevel);
+        }
+
+        public void UnloadTerrain(string fieldName, FieldSectionInfo sectionInfo)
+        {
+            ApplyPreviewScale();
+            Terrain.UnloadTerrainSection(fieldName, sectionInfo, this);
         }
 
         public void LoadBakedCollision(string fileName, Stream stream)
@@ -112,6 +145,20 @@ namespace UKingLibrary
             BakedCollision.Add(loader);
         }
 
+        public void UnloadBakedCollision(string fileName)
+        {
+            if (!RootNode.FolderChildren.ContainsKey(GetSectionName(fileName)))
+                return;
+            if (!((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Collision"].Children.Any(x => x.Header == fileName))
+                return;
+
+            foreach (MapCollisionLoader collision in BakedCollision)
+                collision.Unload();
+
+            BakedCollision.RemoveAll(x => x.RootNode.Header == fileName);
+            ((NodeFolder)((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Collision"]).RemoveChild(fileName);
+        }
+
         public void LoadNavmesh(string fileName, Stream stream, Vector3 origin)
         {
             string sectionName = new FieldSectionInfo(origin).Name;
@@ -125,6 +172,24 @@ namespace UKingLibrary
 
             InitSectionFolder(sectionName);
             ((NodeFolder)RootNode.FolderChildren[sectionName]).FolderChildren["NavMesh"].AddChild(loader.RootNode);
+            Navmesh.Add(loader);
+        }
+
+        public void UnloadNavmesh(string fileName, Vector3 origin)
+        {
+            string sectionName = new FieldSectionInfo(origin).Name;
+
+            if (!RootNode.FolderChildren.ContainsKey(sectionName))
+                return;
+
+            if (!((NodeFolder)RootNode.FolderChildren[sectionName]).FolderChildren["NavMesh"].Children.Any(x => x.Header == fileName))
+                return;
+
+            foreach (MapNavmeshLoader navmesh in Navmesh)
+                navmesh.Unload();
+
+            Navmesh.RemoveAll(x => x.RootNode.Header == fileName);
+            ((NodeFolder)((NodeFolder)RootNode.FolderChildren[sectionName]).FolderChildren["NavMesh"]).RemoveChild(fileName);
         }
 
         public void AddBakedCollisionShape(uint hashId, string muuntFileName, BakedCollisionShapeCacheable info, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)

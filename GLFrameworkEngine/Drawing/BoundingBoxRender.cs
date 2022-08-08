@@ -9,8 +9,22 @@ namespace GLFrameworkEngine
     /// <summary>
     /// Represents a lined box renderer from an axis aligned bounding box.
     /// </summary>
-    public class BoundingBoxRender : RenderMesh<Vector3>
+    public class BoundingBoxRender : RenderMesh<Vector3>, IDrawable
     {
+        // Some basic drawable stuff
+        public bool IsVisible { get; set; } = true;
+        public void DrawModel(GLContext context, Pass pass)
+        {
+            if (pass != Pass.OPAQUE)
+                return;
+
+            var solid = new StandardInstancedMaterial();
+            solid.Color = new Vector4(1, 0, 0, 1);
+            solid.Render(context);
+            Draw(context);
+        }
+        public void Dispose() { }
+
         public GLTransform Transform = new GLTransform();
 
         public BoundingBoxRender(Vector3 min, Vector3 max) :

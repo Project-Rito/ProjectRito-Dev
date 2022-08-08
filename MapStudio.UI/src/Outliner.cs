@@ -729,7 +729,7 @@ namespace MapStudio.UI
         private void SetupRightClickMenu(NodeBase node)
         {
             foreach (var item in node.ContextMenus)
-                LoadMenuItem(item);
+                ImGuiHelper.LoadMenuItem(item);
 
             if (node.Tag is ICheckableNode)
             {
@@ -777,35 +777,9 @@ namespace MapStudio.UI
                 var contextMenu = (IContextMenu)node.Tag;
                 var menuItems = contextMenu.GetContextMenuItems();
                 foreach (var item in menuItems)
-                    LoadMenuItem(item);
+                    ImGuiHelper.LoadMenuItem(item);
 
                 ImGui.Separator();
-            }
-        }
-
-        private void LoadMenuItem(MenuItemModel item)
-        {
-            if (string.IsNullOrEmpty(item.Header)) {
-                ImGui.Separator();
-                return;
-            }
-
-            if (item.MenuItems?.Count > 0)
-            {
-
-                if (ImGui.BeginMenu(item.Header))
-                {
-                    foreach (var child in item.MenuItems)
-                        LoadMenuItem(child);
-
-                    ImGui.EndMenu();
-                }
-            }
-            else
-            {
-                if (ImGui.Selectable(item.Header)) {
-                    item.Command?.Execute(item);
-                }
             }
         }
 

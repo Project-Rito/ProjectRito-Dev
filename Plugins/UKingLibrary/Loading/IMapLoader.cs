@@ -14,6 +14,7 @@ namespace UKingLibrary
         public GLScene Scene { get; set; }
         public List<MapData> MapData { get; set; }
         public List<MapCollisionLoader> BakedCollision { get; set; }
+        public List<MapNavmeshLoader> Navmesh { get; set; }
         public NodeFolder RootNode { get; set; }
 
         public void AddBakedCollisionShape(uint hashId, string muuntFileName, BakedCollisionShapeCacheable info, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale);

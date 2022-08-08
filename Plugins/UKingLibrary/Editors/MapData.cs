@@ -180,6 +180,17 @@ namespace UKingLibrary
             ProcessLoading.Instance.Update(100, 100, "Finished!");
         }
 
+        public void Unload()
+        {
+            // Remove map objects
+            foreach (var obj in Objs)
+                obj.Value.RemoveFromScene();
+            
+            // Remove rails
+            foreach (var rail in Rails)
+                rail.Value.RemoveFromScene();
+        }
+
         public NodeBase AddObject(MapObject obj, IMapLoader parentLoader)
         {
             Dictionary<string, NodeBase> nodeFolders = ObjectFolder.FolderChildren;

@@ -52,12 +52,18 @@ namespace UKingLibrary
                     IsVisible = (bool)value;
                 }
             };
+            Scene = scene;
 
             Prefix = Path.GetFileNameWithoutExtension(fileName);
 
             Origin = origin;
 
-            UpdateRenders(scene);
+            UpdateRenders();
+        }
+
+        public void Unload()
+        {
+            RemoveRenders();
         }
 
         public void Save(Stream stream)
@@ -96,13 +102,11 @@ namespace UKingLibrary
         }
 
         private List<HavokMeshShapeRender> Renders = new List<HavokMeshShapeRender>();
+        private GLScene Scene;
 
-        private void UpdateRenders(GLScene scene = null)
+        private void UpdateRenders()
         {
-            foreach (HavokMeshShapeRender r in Renders)
-                scene?.RemoveRenderObject(r);
-            Renders.Clear();
-
+            RemoveRenders();
 
             HavokMeshShapeRender render = new HavokMeshShapeRender(RootNode);
             render.LoadNavmesh((hkaiNavMesh)Root.m_namedVariants[0].m_variant);
@@ -126,7 +130,14 @@ namespace UKingLibrary
 
             Renders.Add(render);
 
-            scene?.AddRenderObject(render);
+            Scene?.AddRenderObject(render);
+        }
+
+        private void RemoveRenders()
+        {
+            foreach (HavokMeshShapeRender r in Renders)
+                Scene?.RemoveRenderObject(r);
+            Renders.Clear();
         }
         #endregion
 

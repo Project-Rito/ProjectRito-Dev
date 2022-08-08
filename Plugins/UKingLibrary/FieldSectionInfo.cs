@@ -17,6 +17,14 @@ namespace UKingLibrary
             }
         }
 
+        public OpenTK.Vector3 TerrCenter
+        {
+            get
+            {
+                return new OpenTK.Vector3(Center.X, 300, Center.Y);
+            }
+        }
+
         public OpenTK.Vector2 Origin
         {
             get
@@ -71,6 +79,15 @@ namespace UKingLibrary
         public FieldSectionInfo(string name)
         {
             Name = name;
+        }
+
+        public static bool operator ==(FieldSectionInfo a, FieldSectionInfo b)
+        {
+            return a.XIndex == b.XIndex && a.ZIndex == b.ZIndex;
+        }
+        public static bool operator !=(FieldSectionInfo a, FieldSectionInfo b)
+        {
+            return a.XIndex != b.XIndex || a.ZIndex != b.ZIndex;
         }
 
         public int GetQuadIndex(System.Numerics.Vector3 pos) { return GetQuadIndex(pos.X, pos.Z); }

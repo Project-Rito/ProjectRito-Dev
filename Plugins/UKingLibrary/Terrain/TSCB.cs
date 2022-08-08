@@ -114,7 +114,7 @@ namespace UKingLibrary
                 float candidateTileScale = TerrainAreas[x].Core.AreaSize;
                 
                 // Is our candidate inside the section
-                if (TileOverlapsTile(candidateTilePos, candidateTileScale, sectionPos, 1))
+                if (TileOverlapsTile(candidateTilePos, candidateTileScale, sectionPos, 2))
                 {
                     // Can we replace this tile with a complete set of fully-filled higher-detail tiles? If not, keep this as well as higher-detailed tiles.
                     // (In future we should stitch stuff together, but we're not there yet)
@@ -151,7 +151,7 @@ namespace UKingLibrary
             return tiles;
         }
 
-        private bool TileHasExtraType(TerrainArea terrainArea, ExtraSectionType type)
+        private static bool TileHasExtraType(TerrainArea terrainArea, ExtraSectionType type)
         {
             if (terrainArea.Extra == null)
                 return false;
@@ -171,15 +171,49 @@ namespace UKingLibrary
         /// <param name="t2Pos">Tile 2 translate</param>
         /// <param name="t2Scale">Tile 2 scale</param>
         /// <returns></returns>
-        private bool TileOverlapsTile(Vector2 t1Pos, float t1Scale, Vector2 t2Pos, float t2Scale)
+        public static bool TileOverlapsTile(Vector2 t1Pos, float t1Scale, Vector2 t2Pos, float t2Scale)
         {
+            if (t1Pos == t2Pos && t1Scale == t2Scale)
+                return true;
+
             float t1ScaleHalf = t1Scale / 2;
             float t2ScaleHalf = t2Scale / 2;
 
-            if ((t1Pos.X - t1ScaleHalf) <= (t2Pos.X + t2ScaleHalf) // X
-            && (t1Pos.X + t1ScaleHalf) >= (t2Pos.X - t2ScaleHalf)
-            && (t1Pos.Y - t1ScaleHalf) <= (t2Pos.Y + t2ScaleHalf) // Y
-            && (t1Pos.Y + t1ScaleHalf) >= (t2Pos.Y - t2ScaleHalf))
+            float t1MinX = t1Pos.X - t1ScaleHalf;
+            float t1MaxX = t1Pos.X + t1ScaleHalf;
+            float t1MinY = t1Pos.Y - t1ScaleHalf;
+            float t1MaxY = t1Pos.Y + t1ScaleHalf;
+
+            float t2MinX = t2Pos.X - t2ScaleHalf;
+            float t2MaxX = t2Pos.X + t2ScaleHalf;
+            float t2MinY = t2Pos.Y - t2ScaleHalf;
+            float t2MaxY = t2Pos.Y + t2ScaleHalf;
+
+            Vector2 t1C1 = new Vector2(t1MinX, t1MinY);
+            Vector2 t1C2 = new Vector2(t1MaxX, t1MinY);
+            Vector2 t1C3 = new Vector2(t1MinX, t1MaxY);
+            Vector2 t1C4 = new Vector2(t1MaxX, t1MaxY);
+
+            Vector2 t2C1 = new Vector2(t2MinX, t2MinY);
+            Vector2 t2C2 = new Vector2(t2MaxX, t2MinY);
+            Vector2 t2C3 = new Vector2(t2MinX, t2MaxY);
+            Vector2 t2C4 = new Vector2(t2MaxX, t2MaxY);
+
+
+            if (
+            (
+                (t1C1.X > t2MinX && t1C1.X < t2MaxX && t1C1.Y > t2MinY && t1C1.Y < t2MaxY)
+                || (t1C2.X > t2MinX && t1C2.X < t2MaxX && t1C2.Y > t2MinY && t1C2.Y < t2MaxY)
+                || (t1C3.X > t2MinX && t1C3.X < t2MaxX && t1C3.Y > t2MinY && t1C3.Y < t2MaxY)
+                || (t1C4.X > t2MinX && t1C4.X < t2MaxX && t1C4.Y > t2MinY && t1C4.Y < t2MaxY)
+            )
+            ||
+            (
+                (t2C1.X > t1MinX && t2C1.X < t1MaxX && t2C1.Y > t1MinY && t2C1.Y < t1MaxY)
+                || (t2C2.X > t1MinX && t2C2.X < t1MaxX && t2C2.Y > t1MinY && t2C2.Y < t1MaxY)
+                || (t2C3.X > t1MinX && t2C3.X < t1MaxX && t2C3.Y > t1MinY && t2C3.Y < t1MaxY)
+                || (t2C4.X > t1MinX && t2C4.X < t1MaxX && t2C4.Y > t1MinY && t2C4.Y < t1MaxY)
+            ))
             {
                 return true;
             }
@@ -195,7 +229,7 @@ namespace UKingLibrary
         /// <param name="t2Pos">Tile 2 translate</param>
         /// <param name="t2Scale">Tile 2 scale</param>
         /// <returns></returns>
-        private bool TileInTile(Vector2 t1Pos, float t1Scale, Vector2 t2Pos, float t2Scale)
+        public static bool TileInTile(Vector2 t1Pos, float t1Scale, Vector2 t2Pos, float t2Scale)
         {
             if (t1Scale >= t2Scale)
                 return false; // It can't be inside if it's bigger/the same size!

@@ -137,7 +137,18 @@ namespace UKingLibrary
             {
                 loadSectionMenuItem.MenuItems.Add(new MenuItemModel(fieldName)
                 {
-                    MenuItems = GlobalData.SectionNames.Select(sectionName => new MenuItemModel(sectionName, () => { LoadSection(fieldName, sectionName); })).ToList()
+                    MenuItems = GlobalData.SectionNames.Select(sectionName => 
+                    new MenuItemModel(sectionName, (object sender, EventArgs args) => {
+                        MenuItemModel item = (MenuItemModel)sender;
+
+                        if (item.IsChecked)
+                            LoadSection(fieldName, sectionName);
+                        else
+                            UnloadSection(fieldName, sectionName);
+                    })
+                    {
+                        CanCheck = true,
+                    }).ToList()
                 });
             }
 
@@ -154,7 +165,6 @@ namespace UKingLibrary
                     LoadDungeon(Path.GetFileName(sfd.FilePath), File.OpenRead(sfd.FilePath));
             });*/
 
-            //File prompt for now
             List<string> packPaths = new List<string>();
             foreach (var dir in PluginConfig.GetContentPaths("Pack/"))
                 foreach (var file in Directory.GetFiles(dir))
@@ -163,7 +173,18 @@ namespace UKingLibrary
 
             foreach (var packPath in packPaths)
                 if (Path.GetFileName(packPath).StartsWith("Dungeon"))
-                    loadDungeonMenuItem.MenuItems.Add(new MenuItemModel(Path.GetFileNameWithoutExtension(packPath), () => { LoadDungeon(Path.GetFileName(packPath), File.OpenRead(packPath)); EditorConfig.OpenDungeons.Add(Path.GetFileName(packPath)); }));
+                    loadDungeonMenuItem.MenuItems.Add(new MenuItemModel(Path.GetFileNameWithoutExtension(packPath), (object sender, EventArgs args) => 
+                    {
+                        MenuItemModel item = (MenuItemModel)sender;
+
+                        if (item.IsChecked)
+                            LoadDungeon(Path.GetFileName(packPath), File.OpenRead(packPath));
+                        else
+                            UnloadDungeon(Path.GetFileName(packPath));
+                    })
+                    {
+                        CanCheck = true
+                    });
             
 
             Root.ContextMenus.Add(loadDungeonMenuItem);
@@ -202,10 +223,20 @@ namespace UKingLibrary
                 loader = (DungeonMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).FolderChildren[fileName].Tag);
             }
 
+            EditorConfig.OpenDungeons.Add(fileName);
+
             loader.Load(fileName, stream, this);
             stream.Close();
 
             MakeLoaderActive(loader);
+        }
+
+        private void UnloadDungeon(string fileName)
+        {
+            DungeonMapLoader loader = (DungeonMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).FolderChildren[fileName].Tag);
+            loader.Unload();
+
+            loader.RootNode.RemoveFromParent();
         }
 
         private void LoadSection(string fieldName, string sectionName)
@@ -231,6 +262,19 @@ namespace UKingLibrary
             }
         }
 
+        private void UnloadSection(string fieldName, string sectionName)
+        {
+            foreach (var ending in GlobalData.MuuntEndings)
+                UnloadFieldMuunt(fieldName, $"{sectionName}_{ending}.smubin");
+
+            EditorConfig.OpenMapUnits.Remove(fieldName);
+
+            FieldMapLoader loader = (FieldMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren[fieldName].Tag);
+            loader.RootNode.RemoveChild(sectionName);
+            if (loader.RootNode.Children.Count == 0)
+                loader.RootNode.RemoveFromParent();
+        }
+
         private void LoadFieldMuunt(string fieldName, string fileName, Stream stream)
         {
             FieldSectionInfo sectionInfo = new FieldSectionInfo(fileName.Substring(0, 3));
@@ -238,7 +282,7 @@ namespace UKingLibrary
             FieldMapLoader loader;
             if (!((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren.ContainsKey(fieldName))
             {
-                loader = new FieldMapLoader(fieldName);
+                loader = new FieldMapLoader(fieldName, this);
 
                 loader.RootNode.OnSelected = delegate
                 {
@@ -255,9 +299,7 @@ namespace UKingLibrary
             // Load terrain if not loaded
             if (!loader.RootNode.FolderChildren.ContainsKey(FieldMapLoader.GetSectionName(fileName)))
             {
-                var terrSectionID = GetSectionIndex(fileName.Substring(0, 3));
-
-                loader.LoadTerrain(fieldName, (int)terrSectionID.X, (int)terrSectionID.Y, PluginConfig.MaxTerrainLOD);
+                loader.LoadTerrain(fieldName, sectionInfo, PluginConfig.MaxTerrainLOD);
             }
 
             // Load collision
@@ -277,7 +319,7 @@ namespace UKingLibrary
                 }
             }
 
-            // Load Navmesh
+            // Load navmesh
             foreach (FieldNavmeshSectionInfo navmeshSection in sectionInfo.NavmeshSections)
             {
                 string filePath = null;
@@ -295,18 +337,35 @@ namespace UKingLibrary
             }
 
             // Load map file
-            loader.LoadMuunt(fileName, stream, this);
+            loader.LoadMuunt(fileName, stream);
             stream.Close();
 
             MakeLoaderActive(loader);
         }
 
-        private void UnloadFieldMuunt(MapData mapData)
+        private void UnloadFieldMuunt(string fieldName, string fileName)
         {
-            NodeBase fieldFolder = mapData.RootNode.Parent;
-            fieldFolder.Children.Remove(mapData.RootNode);
-            mapData.Dispose();
+            FieldSectionInfo sectionInfo = new FieldSectionInfo(fileName.Substring(0, 3));
 
+            if (((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren.ContainsKey(fieldName))
+            {
+                // Get field loader
+                FieldMapLoader loader = (FieldMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren[fieldName].Tag);
+
+                // Unload muunt
+                loader.UnloadMuunt(fileName);
+
+                // Unload terrain
+                loader.UnloadTerrain(fieldName, sectionInfo);
+
+                // Unload collision
+                for (int i = 0; i < 4; i++)
+                    loader.UnloadBakedCollision($"{sectionInfo.Name}-{i}.shksc");
+
+                // Unload navmesh
+                foreach (FieldNavmeshSectionInfo navmeshSection in sectionInfo.NavmeshSections)
+                    loader.UnloadNavmesh($"{navmeshSection.Name}.shknm2", new Vector3(navmeshSection.Origin.X, 0, navmeshSection.Origin.Y));
+            }
         }
 
         //Todo prod should probably be a seperate FileEditor instance
@@ -374,14 +433,6 @@ namespace UKingLibrary
                 DungeonMapLoader loader = (DungeonMapLoader)dungeonFolder.Tag;
                 loader.Save(Path.GetFullPath(Path.Join(Path.GetDirectoryName(FileInfo.FilePath), $"{EditorConfig.FolderName}")));
             }
-        }
-
-        private Vector2 GetSectionIndex(string mapName)
-        {
-            string[] values = mapName.Split("-");
-            int sectionID = values[0][0] - 'A' - 1;
-            int sectionRegion = int.Parse(values[1]);
-            return new Vector2(sectionID, sectionRegion);
         }
 
         private void CacheBackgroundFiles()
@@ -494,7 +545,7 @@ namespace UKingLibrary
                 if (folder == null)
                 {
                     folder = new NodeBase(profile);
-                    mapData.ObjectFolder.Children.Add(folder);
+                    mapData.ObjectFolder.AddChild(folder);
                 }
                 parent = folder;
             }
@@ -543,7 +594,7 @@ namespace UKingLibrary
                 if (folder == null)
                 {
                     folder = new NodeBase(profile);
-                    mapData.ObjectFolder.Children.Add(folder);
+                    mapData.ObjectFolder.AddChild(folder);
                 }
                 parent = folder;
             }

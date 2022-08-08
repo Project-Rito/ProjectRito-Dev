@@ -85,10 +85,14 @@ namespace UKingLibrary
         /// <summary>
         /// Loads all the terrain data in a given area.
         /// </summary>
-        public void LoadTerrainSection(string fieldName, int areaID, int sectionID, IMapLoader parentLoader, int lodLevel = LOD_LEVEL_MAX)
+        public void LoadTerrainSection(string fieldName, FieldSectionInfo sectionInfo, FieldMapLoader parentLoader, int lodLevel = LOD_LEVEL_MAX)
         {
+            var terrSectionID = GetSectionIndex(sectionInfo.Name);
+            var areaID = (int)terrSectionID.X;
+            var sectionID = (int)terrSectionID.Y;
+
             float lodScale = DetailLevels[Math.Clamp(lodLevel, 0, 7)];
-            Vector3 midpoint = CalculateMidPoint(areaID, sectionID);
+            Vector3 midpoint = sectionInfo.TerrCenter;
             
 
             // Terrain
@@ -142,14 +146,38 @@ namespace UKingLibrary
             }
             */
             // Collision
-            CreateCollisionTile(fieldName, areaID, sectionID, 0);
+            CreateCollisionTile(fieldName, sectionInfo, 0);
         }
 
-        public void CreateCollisionTile(string fieldName, int areaID, int sectionID, int lodLevel = LOD_LEVEL_MAX)
+        public void UnloadTerrainSection(string fieldName, FieldSectionInfo sectionInfo, FieldMapLoader parentLoader)
+        {
+            var terrSectionID = GetSectionIndex(sectionInfo.Name);
+            Vector3 sectionMidpoint = sectionInfo.TerrCenter;
+            List<Vector3> otherSectionMidpoints = parentLoader.LoadedSections.FindAll(x => x != sectionInfo).Select((FieldSectionInfo x) =>
+            {
+                return x.TerrCenter;
+            }).ToList();
+
+            List<EditableObject> sectionRenders = parentLoader.Scene.Objects.FindAll((x) => x is TerrainRender || x is WaterRender || x is GrassRender).Select((x) => (EditableObject)x).ToList();
+            sectionRenders.RemoveAll( // return true = eventually keep in scene
+                (EditableObject x) =>
+                {
+                    var tileSectionScale = TILE_GRID_SIZE / (LOD_MIN / ((TSCB.TerrainAreaCore)x.UINode.Tag).AreaSize) * SECTION_WIDTH * TILE_TO_SECTION_SCALE;
+
+                    if (otherSectionMidpoints.Any(m => TSCB.TileOverlapsTile(x.Transform.Position.Xz / GLContext.PreviewScale, tileSectionScale, m.Xz, SECTION_WIDTH))) // If overlaps another loaded section tile
+                        return true;
+
+                    return false;
+                });
+
+            parentLoader.Scene.RemoveRenderObject(sectionRenders);
+        }
+
+        public void CreateCollisionTile(string fieldName, FieldSectionInfo sectionInfo, int lodLevel = LOD_LEVEL_MAX)
         {
             float lodScale = DetailLevels[Math.Clamp(lodLevel, 0, 7)];
 
-            Vector3 mid_point = CalculateMidPoint(areaID, sectionID);
+            Vector3 mid_point = sectionInfo.TerrCenter;
             var sectionTiles = TerrainTable.GetSectionTilesByPos(lodScale, mid_point, SECTION_WIDTH);
 
             foreach (var tile in sectionTiles)
@@ -219,15 +247,12 @@ namespace UKingLibrary
             }
         }
 
-        //Get the section placement of an area section.
-        //These should match LocationPosX / LocationPosZ in mubin
-        private Vector3 CalculateMidPoint(int x, int y)
+        private Vector2 GetSectionIndex(string mapName)
         {
-            return new Vector3(
-                (x - 3.5f) * SECTION_WIDTH,
-                300,
-                (y - 4.5f) * SECTION_WIDTH
-            );
+            string[] values = mapName.Split("-");
+            int sectionID = values[0][0] - 'A' - 1;
+            int sectionRegion = int.Parse(values[1]);
+            return new Vector2(sectionID, sectionRegion);
         }
 
         //Gets the tile archive name for a tile entry.
@@ -236,7 +261,7 @@ namespace UKingLibrary
         }
 
         //Creates a terrain mesh from a given tile
-        private void CreateTerrainTile(TSCB.TerrainAreaCore tile, string fieldName, string name, float tileSectionScale, IMapLoader parentLoader)
+        private void CreateTerrainTile(TSCB.TerrainAreaCore tile, string fieldName, string name, float tileSectionScale, FieldMapLoader parentLoader)
         {
             string packName = GetTilePackName(name);
 
@@ -268,7 +293,7 @@ namespace UKingLibrary
             parentLoader.Scene.AddRenderObject(meshRender);
         }
 
-        private void CreateWaterTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string fieldName, string name, float tileSectionScale, IMapLoader parentLoader)
+        private void CreateWaterTile(TSCB.TerrainAreaCore tile, TSCB.TerrainAreaExtra extmData, string fieldName, string name, float tileSectionScale, FieldMapLoader parentLoader)
         {
             string packName = GetTilePackName(name);
 

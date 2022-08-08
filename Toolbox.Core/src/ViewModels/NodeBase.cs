@@ -207,6 +207,12 @@ namespace Toolbox.Core.ViewModels
                 Parent.ExpandParent();
         }
 
+        public void RemoveFromParent()
+        {
+            if (Parent != null)
+                Parent.Children.Remove(this);
+        }
+
         private bool _isChecked = true;
 
         /// <summary>
