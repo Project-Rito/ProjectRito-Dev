@@ -27,6 +27,7 @@ AREA_OPACITY - Area Opacity
 
 CACHE_BAKED_COLLISION - Cache Baked Collision
 BAKE_COLLISION - Bake Collision
+PROCESSING - Processing
 
 COLLISION_TOOLS - Collision Tools
 BAKED_COLLISION_CACHED - Baked collision cached

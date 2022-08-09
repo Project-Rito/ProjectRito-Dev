@@ -61,6 +61,7 @@ namespace UKingLibrary
 
             UKingEditor editor = new UKingEditor();
             editor.Load(stream);
+            editor.Root.IsSelected = true;
 
             editor.FileInfo.FileName = $"UKingEditor_{editorIndex.ToString("D3")}.json";
             editor.FileInfo.FilePath = Path.Join(GlobalSettings.Current.Program.ProjectDirectory, Workspace.ActiveWorkspace.Name, editor.FileInfo.FileName);
