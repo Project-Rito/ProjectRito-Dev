@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ namespace GLFrameworkEngine
 {
     public class DataCache
     {
-        public static Dictionary<string, GenericRenderer> ModelCache = new Dictionary<string, GenericRenderer>();
-        public static Dictionary<string, Dictionary<string, GenericRenderer.TextureView>> TextureCache = new Dictionary<string, Dictionary<string, GenericRenderer.TextureView>>();
+        public static ConcurrentDictionary<string, GenericRenderer> ModelCache = new ConcurrentDictionary<string, GenericRenderer>();
+        public static ConcurrentDictionary<string, Dictionary<string, GenericRenderer.TextureView>> TextureCache = new ConcurrentDictionary<string, Dictionary<string, GenericRenderer.TextureView>>();
     }
 }

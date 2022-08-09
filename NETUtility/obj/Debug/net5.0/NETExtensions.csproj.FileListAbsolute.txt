@@ -1,0 +1,5 @@
+C:\Users\Greenlord\Desktop\MapStudio\NETUtility\obj\Debug\net5.0\NETExtensions.csproj.AssemblyReference.cache
+C:\Users\Greenlord\Desktop\MapStudio\NETUtility\obj\Debug\net5.0\NETExtensions.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Greenlord\Desktop\MapStudio\NETUtility\obj\Debug\net5.0\NETExtensions.AssemblyInfoInputs.cache
+C:\Users\Greenlord\Desktop\MapStudio\NETUtility\obj\Debug\net5.0\NETExtensions.AssemblyInfo.cs
+C:\Users\Greenlord\Desktop\MapStudio\NETUtility\obj\Debug\net5.0\NETExtensions.csproj.CoreCompileInputs.cache

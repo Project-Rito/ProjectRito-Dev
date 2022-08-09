@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using GLFrameworkEngine;
 using OpenTK;
+using OpenTK.Graphics;
 using MapStudio.UI;
 using Toolbox.Core;
 using Toolbox.Core.ViewModels;
@@ -65,7 +68,23 @@ namespace UKingLibrary
         /// <summary>
         /// The render instance of the scene which can be transformed and altered.
         /// </summary>
-        public EditableObject Render;
+        private EditableObject _render;
+        public EditableObject Render
+        {
+            get
+            {
+                return _render;
+            }
+            set
+            {
+                if (ParentLoader?.Scene?.Objects != null && ParentLoader.Scene.Objects.Contains(value))
+                {
+                    ParentLoader.Scene.RemoveRenderObject(_render);
+                    ParentLoader.Scene.AddRenderObject(value);
+                }
+                _render = value;
+            }
+        }
 
         public HavokMeshShapeRender CollisionRender;
 
@@ -182,140 +201,142 @@ namespace UKingLibrary
                 CollisionRender?.Dispose();
 
             //Get the renderable object
-            Render = LoadRenderObject(ActorInfo, Properties, Parent);
-            //Prepare the gui tree node on the outliner with property tag and header name
-            Render.UINode.Tag = this;
-
-            // We're drawing a custom header, but we still want to set Header properly for searching and whatnot.
-            Render.UINode.GetHeader = () =>
+            LoadRenderObject(ActorInfo, Properties, Parent, (EditableObject render) =>
             {
-                string header = Name;
-                if (TranslationSource.HasKey($"ACTOR_NAME {Name}"))
-                    header += " " + TranslationSource.GetText($"ACTOR_NAME {Name}");
-                return header;
-            };
+                //Prepare the gui tree node on the outliner with property tag and header name
+                render.UINode.Tag = this;
 
-            Render.UINode.CustomHeaderDraw = () =>
-            {
-                ImGui.BeginGroup(); // Set this to a single group so that the tooltip applies to the whole text section
-
-                if (TranslationSource.HasKey($"ACTOR_NAME {Name}"))
+                // We're drawing a custom header, but we still want to set Header properly for searching and whatnot.
+                render.UINode.GetHeader = () =>
                 {
-                    ImGui.SameLine();
-                    ImGui.PushFont(ImGuiController.DefaultFontBold);
-                    ImGui.Text(" " + TranslationSource.GetText($"ACTOR_NAME {Name}"));
-                    ImGui.PopFont();
-                }
-                else
-                    ImGui.Text(Name);
-
-                ImGui.EndGroup();
-            };
-
-
-            Render.UINode.GetTooltip = () =>
-            {
-                if (TranslationSource.HasKey($"ACTOR_DOCS {Name}"))
-                    return TranslationSource.GetText($"ACTOR_DOCS {Name}");
-                else
-                    return TranslationSource.GetText("NO_ACTOR_DOCUMENTATION_FOUND");
-            };
-
-            //Property drawer for gui node
-            Render.UINode.TagUI = new NodePropertyUI();
-            if (Render is BfresRender)
-            {
-                Render.IsVisibleCallback += delegate
-                {
-                    return MapData.ShowVisibleActors;
+                    string header = Name;
+                    if (TranslationSource.HasKey($"ACTOR_NAME {Name}"))
+                        header += " " + TranslationSource.GetText($"ACTOR_NAME {Name}");
+                    return header;
                 };
-            }
-            else
-            {
-                Render.IsVisibleCallback += delegate
-                {
-                    return MapData.ShowInvisibleActors;
-                };
-            }
 
-            ((EditableObjectNode)Render.UINode).UIProperyDrawer += delegate
-            {
-                if (ImGui.BeginCombo("##objFileSelect", MapData.RootNode.Header))
+                render.UINode.CustomHeaderDraw = () =>
                 {
-                    for (int i = 0; i < ParentLoader.MapData.Count(); i++)
+                    ImGui.BeginGroup(); // Set this to a single group so that the tooltip applies to the whole text section
+
+                    if (TranslationSource.HasKey($"ACTOR_NAME {Name}"))
                     {
-                        string fileName = ParentLoader.MapData[i].RootNode.Header;
-                        bool isSelected = fileName == MapData.RootNode.Header;
-
-                        if (ImGui.Selectable(fileName, isSelected))
-                        {
-                            MapData = ParentLoader.MapData[i];
-                            MapData.Objs.Remove(HashId);
-                            MapData.Objs.Add(HashId, this);
-
-                            Parent.Children.Remove(Render.UINode);
-                            Parent = MapData.AddObject(this, ParentLoader);
-                        }
-
-                        if (isSelected)
-                            ImGui.SetItemDefaultFocus();
+                        ImGui.SameLine();
+                        ImGui.PushFont(ImGuiController.DefaultFontBold);
+                        ImGui.Text(" " + TranslationSource.GetText($"ACTOR_NAME {Name}"));
+                        ImGui.PopFont();
                     }
-                    ImGui.EndCombo();
+                    else
+                        ImGui.Text(Name);
+
+                    ImGui.EndGroup();
+                };
+
+
+                render.UINode.GetTooltip = () =>
+                {
+                    if (TranslationSource.HasKey($"ACTOR_DOCS {Name}"))
+                        return TranslationSource.GetText($"ACTOR_DOCS {Name}");
+                    else
+                        return TranslationSource.GetText("NO_ACTOR_DOCUMENTATION_FOUND");
+                };
+
+                //Property drawer for gui node
+                render.UINode.TagUI = new NodePropertyUI();
+                if (render is BfresRender)
+                {
+                    render.IsVisibleCallback += delegate
+                    {
+                        return MapData.ShowVisibleActors;
+                    };
+                }
+                else
+                {
+                    render.IsVisibleCallback += delegate
+                    {
+                        return MapData.ShowInvisibleActors;
+                    };
                 }
 
-                bool bakeCollision = BakeCollision;
-                if (ImGui.Checkbox(TranslationSource.GetText("BAKE_COLLISION"), ref bakeCollision))
-                    BakeCollision = bakeCollision;
-#if DEBUG
-                if (ImGui.Button("debug: get shapes"))
+                ((EditableObjectNode)render.UINode).UIProperyDrawer += delegate
                 {
-                    foreach (var loader in ParentLoader.BakedCollision)
-                        loader.GetCacheables(HashId);
-                }
+                    if (ImGui.BeginCombo("##objFileSelect", MapData.RootNode.Header))
+                    {
+                        for (int i = 0; i < ParentLoader.MapData.Count(); i++)
+                        {
+                            string fileName = ParentLoader.MapData[i].RootNode.Header;
+                            bool isSelected = fileName == MapData.RootNode.Header;
+
+                            if (ImGui.Selectable(fileName, isSelected))
+                            {
+                                MapData = ParentLoader.MapData[i];
+                                MapData.Objs.Remove(HashId);
+                                MapData.Objs.Add(HashId, this);
+
+                                Parent.Children.Remove(render.UINode);
+                                Parent = MapData.AddObject(this, ParentLoader);
+                            }
+
+                            if (isSelected)
+                                ImGui.SetItemDefaultFocus();
+                        }
+                        ImGui.EndCombo();
+                    }
+
+                    bool bakeCollision = BakeCollision;
+                    if (ImGui.Checkbox(TranslationSource.GetText("BAKE_COLLISION"), ref bakeCollision))
+                        BakeCollision = bakeCollision;
+#if DEBUG
+                    if (ImGui.Button("debug: get shapes"))
+                    {
+                        foreach (var loader in ParentLoader.BakedCollision)
+                            loader.GetCacheables(HashId);
+                    }
 #endif
 
-                PropertyDrawer.Draw(this, Properties, new PropertyDrawer.PropertyChangedCallback(OnPropertyUpdate));
-            };
-            //Icon for gui node
-            string icon = "Node";
-            if (ActorInfo.ContainsKey("bfres"))
-            {
-                if (!IconManager.HasIcon(PluginConfig.GetCachePath($"Images/ActorImages/{ActorInfo["bfres"]}.sbfres.png")))
+                    PropertyDrawer.Draw(this, Properties, new PropertyDrawer.PropertyChangedCallback(OnPropertyUpdate));
+                };
+                //Icon for gui node
+                string icon = "Node";
+                if (ActorInfo.ContainsKey("bfres"))
                 {
-                    if (File.Exists(PluginConfig.GetCachePath($"Images/ActorImages/{ActorInfo["bfres"]}.sbfres.png")))
-                        IconManager.LoadTextureFile(PluginConfig.GetCachePath($"Images/ActorImages/{ActorInfo["bfres"]}.sbfres.png"), 32, 32);
+                    if (!IconManager.HasIcon(PluginConfig.GetCachePath($"Images/ActorImages/{ActorInfo["bfres"]}.sbfres.png")))
+                    {
+                        if (File.Exists(PluginConfig.GetCachePath($"Images/ActorImages/{ActorInfo["bfres"]}.sbfres.png")))
+                            IconManager.LoadTextureFile(PluginConfig.GetCachePath($"Images/ActorImages/{ActorInfo["bfres"]}.sbfres.png"), 32, 32);
+                    }
+                    icon = PluginConfig.GetCachePath($"Images/ActorImages/{ActorInfo["bfres"]}.sbfres.png");
                 }
-                icon = PluginConfig.GetCachePath($"Images/ActorImages/{ActorInfo["bfres"]}.sbfres.png");
-            }
-            Render.UINode.Icon = icon;
+                render.UINode.Icon = icon;
 
-            Render.AddCallback += delegate
-            {
-                AddToMap();
-            };
+                render.AddCallback += delegate
+                {
+                    AddToMap();
+                };
 
-            Render.RemoveCallback += delegate
-            {
-                RemoveFromMap();
-            };
+                render.RemoveCallback += delegate
+                {
+                    RemoveFromMap();
+                };
 
-            Render.Clone += delegate
-            {
-                return ((MapObject)Clone()).Render;
-            };
+                render.Clone += delegate
+                {
+                    return ((MapObject)Clone()).Render;
+                };
 
-            Render.DrawCallback += delegate
-            {
-                RenderAdditional();
-            };
+                render.DrawCallback += delegate
+                {
+                    RenderAdditional();
+                };
 
+                Render = render;
 
+                //Load the transform attached to the object
+                LoadObjectTransform();
+            });
 
             foreach (var property in Properties.ToList())
                 ValidateProperty(property.Key, property.Value);
-
-            //Load the transform attached to the object
-            LoadObjectTransform();
         }
 
         public object Clone()
@@ -724,78 +745,112 @@ namespace UKingLibrary
 
         }
 
-        private EditableObject LoadRenderObject(IDictionary<string, dynamic> actor, IDictionary<string, dynamic> obj, NodeBase parent)
+        private Mutex _t = new Mutex();
+        private void LoadRenderObject(IDictionary<string, dynamic> actor, IDictionary<string, dynamic> obj, NodeBase parent, Action<EditableObject> setup)
         {
             string name = obj["UnitConfigName"].Value;
 
             if (actor.ContainsKey("profile") && ((string)actor["profile"] == "Area" || (string)actor["profile"] == "SpotBgmTag"))
-                return new AreaRender(parent, AreaShape, new Vector3(0, 0, 0));
+            {
+                setup.Invoke(new AreaRender(parent, AreaShape, new Vector3(0, 0, 0)));
+                return;
+            }
 
             if (name == "BoxWater")
-                return new AreaWaterRender(parent, new Vector3(0, 0, 1));
+            {
+                setup.Invoke(new AreaWaterRender(parent, new Vector3(0, 0, 1)));
+                return;
+            }
 
             if (name == "AscendingCurrent")
-                return new AscendingCurrentRender(parent, new Vector3(1, 1, 1));
+            {
+                setup.Invoke(new AscendingCurrentRender(parent, new Vector3(1, 1, 1)));
+                return;
+            }
 
             if (TagRender.IsTag(name))
-                return new TagRender(name, parent);
+            {
+                setup.Invoke(new TagRender(name, parent));
+                return;
+            }
 
             //Default transform cube
             EditableObject render = new TransformableObject(parent);
+            setup.Invoke(render);
 
-            //Bfres render
-            if (actor.ContainsKey("bfres"))
+            Task bfresLoadTask = new Task(() =>
             {
-                string modelPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}.sbfres");
-                string animPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}_Animation.sbfres");
-                if (File.Exists(modelPath))
+                lock (_t)
                 {
-                    var renderCandidate = GetActorSpecificBfresRender(actor, new BfresRender(modelPath, parent));
-                    if (renderCandidate != null)
-                    {
-                        render = renderCandidate;
-                        LoadTextures((BfresRender)render, actor["bfres"]);
+                    EditableObject newRender = new TransformableObject(parent);
+                    //New GL instance for multi threading
+                    GraphicsMode mode = new GraphicsMode(new ColorFormat(32), 24, 8, 4, new ColorFormat(32), 2, false);
+                    var window = new GameWindow(32, 32, mode);
+                    GraphicsContext openTKContext = new GraphicsContext(mode, window.WindowInfo);
+                    openTKContext.MakeCurrent(window.WindowInfo);
 
-                        BfresLoader.LoadAnimations((BfresRender)render, modelPath);
-                        if (File.Exists(animPath))
-                            BfresLoader.LoadAnimations((BfresRender)render, animPath);
-                    }
-                }
-                else
-                {
-                    for (int i = 0; ; i++)
+                    //Bfres render
+                    if (actor.ContainsKey("bfres"))
                     {
-                        string modelPartPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}-{i.ToString("D2")}.sbfres");
-
-                        if (File.Exists(modelPartPath))
+                        string modelPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}.sbfres");
+                        string animPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}_Animation.sbfres");
+                        if (File.Exists(modelPath))
                         {
-                            var renderCandidate = GetActorSpecificBfresRender(actor, new BfresRender(modelPartPath, parent));
+                            var renderCandidate = GetActorSpecificBfresRender(actor, new BfresRender(modelPath, parent));
                             if (renderCandidate != null)
                             {
-                                render = renderCandidate;
-                                LoadTextures((BfresRender)render, actor["bfres"]);
-                                BfresLoader.LoadAnimations((BfresRender)render, modelPartPath);
-                                if (File.Exists(animPath))
-                                    BfresLoader.LoadAnimations((BfresRender)render, animPath);
+                                newRender = renderCandidate;
+                                LoadTextures((BfresRender)newRender, actor["bfres"]);
 
-                                break;
+                                BfresLoader.LoadAnimations((BfresRender)newRender, modelPath);
+                                if (File.Exists(animPath))
+                                    BfresLoader.LoadAnimations((BfresRender)newRender, animPath);
                             }
                         }
                         else
-                            break; // We couldn't find the model
+                        {
+                            for (int i = 0; ; i++)
+                            {
+                                string modelPartPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}-{i.ToString("D2")}.sbfres");
+
+                                if (File.Exists(modelPartPath))
+                                {
+                                    var renderCandidate = GetActorSpecificBfresRender(actor, new BfresRender(modelPartPath, parent));
+                                    if (renderCandidate != null)
+                                    {
+                                        newRender = renderCandidate;
+                                        LoadTextures((BfresRender)newRender, actor["bfres"]);
+                                        BfresLoader.LoadAnimations((BfresRender)newRender, modelPartPath);
+                                        if (File.Exists(animPath))
+                                            BfresLoader.LoadAnimations((BfresRender)newRender, animPath);
+
+                                        break;
+                                    }
+                                }
+                                else
+                                    break; // We couldn't find the model
+                            }
+                        }
+                        if (!(newRender is BfresRender))
+                            StudioLogger.WriteWarning($"missing bfres {actor["bfres"]} for actor {name}!");
                     }
+
+                    if (newRender is BfresRender)
+                        ((BfresRender)newRender).FrustumCullingCallback = () =>
+                        {
+                            ((BfresRender)newRender).UseDrawDistance = true;
+                            return FrustumCullObject((BfresRender)newRender);
+                        };
+
+                    if (newRender is BfresRender)
+                        Console.WriteLine("bfres");
+
+                    ParentLoader.Scene.AddRenderObject(newRender);
+
+                    setup.Invoke(newRender);
                 }
-                if (!(render is BfresRender))
-                    StudioLogger.WriteWarning($"missing bfres {actor["bfres"]} for actor {name}!");
-            }
-
-            if (render is BfresRender)
-                ((BfresRender)render).FrustumCullingCallback = () => {
-                    ((BfresRender)render).UseDrawDistance = true;
-                    return FrustumCullObject((BfresRender)render);
-                };
-
-            return render;
+            });
+            bfresLoadTask.Start();
         }
 
         private static HavokMeshShapeRender LoadCollisionRenderObject(IDictionary<string, dynamic> actor, NodeBase parent)

@@ -146,7 +146,7 @@ namespace CafeLibrary.Rendering
             UpdateBoundingBox();
 
             if (!DataCache.ModelCache.ContainsKey(name) && Models.Count > 0)
-                DataCache.ModelCache.Add(name, this);
+                DataCache.ModelCache.TryAdd(name, this);
 
             return Models.Count > 0;
         }

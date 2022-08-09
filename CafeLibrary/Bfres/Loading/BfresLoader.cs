@@ -57,13 +57,13 @@ namespace CafeLibrary.Rendering
                 if (YAZ0.IsCompressed(filePath))
                 {
                     var textures = GetTextures(new System.IO.MemoryStream(YAZ0.Decompress(filePath)));
-                    DataCache.TextureCache.Add(filePath, textures);
+                    DataCache.TextureCache.TryAdd(filePath, textures);
                     return textures;
                 }
                 else
                 {
                     var textures = GetTextures(System.IO.File.OpenRead(filePath));
-                    DataCache.TextureCache.Add(filePath, textures);
+                    DataCache.TextureCache.TryAdd(filePath, textures);
                     return textures;
                 }
             }
