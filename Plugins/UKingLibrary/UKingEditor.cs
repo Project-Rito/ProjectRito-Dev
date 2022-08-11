@@ -55,7 +55,7 @@ namespace UKingLibrary
             return false;
         }
 
-        public UKingEditor() 
+        public UKingEditor() : base()
         {
             PluginConfig.PathsChanged += delegate
             {
@@ -411,6 +411,7 @@ namespace UKingLibrary
             }
 
             Workspace.ViewportWindow.Pipeline._context.Scene = Scene;
+            Workspace.ViewportWindow.ReloadMenus();
         }
 
         public void Save(Stream stream)
