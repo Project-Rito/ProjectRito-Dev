@@ -97,10 +97,11 @@ vec2 GetTexcoord(ArraySamplerInfo samplerInfo, VertexAttributes vert) {
     }
 }
 
-vec4 Blend_OneMinusSourceAlpha(vec4[4] colors) {
+#define BLEND_COLOR_COUNT 4
+vec4 Blend_OneMinusSourceAlpha(vec4[BLEND_COLOR_COUNT] colors) {
     vec4 result = vec4(0.f);
     float remainingAlpha = 1.f;
-    for (int i = 0; i < colors.length; i++) {
+    for (int i = 0; i < BLEND_COLOR_COUNT; i++) { // using colors.length causes error on some drivers.
         result.rgb += colors[i].rgb * colors[i].a * remainingAlpha;
         result.a += colors[i].a * remainingAlpha;
         remainingAlpha -= colors[i].a;
