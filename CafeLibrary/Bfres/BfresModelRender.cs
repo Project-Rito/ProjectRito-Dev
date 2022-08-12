@@ -199,7 +199,7 @@ namespace CafeLibrary.Rendering
                         context.UseSRBFrameBuffer = false;
 
                     ((BfresMaterialRender)mesh.MaterialAsset).SetRenderState();
-                    int slot = ((BfresMaterialRender)mesh.MaterialAsset).SetTextureUniforms(context, context.CurrentShader);
+                    int slot = ((BfresMaterialRender)mesh.MaterialAsset).SetTextures(context, context.CurrentShader);
                     DebugShaderRender.RenderMaterial(context, slot);
                     context.CurrentShader.SetBoolToInt("DrawAreaID", BfresRender.DrawDebugAreaID);
                     context.CurrentShader.SetInt("AreaIndex", ((BfresMaterialRender)mesh.MaterialAsset).AreaIndex);
