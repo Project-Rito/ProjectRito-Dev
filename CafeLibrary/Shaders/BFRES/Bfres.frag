@@ -200,7 +200,7 @@ vec3 getWorldNormal(VertexAttributes vert) {
     vec4[4] colors;
 
     if (u_TextureNormal0_Info.Enabled == 1 || (u_TextureNormal1_Info.Enabled == 0 && u_TextureNormal2_Info.Enabled == 0 && u_TextureNormal3_Info.Enabled == 0 && u_TextureArrTmc_Info.Enabled == 0)) {
-        vec4 tex = texture(u_TextureAlbedo0, GetTexcoord(u_TextureAlbedo0_Info, vert));
+        vec4 tex = texture(u_TextureNormal0, GetTexcoord(u_TextureNormal0_Info, vert));
         colors[0] = tex;
     }
     if (u_TextureNormal1_Info.Enabled == 1) {
