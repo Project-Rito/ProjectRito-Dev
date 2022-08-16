@@ -44,6 +44,7 @@ namespace UKingLibrary.Rendering
         {
             IsVisible = true;
             CanSelect = false;
+            EnableLinking = false;
             this.Transform.TransformUpdated += delegate {
                 Bounding.UpdateTransform(this.Transform.TransformMatrix);
             };

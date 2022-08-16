@@ -13,11 +13,11 @@ namespace GLFrameworkEngine
         StandardMaterial LineMaterial = new StandardMaterial();
 
         //View colors
-        Vector4 SrcColor_View = new Vector4(0, 0, 1, 1);
-        Vector4 DestColor_View = new Vector4(1, 1, 0, 1);
+        public static Vector4 SrcColor_View = new Vector4(0, 0, 1, 1);
+        public static Vector4 DestColor_View = new Vector4(1, 1, 0, 1);
         //Editing colors
-        Vector4 SrcColor_Edit = new Vector4(0, 1, 0, 1);
-        Vector4 DestColor_Edit = new Vector4(1, 0, 0, 1);
+        public static Vector4 SrcColor_Edit = new Vector4(0, 1, 0, 1);
+        public static Vector4 DestColor_Edit = new Vector4(1, 0, 0, 1);
 
         const float LINE_WIDTH = 5;
 

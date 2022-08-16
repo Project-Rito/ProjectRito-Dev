@@ -10,15 +10,15 @@ namespace GLFrameworkEngine
     {
         public bool DisplayAllLinks = false;
 
-        public bool IsActive => SourceObjectLink != null;
+        public bool IsActive => SourceObject != null;
 
-        bool CanEdit = false;
+        bool CanEdit = true;
 
         RenderMesh<LinkVertex> LinkRender;
 
-        IObjectLink SourceObjectLink;
-        IObjectLink DestObjectLink;
-        IObjectLink ConnectingLink;
+        IObjectLink SourceObject;
+        IObjectLink DestObject;
+        IObjectLink CandidateObject;
 
         enum ConnectionType
         {
@@ -31,11 +31,11 @@ namespace GLFrameworkEngine
 
         public void OnMouseDown(GLContext context)
         {
-            if (IsActive || !CanEdit)
+            if (!CanEdit)
                 return;
 
             //Create new connection
-            if (KeyInfo.EventInfo.KeyCtrl)
+            if (KeyInfo.EventInfo.KeyAlt)
             {
                 //Check for a picked model during a linkable operation
                 Vector2 position = new Vector2(MouseEventInfo.Position.X, context.Height - MouseEventInfo.Position.Y);
@@ -45,7 +45,7 @@ namespace GLFrameworkEngine
                     return;
 
                 //Start a link operation
-                if (pickable is IObjectLink)
+                if (pickable is IObjectLink && ((IObjectLink)pickable).EnableLinking)
                     SetLinkSource(context, pickable);
             }
         }
@@ -57,7 +57,8 @@ namespace GLFrameworkEngine
 
             //Check for a picked model during a linkable operation
             Vector2 position = new Vector2(MouseEventInfo.Position.X, context.Height - MouseEventInfo.Position.Y);
-            ConnectingLink = context.Scene.FindPickableAtPosition(context, position) as IObjectLink;
+            IObjectLink pickable = context.Scene.FindPickableAtPosition(context, position) as IObjectLink;
+            CandidateObject = pickable?.EnableLinking == true && pickable != SourceObject ? pickable : null;
         }
 
         public void OnMouseUp(GLContext context)
@@ -66,56 +67,51 @@ namespace GLFrameworkEngine
                 return;
 
             //Apply the link when the mouse has been released
-            if (ConnectingLink != null)
-                LinkObject(SourceObjectLink, ConnectingLink);
+            if (CandidateObject != null)
+                LinkObject(SourceObject, CandidateObject);
             else
-                UnlinkObject(SourceObjectLink, DestObjectLink);
+                UnlinkObject(SourceObject, DestObject);
 
-            SourceObjectLink = null;
-            DestObjectLink = null;
-            ConnectingLink = null;
+            SourceObject = null;
+            DestObject = null;
+            CandidateObject = null;
         }
 
-        private void LinkObject(IObjectLink objectLink, IObjectLink dest)
+        private void LinkObject(IObjectLink source, IObjectLink dest)
         {
-            if (!objectLink.DestObjectLinks.Contains((ITransformableObject)dest))
-                objectLink.DestObjectLinks.Add((ITransformableObject)dest);
+            if (!source.DestObjectLinks.Contains((ITransformableObject)dest))
+            {
+                source.DestObjectLinks.Add((ITransformableObject)dest);
+                source.OnObjectLink((ITransformableObject)dest);
+            }
 
-            if (!dest.SourceObjectLinks.Contains((ITransformableObject)objectLink))
-                dest.SourceObjectLinks.Add((ITransformableObject)objectLink);
+            if (!dest.SourceObjectLinks.Contains((ITransformableObject)source))
+                dest.SourceObjectLinks.Add((ITransformableObject)source);
         }
 
-        private void UnlinkObject(IObjectLink objectLink, IObjectLink dest)
+        private void UnlinkObject(IObjectLink source, IObjectLink dest)
         {
             if (dest == null)
                 return;
 
-            if (objectLink.DestObjectLinks.Contains((ITransformableObject)dest))
-                objectLink.DestObjectLinks.Remove((ITransformableObject)dest);
+            if (source.DestObjectLinks.Contains((ITransformableObject)dest))
+            {
+                source.DestObjectLinks.Remove((ITransformableObject)dest);
+                source.OnObjectUnlink((ITransformableObject)dest);
+            }
 
-            if (dest.SourceObjectLinks.Contains((ITransformableObject)objectLink))
-                dest.SourceObjectLinks.Remove((ITransformableObject)objectLink);
+            if (dest.SourceObjectLinks.Contains((ITransformableObject)source))
+                dest.SourceObjectLinks.Remove((ITransformableObject)source);
         }
 
         public void SetLinkSource(GLContext context, ITransformableObject linkableObject)
         {
-            if (!(linkableObject is IObjectLink)) //Object not a linkable type
+            if (!(linkableObject is IObjectLink && ((IObjectLink)linkableObject).EnableLinking)) //Object not a linkable type
                 return;
 
             //Set the source link from a linkable object.
-            var link = (IObjectLink)linkableObject;
-            if (link.SourceObjectLinks.Count > 0)
-            {
-                SourceObjectLink = (IObjectLink)link.SourceObjectLinks.FirstOrDefault();
-                DestObjectLink = link;
-                ConnectingLink = link;
-                ConnectionAction = ConnectionType.ToSource;
-            }
-            else
-            {
-                ConnectionAction = ConnectionType.ToDest;
-                SourceObjectLink = (IObjectLink)linkableObject;
-            }
+            ConnectionAction = ConnectionType.ToDest;
+            SourceObject = (IObjectLink)linkableObject;
         }
 
         public void Render(GLContext context, float x, float y)
@@ -124,7 +120,7 @@ namespace GLFrameworkEngine
                 return;
 
             //Don't draw a link connector until a source is set
-            if (SourceObjectLink == null)
+            if (SourceObject == null)
             {
                 foreach (var ob in context.Scene.Objects) {
                     if (ob is IObjectLink) {
@@ -144,11 +140,11 @@ namespace GLFrameworkEngine
             }
 
             //Object links are always transformable with a position. Get the world pos
-            Vector3 positon = ((ITransformableObject)SourceObjectLink).Transform.Position;
+            Vector3 positon = ((ITransformableObject)SourceObject).Transform.Position;
             Vector2 srcPos = context.WorldToScreen(positon);
 
             //Draw the current mouse placement
-            DrawConnection(context, srcPos, new Vector2(x, y), ConnectingLink != null);
+            DrawConnection(context, srcPos, new Vector2(x, y), CandidateObject != null);
         }
 
         private void DrawConnection(GLContext context, Vector2 srcPos, Vector2 destPos, bool hasDest)
@@ -160,8 +156,8 @@ namespace GLFrameworkEngine
                 LinkRender = new RenderMesh<LinkVertex>(new LinkVertex[0], PrimitiveType.LineLoop);
 
             LinkRender.UpdateVertexData(new LinkVertex[] {
-                 new LinkVertex(normalized1, new Vector4(0, 1, 0, 1)),
-                 new LinkVertex(normalized2, new Vector4(1, 0, 0, 1)),
+                 new LinkVertex(normalized1, ObjectLinkDrawer.SrcColor_Edit),
+                 new LinkVertex(normalized2, ObjectLinkDrawer.DestColor_Edit),
             });
 
             //Connection render
