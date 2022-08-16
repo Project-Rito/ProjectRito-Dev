@@ -148,7 +148,7 @@ namespace UKingLibrary
                     })
                     {
                         CanCheck = true,
-                        IsChecked = EditorConfig.OpenMapUnits.ContainsKey(fieldName) ? EditorConfig.OpenMapUnits[fieldName].Any(x => x.StartsWith(sectionName)) : false
+                        IsChecked = EditorConfig != null && EditorConfig.OpenMapUnits.ContainsKey(fieldName) ? EditorConfig.OpenMapUnits[fieldName].Any(x => x.StartsWith(sectionName)) : false
                     }).ToList()
                 });
             }
