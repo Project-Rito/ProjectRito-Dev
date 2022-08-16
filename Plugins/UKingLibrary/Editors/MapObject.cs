@@ -316,6 +316,7 @@ namespace UKingLibrary
 
                 MapObject mapObj = (MapObject)((EditableObject)obj).UINode.Tag;
                 DestLinks.Add(new LinkInstance(mapObj));
+                mapObj.SourceLinks.Add(new LinkInstance(mapObj));
             };
 
             Render.OnObjectUnlink += delegate (ITransformableObject obj)
@@ -324,7 +325,8 @@ namespace UKingLibrary
                     return;
 
                 MapObject mapObj = (MapObject)((EditableObject)obj).UINode.Tag;
-                DestLinks.First(x => x.Object == mapObj);
+                DestLinks.Remove(DestLinks.First(x => x.Object == mapObj));
+                mapObj.SourceLinks.Remove(mapObj.SourceLinks.First(x => x.Object == this));
             };
 
 
