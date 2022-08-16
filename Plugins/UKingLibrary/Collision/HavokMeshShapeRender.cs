@@ -12,7 +12,7 @@ using HKX2Builders.Extensions;
 
 namespace UKingLibrary
 {
-    public class HavokMeshShapeRender : EditableObject, IColorPickable
+    public class HavokMeshShapeRender : EditableObject, IColorPickable, IPositionRenderable
     {
         RenderMesh<HavokMeshShapeVertex> ShapeMesh;
 
@@ -65,6 +65,22 @@ namespace UKingLibrary
             shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
 
             context.ColorPicker.SetPickingColor(this, shader);
+            GL.Enable(EnableCap.CullFace);
+            GL.Disable(EnableCap.Blend);
+            GL.Enable(EnableCap.PolygonOffsetFill);
+            GL.PolygonOffset(-4f, 1f);
+            ShapeMesh.Draw(context);
+            GL.Disable(EnableCap.PolygonOffsetFill);
+            GL.Disable(EnableCap.CullFace);
+        }
+
+        public void DrawPositionColor(GLContext context)
+        {
+            var shader = GlobalShaders.GetShader("POSITION");
+            context.CurrentShader = shader;
+
+            shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
+
             GL.Enable(EnableCap.CullFace);
             GL.Disable(EnableCap.Blend);
             GL.Enable(EnableCap.PolygonOffsetFill);

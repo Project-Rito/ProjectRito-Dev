@@ -56,7 +56,9 @@ namespace GLFrameworkEngine
             ShaderPaths.Add("SHADOWQUAD", "Shadows/ShadowQuad");
             ShaderPaths.Add("UTILITY", "Utility/Utility");
             ShaderPaths.Add("BFRES_UTILITY", "Utility/BfresUtility");
+            ShaderPaths.Add("DEPTH", "Utility/Depth");
             ShaderPaths.Add("NORMALIZE_DEPTH", "Utility/NormalizeDepth");
+            ShaderPaths.Add("POSITION", "Utility/Position");
             ShaderPaths.Add("PICKING", "Utility/Picking");
             ShaderPaths.Add("SELECTION", "Utility/Selection");
             ShaderPaths.Add("GRID", "Viewer/Grid");
