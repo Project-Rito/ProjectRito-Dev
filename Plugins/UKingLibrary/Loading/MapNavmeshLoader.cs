@@ -106,6 +106,9 @@ namespace UKingLibrary
 
         private void UpdateRenders()
         {
+            if (Root.m_namedVariants.Count == 0)
+                return;
+
             RemoveRenders();
 
             HavokMeshShapeRender render = new HavokMeshShapeRender(RootNode);
