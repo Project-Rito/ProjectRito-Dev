@@ -334,13 +334,13 @@ void main(){
         switch (alphaFunc)
         {
             case 0: //gequal
-                if (fragOutput.a <= alphaRefValue)
+                if (fragOutput.a < alphaRefValue)
                 {
                      discard;
                 }
             break;
             case 1: //greater
-                if (fragOutput.a < alphaRefValue)
+                if (fragOutput.a <= alphaRefValue)
                 {
                      discard;
                 }
@@ -352,13 +352,13 @@ void main(){
                 }
             break;
             case 3: //less
-                if (fragOutput.a > alphaRefValue)
+                if (fragOutput.a >= alphaRefValue)
                 {
                      discard;
                 }
             break;
             case 4: //lequal
-                if (fragOutput.a >= alphaRefValue)
+                if (fragOutput.a > alphaRefValue)
                 {
                      discard;
                 }
