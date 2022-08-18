@@ -193,9 +193,11 @@ namespace MapStudio.UI
         
         public virtual void AssetViewportDrop(AssetItem item, Vector2 screenCoords) { }
 
-        public virtual void OnMouseMove(MouseEventInfo mouseInfo) { }
-        public virtual void OnMouseDown(MouseEventInfo mouseInfo) { }
-        public virtual void OnMouseUp(MouseEventInfo mouseInfo) { }
         public virtual void OnKeyDown(KeyEventInfo keyEventInfo) { }
+        public virtual void OnKeyUp(KeyEventInfo keyEventInfo) { }
+        public virtual void OnMouseMove() { }
+        public virtual void OnMouseDown() { }
+        public virtual void OnMouseUp() { }
+        public virtual void OnMouseWheel() { }
     }
 }

@@ -56,6 +56,11 @@ namespace UKingLibrary
         public List<MapNavmeshLoader> Navmesh { get; set; } = new List<MapNavmeshLoader>();
 
         /// <summary>
+        /// Tools to edit navmesh for the field.
+        /// </summary>
+        public MapNavmeshEditor NavmeshEditor { get; set; }
+
+        /// <summary>
         /// The terrain for this field
         /// </summary>
         public Terrain Terrain { get; set; } = new Terrain();
@@ -81,14 +86,17 @@ namespace UKingLibrary
             }
         }
 
-        public FieldMapLoader(string fieldName, UKingEditor editor)
+        public FieldMapLoader(string fieldName, UKingEditor parentEditor)
         {
-            ParentEditor = editor;
+            ParentEditor = parentEditor;
+
             RootNode.Header = fieldName;
             RootNode.Tag = this;
             Scene.Init();
 
             Terrain.LoadTerrainTable(fieldName);
+
+            NavmeshEditor = new MapNavmeshEditor(this);
         }
 
         public MapData LoadMuunt(string fileName, Stream stream)
@@ -382,10 +390,41 @@ namespace UKingLibrary
             GLFrameworkEngine.GLContext.PreviewScale = PreviewScale;
         }
 
+        public virtual void OnKeyDown(KeyEventInfo e)
+        {
+            NavmeshEditor.OnKeyDown(e);
+        }
+
+        public virtual void OnKeyUp(KeyEventInfo e)
+        {
+            NavmeshEditor.OnKeyUp(e);
+        }
+
+        public virtual void OnMouseDown()
+        {
+            NavmeshEditor.OnMouseDown();
+        }
+
+        public virtual void OnMouseUp()
+        {
+            NavmeshEditor.OnMouseUp();
+        }
+
+        public virtual void OnMouseMove()
+        {
+            NavmeshEditor.OnMouseMove();
+        }
+
+        public virtual void OnMouseWheel()
+        {
+            NavmeshEditor.OnMouseWheel();
+        }
+
         public void Dispose()
         {
             foreach (MapData mapData in MapData)
                 mapData.Dispose();
+            NavmeshEditor?.Dispose();
         }
     }
 }

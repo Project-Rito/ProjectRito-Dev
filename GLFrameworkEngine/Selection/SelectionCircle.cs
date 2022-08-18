@@ -51,7 +51,12 @@ namespace GLFrameworkEngine
             Draw(context, context.NormalizeMouseCoords(position), radius);
         }
 
-        public void Apply(GLContext context, float x, float y, bool select) {
+        public void RenderMask(GLContext context, float x, float y)
+        {
+
+        }
+
+        public void ApplyObjectSelection(GLContext context, float x, float y, bool select) {
             position = new Vector2(x, y);
 
             //Check if the position of objects is inside the selection

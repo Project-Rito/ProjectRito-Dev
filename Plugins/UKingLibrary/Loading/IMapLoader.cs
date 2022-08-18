@@ -15,12 +15,20 @@ namespace UKingLibrary
         public List<MapData> MapData { get; set; }
         public List<MapCollisionLoader> BakedCollision { get; set; }
         public List<MapNavmeshLoader> Navmesh { get; set; }
+        public MapNavmeshEditor NavmeshEditor { get; set; }
         public NodeFolder RootNode { get; set; }
 
         public void AddBakedCollisionShape(uint hashId, string muuntFileName, BakedCollisionShapeCacheable info, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale);
         public void RemoveBakedCollisionShape(uint hashId);
         public bool BakedCollisionShapeExists(uint hashId);
         public bool UpdateBakedCollisionShapeTransform(uint hashId, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale);
+
+        public void OnKeyDown(KeyEventInfo e);
+        public void OnKeyUp(KeyEventInfo e);
+        public void OnMouseDown();
+        public void OnMouseUp();
+        public void OnMouseMove();
+        public void OnMouseWheel();
 
         public MapObject MapObjectByHashId(uint hashId);
     }

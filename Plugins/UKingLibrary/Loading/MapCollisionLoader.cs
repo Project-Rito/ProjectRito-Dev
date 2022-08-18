@@ -896,7 +896,7 @@ namespace UKingLibrary
             }
         }
 
-        private List<HavokMeshShapeRender> ShapeRenders = new List<HavokMeshShapeRender>();
+        public List<HavokMeshShapeRender> ShapeRenders = new List<HavokMeshShapeRender>();
         private GLScene Scene = null;
 
         private void UpdateRenders()

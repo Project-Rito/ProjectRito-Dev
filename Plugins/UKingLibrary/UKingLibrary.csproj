@@ -93,7 +93,7 @@
 
   <ItemGroup>
     <None Update="Languages\English\UKingLibrary.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Shaders\HavokShape.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

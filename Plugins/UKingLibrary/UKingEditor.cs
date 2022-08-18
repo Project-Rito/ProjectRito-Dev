@@ -20,6 +20,12 @@ namespace UKingLibrary
         public string[] Description => new string[] { "Field Map Data for Breath of the Wild" };
         public string[] Extension => new string[] { "*.json" };
 
+        public override List<string> SubEditors { get; set; } = new List<string>()
+        {
+            TranslationSource.GetText("DEFAULT"),
+            TranslationSource.GetText("NAVMESH")
+        };
+
         /// <summary>
         /// Whether or not the file can be saved.
         /// </summary>
@@ -210,7 +216,7 @@ namespace UKingLibrary
             DungeonMapLoader loader;
             if (!((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).FolderChildren.ContainsKey(fileName))
             {
-                loader = new DungeonMapLoader();
+                loader = new DungeonMapLoader(this);
 
                 loader.RootNode.OnSelected = delegate
                 {
@@ -226,7 +232,7 @@ namespace UKingLibrary
 
             EditorConfig.OpenDungeons.Add(fileName);
 
-            loader.Load(fileName, stream, this);
+            loader.Load(fileName, stream);
             stream.Close();
 
             MakeLoaderActive(loader);
@@ -526,6 +532,43 @@ namespace UKingLibrary
                 CreateAndSelect();
 
             GLContext.ActiveContext.Scene.EndUndoCollection();
+
+            ActiveMapLoader.OnKeyDown(e);
+        }
+
+        public override void OnKeyUp(KeyEventInfo e)
+        {
+            base.OnKeyUp(e);
+
+            ActiveMapLoader?.OnKeyUp(e);
+        }
+
+        public override void OnMouseDown()
+        {
+            base.OnMouseDown();
+
+            ActiveMapLoader?.OnMouseDown();
+        }
+
+        public override void OnMouseUp()
+        {
+            base.OnMouseUp();
+
+            ActiveMapLoader?.OnMouseUp();
+        }
+
+        public override void OnMouseMove()
+        {
+            base.OnMouseMove();
+
+            ActiveMapLoader?.OnMouseMove();
+        }
+
+        public override void OnMouseWheel()
+        {
+            base.OnMouseWheel();
+
+            ActiveMapLoader?.OnMouseWheel();
         }
 
         public override void AssetViewportDrop(AssetItem item, Vector2 screenCoords)

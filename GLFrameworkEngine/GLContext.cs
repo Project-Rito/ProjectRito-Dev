@@ -43,6 +43,11 @@ namespace GLFrameworkEngine
         public LinkingTool LinkingTools = new LinkingTool();
 
         /// <summary>
+        /// A list of stuff that should be drawn after the scene is drawn
+        /// </summary>
+        public List<IDrawable> FinalDraws = new List<IDrawable>();
+
+        /// <summary>
         /// Color picking for picking scene objects using a color ID pass.
         /// </summary>
         public ColorPicker ColorPicker = new ColorPicker();
@@ -96,6 +101,11 @@ namespace GLFrameworkEngine
         /// Gets or sets the offset from the mouse origin.
         /// </summary>
         public Vector2 MouseOffset => CurrentMousePoint - MouseOrigin;
+
+        /// <summary>
+        /// The frame currently being rendered; a frame counter.
+        /// </summary>
+        public long CurrentFrame = 0;
 
         /// <summary>
         /// Determines to enable SRGB or not for the current context.

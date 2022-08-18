@@ -281,12 +281,17 @@ namespace MapStudio.UI
                 _context.CurrentMousePoint.X,
                _context.CurrentMousePoint.Y);
 
+            _context.FinalDraws.FindAll(x=> x.IsVisible).ForEach(x => x.DrawModel(_context, Pass.OPAQUE));
+            _context.FinalDraws.FindAll(x => x.IsVisible).ForEach(x => x.DrawModel(_context, Pass.TRANSPARENT));
+
             GL.Enable(EnableCap.DepthTest);
 
             foreach (var anim in CameraAnimations)
                 anim.DrawPath(_context);
 
             FinalBuffer.Unbind();
+
+            _context.CurrentFrame++;
         }
 
         public void OnResize()
