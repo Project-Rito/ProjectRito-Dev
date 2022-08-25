@@ -57,9 +57,9 @@ namespace GLFrameworkEngine
                 int vertexStride = attributes.Sum(x => x.BufferIndex == att.BufferIndex ? x.Size : 0);
 
                 if (!string.IsNullOrEmpty(att.Name))
-                    vbo.AddAttribute(att.Name, att.ElementCount, att.Type, att.Normalized, vertexStride, att.Offset.Value, att.BufferIndex);
+                    vbo.AddAttribute(att.Name, att.ElementCount, att.FloatType, att.Normalized, vertexStride, att.Offset.Value, att.BufferIndex);
                 else
-                    vbo.AddAttribute(att.Location, att.ElementCount, att.Type, att.Normalized, vertexStride, att.Offset.Value, att.BufferIndex);
+                    vbo.AddAttribute(att.Location, att.ElementCount, att.FloatType, att.Normalized, vertexStride, att.Offset.Value, att.BufferIndex);
             }
             vbo.Initialize();
             vboInit = true;

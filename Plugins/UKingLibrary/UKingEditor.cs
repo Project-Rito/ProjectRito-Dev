@@ -23,7 +23,7 @@ namespace UKingLibrary
         public override List<string> SubEditors { get; set; } = new List<string>()
         {
             TranslationSource.GetText("DEFAULT"),
-            TranslationSource.GetText("NAVMESH")
+            //TranslationSource.GetText("NAVMESH") // Doesn't work too well yet...
         };
 
         /// <summary>

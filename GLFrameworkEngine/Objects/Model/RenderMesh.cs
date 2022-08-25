@@ -58,9 +58,20 @@ namespace GLFrameworkEngine
             foreach (var att in attributes)
             {
                 if (!string.IsNullOrEmpty(att.Name))
-                    vao.AddAttribute(att.Name, att.ElementCount, att.Type, att.Normalized, vertexStride, att.Offset.Value);
+                {
+                    if (att.IsFloat)
+                        vao.AddAttribute(att.Name, att.ElementCount, att.FloatType, att.Normalized, vertexStride, att.Offset.Value);
+                    else
+                        vao.AddAttribute(att.Name, att.ElementCount, att.IntType, att.Normalized, vertexStride, att.Offset.Value);
+                }
                 else
-                    vao.AddAttribute(att.Location, att.ElementCount, att.Type, att.Normalized, vertexStride, att.Offset.Value);
+                {
+                    if (att.IsFloat)
+                        vao.AddAttribute(att.Location, att.ElementCount, att.FloatType, att.Normalized, vertexStride, att.Offset.Value);
+                    else
+                        vao.AddAttribute(att.Location, att.ElementCount, att.IntType, att.Normalized, vertexStride, att.Offset.Value);
+                }
+
             }
             vao.Initialize();
         }
@@ -91,9 +102,9 @@ namespace GLFrameworkEngine
             foreach (var att in attributes)
             {
                 if (!string.IsNullOrEmpty(att.Name))
-                    vao.AddInstancedAttribute(att.Name, att.ElementCount, att.Type, att.Normalized, vertexStride, att.Offset.Value);
+                    vao.AddInstancedAttribute(att.Name, att.ElementCount, att.FloatType, att.Normalized, vertexStride, att.Offset.Value);
                 else
-                    vao.AddInstancedAttribute(att.Location, att.ElementCount, att.Type, att.Normalized, vertexStride, att.Offset.Value);
+                    vao.AddInstancedAttribute(att.Location, att.ElementCount, att.FloatType, att.Normalized, vertexStride, att.Offset.Value);
             }
 
             if (instancedBuffers.Length == 0) {

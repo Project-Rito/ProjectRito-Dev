@@ -2,6 +2,6 @@
 {
     public interface IPositionRenderable
     {
-        void DrawPositionColor(GLContext context);
+        void DrawForNavmeshPaint(GLContext context);
     }
 }

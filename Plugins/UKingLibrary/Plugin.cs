@@ -21,6 +21,7 @@ namespace UKingLibrary
             GlobalShaders.AddShader("WATER", "Water");
             GlobalShaders.AddShader("GRASS", "Grass");
             GlobalShaders.AddShader("HAVOK_SHAPE", "HavokShape");
+            GlobalShaders.AddShader("NAVMESH_PAINT", "NavmeshPaint");
 
             if (FirstLoad)
             {

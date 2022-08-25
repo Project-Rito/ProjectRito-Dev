@@ -20,7 +20,11 @@ namespace UKingLibrary
             {
                 return ParentLoader.ParentEditor.Workspace.ViewportWindow.Pipeline;
             }
-        } 
+        }
+        public NavmeshEditFilter EditFilter { get; set; } = new NavmeshEditFilter
+        {
+            AngleMax = 0.95f
+        };
 
         private SelectionBox SelectionBox = null;
         private SelectionCircle SelectionCircle = null;
@@ -87,7 +91,14 @@ namespace UKingLibrary
                 return;
             _lastAppliedFrame = Pipeline._context.CurrentFrame;
 
-            Vector3[] positions = GetPositions();
+            DrawingHelper.VerticesIndices<Vector3> geometry = GetGeometry();
+            m = new RenderMesh<HavokMeshShapeRender.HavokMeshShapeVertex>(geometry.Vertices.Select(pos => new HavokMeshShapeRender.HavokMeshShapeVertex
+            {
+                Position = pos,
+                Normal = Vector3.Zero,
+                VertexColor = Vector4.One,
+                VertexIndex = 0
+            }).ToArray(), geometry.Indices.ToArray(), PrimitiveType.Triangles);
         }
 
         public void OnMouseWheel()
@@ -125,8 +136,26 @@ namespace UKingLibrary
             if (pass != Pass.TRANSPARENT)
                 return;
             SelectionCircle.Render(context, context.CurrentMousePoint.X, context.CurrentMousePoint.Y);
+            //DrawPositions();
+
+            var shader = GlobalShaders.GetShader("HAVOK_SHAPE");
+            context.CurrentShader = shader;
+            shader.SetTransform(GLConstants.ModelMatrix, new GLTransform());
+
+            GL.PointSize(4);
+            GL.Disable(EnableCap.CullFace);
+            GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.PolygonOffsetFill);
+            GL.PolygonOffset(-4f, 1f);
+            m?.Draw(context);
+            GL.Disable(EnableCap.PolygonOffsetFill);
+            GL.Disable(EnableCap.CullFace);
+            GL.Disable(EnableCap.Blend);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
         }
         #endregion
+
+        private RenderMesh<HavokMeshShapeRender.HavokMeshShapeVertex> m = null;
 
         #region Offscreen Rendering
         /// <summary>
@@ -155,20 +184,22 @@ namespace UKingLibrary
             // Get rid of any actual color drawn; we just want the stencil.
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
+            GL.Enable(EnableCap.DepthTest);
+
             // Draw everything else and apply the stencil.
             GL.StencilFunc(StencilFunction.Equal, 1, 0xFF);
             GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
             foreach (var bakedCollision in ParentLoader.BakedCollision)
             {
-                foreach (HavokMeshShapeRender shapeRender in bakedCollision.ShapeRenders)
+                for (int i = 0; i < bakedCollision.ShapeRenders.Count; i++)
                 {
-                    shapeRender.DrawPositionColor(Pipeline._context);
+                    bakedCollision.ShapeRenders[i].DrawForNavmeshPaint(Pipeline._context, EditFilter, i, Pipeline.Height, Pipeline.Width);
                 }
             }
             GL.Disable(EnableCap.StencilTest);
         }
 
-        private Vector3[] GetPositions()
+        private DrawingHelper.VerticesIndices<Vector3> GetGeometry()
         {
             PositionBuffer.Bind();
 
@@ -179,7 +210,37 @@ namespace UKingLibrary
 
             PositionBuffer.Unbind();
 
-            return pixels.Where(pixel => pixel.W != 0).Select(pixel => pixel.Xyz).ToArray();
+            Dictionary<Tuple<float, float>, Vector4> uniqueVertexPixels = new Dictionary<Tuple<float, float>, Vector4>();
+            foreach (Vector4 pixel in pixels.Where(pixel => pixel.W != 0))
+            {
+                Tuple<float, float> key = new Tuple<float, float>(pixel.X, pixel.Y);
+                if (!uniqueVertexPixels.TryAdd(key, pixel) && uniqueVertexPixels[key].Z > pixel.Z)
+                    uniqueVertexPixels[key] = pixel;
+            }
+
+            DrawingHelper.VerticesIndices<Vector3> result = new DrawingHelper.VerticesIndices<Vector3>();
+            foreach (Vector4 uniqueVertexPixel in uniqueVertexPixels.Values)
+            {
+                result.Indices.Add(result.Indices.Count);
+                result.Indices.Add(result.Indices.Count);
+                result.Indices.Add(result.Indices.Count);
+
+                int vertexIndex = (int)uniqueVertexPixel.X;//BitConverter.ToInt32(BitConverter.GetBytes(uniqueVertexPixel.X));
+                int indicesIndex = (int)(vertexIndex - vertexIndex % 3);
+
+                HavokMeshShapeRender render = ParentLoader.BakedCollision[0].ShapeRenders[(int)uniqueVertexPixel.Y];
+                Matrix4 transform = render.Transform.TransformMatrix;
+                transform.Transpose();
+
+                var test = (transform * new Vector4(render.Vertices[render.Indices[indicesIndex + 0]].Position, 1f)).Xyz;
+                var test2 = render.Vertices[render.Indices[indicesIndex + 0]].Position;
+
+                result.Vertices.Add((transform * new Vector4(render.Vertices[render.Indices[indicesIndex + 0]].Position, 1f)).Xyz);
+                result.Vertices.Add((transform * new Vector4(render.Vertices[render.Indices[indicesIndex + 1]].Position, 1f)).Xyz);
+                result.Vertices.Add((transform * new Vector4(render.Vertices[render.Indices[indicesIndex + 2]].Position, 1f)).Xyz);
+            }
+
+            return result;
         }
         #endregion
 
@@ -187,5 +248,20 @@ namespace UKingLibrary
         {
             ParentLoader.ParentEditor.Workspace.ViewportWindow.Pipeline._context.FinalDraws.Remove(this);
         }
+
+        #region Types
+
+        /// <summary>
+        /// Info for filtering data before adding to navmesh.
+        /// </summary>
+        public struct NavmeshEditFilter
+        {
+            /// <summary>
+            /// From 0-1, the maximum angle to allow in navmesh.
+            /// Should be tested against the y-component of a normalized world normal.
+            /// </summary>
+            public float AngleMax;
+        }
+        #endregion
     }
 }
