@@ -8,6 +8,7 @@ using CafeLibrary;
 using GLFrameworkEngine;
 using MapStudio.UI;
 using UKingLibrary.Rendering;
+using NETExtensions.Linq;
 
 namespace UKingLibrary
 {

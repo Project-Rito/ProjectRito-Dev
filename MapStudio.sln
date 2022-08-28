@@ -4,12 +4,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.1.31911.260
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GLFrameworkEngine", "GLFrameworkEngine\GLFrameworkEngine.csproj", "{35C8DB46-F713-4D4A-9987-5574BBD1BF5E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB} = {37905AD9-1B56-4F13-9FB0-45CAC69E24BB}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MapStudio.UI", "MapStudio.UI\MapStudio.UI.csproj", "{1EDA9B52-1778-40FE-9F7A-9EC65364640D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toolbox.Core", "Toolbox.Core\Toolbox.Core.csproj", "{B72B73BC-8041-4478-9AB2-21B9D0E05C2B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MapStudio", "MapStudio\MapStudio.csproj", "{58D63242-BC05-4DCF-82BC-C8F6C958A9F9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB} = {37905AD9-1B56-4F13-9FB0-45CAC69E24BB}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKingLibrary", "Plugins\UKingLibrary\UKingLibrary.csproj", "{AA80A602-0BA9-4C9E-80C5-1A675F2BE3DD}"
 EndProject
@@ -31,6 +37,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HKX2Builders", "HKX2Builders\HKX2Builders\HKX2Builders.csproj", "{1BC0B500-15C4-4C43-8663-494D3A0CB9C5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HKX2", "HKX2Builders\lib\HKX2Library\HKX2\HKX2.csproj", "{52439401-AF55-46B7-A482-85893188DD00}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NETExtensions", "NETExtensions\NETExtensions.csproj", "{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -186,6 +194,18 @@ Global
 		{52439401-AF55-46B7-A482-85893188DD00}.Release|x64.Build.0 = Release|x64
 		{52439401-AF55-46B7-A482-85893188DD00}.Release|x86.ActiveCfg = Release|x86
 		{52439401-AF55-46B7-A482-85893188DD00}.Release|x86.Build.0 = Release|x86
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}.Debug|x64.Build.0 = Debug|Any CPU
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}.Debug|x86.Build.0 = Debug|Any CPU
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}.Release|x64.ActiveCfg = Release|Any CPU
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}.Release|x64.Build.0 = Release|Any CPU
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}.Release|x86.ActiveCfg = Release|Any CPU
+		{37905AD9-1B56-4F13-9FB0-45CAC69E24BB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
