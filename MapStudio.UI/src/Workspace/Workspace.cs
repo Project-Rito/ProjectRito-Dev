@@ -661,21 +661,40 @@ namespace MapStudio.UI
             }
         }
 
+        public void OnKeyUp(KeyEventInfo e)
+        {
+            ActiveEditor?.OnKeyUp(e);
+        }
+
         /// <summary>
         /// The mouse down event for when the mouse has been pressed down.
         /// Used to perform editor shortcuts.
         /// </summary>
-        public void OnMouseDown(MouseEventInfo mouseInfo)
+        public void OnMouseDown()
         {
-            ActiveEditor.OnMouseDown(mouseInfo);
+            ActiveEditor?.OnMouseDown();
+        }
+
+        /// <summary>
+        /// The mouse up event for when the mouse has been released.
+        /// Used to perform editor shortcuts.
+        /// </summary>
+        public void OnMouseUp()
+        {
+            ActiveEditor?.OnMouseUp();
         }
 
         /// <summary>
         /// The mouse move event for when the mouse has been moved around.
         /// </summary>
-        public void OnMouseMove(MouseEventInfo mouseInfo)
+        public void OnMouseMove()
         {
-            ActiveEditor.OnMouseMove(mouseInfo);
+            ActiveEditor?.OnMouseMove();
+        }
+
+        public void OnMouseWheel()
+        {
+            ActiveEditor?.OnMouseWheel();
         }
 
         private bool init = false;

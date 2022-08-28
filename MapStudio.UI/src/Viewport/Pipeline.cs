@@ -197,6 +197,9 @@ namespace MapStudio.UI
 
             _context.UpdateViewport = false;
 
+            GLContext.QueuedGLCalls.Invoke();
+            GLContext.QueuedGLCalls = delegate { };
+
             //Scene is drawn with frame arguments.
             //This is to customize what can be drawn during a single frame.
             //Backgrounds, alpha, and other data can be toggled for render purposes.
@@ -281,12 +284,17 @@ namespace MapStudio.UI
                 _context.CurrentMousePoint.X,
                _context.CurrentMousePoint.Y);
 
+            _context.FinalDraws.FindAll(x=> x.IsVisible).ForEach(x => x.DrawModel(_context, Pass.OPAQUE));
+            _context.FinalDraws.FindAll(x => x.IsVisible).ForEach(x => x.DrawModel(_context, Pass.TRANSPARENT));
+
             GL.Enable(EnableCap.DepthTest);
 
             foreach (var anim in CameraAnimations)
                 anim.DrawPath(_context);
 
             FinalBuffer.Unbind();
+
+            _context.CurrentFrame++;
         }
 
         public void OnResize()

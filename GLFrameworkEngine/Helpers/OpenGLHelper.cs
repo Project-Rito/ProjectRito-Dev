@@ -9,6 +9,9 @@ namespace GLFrameworkEngine
 {
     public class OpenGLHelper
     {
+        private static int _mainThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+        public static bool IsMainThread { get { return System.Threading.Thread.CurrentThread.ManagedThreadId == _mainThreadId; } }
+
         public static Vector2 NormMouseCoords(int x, int y, int width, int height)
         {
             return new Vector2(x - width / 2, y - height / 2);

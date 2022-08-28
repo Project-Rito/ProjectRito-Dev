@@ -65,14 +65,14 @@ namespace MapStudio.UI
         }
 
 
-        public static bool InputFromFloat(string label, object obj, string properyName, bool drag = false, float step = 1)
+        public static bool InputFromFloat(string label, object obj, string properyName, bool drag = false, float step = 1, float min = float.MinValue, float max = float.MaxValue)
         {
             var input = obj.GetType().GetProperty(properyName);
             var inputValue = (float)input.GetValue(obj);
 
             bool edited = false;
             if (drag)
-                edited = ImGui.DragFloat(label, ref inputValue, 0.1f);
+                edited = ImGui.DragFloat(label, ref inputValue, 0.1f, min, max);
             else
                 edited = ImGui.InputFloat(label, ref inputValue, step);
 

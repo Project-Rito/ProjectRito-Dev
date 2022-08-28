@@ -71,94 +71,89 @@ layout(std140) uniform ub_MaterialParams {
 struct StandardSamplerInfo {
     int Enabled;
     int TexcoordIdx;
+    int _Padding0;
+    int _Padding1;
 };
 struct ArraySamplerInfo {
     int Enabled;
     int TexcoordIdx;
     float Index;
+    int _Padding0;
 };
+
+layout(std140) uniform ub_SamplerInfo {
+    StandardSamplerInfo u_TextureAlbedo0_Info;
+    StandardSamplerInfo u_TextureAlbedo1_Info;
+    StandardSamplerInfo u_TextureAlbedo2_Info;
+    StandardSamplerInfo u_TextureAlbedo3_Info;
+
+    StandardSamplerInfo u_TextureAlpha0_Info;
+    StandardSamplerInfo u_TextureAlpha1_Info;
+    StandardSamplerInfo u_TextureAlpha2_Info;
+    StandardSamplerInfo u_TextureAlpha3_Info;
+
+    StandardSamplerInfo u_TextureSpec0_Info;
+    StandardSamplerInfo u_TextureSpec1_Info;
+    StandardSamplerInfo u_TextureSpec2_Info;
+    StandardSamplerInfo u_TextureSpec3_Info;
+
+    StandardSamplerInfo u_TextureNormal0_Info;
+    StandardSamplerInfo u_TextureNormal1_Info;
+    StandardSamplerInfo u_TextureNormal2_Info;
+    StandardSamplerInfo u_TextureNormal3_Info;
+
+    StandardSamplerInfo u_TextureEmission0_Info;
+    StandardSamplerInfo u_TextureEmission1_Info;
+    StandardSamplerInfo u_TextureEmission2_Info;
+    StandardSamplerInfo u_TextureEmission3_Info;
+
+    StandardSamplerInfo u_TextureBake0_Info;
+    StandardSamplerInfo u_TextureBake1_Info;
+    StandardSamplerInfo u_TextureBake2_Info;
+    StandardSamplerInfo u_TextureBake3_Info;
+
+    ArraySamplerInfo u_TextureArrTma_Info;
+    ArraySamplerInfo u_TextureArrTmc_Info;
+};
+
 // Samplers - we assume that all standard samplers have 4 variants.
 // -------------------------------------------
 uniform sampler2D u_TextureAlbedo0;   // _a0
-uniform StandardSamplerInfo u_TextureAlbedo0_Info;
-
 uniform sampler2D u_TextureAlbedo1;   // _a1
-uniform StandardSamplerInfo u_TextureAlbedo1_Info;
-
 uniform sampler2D u_TextureAlbedo2;   // _a2
-uniform StandardSamplerInfo u_TextureAlbedo2_Info;
-
 uniform sampler2D u_TextureAlbedo3;   // _a3
-uniform StandardSamplerInfo u_TextureAlbedo3_Info;
 // -------------------------------------------
 uniform sampler2D u_TextureAlpha0;    // _ms0
-uniform StandardSamplerInfo u_TextureAlpha0_Info;
-
 uniform sampler2D u_TextureAlpha1;    // _ms1
-uniform StandardSamplerInfo u_TextureAlpha1_Info;
-
 uniform sampler2D u_TextureAlpha2;    // _ms2
-uniform StandardSamplerInfo u_TextureAlpha2_Info;
-
 uniform sampler2D u_TextureAlpha3;    // _ms3
-uniform StandardSamplerInfo u_TextureAlpha3_Info;
 // -------------------------------------------
 uniform sampler2D u_TextureSpec0;     // _s0
-uniform StandardSamplerInfo u_TextureSpec0_Info;
-
 uniform sampler2D u_TextureSpec1;     // _s1
-uniform StandardSamplerInfo u_TextureSpec1_Info;
-
 uniform sampler2D u_TextureSpec2;     // _s2
-uniform StandardSamplerInfo u_TextureSpec2_Info;
-
 uniform sampler2D u_TextureSpec3;     // _s3
-uniform StandardSamplerInfo u_TextureSpec3_Info;
 // -------------------------------------------
 uniform sampler2D u_TextureNormal0;   // _n0
-uniform StandardSamplerInfo u_TextureNormal0_Info;
-
 uniform sampler2D u_TextureNormal1;   // _n1
-uniform StandardSamplerInfo u_TextureNormal1_Info;
-
 uniform sampler2D u_TextureNormal2;   // _n2
-uniform StandardSamplerInfo u_TextureNormal2_Info;
-
 uniform sampler2D u_TextureNormal3;   // _n3
-uniform StandardSamplerInfo u_TextureNormal3_Info;
 // -------------------------------------------
 uniform sampler2D u_TextureEmission0; // _e0
-uniform StandardSamplerInfo u_TextureEmission0_Info;
-
 uniform sampler2D u_TextureEmission1; // _e1
-uniform StandardSamplerInfo u_TextureEmission1_Info;
-
 uniform sampler2D u_TextureEmission2; // _e2
-uniform StandardSamplerInfo u_TextureEmission2_Info;
-
 uniform sampler2D u_TextureEmission3; // _e3
-uniform StandardSamplerInfo u_TextureEmission3_Info;
 // -------------------------------------------
 uniform sampler2D u_TextureBake0;     // _b0
-uniform StandardSamplerInfo u_TextureBake0_Info;
-
 uniform sampler2D u_TextureBake1;     // _b1
-uniform StandardSamplerInfo u_TextureBake1_Info;
-
 uniform sampler2D u_TextureBake2;     // _b2
-uniform StandardSamplerInfo u_TextureBake2_Info;
-
 uniform sampler2D u_TextureBake3;     // _b3
-uniform StandardSamplerInfo u_TextureBake3_Info;
 // -------------------------------------------
 
 // Array Samplers
 // -------------------------------------------
 uniform sampler2DArray u_TextureArrTma; // tma
-uniform ArraySamplerInfo u_TextureArrTma_Info;
 // -------------------------------------------
 uniform sampler2DArray u_TextureArrTmc; // tmc
-uniform ArraySamplerInfo u_TextureArrTmc_Info;
 // -------------------------------------------
 
 
@@ -205,7 +200,7 @@ vec3 getWorldNormal(VertexAttributes vert) {
     vec4[4] colors;
 
     if (u_TextureNormal0_Info.Enabled == 1 || (u_TextureNormal1_Info.Enabled == 0 && u_TextureNormal2_Info.Enabled == 0 && u_TextureNormal3_Info.Enabled == 0 && u_TextureArrTmc_Info.Enabled == 0)) {
-        vec4 tex = texture(u_TextureAlbedo0, GetTexcoord(u_TextureAlbedo0_Info, vert));
+        vec4 tex = texture(u_TextureNormal0, GetTexcoord(u_TextureNormal0_Info, vert));
         colors[0] = tex;
     }
     if (u_TextureNormal1_Info.Enabled == 1) {
@@ -339,13 +334,13 @@ void main(){
         switch (alphaFunc)
         {
             case 0: //gequal
-                if (fragOutput.a <= alphaRefValue)
+                if (fragOutput.a < alphaRefValue)
                 {
                      discard;
                 }
             break;
             case 1: //greater
-                if (fragOutput.a < alphaRefValue)
+                if (fragOutput.a <= alphaRefValue)
                 {
                      discard;
                 }
@@ -357,13 +352,13 @@ void main(){
                 }
             break;
             case 3: //less
-                if (fragOutput.a > alphaRefValue)
+                if (fragOutput.a >= alphaRefValue)
                 {
                      discard;
                 }
             break;
             case 4: //lequal
-                if (fragOutput.a >= alphaRefValue)
+                if (fragOutput.a > alphaRefValue)
                 {
                      discard;
                 }

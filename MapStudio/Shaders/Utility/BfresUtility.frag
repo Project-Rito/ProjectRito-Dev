@@ -20,11 +20,14 @@ struct VertexAttributes
 struct StandardSamplerInfo {
     int Enabled;
     int TexcoordIdx;
+    int _Padding0;
+    int _Padding1;
 };
 struct ArraySamplerInfo {
     int Enabled;
     int TexcoordIdx;
     float Index;
+    int _Padding0;
 };
 
 // Defined in Utility.frag.
@@ -97,10 +100,11 @@ vec2 GetTexcoord(ArraySamplerInfo samplerInfo, VertexAttributes vert) {
     }
 }
 
-vec4 Blend_OneMinusSourceAlpha(vec4[4] colors) {
+#define BLEND_COLOR_COUNT 4
+vec4 Blend_OneMinusSourceAlpha(vec4[BLEND_COLOR_COUNT] colors) {
     vec4 result = vec4(0.f);
     float remainingAlpha = 1.f;
-    for (int i = 0; i < colors.length; i++) {
+    for (int i = 0; i < colors.length(); i++) { // using colors.length causes error on some drivers.
         result.rgb += colors[i].rgb * colors[i].a * remainingAlpha;
         result.a += colors[i].a * remainingAlpha;
         remainingAlpha -= colors[i].a;

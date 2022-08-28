@@ -51,10 +51,15 @@ namespace UKingLibrary
         public List<MapCollisionLoader> BakedCollision { get; set; } = new List<MapCollisionLoader>();
 
         /// <summary>
-        /// All navmesh for the field. Included here for convenience,
+        /// All navmesh for the dungeon. Included here for convenience,
         /// but references are also present in MapNavmeshLoader.RootNode.Tag.
         /// </summary>
         public List<MapNavmeshLoader> Navmesh { get; set; } = new List<MapNavmeshLoader>();
+
+        /// <summary>
+        /// Tools to edit navmesh for the dungeon.
+        /// </summary>
+        public MapNavmeshEditor NavmeshEditor { get; set; }
 
         /// <summary>
         /// Instancing info related to trees.
@@ -68,14 +73,16 @@ namespace UKingLibrary
 
 
         public SARC DungeonData;
-        public BfresRender MapRender;
+        public BfresRender DungeonRender;
 
         public static Dictionary<string, dynamic> Actors = new Dictionary<string, dynamic>();
 
         private string DungeonName;
 
-        public DungeonMapLoader()
+        public DungeonMapLoader(UKingEditor parentEditor)
         {
+            ParentEditor = parentEditor;
+
             RootNode.Header = "Some random dungeon, idk.";
             RootNode.Tag = this;
             RootNode.FolderChildren = new Dictionary<string, NodeBase>
@@ -86,11 +93,12 @@ namespace UKingLibrary
                 };
 
             Scene.Init();
+
+            NavmeshEditor = new MapNavmeshEditor(this);
         }
 
-        public void Load(string fileName, Stream stream, UKingEditor editor)
+        public void Load(string fileName, Stream stream)
         {
-            ParentEditor = editor;
             //ParentEditor.Workspace.Windows.Add(new ActorLinkNodeUI());
             DungeonName = Path.GetFileNameWithoutExtension(fileName);
 
@@ -149,19 +157,19 @@ namespace UKingLibrary
             var dungeonModel = GetModel();
             if (dungeonModel != null)
             {
-                MapRender = new BfresRender(GetModel(), $"DgnMrgPrt_{DungeonName}.sbfres", null);
+                DungeonRender = new BfresRender(GetModel(), $"DgnMrgPrt_{DungeonName}.sbfres", null);
 
                 var dungeonTextures = GetTexture();
                 if (dungeonTextures != null)
-                    BfresLoader.GetTextures(new MemoryStream(YAZ0.Decompress(dungeonTextures.ReadAllBytes()))).ToList().ForEach(x => MapRender.Textures.Add(x.Key, x.Value)); // Merge pack textures
+                    BfresLoader.GetTextures(new MemoryStream(YAZ0.Decompress(dungeonTextures.ReadAllBytes()))).ToList().ForEach(x => DungeonRender.Textures.Add(x.Key, x.Value)); // Merge pack textures
                 else
                     StudioLogger.WriteWarning("Couldn't find textures for dungeon model!");
-                MapRender.CanSelect = false;
-                MapRender.IsVisibleCallback += delegate
+                DungeonRender.CanSelect = false;
+                DungeonRender.IsVisibleCallback += delegate
                 {
                     return UKingLibrary.MapData.ShowMapModel;
                 };
-                Scene.AddRenderObject(MapRender);
+                Scene.AddRenderObject(DungeonRender);
             }
             else
                 StudioLogger.WriteWarning("Couldn't find dungeon model!");
@@ -190,7 +198,7 @@ namespace UKingLibrary
                 navmesh.Unload();
             }
 
-            Scene.RemoveRenderObject(MapRender);
+            Scene.RemoveRenderObject(DungeonRender);
         }
 
         public void AddBakedCollisionShape(uint hashId, string muuntFileName, BakedCollisionShapeCacheable info, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
@@ -354,11 +362,42 @@ namespace UKingLibrary
             GLFrameworkEngine.GLContext.PreviewScale = PreviewScale;
         }
 
+        public virtual void OnKeyDown(KeyEventInfo e)
+        {
+            NavmeshEditor.OnKeyDown(e);
+        }
+
+        public virtual void OnKeyUp(KeyEventInfo e)
+        {
+            NavmeshEditor.OnKeyUp(e);
+        }
+
+        public virtual void OnMouseDown()
+        {
+            NavmeshEditor.OnMouseDown();
+        }
+
+        public virtual void OnMouseUp()
+        {
+            NavmeshEditor.OnMouseUp();
+        }
+
+        public virtual void OnMouseMove()
+        {
+            NavmeshEditor.OnMouseMove();
+        }
+
+        public virtual void OnMouseWheel()
+        {
+            NavmeshEditor.OnMouseWheel();
+        }
+
         public void Dispose()
         {
             foreach (MapData mapData in MapData)
                 mapData?.Dispose();
-            MapRender?.Dispose();
+            DungeonRender?.Dispose();
+            NavmeshEditor?.Dispose();
         }
     }
 }

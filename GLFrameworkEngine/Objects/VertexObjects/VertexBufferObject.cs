@@ -82,6 +82,25 @@ namespace GLFrameworkEngine
             attributesInstanced.Add(location, new VertexAttribute(size, type, normalized, stride, offset, true));
         }
 
+        public void AddAttribute(int location, int size, VertexAttribIntegerType type, bool normalized, int stride, int offset, int bufferIndex = 0)
+        {
+            attributes.Add(location, new VertexAttribute(size, type, normalized, stride, offset, false, 1, bufferIndex));
+        }
+
+        public void AddAttribute(string name, int size, VertexAttribIntegerType type, bool normalized, int stride, int offset, int bufferIndex = 0)
+        {
+            attributes.Add(name, new VertexAttribute(size, type, normalized, stride, offset, false, 1, bufferIndex));
+        }
+
+        public void AddInstancedAttribute(string name, int size, VertexAttribIntegerType type, bool normalized, int stride, int offset)
+        {
+            attributesInstanced.Add(name, new VertexAttribute(size, type, normalized, stride, offset, true));
+        }
+        public void AddInstancedAttribute(int location, int size, VertexAttribIntegerType type, bool normalized, int stride, int offset)
+        {
+            attributesInstanced.Add(location, new VertexAttribute(size, type, normalized, stride, offset, true));
+        }
+
         public void Initialize()
         {
             if (_disposed || ID != -1)
@@ -124,10 +143,10 @@ namespace GLFrameworkEngine
                 GL.EnableVertexAttribArray(location);
                 GL.BindBuffer(BufferTarget.ArrayBuffer, bufferIDs[a.Value.bufferIndex]);
 
-                if (a.Value.type == VertexAttribPointerType.Int)
-                    GL.VertexAttribIPointer(location, a.Value.size, VertexAttribIntegerType.Int, a.Value.stride, new System.IntPtr(a.Value.offset));
+                if (a.Value.isFloat)
+                    GL.VertexAttribPointer(location, a.Value.size, a.Value.floatType, a.Value.normalized, a.Value.stride, a.Value.offset);
                 else
-                    GL.VertexAttribPointer(location, a.Value.size, a.Value.type, a.Value.normalized, a.Value.stride, a.Value.offset);
+                    GL.VertexAttribIPointer(location, a.Value.size, a.Value.intType, a.Value.stride, new System.IntPtr(a.Value.offset));
 
                 if (a.Value.instance)
                     GL.VertexAttribDivisor(location, a.Value.divisor);
@@ -209,7 +228,8 @@ namespace GLFrameworkEngine
         private struct VertexAttribute
         {
             public int size;
-            public VertexAttribPointerType type;
+            public VertexAttribPointerType floatType;
+            public VertexAttribIntegerType intType;
             public bool normalized;
             public int stride;
             public int offset;
@@ -217,16 +237,33 @@ namespace GLFrameworkEngine
             public int divisor;
             public int bufferIndex;
 
+            public readonly bool isFloat;
+
             public VertexAttribute(int size, VertexAttribPointerType type, bool normalized, int stride, int offset, bool instance = false, int divisor = 1, int bufferIndex = 0)
             {
                 this.size = size;
-                this.type = type;
+                this.floatType = type;
+                this.intType = VertexAttribIntegerType.Int; // Lol just so c# isn't mad
                 this.normalized = normalized;
                 this.stride = stride;
                 this.offset = offset;
                 this.instance = instance;
                 this.divisor = divisor;
                 this.bufferIndex = bufferIndex;
+                this.isFloat = true;
+            }
+            public VertexAttribute(int size, VertexAttribIntegerType type, bool normalized, int stride, int offset, bool instance = false, int divisor = 1, int bufferIndex = 0)
+            {
+                this.size = size;
+                this.floatType = VertexAttribPointerType.Float; // Again, just so that c# isn't mad
+                this.intType = type;
+                this.normalized = normalized;
+                this.stride = stride;
+                this.offset = offset;
+                this.instance = instance;
+                this.divisor = divisor;
+                this.bufferIndex = bufferIndex;
+                this.isFloat = false;
             }
         }
     }

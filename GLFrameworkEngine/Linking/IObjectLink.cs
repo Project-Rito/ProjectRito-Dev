@@ -15,5 +15,7 @@ namespace GLFrameworkEngine
 
         Action<ITransformableObject> OnObjectLink { get; set; }
         Action<ITransformableObject> OnObjectUnlink { get; set; }
+
+        bool EnableLinking { get; set; }
     }
 }

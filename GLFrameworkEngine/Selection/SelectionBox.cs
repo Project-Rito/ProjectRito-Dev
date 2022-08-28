@@ -43,14 +43,14 @@ namespace GLFrameworkEngine
 
         private SELECT_ACTION SelectAction = SELECT_ACTION.NONE;
 
-        public void StartSelection(GLContext context, float x, float y) {
+        public void StartObjectSelection(GLContext context, float x, float y) {
             startPoint = new Vector2(x, y);
-            SelectAction = SELECT_ACTION.SELECT;
+            SelectAction = SELECT_ACTION.OBJECT_SELECT;
         }
 
-        public void StartDeselection(GLContext context, float x, float y) {
+        public void StartObjectDeselection(GLContext context, float x, float y) {
             startPoint = new Vector2(x, y);
-            SelectAction = SELECT_ACTION.DESELECT;
+            SelectAction = SELECT_ACTION.OBJECT_DESELECT;
         }
 
         public void Render(GLContext context, float x, float y) {
@@ -71,18 +71,18 @@ namespace GLFrameworkEngine
 
             Draw(context, screenPos1, screenPos2);
 
-            if (SelectAction != SELECT_ACTION.NONE)
-                Apply(context, endPoint.X, endPoint.Y);
+            if (SelectAction == SELECT_ACTION.OBJECT_SELECT || SelectAction == SELECT_ACTION.OBJECT_DESELECT)
+                ApplyObjectSelection(context, endPoint.X, endPoint.Y);
         }
 
-        public void Apply(GLContext context, float x, float y) {
+        public void ApplyObjectSelection(GLContext context, float x, float y) {
             endPoint = new Vector2(x, y);
 
             //Check if the position of objects is inside the selection
             var objects = context.Scene.GetSelectableObjects();
             //Set the default setting before selection
             foreach (var ob in selectedObjects)
-                ob.IsSelected = SelectAction != SELECT_ACTION.SELECT;
+                ob.IsSelected = SelectAction != SELECT_ACTION.OBJECT_SELECT;
 
             for (int i = 0; i < objects.Count; i++)
             {
@@ -93,7 +93,7 @@ namespace GLFrameworkEngine
                 if (screenPoint.X < MaxPoint.X && screenPoint.X > MinPoint.X &&
                     screenPoint.Y < MaxPoint.Y && screenPoint.Y > MinPoint.Y)
                 {
-                    if (SelectAction == SELECT_ACTION.SELECT)
+                    if (SelectAction == SELECT_ACTION.OBJECT_SELECT)
                         objects[i].IsSelected = true;
                     else
                         objects[i].IsSelected = false;
@@ -145,8 +145,8 @@ namespace GLFrameworkEngine
         enum SELECT_ACTION
         {
             NONE,
-            SELECT,
-            DESELECT,
+            OBJECT_SELECT,
+            OBJECT_DESELECT,
         }
     }
 }

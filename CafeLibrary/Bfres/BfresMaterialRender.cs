@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using GLFrameworkEngine;
 using Nintendo.Bfres;
 using Toolbox.Core;
@@ -45,6 +46,7 @@ namespace CafeLibrary.Rendering
 
         //GL resources
         UniformBlock MaterialBlock;
+        UniformBlock SamplerInfoBlock;
 
         public BfresMaterialRender() { }
 
@@ -57,6 +59,7 @@ namespace CafeLibrary.Rendering
             ShaderOptions = new Dictionary<string, string>();
 
             MaterialBlock = new UniformBlock();
+            SamplerInfoBlock = new UniformBlock();
         }
 
         /// <summary>
@@ -314,7 +317,7 @@ namespace CafeLibrary.Rendering
 
             SetRenderState();
             SetBlendState();
-            SetTextureUniforms(control, shader);
+            SetTextures(control, shader);
             SetShadows(control, shader);
 
             shader.SetFloat("uBrightness", Brightness);
@@ -329,6 +332,7 @@ namespace CafeLibrary.Rendering
 
             UpdateMaterialBlock();
             MaterialBlock.RenderBuffer(shader.program, "ub_MaterialParams");
+            SamplerInfoBlock.RenderBuffer(shader.program, "ub_SamplerInfo");
         }
 
         public void RenderDebugMaterials(GLContext control, GLTransform transform, ShaderProgram shader, GenericPickableMesh mesh)
@@ -337,7 +341,7 @@ namespace CafeLibrary.Rendering
 
             SetRenderState();
             SetBlendState();
-            SetTextureUniforms(control, shader);
+            SetTextures(control, shader);
             SetShadows(control, shader);
 
             shader.SetBool("alphaTest", BlendState.AlphaTest);
@@ -349,6 +353,7 @@ namespace CafeLibrary.Rendering
 
             UpdateMaterialBlock();
             MaterialBlock.RenderBuffer(shader.program, "ub_MaterialParams");
+            SamplerInfoBlock.RenderBuffer(shader.program, "ub_SamplerInfo");
         }
 
         static int GetAlphaFunc(AlphaFunction func)
@@ -369,7 +374,7 @@ namespace CafeLibrary.Rendering
             if (BlendState.AlphaTest || BlendState.BlendColor)
             {
                 context.CurrentShader.SetBoolToInt("hasAlpha", true);
-                SetTextureUniforms(context, context.CurrentShader);
+                SetTextures(context, context.CurrentShader);
             }
         }
 
@@ -410,45 +415,160 @@ namespace CafeLibrary.Rendering
                 GL.Disable(EnableCap.CullFace);
         }
 
-        public virtual int SetTextureUniforms(GLContext control, ShaderProgram shader)
+        private struct StandardSamplerInfo
         {
+            public int Enabled;
+            public int TexcoordIdx;
+
+            public void Write(System.IO.Stream stream)
+            {
+                using (var writer = new Toolbox.Core.IO.FileWriter(stream, true))
+                {
+                    writer.Write(Enabled);
+                    writer.Write(TexcoordIdx);
+                    writer.Write(0); // Padding
+                    writer.Write(0); // Padding
+                }
+            }
+        }
+
+        private struct ArraySamplerInfo
+        {
+            public int Enabled;
+            public int TexcoordIdx;
+            public float Index;
+
+            public void Write(System.IO.Stream stream)
+            {
+                using (var writer = new Toolbox.Core.IO.FileWriter(stream, true))
+                {
+                    writer.Write(Enabled);
+                    writer.Write(TexcoordIdx);
+                    writer.Write(Index);
+                    writer.Write(0); // Padding
+                }  
+            }
+        }
+        
+        [StructLayout(LayoutKind.Sequential)]
+        private struct SamplerInfo
+        {
+            // Standard samplers:
+            public StandardSamplerInfo u_TextureAlbedo0_Info;
+            public StandardSamplerInfo u_TextureAlbedo1_Info;
+            public StandardSamplerInfo u_TextureAlbedo2_Info;
+            public StandardSamplerInfo u_TextureAlbedo3_Info;
+
+            public StandardSamplerInfo u_TextureAlpha0_Info;
+            public StandardSamplerInfo u_TextureAlpha1_Info;
+            public StandardSamplerInfo u_TextureAlpha2_Info;
+            public StandardSamplerInfo u_TextureAlpha3_Info;
+
+            public StandardSamplerInfo u_TextureSpec0_Info;
+            public StandardSamplerInfo u_TextureSpec1_Info;
+            public StandardSamplerInfo u_TextureSpec2_Info;
+            public StandardSamplerInfo u_TextureSpec3_Info;
+
+            public StandardSamplerInfo u_TextureNormal0_Info;
+            public StandardSamplerInfo u_TextureNormal1_Info;
+            public StandardSamplerInfo u_TextureNormal2_Info;
+            public StandardSamplerInfo u_TextureNormal3_Info;
+
+            public StandardSamplerInfo u_TextureEmission0_Info;
+            public StandardSamplerInfo u_TextureEmission1_Info;
+            public StandardSamplerInfo u_TextureEmission2_Info;
+            public StandardSamplerInfo u_TextureEmission3_Info;
+
+            public StandardSamplerInfo u_TextureBake0_Info;
+            public StandardSamplerInfo u_TextureBake1_Info;
+            public StandardSamplerInfo u_TextureBake2_Info;
+            public StandardSamplerInfo u_TextureBake3_Info;
+
+            // Array samplers:
+            public ArraySamplerInfo u_TextureArrTma_Info;
+            public ArraySamplerInfo u_TextureArrTmc_Info;
+
+            public void Write(System.IO.Stream stream)
+            {
+                u_TextureAlbedo0_Info.Write(stream);
+                u_TextureAlbedo1_Info.Write(stream);
+                u_TextureAlbedo2_Info.Write(stream);
+                u_TextureAlbedo3_Info.Write(stream);
+
+                u_TextureAlpha0_Info.Write(stream);
+                u_TextureAlpha1_Info.Write(stream);
+                u_TextureAlpha2_Info.Write(stream);
+                u_TextureAlpha3_Info.Write(stream);
+
+                u_TextureSpec0_Info.Write(stream);
+                u_TextureSpec1_Info.Write(stream);
+                u_TextureSpec2_Info.Write(stream);
+                u_TextureSpec3_Info.Write(stream);
+
+                u_TextureNormal0_Info.Write(stream);
+                u_TextureNormal1_Info.Write(stream);
+                u_TextureNormal2_Info.Write(stream);
+                u_TextureNormal3_Info.Write(stream);
+
+                u_TextureEmission0_Info.Write(stream);
+                u_TextureEmission1_Info.Write(stream);
+                u_TextureEmission2_Info.Write(stream);
+                u_TextureEmission3_Info.Write(stream);
+
+                u_TextureBake0_Info.Write(stream);
+                u_TextureBake1_Info.Write(stream);
+                u_TextureBake2_Info.Write(stream);
+                u_TextureBake3_Info.Write(stream);
+
+                u_TextureArrTma_Info.Write(stream);
+                u_TextureArrTmc_Info.Write(stream);
+
+
+                // If we do not ever regenerate binary writers we might be able to get even faster speed.
+            }
+        }
+
+        public virtual int SetTextures(GLContext control, ShaderProgram shader)
+        {
+            SamplerInfo samplerInfoBlock = new SamplerInfo();
+
             GL.ActiveTexture(TextureUnit.Texture0 + 1);
             GL.BindTexture(TextureTarget.Texture2D, RenderTools.defaultTex.ID);
             shader.SetInt("u_TextureAlbedo0", 1); // Attach default texture
 
 
-            shader.SetBoolToInt("u_TextureAlbedo0_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureAlbedo1_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureAlbedo2_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureAlbedo3_Info.Enabled", false);
-            
-            shader.SetBoolToInt("u_TextureAlpha0_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureAlpha1_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureAlpha2_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureAlpha3_Info.Enabled", false);
+            samplerInfoBlock.u_TextureAlbedo0_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureAlbedo1_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureAlbedo2_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureAlbedo3_Info.Enabled = 0;
 
-            shader.SetBoolToInt("u_TextureSpec0_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureSpec1_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureSpec2_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureSpec3_Info.Enabled", false);
+            samplerInfoBlock.u_TextureAlpha0_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureAlpha1_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureAlpha2_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureAlpha3_Info.Enabled = 0;
 
-            shader.SetBoolToInt("u_TextureNormal0_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureNormal1_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureNormal2_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureNormal3_Info.Enabled", false);
+            samplerInfoBlock.u_TextureSpec0_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureSpec1_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureSpec2_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureSpec3_Info.Enabled = 0;
 
-            shader.SetBoolToInt("u_TextureEmission0_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureEmission1_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureEmission2_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureEmission3_Info.Enabled", false);
+            samplerInfoBlock.u_TextureNormal0_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureNormal1_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureNormal2_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureNormal3_Info.Enabled = 0;
 
-            shader.SetBoolToInt("u_TextureBake0_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureBake1_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureBake2_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureBake3_Info.Enabled", false);
+            samplerInfoBlock.u_TextureEmission0_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureEmission1_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureEmission2_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureEmission3_Info.Enabled = 0;
 
-            shader.SetBoolToInt("u_TextureArrTma_Info.Enabled", false);
-            shader.SetBoolToInt("u_TextureArrTmc_Info.Enabled", false);
+            samplerInfoBlock.u_TextureBake0_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureBake1_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureBake2_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureBake3_Info.Enabled = 0;
+
+            samplerInfoBlock.u_TextureArrTma_Info.Enabled = 0;
+            samplerInfoBlock.u_TextureArrTmc_Info.Enabled = 0;
 
             int id = 2;
             int arrayIdx = 0;
@@ -476,119 +596,126 @@ namespace CafeLibrary.Rendering
                 switch (sampler)
                 {
                     case "_a0":
-                        shader.SetBoolToInt("u_TextureAlbedo0_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureAlbedo0_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureAlbedo0_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureAlbedo0_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_a1":
-                        shader.SetBoolToInt("u_TextureAlbedo1_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureAlbedo1_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureAlbedo1_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureAlbedo1_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_a2":
-                        shader.SetBoolToInt("u_TextureAlbedo2_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureAlbedo2_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureAlbedo2_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureAlbedo2_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_a3":
-                        shader.SetBoolToInt("u_TextureAlbedo3_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureAlbedo3_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureAlbedo3_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureAlbedo3_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_ms0":
-                        shader.SetBoolToInt("u_TextureAlpha0_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureAlpha0_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureAlpha0_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureAlpha0_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_ms1":
-                        shader.SetBoolToInt("u_TextureAlpha1_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureAlpha1_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureAlpha1_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureAlpha1_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_ms2":
-                        shader.SetBoolToInt("u_TextureAlpha2_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureAlpha2_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureAlpha2_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureAlpha2_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_ms3":
-                        shader.SetBoolToInt("u_TextureAlpha3_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureAlpha3_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureAlpha3_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureAlpha3_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_s0":
-                        shader.SetBoolToInt("u_TextureSpec0_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureSpec0_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureSpec0_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureSpec0_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_s1":
-                        shader.SetBoolToInt("u_TextureSpec1_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureSpec1_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureSpec1_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureSpec1_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_s2":
-                        shader.SetBoolToInt("u_TextureSpec2_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureSpec2_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureSpec2_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureSpec2_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_s3":
-                        shader.SetBoolToInt("u_TextureSpec3_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureSpec3_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureSpec3_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureSpec3_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_n0":
-                        shader.SetBoolToInt("u_TextureNormal0_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureNormal0_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureNormal0_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureNormal0_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_n1":
-                        shader.SetBoolToInt("u_TextureNormal1_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureNormal1_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureNormal1_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureNormal1_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_n2":
-                        shader.SetBoolToInt("u_TextureNormal2_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureNormal2_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureNormal2_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureNormal2_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_n3":
-                        shader.SetBoolToInt("u_TextureNormal3_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureNormal3_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureNormal3_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureNormal3_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_e0":
-                        shader.SetBoolToInt("u_TextureEmission0_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureEmission0_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureEmission0_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureEmission0_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_e1":
-                        shader.SetBoolToInt("u_TextureEmission1_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureEmission1_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureEmission1_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureEmission1_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_e2":
-                        shader.SetBoolToInt("u_TextureEmission2_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureEmission2_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureEmission2_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureEmission2_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_e3":
-                        shader.SetBoolToInt("u_TextureEmission3_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureEmission3_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureEmission3_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureEmission3_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_b0":
-                        shader.SetBoolToInt("u_TextureBake0_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureBake0_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureBake0_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureBake0_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_b1":
-                        shader.SetBoolToInt("u_TextureBake1_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureBake1_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureBake1_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureBake1_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_b2":
-                        shader.SetBoolToInt("u_TextureBake2_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureBake2_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureBake2_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureBake2_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "_b3":
-                        shader.SetBoolToInt("u_TextureBake3_Info.Enabled", hasTexture);
-                        shader.SetInt("u_TextureBake3_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                        samplerInfoBlock.u_TextureBake3_Info.Enabled = hasTexture ? 1 : 0;
+                        samplerInfoBlock.u_TextureBake3_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
 
                     case "tma":
-                        shader.SetBoolToInt("u_TextureArrTma_Info.Enabled", hasTexture);
+                        samplerInfoBlock.u_TextureArrTma_Info.Enabled = hasTexture ? 1 : 0;
                         if (ShaderParams.ContainsKey("texture_array_index" + i))
-                            shader.SetFloat("u_TextureArrTma_Info.Index", (float)ShaderParams["texture_array_index" + arrayIdx++].DataValue);
-                        shader.SetInt("u_TextureArrTma_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                            samplerInfoBlock.u_TextureArrTma_Info.Index = (float)ShaderParams["texture_array_index" + arrayIdx++].DataValue;
+                        samplerInfoBlock.u_TextureArrTma_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                     case "tmc":
-                        shader.SetBoolToInt("u_TextureArrTmc_Info.Enabled", hasTexture);
+                        samplerInfoBlock.u_TextureArrTmc_Info.Enabled = hasTexture ? 1 : 0;
                         if (ShaderParams.ContainsKey("texture_array_index" + i))
-                            shader.SetFloat("u_TextureArrTmc_Info.Index", (float)ShaderParams["texture_array_index" + arrayIdx++].DataValue);
-                        shader.SetInt("u_TextureArrTmc_Info.TexcoordIdx", GetTexTexcoordIdx(i));
+                            samplerInfoBlock.u_TextureArrTmc_Info.Index = (float)ShaderParams["texture_array_index" + arrayIdx++].DataValue;
+                        samplerInfoBlock.u_TextureArrTmc_Info.TexcoordIdx = GetTexTexcoordIdx(i);
                         break;
                 }
 
                 if (hasTexture)
                     shader.SetInt(uniformName, id++);
             }
+
+            var mem = new System.IO.MemoryStream();
+            samplerInfoBlock.Write(mem);
+            //using (var writer = new Toolbox.Core.IO.FileWriter(mem))
+            //    mem.Write(MemoryMarshal.AsBytes<SamplerInfo>(new SamplerInfo[1] { samplerInfoBlock }));
+            SamplerInfoBlock.Buffer.Clear();
+            SamplerInfoBlock.Add(mem.ToArray());
 
             return id; // Might not be the best way to implement this...
         }

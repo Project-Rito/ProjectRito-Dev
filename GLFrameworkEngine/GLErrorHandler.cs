@@ -20,5 +20,15 @@ namespace GLFrameworkEngine
                 Debug.Print($"{title}: {error}");
             }*/
         }
+
+        public static void CheckGLErrors()
+        {
+            ErrorCode error;
+            while ((error = GL.GetError()) != ErrorCode.NoError)
+            {
+                Console.WriteLine("OpenGL Error");
+                Console.WriteLine(error.ToString());
+            }
+        }
     }
 }

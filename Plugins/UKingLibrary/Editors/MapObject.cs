@@ -329,7 +329,25 @@ namespace UKingLibrary
                     RenderAdditional();
                 };
 
-                Render = render;
+            Render.OnObjectLink += delegate (ITransformableObject obj)
+            {
+                if (((EditableObject)obj).UINode.Tag is not MapObject)
+                    return;
+
+                MapObject mapObj = (MapObject)((EditableObject)obj).UINode.Tag;
+                DestLinks.Add(new LinkInstance(mapObj));
+                mapObj.SourceLinks.Add(new LinkInstance(this));
+            };
+
+            Render.OnObjectUnlink += delegate (ITransformableObject obj)
+            {
+                if (((EditableObject)obj).UINode.Tag is not MapObject)
+                    return;
+
+                MapObject mapObj = (MapObject)((EditableObject)obj).UINode.Tag;
+                DestLinks.Remove(DestLinks.First(x => x.Object == mapObj));
+                mapObj.SourceLinks.Remove(mapObj.SourceLinks.First(x => x.Object == this));
+            };
 
                 //Load the transform attached to the object
                 LoadObjectTransform();
@@ -977,6 +995,23 @@ namespace UKingLibrary
             {
                 Properties = properties;
                 Object = ((UKingEditor)Workspace.ActiveWorkspace.ActiveEditor).ActiveMapLoader.MapObjectByHashId(hashId);
+            }
+
+            public LinkInstance(MapObject obj, IDictionary<string, dynamic> properties)
+            {
+                Properties = properties;
+                Object = obj;
+            }
+
+            public LinkInstance(MapObject obj)
+            {
+                Properties = new Dictionary<string, dynamic>()
+                {
+                    { "!Parameters", new Dictionary<string, dynamic>() },
+                    {"DefinitionName", new MapData.Property<dynamic>("BasicSig") },
+                    {"DestUnitHashId", new MapData.Property<dynamic>(obj.HashId) }
+                };
+                Object = obj;
             }
         }
     }

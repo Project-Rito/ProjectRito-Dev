@@ -13,6 +13,12 @@ namespace GLFrameworkEngine
         public static GLContext ActiveContext = null;
 
         /// <summary>
+        /// Executed and cleared before every frame.
+        /// Self-contained OpenGL logic (such as loading mesh data) should be appended.
+        /// </summary>
+        public static Action QueuedGLCalls = delegate { };
+
+        /// <summary>
         /// Default rendering arguments when a rendered frame is being drawn.
         /// </summary>
         public RenderFrameArgs FrameArgs = new RenderFrameArgs();
@@ -41,6 +47,11 @@ namespace GLFrameworkEngine
         /// A toolset for linking IObjectLink objects to a transformable object.
         /// </summary>
         public LinkingTool LinkingTools = new LinkingTool();
+
+        /// <summary>
+        /// A list of stuff that should be drawn after the scene is drawn
+        /// </summary>
+        public List<IDrawable> FinalDraws = new List<IDrawable>();
 
         /// <summary>
         /// Color picking for picking scene objects using a color ID pass.
@@ -96,6 +107,11 @@ namespace GLFrameworkEngine
         /// Gets or sets the offset from the mouse origin.
         /// </summary>
         public Vector2 MouseOffset => CurrentMousePoint - MouseOrigin;
+
+        /// <summary>
+        /// The frame currently being rendered; a frame counter.
+        /// </summary>
+        public long CurrentFrame = 0;
 
         /// <summary>
         /// Determines to enable SRGB or not for the current context.

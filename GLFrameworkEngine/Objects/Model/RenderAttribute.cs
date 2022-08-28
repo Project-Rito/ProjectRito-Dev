@@ -20,9 +20,19 @@ namespace GLFrameworkEngine
         public int Location { get; protected set; }
 
         /// <summary>
-        /// The format type of the attribute.
+        /// The format type of the attribute for floating-type usage.
         /// </summary>
-        public VertexAttribPointerType Type { get; private set; }
+        public VertexAttribPointerType FloatType { get; private set; }
+
+        /// <summary>
+        /// The format type of the attribute for integer usage.
+        /// </summary>
+        public VertexAttribIntegerType IntType { get; private set; }
+
+        /// <summary>
+        /// Is this a float or int?
+        /// </summary>
+        public bool IsFloat { get; private set; }
 
         /// <summary>
         /// The offset in the buffer.
@@ -44,19 +54,39 @@ namespace GLFrameworkEngine
 
         private int GetFormatStride()
         {
-           switch (Type)
+            if (IsFloat)
             {
-                case VertexAttribPointerType.Byte:
-                case VertexAttribPointerType.UnsignedByte:
-                    return 1;
-                case VertexAttribPointerType.HalfFloat:
-                case VertexAttribPointerType.Short:
-                    return 2;
-                case VertexAttribPointerType.Float:
-                case VertexAttribPointerType.Int:
-                    return 4;
-                default:
-                    throw new Exception($"Could not set format stride. Format not supported! {Type}");
+                switch (FloatType)
+                {
+                    case VertexAttribPointerType.Byte:
+                    case VertexAttribPointerType.UnsignedByte:
+                        return 1;
+                    case VertexAttribPointerType.HalfFloat:
+                    case VertexAttribPointerType.Short:
+                        return 2;
+                    case VertexAttribPointerType.Float:
+                    case VertexAttribPointerType.Int:
+                    case VertexAttribPointerType.UnsignedInt:
+                        return 4;
+                    default:
+                        throw new Exception($"Could not set format stride. Format not supported! {FloatType}");
+                }
+            }
+            else
+            {
+                switch (IntType)
+                {
+                    case VertexAttribIntegerType.Byte:
+                    case VertexAttribIntegerType.UnsignedByte:
+                        return 1;
+                    case VertexAttribIntegerType.Short:
+                        return 2;
+                    case VertexAttribIntegerType.Int:
+                    case VertexAttribIntegerType.UnsignedInt:
+                        return 4;
+                    default:
+                        throw new Exception($"Could not set format stride. Format not supported! {IntType}");
+                }
             }
         }
 
@@ -73,7 +103,8 @@ namespace GLFrameworkEngine
         public RenderAttribute(string attributeName, VertexAttribPointerType attributeFormat, int offset, int count)
         {
             Name = attributeName;
-            Type = attributeFormat;
+            FloatType = attributeFormat;
+            IsFloat = true;
             Offset = offset;
             ElementCount = count;
         }
@@ -81,20 +112,55 @@ namespace GLFrameworkEngine
         public RenderAttribute(string attributeName, VertexAttribPointerType attributeFormat)
         {
             Name = attributeName;
-            Type = attributeFormat;
+            FloatType = attributeFormat;
+            IsFloat = true;
         }
 
         public RenderAttribute(string attributeName, VertexAttribPointerType attributeFormat, int offset)
         {
             Name = attributeName;
-            Type = attributeFormat;
+            FloatType = attributeFormat;
+            IsFloat = true;
             Offset = offset;
         }
 
         public RenderAttribute(int attributeLocation, VertexAttribPointerType attributeFormat, int offset)
         {
             Location = attributeLocation;
-            Type = attributeFormat;
+            FloatType = attributeFormat;
+            IsFloat = true;
+            Offset = offset;
+        }
+
+        public RenderAttribute(string attributeName, VertexAttribIntegerType attributeFormat, int offset, int count)
+        {
+            Name = attributeName;
+            IntType = attributeFormat;
+            IsFloat = false;
+            Offset = offset;
+            ElementCount = count;
+        }
+
+        public RenderAttribute(string attributeName, VertexAttribIntegerType attributeFormat)
+        {
+            Name = attributeName;
+            IntType = attributeFormat;
+            IsFloat = false;
+        }
+
+        public RenderAttribute(string attributeName, VertexAttribIntegerType attributeFormat, int offset)
+        {
+            Name = attributeName;
+            IntType = attributeFormat;
+            IsFloat = false;
+            Offset = offset;
+        }
+
+        public RenderAttribute(int attributeLocation, VertexAttribIntegerType attributeFormat, int offset)
+        {
+            Location = attributeLocation;
+            IntType = attributeFormat;
+            IsFloat = false;
             Offset = offset;
         }
 
@@ -114,7 +180,10 @@ namespace GLFrameworkEngine
 
         public virtual void SetAttribute(int index, int stride)
         {
-            GL.VertexAttribPointer(index, ElementCount, Type, Normalized, stride, Offset.Value);
+            if (IsFloat)
+                GL.VertexAttribPointer(index, ElementCount, FloatType, Normalized, stride, Offset.Value);
+            else
+                GL.VertexAttribIPointer(index, ElementCount, IntType, stride, (IntPtr)Offset.Value);
         }
 
         public static RenderAttribute[] GetAttributes<T>()

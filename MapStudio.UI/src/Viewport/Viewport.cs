@@ -268,7 +268,7 @@ namespace MapStudio.UI
                     ImGui.SameLine(); if (ImGui.Button(TranslationSource.GetText("RESET"))) { Pipeline._context.Camera.PanSpeed = 1.0f; }
                 }
 
-                updateSettings |= ImGuiHelper.InputFromFloat(TranslationSource.GetText("KEY_MOVE_SPEED"), Pipeline._context.Camera, "KeyMoveSpeed", true, 0.1f);
+                updateSettings |= ImGuiHelper.InputFromFloat(TranslationSource.GetText("KEY_MOVE_SPEED"), Pipeline._context.Camera, "KeyMoveSpeed", true, 0.1f, 0f, 50f);
                 if (Pipeline._context.Camera.PanSpeed != 1.0f)
                 {
                     ImGui.SameLine(); if (ImGui.Button(TranslationSource.GetText("RESET"))) { Pipeline._context.Camera.KeyMoveSpeed = 1.0f; }

@@ -15,8 +15,11 @@ namespace UKingLibrary
         public MubinToolSettings() {
         }
 
+        bool _collisionCacheProcessing = false;
+        bool _navmeshBuildProcessing = false;
         private string _removeOnlyOneUnitConfigName = @"";
         private string _removeOnlyOneFieldName = @"MainField";
+        bool _removeOnlyOneProcessing = false;
         public void Render()
         {
             UKingEditor editor = (UKingEditor)Workspace.ActiveWorkspace.ActiveEditor; // If this is being rendered we know that the active editor is a UKingEditor.
@@ -43,7 +46,35 @@ namespace UKingLibrary
             if (ImGui.CollapsingHeader(TranslationSource.GetText("COLLISION_TOOLS")))
             {
                 if (ImGui.Button(TranslationSource.GetText("CACHE_BAKED_COLLISION")))
-                    CollisionCacher.CacheAll(PluginConfig.CollisionCacheDir);
+                {
+                    _collisionCacheProcessing = true;
+                    new Task(() => { CollisionCacher.CacheAll(PluginConfig.CollisionCacheDir); _collisionCacheProcessing = false; }).Start();
+                }
+                if (_collisionCacheProcessing)
+                {
+                    ImGui.SameLine(); ImGui.TextDisabled($"{TranslationSource.GetText("PROCESSING")}");
+                }
+            }
+
+            if (ImGui.CollapsingHeader(TranslationSource.GetText("NAVMESH_TOOLS")))
+            {
+                ImGui.SliderFloat(TranslationSource.GetText("CELL_HEIGHT"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.CellHeight, 0.001f, 10f);
+                ImGui.SliderFloat(TranslationSource.GetText("CELL_SIZE"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.CellSize, 0.001f, 10f);
+                ImGui.SliderInt(TranslationSource.GetText("MIN_REGION_AREA"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.MinRegionArea, 1, 256);
+                ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_CLIMB"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableClimb, 0.001f, 10f);
+                ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_HEIGHT"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableHeight, 0.001f, 10f);
+                ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_RADIUS"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableRadius, 0.001f, 10f);
+                ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_SLOPE_ANGLE"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableSlopeAngle, 0.001f, 10f);
+
+                if (ImGui.Button(TranslationSource.GetText("BUILD_NAVMESH")))
+                {
+                    _navmeshBuildProcessing = true;
+                    new Task(() => { NavmeshBuilder.Build(); _navmeshBuildProcessing = false; }).Start();
+                }
+                if (_navmeshBuildProcessing)
+                {
+                    ImGui.SameLine(); ImGui.TextDisabled($"{TranslationSource.GetText("PROCESSING")}");
+                }
             }
 
             if (ImGui.CollapsingHeader(TranslationSource.GetText("ONLYONE_TOOLS"))) {
@@ -69,9 +100,16 @@ namespace UKingLibrary
                 }
 
                 if (ImGui.Button($"{TranslationSource.GetText("REMOVE_ONLYONE")}"))
-                    OnlyOneRemover.Remove(_removeOnlyOneUnitConfigName, _removeOnlyOneFieldName, Path.GetFullPath(Path.Join(Path.GetDirectoryName(editor.FileInfo.FilePath), $"{editor.EditorConfig.FolderName}")));
+                {
+                    _removeOnlyOneProcessing = true;
+                    new Task(() => { OnlyOneRemover.Remove(_removeOnlyOneUnitConfigName, _removeOnlyOneFieldName, Path.GetFullPath(Path.Join(Path.GetDirectoryName(editor.FileInfo.FilePath), $"{editor.EditorConfig.FolderName}"))); _removeOnlyOneProcessing = false; }).Start();
+                }
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(TranslationSource.GetText("ONLYONE_REMOVER_NOTICE"));
+                if (_removeOnlyOneProcessing)
+                {
+                    ImGui.SameLine(); ImGui.TextDisabled($"{TranslationSource.GetText("PROCESSING")}");
+                }
             }
 
             if (refreshScene)

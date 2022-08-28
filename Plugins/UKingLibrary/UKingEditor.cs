@@ -17,8 +17,24 @@ namespace UKingLibrary
 {
     public class UKingEditor : FileEditor, IFileFormat, IDisposable
     {
+        public static UKingEditor ActiveUkingEditor
+        {
+            get
+            {
+                if (Workspace.ActiveWorkspace.ActiveEditor is UKingEditor)
+                    return (UKingEditor)Workspace.ActiveWorkspace.ActiveEditor;
+                return null;
+            }
+        }
+
         public string[] Description => new string[] { "Field Map Data for Breath of the Wild" };
         public string[] Extension => new string[] { "*.json" };
+
+        public override List<string> SubEditors { get; set; } = new List<string>()
+        {
+            TranslationSource.GetText("DEFAULT"),
+            //TranslationSource.GetText("NAVMESH") // Doesn't work too well yet...
+        };
 
         /// <summary>
         /// Whether or not the file can be saved.
@@ -55,7 +71,7 @@ namespace UKingLibrary
             return false;
         }
 
-        public UKingEditor() 
+        public UKingEditor() : base()
         {
             PluginConfig.PathsChanged += delegate
             {
@@ -148,6 +164,7 @@ namespace UKingLibrary
                     })
                     {
                         CanCheck = true,
+                        IsChecked = EditorConfig != null && EditorConfig.OpenMapUnits.ContainsKey(fieldName) ? EditorConfig.OpenMapUnits[fieldName].Any(x => x.StartsWith(sectionName)) : false
                     }).ToList()
                 });
             }
@@ -209,7 +226,7 @@ namespace UKingLibrary
             DungeonMapLoader loader;
             if (!((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).FolderChildren.ContainsKey(fileName))
             {
-                loader = new DungeonMapLoader();
+                loader = new DungeonMapLoader(this);
 
                 loader.RootNode.OnSelected = delegate
                 {
@@ -225,7 +242,7 @@ namespace UKingLibrary
 
             EditorConfig.OpenDungeons.Add(fileName);
 
-            loader.Load(fileName, stream, this);
+            loader.Load(fileName, stream);
             stream.Close();
 
             MakeLoaderActive(loader);
@@ -410,6 +427,7 @@ namespace UKingLibrary
             }
 
             Workspace.ViewportWindow.Pipeline._context.Scene = Scene;
+            Workspace.ViewportWindow.ReloadMenus();
         }
 
         public void Save(Stream stream)
@@ -524,6 +542,43 @@ namespace UKingLibrary
                 CreateAndSelect();
 
             GLContext.ActiveContext.Scene.EndUndoCollection();
+
+            ActiveMapLoader.OnKeyDown(e);
+        }
+
+        public override void OnKeyUp(KeyEventInfo e)
+        {
+            base.OnKeyUp(e);
+
+            ActiveMapLoader?.OnKeyUp(e);
+        }
+
+        public override void OnMouseDown()
+        {
+            base.OnMouseDown();
+
+            ActiveMapLoader?.OnMouseDown();
+        }
+
+        public override void OnMouseUp()
+        {
+            base.OnMouseUp();
+
+            ActiveMapLoader?.OnMouseUp();
+        }
+
+        public override void OnMouseMove()
+        {
+            base.OnMouseMove();
+
+            ActiveMapLoader?.OnMouseMove();
+        }
+
+        public override void OnMouseWheel()
+        {
+            base.OnMouseWheel();
+
+            ActiveMapLoader?.OnMouseWheel();
         }
 
         public override void AssetViewportDrop(AssetItem item, Vector2 screenCoords)

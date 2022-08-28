@@ -19,7 +19,7 @@ namespace GLFrameworkEngine
             return vertices;
         }
 
-        public static Tuple<List<VertexPositionNormalTexCoord>, int[]> GetUVCubeVertices(float size)
+        public static VerticesIndices<VertexPositionNormalTexCoord> GetUVCubeVertices(float size)
         {
             return FromObj(new System.IO.MemoryStream(Properties.Resources.Cube), size);
         }
@@ -224,12 +224,12 @@ namespace GLFrameworkEngine
             return vertices.ToArray();
         }
 
-        public static Tuple<List<VertexPositionNormalTexCoord>, int[]> FromObj(byte[] data, float size = 1.0f)
+        public static VerticesIndices<VertexPositionNormalTexCoord> FromObj(byte[] data, float size = 1.0f)
         {
             return FromObj(new System.IO.MemoryStream(data), size);
         }
 
-        public static Tuple<List<VertexPositionNormalTexCoord>, int[]> FromObj(System.IO.Stream stream, float size = 1.0f)
+        public static VerticesIndices<VertexPositionNormalTexCoord> FromObj(System.IO.Stream stream, float size = 1.0f)
         {
             var obj = new ObjLoader();
             obj.LoadObj(stream);
@@ -250,7 +250,7 @@ namespace GLFrameworkEngine
                     }
                 }
             }
-            return Tuple.Create(vertices, indices.ToArray());
+            return new VerticesIndices<VertexPositionNormalTexCoord>(vertices, indices);
         }
 
         public static Vector3[] CalculateNormals(List<Vector3> positions)
@@ -330,11 +330,11 @@ namespace GLFrameworkEngine
         /// </summary>
         /// <param name="vertices">The vertices to reorder.</param>
         /// <param name="clockwise">True for clockwise. False for counterclockwise.</param>
-        public static Tuple<Vector2, int>[] EnsureVertexOrder(Vector2[] vertices, bool clockwise = true)
+        public static VertexIndex<Vector2>[] EnsureVertexOrder(Vector2[] vertices, bool clockwise = true)
         {
-            Tuple<Vector2, int>[] indexedVertices = new Tuple<Vector2, int>[vertices.Length];
+            VertexIndex<Vector2>[] indexedVertices = new VertexIndex<Vector2>[vertices.Length];
             for (int i = 0; i < vertices.Length; i++)
-                indexedVertices[i] = new Tuple<Vector2, int>(vertices[i], i);
+                indexedVertices[i] = new VertexIndex<Vector2>(vertices[i], i);
 
             if (vertices.Length <= 1)
                 return indexedVertices;
@@ -420,15 +420,15 @@ namespace GLFrameworkEngine
                 flatten = Matrix3.Invert(new Matrix3(Vector3.Normalize(x), Vector3.Normalize(y), Vector3.Normalize(z))); // A matrix to flatten to 2
             }
 
-            LinkedList<Tuple<Vector2, int>> flattenedVertices = new LinkedList<Tuple<Vector2, int>>();
+            LinkedList<VertexIndex<Vector2>> flattenedVertices = new LinkedList<VertexIndex<Vector2>>();
             {
-                Tuple<Vector2, int>[] _flattenedVertices = EnsureVertexOrder(vertices.Select(x => (x * flatten).Xz).ToArray(), false);
+                VertexIndex<Vector2>[] _flattenedVertices = EnsureVertexOrder(vertices.Select(x => (x * flatten).Xz).ToArray(), false);
 
                 for (int i = 0; i < _flattenedVertices.Length; i++)
                 {
-                    if (collinearIndices.Contains(_flattenedVertices[i].Item2))
+                    if (collinearIndices.Contains(_flattenedVertices[i].Index))
                         continue;
-                    flattenedVertices.AddLast(new Tuple<Vector2, int>(_flattenedVertices[i].Item1, _flattenedVertices[i].Item2));
+                    flattenedVertices.AddLast(new VertexIndex<Vector2>(_flattenedVertices[i].Vertex, _flattenedVertices[i].Index));
                 }
             }
 
@@ -436,38 +436,38 @@ namespace GLFrameworkEngine
 
             if (flattenedVertices.Count == 3)
             {
-                for (LinkedListNode<Tuple<Vector2, int>> vertexNode = flattenedVertices.First; vertexNode != null; vertexNode = vertexNode.Next)
+                for (LinkedListNode<VertexIndex<Vector2>> vertexNode = flattenedVertices.First; vertexNode != null; vertexNode = vertexNode.Next)
                 {
-                    indices.AddLast(vertexNode.Value.Item2);
+                    indices.AddLast(vertexNode.Value.Index);
                 }
                 return indices.ToArray();
             }
             else if (flattenedVertices.Count <= 2)
                 return new int[0];
             
-            LinkedListNode<Tuple<Vector2, int>> nextNode;
-            for (LinkedListNode<Tuple<Vector2, int>> convexVertexNode = flattenedVertices.First; convexVertexNode != null; convexVertexNode = nextNode)
+            LinkedListNode<VertexIndex<Vector2>> nextNode;
+            for (LinkedListNode<VertexIndex<Vector2>> convexVertexNode = flattenedVertices.First; convexVertexNode != null; convexVertexNode = nextNode)
             {
                 nextNode = convexVertexNode.Next;
-                Tuple<Vector2, int>[] convexTri = new Tuple<Vector2, int>[3];
+                VertexIndex<Vector2>[] convexTri = new VertexIndex<Vector2>[3];
                 convexTri[0] = (convexVertexNode.Previous ?? convexVertexNode.List.Last).Value;
                 convexTri[1] = convexVertexNode.Value;
                 convexTri[2] = (convexVertexNode.Next ?? convexVertexNode.List.First).Value;
 
-                bool convex = (convexTri[1].Item1.X - convexTri[0].Item1.X) * (convexTri[2].Item1.Y - convexTri[1].Item1.Y) - (convexTri[2].Item1.X - convexTri[1].Item1.X) * (convexTri[1].Item1.Y - convexTri[0].Item1.Y) > 0;
+                bool convex = (convexTri[1].Vertex.X - convexTri[0].Vertex.X) * (convexTri[2].Vertex.Y - convexTri[1].Vertex.Y) - (convexTri[2].Vertex.X - convexTri[1].Vertex.X) * (convexTri[1].Vertex.Y - convexTri[0].Vertex.Y) > 0;
 
                 if (!convex)
                     continue;
 
                 bool vertexContained = false;
-                for (LinkedListNode<Tuple<Vector2, int>> reflexVertexNode = flattenedVertices.First; reflexVertexNode != null; reflexVertexNode = reflexVertexNode.Next)
+                for (LinkedListNode<VertexIndex<Vector2>> reflexVertexNode = flattenedVertices.First; reflexVertexNode != null; reflexVertexNode = reflexVertexNode.Next)
                 {
-                    Tuple<Vector2, int>[] reflexTri = new Tuple<Vector2, int>[3];
+                    VertexIndex<Vector2>[] reflexTri = new VertexIndex<Vector2>[3];
                     reflexTri[0] = (reflexVertexNode.Previous ?? reflexVertexNode.List.Last).Value;
                     reflexTri[1] = reflexVertexNode.Value;
                     reflexTri[2] = (reflexVertexNode.Next ?? reflexVertexNode.List.First).Value;
-                    bool reflex = (convexTri[1].Item1.X - convexTri[0].Item1.X) * (convexTri[2].Item1.Y - convexTri[1].Item1.Y) - (convexTri[2].Item1.X - convexTri[1].Item1.X) * (convexTri[1].Item1.Y - convexTri[0].Item1.Y) < 0;
-                    if (reflex && PointInTriangle(convexTri[0].Item1, convexTri[1].Item1, convexTri[2].Item1, reflexVertexNode.Value.Item1))
+                    bool reflex = (convexTri[1].Vertex.X - convexTri[0].Vertex.X) * (convexTri[2].Vertex.Y - convexTri[1].Vertex.Y) - (convexTri[2].Vertex.X - convexTri[1].Vertex.X) * (convexTri[1].Vertex.Y - convexTri[0].Vertex.Y) < 0;
+                    if (reflex && PointInTriangle(convexTri[0].Vertex, convexTri[1].Vertex, convexTri[2].Vertex, reflexVertexNode.Value.Vertex))
                     {
                         vertexContained = true;
                         break;
@@ -476,22 +476,78 @@ namespace GLFrameworkEngine
                 if (vertexContained)
                     continue;
 
-                indices.AddLast(convexTri[0].Item2);
-                indices.AddLast(convexTri[1].Item2);
-                indices.AddLast(convexTri[2].Item2);
+                indices.AddLast(convexTri[0].Index);
+                indices.AddLast(convexTri[1].Index);
+                indices.AddLast(convexTri[2].Index);
                 flattenedVertices.Remove(convexVertexNode);
 
                 if (flattenedVertices.Count == 3)
                 {
-                    for (LinkedListNode<Tuple<Vector2, int>> vertexNode = flattenedVertices.First; vertexNode != null; vertexNode = vertexNode.Next)
+                    for (LinkedListNode<VertexIndex<Vector2>> vertexNode = flattenedVertices.First; vertexNode != null; vertexNode = vertexNode.Next)
                     {
-                        indices.AddLast(vertexNode.Value.Item2);
+                        indices.AddLast(vertexNode.Value.Index);
                     }
                     break;
                 }
             }
 
             return indices.ToArray();
+        }
+
+        public static VerticesIndices<Vector3> SplitVertices(Vector3[] vertices, int[] indices)
+        {
+            List<Vector3> newVertices = new List<Vector3>(vertices.Length); // Might as well feed in a capacity. Will probably be resized past this point anyway though
+            List<int> newIndices = new List<int>(indices.Length);
+
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                newIndices.Add(newVertices.Count + 0);
+                newIndices.Add(newVertices.Count + 1);
+                newIndices.Add(newVertices.Count + 2);
+
+                newVertices.Add(vertices[indices[i + 0]]);
+                newVertices.Add(vertices[indices[i + 1]]);
+                newVertices.Add(vertices[indices[i + 2]]);
+            }
+
+            return new VerticesIndices<Vector3>(newVertices, newIndices);
+        }
+
+        /// <summary>
+        /// A list of vertices and a list of indices
+        /// </summary>
+        public class VerticesIndices<T>
+        {
+            public List<T> Vertices;
+            public List<int> Indices;
+
+            public VerticesIndices()
+            {
+                Vertices = new List<T>();
+                Indices = new List<int>();
+            }
+
+            public VerticesIndices(List<T> vertices, List<int> indices)
+            {
+                Vertices = vertices;
+                Indices = indices;
+            }
+        }
+
+        /// <summary>
+        /// A vertex labeled with an arbitrary index.
+        /// Basically just a vertex that remembers a number.
+        /// </summary>
+        public struct VertexIndex<T>
+        {
+            public T Vertex;
+            public int Index;
+
+            public VertexIndex(T vertex, int index)
+            {
+                Vertex = vertex;
+                Index = index;
+            }
         }
     }
 }
