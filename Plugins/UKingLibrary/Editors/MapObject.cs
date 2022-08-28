@@ -329,25 +329,27 @@ namespace UKingLibrary
                     RenderAdditional();
                 };
 
-            Render.OnObjectLink += delegate (ITransformableObject obj)
-            {
-                if (((EditableObject)obj).UINode.Tag is not MapObject)
-                    return;
+                render.OnObjectLink += delegate (ITransformableObject obj)
+                {
+                    if (((EditableObject)obj).UINode.Tag is not MapObject)
+                        return;
 
-                MapObject mapObj = (MapObject)((EditableObject)obj).UINode.Tag;
-                DestLinks.Add(new LinkInstance(mapObj));
-                mapObj.SourceLinks.Add(new LinkInstance(this));
-            };
+                    MapObject mapObj = (MapObject)((EditableObject)obj).UINode.Tag;
+                    DestLinks.Add(new LinkInstance(mapObj));
+                    mapObj.SourceLinks.Add(new LinkInstance(this));
+                };
 
-            Render.OnObjectUnlink += delegate (ITransformableObject obj)
-            {
-                if (((EditableObject)obj).UINode.Tag is not MapObject)
-                    return;
+                render.OnObjectUnlink += delegate (ITransformableObject obj)
+                {
+                    if (((EditableObject)obj).UINode.Tag is not MapObject)
+                        return;
 
-                MapObject mapObj = (MapObject)((EditableObject)obj).UINode.Tag;
-                DestLinks.Remove(DestLinks.First(x => x.Object == mapObj));
-                mapObj.SourceLinks.Remove(mapObj.SourceLinks.First(x => x.Object == this));
-            };
+                    MapObject mapObj = (MapObject)((EditableObject)obj).UINode.Tag;
+                    DestLinks.Remove(DestLinks.First(x => x.Object == mapObj));
+                    mapObj.SourceLinks.Remove(mapObj.SourceLinks.First(x => x.Object == this));
+                };
+
+                Render = render;
 
                 //Load the transform attached to the object
                 LoadObjectTransform();
@@ -798,75 +800,72 @@ namespace UKingLibrary
 
             Task bfresLoadTask = new Task(() =>
             {
-                lock (_t)
+                EditableObject newRender = new TransformableObject(parent);
+                //New GL instance for multi threading
+                GraphicsMode mode = new GraphicsMode(new ColorFormat(32), 24, 8, 4, new ColorFormat(32), 2, false);
+                var window = new GameWindow(32, 32, mode);
+                GraphicsContext openTKContext = new GraphicsContext(mode, window.WindowInfo);
+                openTKContext.MakeCurrent(window.WindowInfo);
+
+                //Bfres render
+                if (actor.ContainsKey("bfres"))
                 {
-                    EditableObject newRender = new TransformableObject(parent);
-                    //New GL instance for multi threading
-                    GraphicsMode mode = new GraphicsMode(new ColorFormat(32), 24, 8, 4, new ColorFormat(32), 2, false);
-                    var window = new GameWindow(32, 32, mode);
-                    GraphicsContext openTKContext = new GraphicsContext(mode, window.WindowInfo);
-                    openTKContext.MakeCurrent(window.WindowInfo);
-
-                    //Bfres render
-                    if (actor.ContainsKey("bfres"))
+                    string modelPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}.sbfres");
+                    string animPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}_Animation.sbfres");
+                    if (File.Exists(modelPath))
                     {
-                        string modelPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}.sbfres");
-                        string animPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}_Animation.sbfres");
-                        if (File.Exists(modelPath))
+                        var renderCandidate = GetActorSpecificBfresRender(actor, new BfresRender(modelPath, parent));
+                        if (renderCandidate != null)
                         {
-                            var renderCandidate = GetActorSpecificBfresRender(actor, new BfresRender(modelPath, parent));
-                            if (renderCandidate != null)
-                            {
-                                newRender = renderCandidate;
-                                LoadTextures((BfresRender)newRender, actor["bfres"]);
+                            newRender = renderCandidate;
+                            LoadTextures((BfresRender)newRender, actor["bfres"]);
 
-                                BfresLoader.LoadAnimations((BfresRender)newRender, modelPath);
-                                if (File.Exists(animPath))
-                                    BfresLoader.LoadAnimations((BfresRender)newRender, animPath);
-                            }
+                            BfresLoader.LoadAnimations((BfresRender)newRender, modelPath);
+                            if (File.Exists(animPath))
+                                BfresLoader.LoadAnimations((BfresRender)newRender, animPath);
                         }
-                        else
-                        {
-                            for (int i = 0; ; i++)
-                            {
-                                string modelPartPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}-{i.ToString("D2")}.sbfres");
-
-                                if (File.Exists(modelPartPath))
-                                {
-                                    var renderCandidate = GetActorSpecificBfresRender(actor, new BfresRender(modelPartPath, parent));
-                                    if (renderCandidate != null)
-                                    {
-                                        newRender = renderCandidate;
-                                        LoadTextures((BfresRender)newRender, actor["bfres"]);
-                                        BfresLoader.LoadAnimations((BfresRender)newRender, modelPartPath);
-                                        if (File.Exists(animPath))
-                                            BfresLoader.LoadAnimations((BfresRender)newRender, animPath);
-
-                                        break;
-                                    }
-                                }
-                                else
-                                    break; // We couldn't find the model
-                            }
-                        }
-                        if (!(newRender is BfresRender))
-                            StudioLogger.WriteWarning($"missing bfres {actor["bfres"]} for actor {name}!");
                     }
-
-                    if (newRender is BfresRender)
-                        ((BfresRender)newRender).FrustumCullingCallback = () =>
+                    else
+                    {
+                        for (int i = 0; ; i++)
                         {
-                            ((BfresRender)newRender).UseDrawDistance = true;
-                            return FrustumCullObject((BfresRender)newRender);
-                        };
+                            string modelPartPath = PluginConfig.GetContentPath($"Model/{actor["bfres"]}-{i.ToString("D2")}.sbfres");
 
-                    if (newRender is BfresRender)
-                        Console.WriteLine("bfres");
+                            if (File.Exists(modelPartPath))
+                            {
+                                var renderCandidate = GetActorSpecificBfresRender(actor, new BfresRender(modelPartPath, parent));
+                                if (renderCandidate != null)
+                                {
+                                    newRender = renderCandidate;
+                                    LoadTextures((BfresRender)newRender, actor["bfres"]);
+                                    BfresLoader.LoadAnimations((BfresRender)newRender, modelPartPath);
+                                    if (File.Exists(animPath))
+                                        BfresLoader.LoadAnimations((BfresRender)newRender, animPath);
 
-                    ParentLoader.Scene.AddRenderObject(newRender);
-
-                    setup.Invoke(newRender);
+                                    break;
+                                }
+                            }
+                            else
+                                break; // We couldn't find the model
+                        }
+                    }
+                    if (!(newRender is BfresRender))
+                        StudioLogger.WriteWarning($"missing bfres {actor["bfres"]} for actor {name}!");
                 }
+
+                if (newRender is BfresRender)
+                    ((BfresRender)newRender).FrustumCullingCallback = () =>
+                    {
+                        ((BfresRender)newRender).UseDrawDistance = true;
+                        return FrustumCullObject((BfresRender)newRender);
+                    };
+
+                if (newRender is BfresRender)
+                    Console.WriteLine("bfres");
+
+                ParentLoader.Scene.AddRenderObject(newRender);
+
+                setup.Invoke(newRender);
             });
             bfresLoadTask.Start();
         }

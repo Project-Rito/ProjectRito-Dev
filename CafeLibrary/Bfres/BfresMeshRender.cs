@@ -137,6 +137,17 @@ namespace CafeLibrary.Rendering
 
         public void InitVertexBuffer(List<BfresGLLoader.VaoAttribute> attributes, byte[] bufferData, byte[] indices)
         {
+            if (OpenGLHelper.IsMainThread)
+                _initVertexBuffer(attributes, bufferData, indices);
+            else
+                GLContext.QueuedGLCalls +=
+                    () =>
+                    {
+                        _initVertexBuffer(attributes, bufferData, indices);
+                    };
+        }
+        private void _initVertexBuffer(List<BfresGLLoader.VaoAttribute> attributes, byte[] bufferData, byte[] indices)
+        {
             Attributes = attributes;
 
             if (Attributes.Count == 0)

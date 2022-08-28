@@ -30,7 +30,7 @@ namespace GLFrameworkEngine
         /// <summary>
         /// The object list drawn in the scene.
         /// </summary>
-        public LockList<IDrawable> Objects = new LockList<IDrawable>();
+        public LockingList<IDrawable> Objects = new LockingList<IDrawable>();
 
         /// <summary>
         /// Used to keep track of what objects can be grouped into a single draw call.

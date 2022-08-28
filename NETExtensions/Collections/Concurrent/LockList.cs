@@ -11,7 +11,7 @@ namespace NETExtensions.Collections.Concurrent
     /// <summary>
     /// Thread-safe list locking on operations. Might be locking on more than it needs to.
     /// </summary>
-    public class LockList<T> : IList<T>
+    public class LockingList<T> : IList<T>
     {
         public List<T> List = new List<T>();
         public Mutex Mutex = new Mutex();
@@ -110,25 +110,47 @@ namespace NETExtensions.Collections.Concurrent
 
         public List<T>.Enumerator GetEnumerator()
         {
-            List<T>.Enumerator output;
-            lock (Mutex)
-                output = List.GetEnumerator();
+            Mutex.WaitOne();
+            List<T>.Enumerator output = List.GetEnumerator();
+            Task t = new Task(
+                () => 
+                {
+                    while (!EqualityComparer<T>.Default.Equals(output.Current, List.Last()))
+                    {
+
+                    }
+                    Mutex.ReleaseMutex();
+                });
             return output;
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            IEnumerator<T> output;
-            lock (Mutex)
-                output = List.GetEnumerator();
+            IEnumerator<T> output = List.GetEnumerator();
+            Task t = new Task(
+                () =>
+                {
+                    while (!EqualityComparer<T>.Default.Equals(output.Current, List.Last()))
+                    {
+
+                    }
+                    Mutex.ReleaseMutex();
+                });
             return output;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            IEnumerator output;
-            lock (Mutex)
-                output = List.GetEnumerator();
+            IEnumerator output = List.GetEnumerator();
+            Task t = new Task(
+                () =>
+                {
+                    while (output.Current != (object)List.Last())
+                    {
+
+                    }
+                    Mutex.ReleaseMutex();
+                });
             return output;
         }
     }

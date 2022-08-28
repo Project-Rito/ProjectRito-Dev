@@ -52,7 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NETUtility\NETExtensions.csproj" />
+    <ProjectReference Include="..\NETExtensions\NETExtensions.csproj" />
     <ProjectReference Include="..\Toolbox.Core\Toolbox.Core.csproj" />
   </ItemGroup>
 
