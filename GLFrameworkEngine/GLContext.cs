@@ -13,6 +13,12 @@ namespace GLFrameworkEngine
         public static GLContext ActiveContext = null;
 
         /// <summary>
+        /// Executed and cleared before every frame.
+        /// Self-contained OpenGL logic (such as loading mesh data) should be appended.
+        /// </summary>
+        public static Action QueuedGLCalls = delegate { };
+
+        /// <summary>
         /// Default rendering arguments when a rendered frame is being drawn.
         /// </summary>
         public RenderFrameArgs FrameArgs = new RenderFrameArgs();

@@ -197,6 +197,9 @@ namespace MapStudio.UI
 
             _context.UpdateViewport = false;
 
+            GLContext.QueuedGLCalls.Invoke();
+            GLContext.QueuedGLCalls = delegate { };
+
             //Scene is drawn with frame arguments.
             //This is to customize what can be drawn during a single frame.
             //Backgrounds, alpha, and other data can be toggled for render purposes.

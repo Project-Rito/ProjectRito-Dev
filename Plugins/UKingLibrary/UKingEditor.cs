@@ -17,6 +17,16 @@ namespace UKingLibrary
 {
     public class UKingEditor : FileEditor, IFileFormat, IDisposable
     {
+        public static UKingEditor ActiveUkingEditor
+        {
+            get
+            {
+                if (Workspace.ActiveWorkspace.ActiveEditor is UKingEditor)
+                    return (UKingEditor)Workspace.ActiveWorkspace.ActiveEditor;
+                return null;
+            }
+        }
+
         public string[] Description => new string[] { "Field Map Data for Breath of the Wild" };
         public string[] Extension => new string[] { "*.json" };
 

@@ -66,6 +66,12 @@ namespace UKingLibrary
             RemoveRenders();
         }
 
+        public void Replace(hkaiNavMesh navmesh)
+        {
+            Root.m_namedVariants[0].m_variant = navmesh;
+            UpdateRenders();
+        }
+
         public void Save(Stream stream)
         {
             UpdateRenders(); // Might as well apply render updates
@@ -139,7 +145,10 @@ namespace UKingLibrary
         private void RemoveRenders()
         {
             foreach (HavokMeshShapeRender r in Renders)
+            {
                 Scene?.RemoveRenderObject(r);
+                r.Dispose();
+            }
             Renders.Clear();
         }
         #endregion

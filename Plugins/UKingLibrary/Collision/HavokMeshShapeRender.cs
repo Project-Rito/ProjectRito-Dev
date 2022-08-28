@@ -210,6 +210,16 @@ namespace UKingLibrary
             ShapeMesh = new RenderMesh<HavokMeshShapeVertex>(vertices, indices.ToArray(), OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
             Vertices = vertices;
             Indices = indices.ToArray();
+
+
+            Console.WriteLine("Vertices.Length:");
+            Console.WriteLine(Vertices.Length);
+            Console.WriteLine("Indices.Length");
+            Console.WriteLine(Indices.Length);
+            Console.WriteLine("Max Index:");
+            Console.WriteLine(Indices.Max());
+            Console.WriteLine("Min Index:");
+            Console.WriteLine(Indices.Min());
         }
 
         public void SetBounding(BoundingNode boundingNode)

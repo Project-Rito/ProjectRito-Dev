@@ -13,12 +13,26 @@ namespace GLFrameworkEngine
         public RenderMesh() { }
 
         public RenderMesh(TVertex[] vertices, PrimitiveType primitiveType) : base(primitiveType) {
-            Init(vertices);
+            if (OpenGLHelper.IsMainThread)
+                Init(vertices);
+            else
+                GLContext.QueuedGLCalls +=
+                    () =>
+                    {
+                        Init(vertices);
+                    };
         }
 
         public RenderMesh(TVertex[] vertices, int[] indices, PrimitiveType primitiveType) : base(primitiveType)
         {
-            Init(vertices, indices);
+            if (OpenGLHelper.IsMainThread)
+                Init(vertices, indices);
+            else
+                GLContext.QueuedGLCalls +=
+                    () =>
+                    {
+                        Init(vertices, indices);
+                    };
         }
 
         protected override void BindVAO()
