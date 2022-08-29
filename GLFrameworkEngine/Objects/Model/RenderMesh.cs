@@ -116,9 +116,20 @@ namespace GLFrameworkEngine
             foreach (var att in attributes)
             {
                 if (!string.IsNullOrEmpty(att.Name))
-                    vao.AddInstancedAttribute(att.Name, att.ElementCount, att.FloatType, att.Normalized, vertexStride, att.Offset.Value);
+                {
+                    if (att.IsFloat)
+                        vao.AddInstancedAttribute(att.Name, att.ElementCount, att.FloatType, att.Normalized, vertexStride, att.Offset.Value);
+                    else
+                        vao.AddInstancedAttribute(att.Name, att.ElementCount, att.IntType, att.Normalized, vertexStride, att.Offset.Value);
+                }
                 else
-                    vao.AddInstancedAttribute(att.Location, att.ElementCount, att.FloatType, att.Normalized, vertexStride, att.Offset.Value);
+                {
+                    if (att.IsFloat)
+                        vao.AddInstancedAttribute(att.Location, att.ElementCount, att.FloatType, att.Normalized, vertexStride, att.Offset.Value);
+                    else
+                        vao.AddInstancedAttribute(att.Location, att.ElementCount, att.IntType, att.Normalized, vertexStride, att.Offset.Value);
+                }
+                    
             }
 
             if (instancedBuffers.Length == 0) {
