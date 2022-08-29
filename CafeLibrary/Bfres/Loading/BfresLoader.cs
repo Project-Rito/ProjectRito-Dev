@@ -183,7 +183,14 @@ namespace CafeLibrary.Rendering
                 var indices = BfresGLLoader.LoadIndexBufferData(shape);
 
                 mesh.LODMeshes = groups;
-                mesh.InitVertexBuffer(attributes, buffer, indices);
+                if (OpenGLHelper.IsMainThread)
+                    mesh.InitVertexBuffer(attributes, buffer, indices);
+                else
+                    GLContext.QueuedGLCalls +=
+                        () =>
+                        {
+                            mesh.InitVertexBuffer(attributes, buffer, indices);
+                        };
 
                 var matRender = LoadMaterial(renderer, modelRender, mesh, mat, shape);
                 if (matRender.IsTransparent)
