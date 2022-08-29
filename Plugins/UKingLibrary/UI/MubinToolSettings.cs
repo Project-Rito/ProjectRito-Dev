@@ -15,8 +15,8 @@ namespace UKingLibrary
         public MubinToolSettings() {
         }
 
-        bool _collisionCacheProcessing = false;
-        bool _navmeshBuildProcessing = false;
+        string _collisionCacheStatus = "";
+        string _navmeshBuildStatus = "";
         private string _removeOnlyOneUnitConfigName = @"";
         private string _removeOnlyOneFieldName = @"MainField";
         bool _removeOnlyOneProcessing = false;
@@ -47,34 +47,53 @@ namespace UKingLibrary
             {
                 if (ImGui.Button(TranslationSource.GetText("CACHE_BAKED_COLLISION")))
                 {
-                    _collisionCacheProcessing = true;
-                    new Task(() => { CollisionCacher.CacheAll(PluginConfig.CollisionCacheDir); _collisionCacheProcessing = false; }).Start();
+                    _collisionCacheStatus = "PROCESSING";
+                    new Task(
+                        () => 
+                        {
+                            try
+                            {
+                                CollisionCacher.CacheAll(PluginConfig.CollisionCacheDir);
+                                _collisionCacheStatus = "";
+                            }
+                            catch
+                            {
+                                _collisionCacheStatus = "ERROR";
+                            }
+                            
+                        }).Start();
                 }
-                if (_collisionCacheProcessing)
-                {
-                    ImGui.SameLine(); ImGui.TextDisabled($"{TranslationSource.GetText("PROCESSING")}");
-                }
+                ImGui.SameLine(); ImGui.TextDisabled($"{TranslationSource.GetText(_collisionCacheStatus)}");
             }
 
             if (ImGui.CollapsingHeader(TranslationSource.GetText("NAVMESH_TOOLS")))
             {
-                ImGui.SliderFloat(TranslationSource.GetText("CELL_HEIGHT"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.CellHeight, 0.001f, 10f);
                 ImGui.SliderFloat(TranslationSource.GetText("CELL_SIZE"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.CellSize, 0.001f, 10f);
-                ImGui.SliderInt(TranslationSource.GetText("MIN_REGION_AREA"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.MinRegionArea, 1, 256);
-                ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_CLIMB"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableClimb, 0.001f, 10f);
+                ImGui.SliderFloat(TranslationSource.GetText("CELL_HEIGHT"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.CellHeight, 0.001f, 10f);
+                ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_SLOPE_ANGLE"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableSlopeAngle, 0.001f, 180f);
                 ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_HEIGHT"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableHeight, 0.001f, 10f);
+                ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_CLIMB"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableClimb, 0.001f, 10f);
                 ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_RADIUS"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableRadius, 0.001f, 10f);
-                ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_SLOPE_ANGLE"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableSlopeAngle, 0.001f, 10f);
+                ImGui.SliderInt(TranslationSource.GetText("MIN_REGION_AREA"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.MinRegionArea, 1, 256);
 
                 if (ImGui.Button(TranslationSource.GetText("BUILD_NAVMESH")))
                 {
-                    _navmeshBuildProcessing = true;
-                    new Task(() => { NavmeshBuilder.Build(); _navmeshBuildProcessing = false; }).Start();
+                    _navmeshBuildStatus = "PROCESSING";
+                    new Task(
+                        () => 
+                        {
+                            try
+                            {
+                                NavmeshBuilder.Build();
+                                _navmeshBuildStatus = "";
+                            }
+                            catch
+                            {
+                                _navmeshBuildStatus = "ERROR";
+                            }
+                        }).Start();
                 }
-                if (_navmeshBuildProcessing)
-                {
-                    ImGui.SameLine(); ImGui.TextDisabled($"{TranslationSource.GetText("PROCESSING")}");
-                }
+                ImGui.SameLine(); ImGui.TextDisabled($"{TranslationSource.GetText(_navmeshBuildStatus)}");
             }
 
             if (ImGui.CollapsingHeader(TranslationSource.GetText("ONLYONE_TOOLS"))) {
