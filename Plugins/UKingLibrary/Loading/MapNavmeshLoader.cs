@@ -148,6 +148,7 @@ namespace UKingLibrary
 
             foreach (System.Numerics.Vector4 pos in ((hkaiDirectedGraphExplicitCost)Root.m_namedVariants[1].m_variant).m_positions)
             {
+                continue;
                 Vector4 position = new Vector4(pos.X, pos.Y, pos.Z, pos.W);
                 var render = new TransformableObject(RootNode);
                 render.Transform.Position = (position.Xyz + Origin) * GLContext.PreviewScale;
