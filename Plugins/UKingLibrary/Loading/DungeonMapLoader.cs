@@ -348,6 +348,15 @@ namespace UKingLibrary
 
                 DungeonData.SarcData.Files[$"Physics/StaticCompound/CDungeon/{DungeonName}.shksc"] = YAZ0.Compress(memoryStream.ToArray());
             }
+            foreach (MapNavmeshLoader loader in Navmesh)
+            {
+                string fileName = loader.RootNode.Header;
+
+                MemoryStream memoryStream = new MemoryStream();
+                loader.Save(memoryStream);
+
+                DungeonData.SarcData.Files[$"NavMesh/CDungeon/{DungeonName}/{DungeonName}.shknm2"] = YAZ0.Compress(memoryStream.ToArray());
+            }
 
             Directory.CreateDirectory(Path.Join(savePath, "content/Pack"));
             FileStream fileStream = File.Open(Path.Join(savePath, $"content/Pack/{RootNode.Header}"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);

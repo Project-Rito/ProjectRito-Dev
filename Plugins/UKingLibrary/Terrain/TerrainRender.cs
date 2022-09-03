@@ -28,10 +28,12 @@ namespace UKingLibrary.Rendering
         static GLTexture2DArray TerrainTexture_Alb;
         static GLTexture2DArray TerrainTexture_Cmb;
 
-        static int[] IndexBuffer;
+        public static int[] Indices;
 
         public bool EnableFrustumCulling => true;
         public bool InFrustum { get; set; } = true;
+
+        public TerrainVertex[] Vertices;
 
         BoundingNode Bounding = new BoundingNode();
 
@@ -57,8 +59,8 @@ namespace UKingLibrary.Rendering
             var texCoords = GetTexCoords(materialBuffer, MAP_TILE_SIZE, MAP_TILE_LENGTH, INDEX_COUNT_SIDE);
             var materialMap = GetTexIndexBuffer(materialBuffer);
             //Fixed index buffer. It can be kept static as all terrain tiles use the same index layout.
-            if (IndexBuffer == null)
-                IndexBuffer = GetIndexBuffer();
+            if (Indices == null)
+                Indices = GetIndexBuffer();
 
             // Apply X and Z scaling
             for (int i = 0; i < positions.Length; i++)
@@ -68,7 +70,7 @@ namespace UKingLibrary.Rendering
             }
 
             //Normals calculation
-            var normals = DrawingHelper.CalculateNormals(positions.ToList(), IndexBuffer.ToList());
+            var normals = DrawingHelper.CalculateNormals(positions.ToList(), Indices.ToList());
             //Tangents calculation
             var tangents = GetTangents(positions);
 
@@ -96,7 +98,8 @@ namespace UKingLibrary.Rendering
             Bounding.Radius = (Bounding.Box.Max - Bounding.Box.Min).Length;
 
             //Finish loading the terrain mesh
-            TerrainMesh = new RenderMesh<TerrainVertex>(vertices, IndexBuffer, PrimitiveType.Triangles);
+            TerrainMesh = new RenderMesh<TerrainVertex>(vertices, Indices, PrimitiveType.Triangles);
+            Vertices = vertices;
             LoadTerrainTextures();
         }
 

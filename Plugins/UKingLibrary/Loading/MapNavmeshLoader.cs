@@ -66,9 +66,14 @@ namespace UKingLibrary
             RemoveRenders();
         }
 
-        public void Replace(hkaiNavMesh navmesh)
+        public void Replace(hkRootLevelContainer root)
         {
-            Root.m_namedVariants[0].m_variant = navmesh;
+            // We'll just do this...
+            root.m_namedVariants[0].m_name = Root.m_namedVariants[0].m_name;
+            root.m_namedVariants[1].m_name = Root.m_namedVariants[1].m_name;
+            root.m_namedVariants[2].m_name = Root.m_namedVariants[2].m_name;
+
+            Root = root;
             UpdateRenders();
         }
 
@@ -117,29 +122,38 @@ namespace UKingLibrary
 
             RemoveRenders();
 
-            HavokMeshShapeRender render = new HavokMeshShapeRender(RootNode);
-            render.LoadNavmesh((hkaiNavMesh)Root.m_namedVariants[0].m_variant);
+            HavokMeshShapeRender nmrender = new HavokMeshShapeRender(RootNode);
+            nmrender.LoadNavmesh((hkaiNavMesh)Root.m_namedVariants[0].m_variant);
 
-            render.Transform.Position = Origin * GLContext.PreviewScale;
-            render.Transform.Rotation = OpenTK.Quaternion.Identity;
-            render.Transform.Scale = OpenTK.Vector3.One;
-            render.Transform.UpdateMatrix(true);
+            nmrender.Transform.Position = Origin * GLContext.PreviewScale;
+            nmrender.Transform.Rotation = OpenTK.Quaternion.Identity;
+            nmrender.Transform.Scale = OpenTK.Vector3.One;
+            nmrender.Transform.UpdateMatrix(true);
 
-            render.IsVisibleCallback += delegate
+            nmrender.IsVisibleCallback += delegate
             {
                 return MapData.ShowNavmeshShapes;
             };
 
-            ((EditableObjectNode)render.UINode).UIProperyDrawer += delegate
+            ((EditableObjectNode)nmrender.UINode).UIProperyDrawer += delegate
             {
                 ImGui.Separator();
                 ImGui.Text("Debug Navmesh Info:");
                 ImGui.Separator();
             };
 
-            Renders.Add(render);
+            Renders.Add(nmrender);
 
-            Scene?.AddRenderObject(render);
+            Scene?.AddRenderObject(nmrender);
+
+            foreach (System.Numerics.Vector4 pos in ((hkaiDirectedGraphExplicitCost)Root.m_namedVariants[1].m_variant).m_positions)
+            {
+                Vector4 position = new Vector4(pos.X, pos.Y, pos.Z, pos.W);
+                var render = new TransformableObject(RootNode);
+                render.Transform.Position = (position.Xyz + Origin) * GLContext.PreviewScale;
+                render.Transform.UpdateMatrix(true);
+                Scene?.AddRenderObject(render);
+            }
         }
 
         private void RemoveRenders()

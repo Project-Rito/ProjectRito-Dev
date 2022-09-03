@@ -18,6 +18,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MapStudio", "MapStudio\MapS
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKingLibrary", "Plugins\UKingLibrary\UKingLibrary.csproj", "{AA80A602-0BA9-4C9E-80C5-1A675F2BE3DD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1BC0B500-15C4-4C43-8663-494D3A0CB9C5} = {1BC0B500-15C4-4C43-8663-494D3A0CB9C5}
+		{52439401-AF55-46B7-A482-85893188DD00} = {52439401-AF55-46B7-A482-85893188DD00}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CafeLibrary", "CafeLibrary\CafeLibrary.csproj", "{97635060-BD51-41DC-9B44-9AD6EE4583B9}"
 EndProject

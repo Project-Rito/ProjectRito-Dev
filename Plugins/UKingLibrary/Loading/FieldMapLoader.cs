@@ -347,6 +347,22 @@ namespace UKingLibrary
                     fileStream.Flush();
                     fileStream.Close();
                 }
+
+                // Navmesh saving
+                foreach (NodeBase file in sectionFolder.FolderChildren["NavMesh"].Children)
+                {
+                    string fileName = file.Header;
+                    MapNavmeshLoader loader = (MapNavmeshLoader)file.Tag;
+
+                    Directory.CreateDirectory(Path.Join(savePath, $"content/NavMesh/{RootNode.Header}/"));
+                    FileStream fileStream = File.Open(Path.Join(savePath, $"content/NavMesh/{RootNode.Header}/{fileName}"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
+
+                    loader.Save(fileStream);
+
+                    fileStream.SetLength(fileStream.Position);
+                    fileStream.Flush();
+                    fileStream.Close();
+                }
             }
         }
 

@@ -43,6 +43,7 @@
     <ProjectReference Include="..\..\Toolbox.Core\Toolbox.Core.csproj">
       <Private>false</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\HKX2Builders\HKX2Builders\HKX2Builders.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,14 +65,6 @@
     </Reference>
     <Reference Include="BfshaLibrary">
       <HintPath>..\..\MapStudio\Lib\BfshaLibrary.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="HKX2">
-      <HintPath>..\..\MapStudio\Lib\HKX2.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="HKX2Builders">
-      <HintPath>..\..\MapStudio\Lib\HKX2Builders.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

@@ -513,6 +513,24 @@ namespace GLFrameworkEngine
             return new VerticesIndices<Vector3>(newVertices, newIndices);
         }
 
+        public class LinkedVertex<T>
+        {
+            public T Vertex;
+            public List<int> Adjacencies;
+
+            public LinkedVertex(T vertex)
+            {
+                Vertex = vertex;
+                Adjacencies = new List<int>();
+            }
+
+            public LinkedVertex(T vertex, List<int> adjacencies)
+            {
+                Vertex = vertex;
+                Adjacencies = adjacencies;
+            }
+        }
+
         /// <summary>
         /// A list of vertices and a list of indices
         /// </summary>
@@ -531,6 +549,37 @@ namespace GLFrameworkEngine
             {
                 Vertices = vertices;
                 Indices = indices;
+            }
+
+            /*
+            public VerticesIndices(List<LinkedVertex> linkedVertices)
+            {
+
+            }*/
+
+            public List<LinkedVertex<T>> ToLinkedVertices()
+            {
+                LinkedVertex<T>[] result = new LinkedVertex<T>[Vertices.Count];
+                for (int i = 0; i < Indices.Count; i += 3)
+                {
+                    if (result[Indices[i + 0]] == null)
+                        result[Indices[i + 0]] = new LinkedVertex<T>(Vertices[Indices[i + 0]]);
+
+                    if (result[Indices[i + 1]] == null)
+                        result[Indices[i + 1]] = new LinkedVertex<T>(Vertices[Indices[i + 1]]);
+
+                    if (result[Indices[i + 2]] == null)
+                        result[Indices[i + 2]] = new LinkedVertex<T>(Vertices[Indices[i + 2]]);
+
+                    result[Indices[i + 0]].Adjacencies.Add(Indices[i + 1]);
+                    result[Indices[i + 0]].Adjacencies.Add(Indices[i + 2]);
+                    result[Indices[i + 1]].Adjacencies.Add(Indices[i + 0]);
+                    result[Indices[i + 1]].Adjacencies.Add(Indices[i + 2]);
+                    result[Indices[i + 2]].Adjacencies.Add(Indices[i + 0]);
+                    result[Indices[i + 2]].Adjacencies.Add(Indices[i + 1]);
+                }
+
+                return result.ToList();
             }
         }
 
