@@ -627,7 +627,7 @@ namespace MapStudio.UI
             foreach (var child in parent.Children)
                 GetSelectedNode(child, ref selected);
 
-            return;
+            return; // This is just funny tbh
         }
 
         public void OnAssetViewportDrop()

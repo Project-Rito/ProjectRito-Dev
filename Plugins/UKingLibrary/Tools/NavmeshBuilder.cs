@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -20,6 +21,29 @@ namespace UKingLibrary
             get
             {
                 return UKingEditor.ActiveUkingEditor.ActiveMapLoader;
+            }
+        }
+
+        public static void Prepare(string savePath)
+        {
+            for (int xIndex = 0; xIndex < 40; xIndex++)
+            {
+                for (int zIndex = 0; zIndex < 32; zIndex++)
+                {
+                    string fileName = $"{xIndex}-{zIndex}.shknm2";
+
+                    foreach (string fieldName in GlobalData.FieldNames)
+                    {
+                        MapNavmeshLoader loader = new MapNavmeshLoader();
+                        loader.Load(File.OpenRead(PluginConfig.GetContentPath($"NavMesh/{fieldName}/{fileName}")), fileName, Vector3.Zero);
+                        loader.ClearStreamingSets();
+
+                        string filePath = Path.Join(savePath, $"content/NavMesh/{fieldName}/{fileName}");
+
+                        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                        loader.Save(File.Create(filePath));
+                    }
+                }
             }
         }
 

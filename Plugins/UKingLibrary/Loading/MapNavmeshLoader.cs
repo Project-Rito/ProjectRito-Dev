@@ -69,12 +69,39 @@ namespace UKingLibrary
         public void Replace(hkRootLevelContainer root)
         {
             // We'll just do this...
+            //ClearStreamingSets();
+            //((hkaiDirectedGraphExplicitCost)root.m_namedVariants[1].m_variant).m_streamingSets = ((hkaiDirectedGraphExplicitCost)Root.m_namedVariants[1].m_variant).m_streamingSets;
             root.m_namedVariants[0].m_name = Root.m_namedVariants[0].m_name;
             root.m_namedVariants[1].m_name = Root.m_namedVariants[1].m_name;
             root.m_namedVariants[2].m_name = Root.m_namedVariants[2].m_name;
 
             Root = root;
+            //Root.m_namedVariants[0] = root.m_namedVariants[0];
             UpdateRenders();
+        }
+
+        public void ClearStreamingSets()
+        {
+            if (Root.m_namedVariants.Count != 3)
+                return;
+            foreach (var streamingSet in ((hkaiNavMesh)Root.m_namedVariants[0].m_variant).m_streamingSets)
+            {
+                streamingSet.m_meshConnections.Clear();
+                streamingSet.m_graphConnections.Clear();
+                streamingSet.m_volumeConnections.Clear();
+            }
+            foreach (var streamingSet in ((hkaiDirectedGraphExplicitCost)Root.m_namedVariants[1].m_variant).m_streamingSets)
+            {
+                streamingSet.m_meshConnections.Clear();
+                streamingSet.m_graphConnections.Clear();
+                streamingSet.m_volumeConnections.Clear();
+            }
+            foreach (var streamingSet in ((hkaiStaticTreeNavMeshQueryMediator)Root.m_namedVariants[2].m_variant).m_navMesh.m_streamingSets)
+            {
+                streamingSet.m_meshConnections.Clear();
+                streamingSet.m_graphConnections.Clear();
+                streamingSet.m_volumeConnections.Clear();
+            }
         }
 
         public void Save(Stream stream)
@@ -148,7 +175,6 @@ namespace UKingLibrary
 
             foreach (System.Numerics.Vector4 pos in ((hkaiDirectedGraphExplicitCost)Root.m_namedVariants[1].m_variant).m_positions)
             {
-                continue;
                 Vector4 position = new Vector4(pos.X, pos.Y, pos.Z, pos.W);
                 var render = new TransformableObject(RootNode);
                 render.Transform.Position = (position.Xyz + Origin) * GLContext.PreviewScale;

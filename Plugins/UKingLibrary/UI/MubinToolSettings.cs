@@ -17,6 +17,7 @@ namespace UKingLibrary
 
         string _collisionCacheStatus = "";
         string _navmeshBuildStatus = "";
+        string _navmeshPrepareStatus = "";
         private string _removeOnlyOneUnitConfigName = @"";
         private string _removeOnlyOneFieldName = @"MainField";
         bool _removeOnlyOneProcessing = false;
@@ -76,8 +77,13 @@ namespace UKingLibrary
                 ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_RADIUS"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableRadius, 0.001f, 10f);
                 ImGui.SliderInt(TranslationSource.GetText("MIN_REGION_AREA"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.MinRegionArea, 1, 256);
 
+                ImGui.SliderFloat(TranslationSource.GetText("COST_Y_SCALE"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.CostYScale, 0f, 10f);
+                ImGui.SliderFloat(TranslationSource.GetText("MIN_GRAPH_GROUPING"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.MinGraphGrouping, 5f, 20f);
+
                 if (ImGui.Button(TranslationSource.GetText("BUILD_NAVMESH")))
                 {
+                    NavmeshBuilder.Build();
+                    /*
                     _navmeshBuildStatus = "PROCESSING";
                     new Task(
                         () => 
@@ -92,8 +98,23 @@ namespace UKingLibrary
                                 _navmeshBuildStatus = "ERROR";
                             }
                         }).Start();
+                    */
                 }
                 ImGui.SameLine(); ImGui.TextDisabled($"{TranslationSource.GetText(_navmeshBuildStatus)}");
+
+                /*
+                if (ImGui.Button(TranslationSource.GetText("PREPARE_NAVMESH")))
+                {
+                    _navmeshPrepareStatus = "PROCESSING";
+                    new Task(
+                        () =>
+                        {
+                            NavmeshBuilder.Prepare(Path.GetFullPath(Path.Join(Path.GetDirectoryName(editor.FileInfo.FilePath), $"{editor.EditorConfig.FolderName}")));
+                            _navmeshPrepareStatus = "";
+                        }).Start();
+                }
+                ImGui.SameLine(); ImGui.TextDisabled($"{TranslationSource.GetText(_navmeshPrepareStatus)}");
+                */
             }
 
             if (ImGui.CollapsingHeader(TranslationSource.GetText("ONLYONE_TOOLS"))) {
