@@ -10,6 +10,8 @@ uniform bool uDebugSections;
 
 in vec3 v_PositionWorld;
 in vec2 v_TexCoords;
+in float v_XAxisFlowRate;
+in float v_ZAxisFlowRate;
 in vec3 v_NormalWorld;
 in vec3 v_TangentWorld;
 in vec3 v_DebugHighlight;
@@ -20,6 +22,7 @@ out vec4 fragColor;
 
 // GL
 uniform vec3 camPosition;
+uniform float millisecond;
 
 // Used for passing vertex info to BfresUtility
 struct VertexAttributes
@@ -52,8 +55,14 @@ void main(void)
     vert.tangent = v_TangentWorld.xyz;
     vert.bitangent = cross(v_NormalWorld, v_TangentWorld.xyz);
 
+    // Flow stuff
+    vec2 flowTexCoord0 = vec2((v_TexCoords.x * v_XAxisFlowRate), (v_TexCoords.y * v_ZAxisFlowRate)) * (millisecond / 20000.f);
+    vec2 flowTexCoord1 = vec2((v_TexCoords.x * -v_XAxisFlowRate), (v_TexCoords.y * -v_ZAxisFlowRate)) * (millisecond / 30000.f);
+
     // Normals
-    vec4 texNormal = texture(texWater_Nrm, vec3(v_TexCoords.xy, texIndex));
+    vec4 texNormal0 = texture(texWater_Nrm, vec3(flowTexCoord0, texIndex));
+    vec4 texNormal1 = texture(texWater_Nrm, vec3(flowTexCoord1, texIndex));
+    vec4 texNormal = mix(texNormal0, texNormal1, 0.5f);
     vec3 worldNormal = CalcBumpedNormal(texNormal.xy, vert);
 
     // Base water color
@@ -79,7 +88,9 @@ void main(void)
         fragColor.rgb += v_DebugHighlight;
 
     // Fake emmission
-    float emm = texture(texWater_Emm, vec3(v_TexCoords.xy, texIndex)).r;
+    float emm0 = texture(texWater_Emm, vec3(flowTexCoord0, texIndex)).r;
+    float emm1 = texture(texWater_Emm, vec3(flowTexCoord1, texIndex)).r;
+    float emm = mix(emm0, emm1, 0.5f);
     fragColor = vec4(fragColor.rgb * (emm + 1), fragColor.a);
 
     // Spec
