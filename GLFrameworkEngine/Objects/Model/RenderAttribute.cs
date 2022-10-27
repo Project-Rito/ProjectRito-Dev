@@ -216,7 +216,7 @@ namespace GLFrameworkEngine
                 attribute.ElementCount = CalculateCount(field.FieldType);
                 //Set offset automatically if necessary
                 if (attribute.Offset == null) {
-                    attribute.Offset += offset;
+                    attribute.Offset = offset;
                     bufferOffsets[attribute.BufferIndex] += attribute.Size;
                 }
 

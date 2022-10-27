@@ -78,7 +78,10 @@ namespace UKingLibrary
                 ImGui.SliderInt(TranslationSource.GetText("MIN_REGION_AREA"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.MinRegionArea, 1, 256);
 
                 ImGui.SliderFloat(TranslationSource.GetText("COST_Y_SCALE"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.CostYScale, 0f, 10f);
-                ImGui.SliderFloat(TranslationSource.GetText("MIN_GRAPH_GROUPING"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.MinGraphGrouping, 5f, 20f);
+                ImGui.SliderInt(TranslationSource.GetText("KMEANS_CLUSTERING_K"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.KMeansClusteringK, 1, 100);
+                //ImGui.SliderFloat(TranslationSource.GetText("GRAPH_MIN_GROUPING"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.GraphMinGrouping, 5f, 20f);
+                //ImGui.SliderFloat(TranslationSource.GetText("GRAPH_EDGE_RADIUS"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.GraphEdgeRadius, 0.5f, 5f);
+                ImGui.SliderFloat(TranslationSource.GetText("STREAMING_SET_SEARCH_RADIUS"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.StreamingSetSearchRadius, 1f, 20f);
 
                 if (ImGui.Button(TranslationSource.GetText("BUILD_NAVMESH")))
                 {

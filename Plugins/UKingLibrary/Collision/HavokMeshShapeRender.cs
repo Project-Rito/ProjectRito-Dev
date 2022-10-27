@@ -156,7 +156,7 @@ namespace UKingLibrary
             Indices = indices.ToArray();
         }
 
-        public void LoadNavmesh(hkaiNavMesh navmesh)
+        public void LoadNavmesh(hkaiNavMesh navmesh, Vector3 origin = default)
         {
             List<int> indices = new List<int>(navmesh.m_vertices.Count); // Setting capacity just as rough estimate.
             foreach (hkaiNavMeshFace face in navmesh.m_faces)
@@ -210,6 +210,10 @@ namespace UKingLibrary
             ShapeMesh = new RenderMesh<HavokMeshShapeVertex>(vertices, indices.ToArray(), OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
             Vertices = vertices;
             Indices = indices.ToArray();
+
+            Vector3 bMin = new Vector3(navmesh.m_aabb.m_min.X, navmesh.m_aabb.m_min.Y, navmesh.m_aabb.m_min.Z) * GLContext.PreviewScale + origin;
+            Vector3 bMax = new Vector3(navmesh.m_aabb.m_max.X, navmesh.m_aabb.m_max.Y, navmesh.m_aabb.m_max.Z) * GLContext.PreviewScale + origin;
+            SetBounding(new BoundingNode(bMin, bMax));
         }
 
         public void SetBounding(BoundingNode boundingNode)
@@ -219,16 +223,16 @@ namespace UKingLibrary
 
         public struct HavokMeshShapeVertex
         {
-            [RenderAttribute("vPosition", VertexAttribPointerType.Float, 0)]
+            [RenderAttribute("vPosition", VertexAttribPointerType.Float)]
             public Vector3 Position;
 
-            [RenderAttribute("vNormalWorld", VertexAttribPointerType.Float, 12)]
+            [RenderAttribute("vNormalWorld", VertexAttribPointerType.Float)]
             public Vector3 Normal;
 
-            [RenderAttribute("vVertexColor", VertexAttribPointerType.Float, 24)]
+            [RenderAttribute("vVertexColor", VertexAttribPointerType.Float)]
             public Vector4 VertexColor;
 
-            [RenderAttribute("vVertexIndex", VertexAttribPointerType.Float, 40)]
+            [RenderAttribute("vVertexIndex", VertexAttribPointerType.Float)]
             public float VertexIndex;
         }
     }

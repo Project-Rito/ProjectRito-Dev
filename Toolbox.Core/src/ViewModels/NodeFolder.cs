@@ -7,7 +7,7 @@ namespace Toolbox.Core.ViewModels
 {
     public class NodeFolder : NodeBase
     {
-        public Dictionary<string, NodeBase> FolderChildren
+        public Dictionary<string, NodeBase> NamedChildren
         {
             get
             {
@@ -32,9 +32,25 @@ namespace Toolbox.Core.ViewModels
             }
         }
 
+        public Dictionary<string, NodeFolder> FolderChildren
+        {
+            get
+            {
+                Dictionary<string, NodeFolder> result = new Dictionary<string, NodeFolder>(Children.Count);
+
+                foreach (var childNode in Children)
+                {
+                    if (childNode is NodeFolder)
+                        result.Add(childNode.Header, (NodeFolder)childNode);
+                }
+
+                return result;
+            }
+        }
+
         public new void AddChild(NodeBase child)
         {
-            if (!FolderChildren.ContainsKey(child.Header))
+            if (!NamedChildren.ContainsKey(child.Header))
             {
                 Children.Add(child);
                 child.Parent = this;
@@ -45,7 +61,7 @@ namespace Toolbox.Core.ViewModels
 
         public void TryAddChild(NodeBase child)
         {
-            if (!FolderChildren.ContainsKey(child.Header))
+            if (!NamedChildren.ContainsKey(child.Header))
             {
                 Children.Add(child);
                 child.Parent = this;

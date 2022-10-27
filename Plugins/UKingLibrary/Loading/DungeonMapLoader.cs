@@ -85,7 +85,7 @@ namespace UKingLibrary
 
             RootNode.Header = "Some random dungeon, idk.";
             RootNode.Tag = this;
-            RootNode.FolderChildren = new Dictionary<string, NodeBase>
+            RootNode.NamedChildren = new Dictionary<string, NodeBase>
                 {
                     { "Muunt", new NodeFolder("Muunt") },
                     { "Collision", new NodeFolder("Collision") },
@@ -126,13 +126,13 @@ namespace UKingLibrary
             // Load baked collision data
             MapCollisionLoader bakedCollisionLoader = new MapCollisionLoader();
             bakedCollisionLoader.Load(GetStaticCompound(), $"{DungeonName}.shksc", Scene);
-            RootNode.FolderChildren["Collision"].AddChild(bakedCollisionLoader.RootNode);
+            RootNode.NamedChildren["Collision"].AddChild(bakedCollisionLoader.RootNode);
             BakedCollision.Add(bakedCollisionLoader);
 
             // Load navmesh data
             MapNavmeshLoader navmeshLoader = new MapNavmeshLoader();
             navmeshLoader.Load(GetNavmesh(), $"{DungeonName}.shknm2", Vector3.Zero, Scene);
-            RootNode.FolderChildren["NavMesh"].AddChild(navmeshLoader.RootNode);
+            RootNode.NamedChildren["NavMesh"].AddChild(navmeshLoader.RootNode);
             Navmesh.Add(navmeshLoader);
 
             //Static and dynamic actors
@@ -148,7 +148,7 @@ namespace UKingLibrary
 
             RootNode.Header = fileName;
             foreach (var mapFile in MapData)
-                RootNode.FolderChildren["Muunt"].AddChild(mapFile.RootNode);
+                RootNode.NamedChildren["Muunt"].AddChild(mapFile.RootNode);
 
             //editor.LoadProd(ClusteringInstances, $"{DungeonName}_Clustering.sblwp");
             //editor.LoadProd(TeraTreeInstances, $"{DungeonName}_TeraTree.sblwp");

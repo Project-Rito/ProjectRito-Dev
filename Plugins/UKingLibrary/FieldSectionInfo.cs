@@ -61,6 +61,48 @@ namespace UKingLibrary
                 return navmeshSections;
             }
         }
+        public List<FieldNavmeshSectionInfo> NavmeshSectionsWithStreamables
+        {
+            get
+            {
+                int[] xIndices = new int[] { -1, 0, 1, 2, 3, 4 }.Select(x => x += (XIndex * 1000) / 250).ToArray();
+                int[] zIndices = new int[] { -1, 0, 1, 2, 3, 4 }.Select(x => x += (ZIndex * 1000) / 250).ToArray();
+
+                List<FieldNavmeshSectionInfo> navmeshSections = new List<FieldNavmeshSectionInfo>(36);
+                foreach (int xIndex in xIndices)
+                    foreach (int zIndex in zIndices)
+                        if (xIndex >= 0 && zIndex >= 0) // Can't be having navmesh sections outside the map.
+                            navmeshSections.Add(new FieldNavmeshSectionInfo(xIndex, zIndex));
+
+                return navmeshSections;
+            }
+        }
+        public List<FieldNavmeshSectionInfo> NavmeshSectionsOnlyStreamables
+        {
+            get
+            {
+                int[] xRelativeIndices = new int[] { -1, 0, 1, 2, 3, 4 }.ToArray();
+                int[] zRelativeIndices = new int[] { -1, 0, 1, 2, 3, 4 }.ToArray();
+
+                List<FieldNavmeshSectionInfo> navmeshSections = new List<FieldNavmeshSectionInfo>(36);
+                foreach (int xRelativeIndex in xRelativeIndices)
+                {
+                    foreach (int zRelativeIndex in zRelativeIndices)
+                    {
+                        if (xRelativeIndex >= 0 && xRelativeIndex <= 3 && zRelativeIndex >= 0 && zRelativeIndex <= 3) // Exclude non-streamables
+                            continue;
+
+                        int xIndex = xRelativeIndex + (XIndex * 1000) / 250;
+                        int zIndex = zRelativeIndex + (ZIndex * 1000) / 250;
+
+                        if (xIndex >= 0 && zIndex >= 0) // Can't be having navmesh sections outside the map.
+                            navmeshSections.Add(new FieldNavmeshSectionInfo(xIndex, zIndex));
+                    }
+                }
+
+                return navmeshSections;
+            }
+        }
 
         public FieldSectionInfo(System.Numerics.Vector3 pos) : this(pos.X, pos.Z) { }
         public FieldSectionInfo(System.Numerics.Vector2 pos) : this(pos.X, pos.Y) { }

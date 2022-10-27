@@ -111,8 +111,7 @@ namespace UKingLibrary
                     else if (File.Exists(PluginConfig.GetContentPath($"Map/{fieldName}/{muName}")))
                         filePath = PluginConfig.GetContentPath($"Map/{fieldName}/{muName}");
 
-                    string fileName = Path.GetFileName(muName);
-                    LoadFieldMuunt(fieldName, fileName, File.Open(filePath, FileMode.Open));
+                    LoadFieldMuunt(fieldName, filePath, File.Open(filePath, FileMode.Open));
                 }
             }
             foreach (var packName in EditorConfig.OpenDungeons)
@@ -134,7 +133,7 @@ namespace UKingLibrary
 
             ContentFolder = new NodeFolder("content")
             {
-                FolderChildren = new Dictionary<string, NodeBase>()
+                NamedChildren = new Dictionary<string, NodeBase>()
                 {
                     { "Map", new NodeFolder("Map") },
                     { "Dungeon", new NodeFolder("Dungeon") }
@@ -209,7 +208,7 @@ namespace UKingLibrary
 
         public void LoadAssetList()
         {
-            if (this.Workspace.AssetViewWindow.AssetCategories.Count > 0)
+            if (this.Workspace?.AssetViewWindow.AssetCategories.Count > 0)
                 return;
 
             foreach (var actor in GlobalData.Actors.Values)
@@ -224,7 +223,7 @@ namespace UKingLibrary
         private void LoadDungeon(string fileName, Stream stream)
         {
             DungeonMapLoader loader;
-            if (!((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).FolderChildren.ContainsKey(fileName))
+            if (!ContentFolder.FolderChildren["Dungeon"].NamedChildren.ContainsKey(fileName))
             {
                 loader = new DungeonMapLoader(this);
 
@@ -233,11 +232,11 @@ namespace UKingLibrary
                     MakeLoaderActive(loader);
                 };
 
-                ((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).AddChild(loader.RootNode);
+                ContentFolder.FolderChildren["Dungeon"].AddChild(loader.RootNode);
             }
             else
             {
-                loader = (DungeonMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).FolderChildren[fileName].Tag);
+                loader = (DungeonMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).NamedChildren[fileName].Tag);
             }
 
             EditorConfig.OpenDungeons.Add(fileName);
@@ -250,7 +249,7 @@ namespace UKingLibrary
 
         private void UnloadDungeon(string fileName)
         {
-            DungeonMapLoader loader = (DungeonMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).FolderChildren[fileName].Tag);
+            DungeonMapLoader loader = (DungeonMapLoader)ContentFolder.FolderChildren["Dungeon"].NamedChildren[fileName].Tag;
             loader.Unload();
 
             loader.RootNode.RemoveFromParent();
@@ -275,7 +274,7 @@ namespace UKingLibrary
                 EditorConfig.OpenMapUnits.TryAdd(fieldName, new List<string>());
                 EditorConfig.OpenMapUnits[fieldName].Add($"{fileName.Substring(0, 3)}/{fileName}");
 
-                LoadFieldMuunt(fieldName, fileName, stream);
+                LoadFieldMuunt(fieldName, filePath, stream);
             }
         }
 
@@ -286,18 +285,20 @@ namespace UKingLibrary
 
             EditorConfig.OpenMapUnits.Remove(fieldName);
 
-            FieldMapLoader loader = (FieldMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren[fieldName].Tag);
+            FieldMapLoader loader = (FieldMapLoader)ContentFolder.FolderChildren["Map"].FolderChildren[fieldName].Tag;
             loader.RootNode.RemoveChild(sectionName);
             if (loader.RootNode.Children.Count == 0)
                 loader.RootNode.RemoveFromParent();
         }
 
-        private void LoadFieldMuunt(string fieldName, string fileName, Stream stream)
+        private void LoadFieldMuunt(string fieldName, string muuntPath, Stream stream)
         {
+            string fileName = Path.GetFileName(muuntPath);
+
             FieldSectionInfo sectionInfo = new FieldSectionInfo(fileName.Substring(0, 3));
 
             FieldMapLoader loader;
-            if (!((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren.ContainsKey(fieldName))
+            if (!ContentFolder.FolderChildren["Map"].FolderChildren.ContainsKey(fieldName))
             {
                 loader = new FieldMapLoader(fieldName, this);
 
@@ -306,11 +307,11 @@ namespace UKingLibrary
                     MakeLoaderActive(loader);
                 };
 
-                ((NodeFolder)ContentFolder.FolderChildren["Map"]).AddChild(loader.RootNode);
+                ContentFolder.FolderChildren["Map"].AddChild(loader.RootNode);
             }
             else
             {
-                loader = (FieldMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren[fieldName].Tag);
+                loader = (FieldMapLoader)ContentFolder.FolderChildren["Map"].FolderChildren[fieldName].Tag;
             }
 
             // Load terrain if not loaded
@@ -353,8 +354,24 @@ namespace UKingLibrary
                 }
             }
 
+            foreach (FieldNavmeshSectionInfo navmeshSection in sectionInfo.NavmeshSectionsOnlyStreamables)
+            {
+                string filePath = null;
+                if (File.Exists(Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/NavMesh/{fieldName}/{navmeshSection.Name}.shknm2"), FileInfo.FolderPath)))
+                    filePath = Path.GetFullPath(Path.Join(EditorConfig.FolderName, $"content/NavMesh/{fieldName}/{navmeshSection.Name}.shknm2"), FileInfo.FolderPath);
+                else if (File.Exists(PluginConfig.GetContentPath($"NavMesh/{fieldName}/{navmeshSection.Name}.shknm2")))
+                    filePath = PluginConfig.GetContentPath($"NavMesh/{fieldName}/{navmeshSection.Name}.shknm2");
+
+                if (filePath != null)
+                {
+                    Stream navmeshStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    loader.LoadStreamableNavmesh(Path.GetFileName(filePath), navmeshStream, new Vector3(navmeshSection.Origin.X, 0, navmeshSection.Origin.Y));
+                    navmeshStream.Close();
+                }
+            }
+
             // Load map file
-            loader.LoadMuunt(fileName, stream);
+            loader.LoadMuunt(muuntPath, stream);
             stream.Close();
 
             MakeLoaderActive(loader);
@@ -364,10 +381,10 @@ namespace UKingLibrary
         {
             FieldSectionInfo sectionInfo = new FieldSectionInfo(fileName.Substring(0, 3));
 
-            if (((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren.ContainsKey(fieldName))
+            if (ContentFolder.FolderChildren["Map"].FolderChildren.ContainsKey(fieldName))
             {
                 // Get field loader
-                FieldMapLoader loader = (FieldMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Map"]).FolderChildren[fieldName].Tag);
+                FieldMapLoader loader = (FieldMapLoader)ContentFolder.FolderChildren["Map"].FolderChildren[fieldName].Tag;
 
                 // Unload muunt
                 loader.UnloadMuunt(fileName);
@@ -380,7 +397,7 @@ namespace UKingLibrary
                     loader.UnloadBakedCollision($"{sectionInfo.Name}-{i}.shksc");
 
                 // Unload navmesh
-                foreach (FieldNavmeshSectionInfo navmeshSection in sectionInfo.NavmeshSections)
+                foreach (FieldNavmeshSectionInfo navmeshSection in sectionInfo.NavmeshSectionsWithStreamables)
                     loader.UnloadNavmesh($"{navmeshSection.Name}.shknm2", new Vector3(navmeshSection.Origin.X, 0, navmeshSection.Origin.Y));
             }
         }
@@ -679,12 +696,12 @@ namespace UKingLibrary
 
         public void Dispose()
         {
-            foreach (NodeFolder fieldFolder in ((NodeFolder)ContentFolder.FolderChildren["Map"]).Children)
+            foreach (NodeFolder fieldFolder in ContentFolder.FolderChildren["Map"].Children)
             {
                 IMapLoader loader = (IMapLoader)fieldFolder.Tag;
                 loader.Dispose();
             }
-            foreach (NodeFolder dungeonFolder in ((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).Children) {
+            foreach (NodeFolder dungeonFolder in ContentFolder.FolderChildren["Dungeon"].Children) {
                 IMapLoader loader = (IMapLoader)dungeonFolder.Tag;
                 loader.Dispose();
             }

@@ -30,7 +30,34 @@ namespace UKingLibrary
         private string Prefix;
 
         private HKXHeader Header = HKXHeader.BotwWiiu(); // TODO - actually get the right platform
-        private hkRootLevelContainer Root;
+        private hkRootLevelContainer _root;
+        public hkRootLevelContainer Root
+        {
+            get
+            {
+                return _root;
+            }
+            set
+            {
+                // We'll just do this...
+                //ClearStreamingSets();
+                //((hkaiDirectedGraphExplicitCost)root.m_namedVariants[1].m_variant).m_streamingSets = ((hkaiDirectedGraphExplicitCost)Root.m_namedVariants[1].m_variant).m_streamingSets;
+                value.m_namedVariants[0].m_name = _root.m_namedVariants[0].m_name;
+                value.m_namedVariants[1].m_name = _root.m_namedVariants[1].m_name;
+                value.m_namedVariants[2].m_name = _root.m_namedVariants[2].m_name;
+
+                _root = value;
+                //Root.m_namedVariants[0] = root.m_namedVariants[0];
+                UpdateRenders();
+            }
+        }
+
+        public override string ToString()
+        {
+            if (_root != null)
+                return _root.m_namedVariants[0].m_name.Split("//")[0];
+            return null;
+        }
 
         private STFileLoader.Settings FileSettings;
 
@@ -40,7 +67,7 @@ namespace UKingLibrary
 
             List<IHavokObject> roots = Util.ReadBotwHKX(FileSettings.Stream.ReadAllBytes(), ".hknm2");
 
-            Root = (hkRootLevelContainer)roots[0];
+            _root = (hkRootLevelContainer)roots[0];
 
             RootNode = new NodeFolder(fileName)
             {
@@ -64,20 +91,6 @@ namespace UKingLibrary
         public void Unload()
         {
             RemoveRenders();
-        }
-
-        public void Replace(hkRootLevelContainer root)
-        {
-            // We'll just do this...
-            //ClearStreamingSets();
-            //((hkaiDirectedGraphExplicitCost)root.m_namedVariants[1].m_variant).m_streamingSets = ((hkaiDirectedGraphExplicitCost)Root.m_namedVariants[1].m_variant).m_streamingSets;
-            root.m_namedVariants[0].m_name = Root.m_namedVariants[0].m_name;
-            root.m_namedVariants[1].m_name = Root.m_namedVariants[1].m_name;
-            root.m_namedVariants[2].m_name = Root.m_namedVariants[2].m_name;
-
-            Root = root;
-            //Root.m_namedVariants[0] = root.m_namedVariants[0];
-            UpdateRenders();
         }
 
         public void ClearStreamingSets()
@@ -150,7 +163,7 @@ namespace UKingLibrary
             RemoveRenders();
 
             HavokMeshShapeRender nmrender = new HavokMeshShapeRender(RootNode);
-            nmrender.LoadNavmesh((hkaiNavMesh)Root.m_namedVariants[0].m_variant);
+            nmrender.LoadNavmesh((hkaiNavMesh)Root.m_namedVariants[0].m_variant, Origin * GLContext.PreviewScale);
 
             nmrender.Transform.Position = Origin * GLContext.PreviewScale;
             nmrender.Transform.Rotation = OpenTK.Quaternion.Identity;
@@ -173,13 +186,47 @@ namespace UKingLibrary
 
             Scene?.AddRenderObject(nmrender);
 
-            foreach (System.Numerics.Vector4 pos in ((hkaiDirectedGraphExplicitCost)Root.m_namedVariants[1].m_variant).m_positions)
+            return;
+            int startNodeIdx = Scene.Objects.Count;
+            var graph = (hkaiDirectedGraphExplicitCost)Root.m_namedVariants[1].m_variant;
+            for (int i = 0; i < graph.m_nodes.Count; i++)
             {
-                Vector4 position = new Vector4(pos.X, pos.Y, pos.Z, pos.W);
+                Vector4 position = new Vector4(graph.m_positions[i].X, graph.m_positions[i].Y, graph.m_positions[i].Z, graph.m_positions[i].W);
                 var render = new TransformableObject(RootNode);
                 render.Transform.Position = (position.Xyz + Origin) * GLContext.PreviewScale;
                 render.Transform.UpdateMatrix(true);
+                render.UINode.Header = "Map Navmesh Graph Node";
+                int index = i; // So the capture doesn't mess up, I guess...
+                ((EditableObjectNode)render.UINode).UIProperyDrawer += delegate
+                {
+                    ImGui.Text("Index:");
+                    ImGui.Text($"{index}");
+                    ImGui.Separator();
+                    ImGui.Text("Connected to:");
+                    for (int edgeIdx = graph.m_nodes[index].m_startEdgeIndex; edgeIdx < graph.m_nodes[index].m_startEdgeIndex + graph.m_nodes[index].m_numEdges; edgeIdx++)
+                    {
+                        ImGui.Text("Idx: ");
+                        ImGui.Text($"  {graph.m_edges[edgeIdx].m_target}");
+                        ImGui.Text("Cost: ");
+                        ImGui.Text($"  As half: {graph.m_edges[edgeIdx].m_cost}");
+                        unsafe
+                        {
+                            fixed (System.Half* cost = &graph.m_edges[edgeIdx].m_cost)
+                            {
+                                ImGui.Text($"  As short: {*(short*)(cost)}");
+                            }
+                        }
+                        ImGui.NewLine();
+                    }
+                };
                 Scene?.AddRenderObject(render);
+            }
+            for (int i = 0; i < graph.m_nodes.Count; i++) // Add link renders
+            {
+                for (int edgeIdx = graph.m_nodes[i].m_startEdgeIndex; edgeIdx < graph.m_nodes[i].m_startEdgeIndex + graph.m_nodes[i].m_numEdges; edgeIdx++)
+                {
+                    ((EditableObject)Scene.Objects[startNodeIdx + i]).DestObjectLinks.Add((EditableObject)Scene.Objects[startNodeIdx + (int)graph.m_edges[edgeIdx].m_target]);
+                }
             }
         }
 
