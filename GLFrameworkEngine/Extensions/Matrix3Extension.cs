@@ -50,8 +50,8 @@ namespace GLFrameworkEngine
         public static Matrix3 CreateRotationX(double angle)
         {
             Matrix3 result;
-            float cos = (float)(Math.Round(Math.Cos(angle) * 256f) / 256.0);
-            float sin = (float)(Math.Round(Math.Sin(angle) * 256f) / 256.0);
+            float cos = (float)(Math.Cos(angle));
+            float sin = (float)(Math.Sin(angle));
 
             result.Row0 = Vector3.UnitX;
             result.Row1 = new Vector3(0.0f, cos, sin);
@@ -62,8 +62,8 @@ namespace GLFrameworkEngine
         public static Matrix3 CreateRotationY(double angle)
         {
             Matrix3 result;
-            float cos = (float)(Math.Round(Math.Cos(angle) * 256f) / 256.0);
-            float sin = (float)(Math.Round(Math.Sin(angle) * 256f) / 256.0);
+            float cos = (float)(Math.Cos(angle));
+            float sin = (float)(Math.Sin(angle));
 
             result.Row0 = new Vector3(cos, 0.0f, -sin);
             result.Row1 = Vector3.UnitY;
@@ -74,8 +74,8 @@ namespace GLFrameworkEngine
         public static Matrix3 CreateRotationZ(double angle)
         {
             Matrix3 result;
-            float cos = (float)(Math.Round(Math.Cos(angle) * 256f) / 256.0);
-            float sin = (float)(Math.Round(Math.Sin(angle) * 256f) / 256.0);
+            float cos = (float)(Math.Cos(angle));
+            float sin = (float)(Math.Sin(angle));
 
             result.Row0 = new Vector3(cos, sin, 0.0f);
             result.Row1 = new Vector3(-sin, cos, 0.0f);
