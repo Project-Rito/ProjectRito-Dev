@@ -60,7 +60,7 @@ namespace UKingLibrary
                             catch (Exception ex)
                             {
                                 _collisionCacheStatus = "ERROR";
-                                Console.WriteLine(ex.Message);
+                                Console.WriteLine(ex.ToString());
                             }
                             
                         }).Start();
