@@ -131,7 +131,6 @@ namespace UKingLibrary
             DrawingHelper.VerticesIndices<Vector3> res = new DrawingHelper.VerticesIndices<Vector3>();
             int vtxBase = 0;
 
-            /*
             foreach (var collisionLoader in ActiveLoader.BakedCollision)
             {
                 foreach (var render in collisionLoader.ShapeRenders)
@@ -160,7 +159,6 @@ namespace UKingLibrary
                     vtxBase = res.Vertices.Count;
                 }
             }
-            */
 
             if (ActiveLoader is FieldMapLoader)
             {

@@ -53,6 +53,19 @@ namespace UKingLibrary
             }
         }
 
+        private Vector3 _rotationEuler;
+        public Vector3 RotationEuler
+        {
+            get
+            {
+                return _rotationEuler;
+            }
+            set
+            {
+                _rotationEuler = value;
+            }
+        } 
+
         /// <summary>
         /// Parameters related to the actor instance.
         /// </summary>
@@ -688,7 +701,7 @@ namespace UKingLibrary
         }
 
         /// <summary>
-        /// Checks for transform differences and saves it to the actor.
+        /// Saves transform to the actor.
         /// If the values are uniform, they will save in a single floating point parameter.
         /// </summary>
         void SaveTransform()
