@@ -67,7 +67,7 @@ namespace UKingLibrary
 
                         foreach (BymlFile muunt in section.Value)
                         {
-                            foreach (IDictionary<string, BymlNode> obj in muunt.RootNode.Hash["Objs"].Array.Select(x => x.Hash))
+                            foreach (IDictionary<string, BymlNode> obj in muunt.RootNode.Hash["Objs"].Array?.Select(x => x.Hash))
                             {
                                 if (!actorShapes.ContainsKey(obj["UnitConfigName"].String))
                                 {
@@ -153,7 +153,7 @@ namespace UKingLibrary
 
                         BymlFile muunt = BymlFile.FromBinary(muuntSettings.Stream);
 
-                        foreach (IDictionary<string, BymlNode> obj in muunt.RootNode.Hash["Objs"].Array.Select(x => x.Hash))
+                        foreach (IDictionary<string, BymlNode> obj in muunt.RootNode.Hash["Objs"].Array?.Select(x => x.Hash))
                         {
                             BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(obj["HashId"].UInt);
                             if (infos != null)
