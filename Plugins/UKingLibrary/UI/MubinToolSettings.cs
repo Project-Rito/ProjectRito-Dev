@@ -57,9 +57,10 @@ namespace UKingLibrary
                                 CollisionCacher.CacheAll(PluginConfig.CollisionCacheDir);
                                 _collisionCacheStatus = "";
                             }
-                            catch
+                            catch (Exception ex)
                             {
                                 _collisionCacheStatus = "ERROR";
+                                Console.WriteLine(ex.Message);
                             }
                             
                         }).Start();
