@@ -64,10 +64,25 @@ namespace UKingLibrary
             {
                 for (int i = 0; i < ModPaths.Count; i++)
                 {
+                    bool pathsChanged = false;
+
                     string path = ModPaths[i];
                     if (ImguiCustomWidgets.PathSelector($"##uk_modpath{i}", ref path, HasValidModPaths[i]))
                     {
                         ModPaths[i] = path;
+                        pathsChanged = true;
+                        
+                    }
+                    ImGui.SameLine();
+                    if (HasValidModPaths[i] && ImGui.Button(TranslationSource.GetText("REMOVE" + $"##REMOVE_MOD_PATH_{i}")))
+                    {
+                        ModPaths.RemoveAt(i);
+                        HasValidModPaths.RemoveAt(i);
+                        pathsChanged = true;
+                    }
+
+                    if (pathsChanged)
+                    {
                         Save();
                         PathsChanged?.Invoke();
                     }

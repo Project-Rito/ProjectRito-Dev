@@ -212,7 +212,7 @@ namespace UKingLibrary
                 return;
 
             foreach (var actor in GlobalData.Actors.Values)
-                this.Workspace.AddAssetCategory(new AssetViewMapObject(actor["profile"]));
+                this.Workspace?.AddAssetCategory(new AssetViewMapObject(actor["profile"]));
         }
 
         public override void DrawToolWindow()
