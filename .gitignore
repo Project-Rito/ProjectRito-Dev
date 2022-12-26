@@ -11,6 +11,8 @@ Plugins/UKingLibrary/bin
 Toolbox.Core/obj
 Toolbox.Core/bin
 HKX2Library/HKX2/obj
+NetExtensions/obj
+NetExtensions/bin
 .vs
 
 # Provide a working directory:
