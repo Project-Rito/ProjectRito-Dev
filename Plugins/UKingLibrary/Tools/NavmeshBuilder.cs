@@ -88,6 +88,22 @@ namespace UKingLibrary
 
             if (ActiveLoader is FieldMapLoader) {
                 // Update streaming sets.
+                /*
+                foreach (var navmeshLoader in ((FieldMapLoader)ActiveLoader).AllNavmesh) // I shouldn't have to be doing this... not everything is called on apparently.
+                {
+                    for (int i = 0; i < ((hkaiNavMesh)navmeshLoader.Root.m_namedVariants[0].m_variant).m_streamingSets.Count; i++)
+                    {
+                        ((hkaiNavMesh)navmeshLoader.Root.m_namedVariants[0].m_variant).m_streamingSets[i].m_meshConnections.Clear();
+                        ((hkaiNavMesh)navmeshLoader.Root.m_namedVariants[0].m_variant).m_streamingSets[i].m_graphConnections.Clear();
+                    }
+                    for (int i = 0; i < ((hkaiDirectedGraphExplicitCost)navmeshLoader.Root.m_namedVariants[1].m_variant).m_streamingSets.Count; i++)
+                    {
+                        ((hkaiDirectedGraphExplicitCost)navmeshLoader.Root.m_namedVariants[1].m_variant).m_streamingSets[i].m_meshConnections.Clear();
+                        ((hkaiDirectedGraphExplicitCost)navmeshLoader.Root.m_namedVariants[1].m_variant).m_streamingSets[i].m_graphConnections.Clear();
+                    }
+                }
+                */
+
                 foreach (var navmeshLoader in ActiveLoader.Navmesh)
                 {
                     MapNavmeshLoader[] streamables =

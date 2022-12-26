@@ -175,11 +175,108 @@ namespace UKingLibrary
                 return MapData.ShowNavmeshShapes;
             };
 
+            int debugUIFaceIndex = 0;
+            int debugUIEdgeIndex = 0;
+            int debugUIVertexIndex = 0;
             ((EditableObjectNode)nmrender.UINode).UIProperyDrawer += delegate
             {
+                hkaiNavMesh navmesh = (hkaiNavMesh)Root.m_namedVariants[0].m_variant;
+
                 ImGui.Separator();
-                ImGui.Text("Debug Navmesh Info:");
+                ImGui.Text("Navmesh Debug:");
                 ImGui.Separator();
+
+                ImGui.Text("Name:");
+                ImGui.Text(Root.m_namedVariants[0].m_name);
+
+                ImGui.Text("Find Face By Index:");
+                ImGui.InputInt("Index##debugNavmeshFindFaceByIndex", ref debugUIFaceIndex);
+                if (ImGui.Button("Go!##debugNavmeshFindFaceByIndexGo"))
+                {
+                    TransformableObject r = new TransformableObject(RootNode);
+                    Vector4 midpoint = new Vector4();
+                    for (int i = navmesh.m_faces[debugUIFaceIndex].m_startEdgeIndex; i < navmesh.m_faces[debugUIFaceIndex].m_startEdgeIndex + navmesh.m_faces[debugUIFaceIndex].m_numEdges; i++)
+                    {
+                        var edgemidpoint = (navmesh.m_vertices[navmesh.m_edges[i].m_a] + navmesh.m_vertices[navmesh.m_edges[i].m_b]) / 2;
+                        midpoint.X += edgemidpoint.X;
+                        midpoint.Y += edgemidpoint.Y;
+                        midpoint.Z += edgemidpoint.Z;
+                        midpoint.W += edgemidpoint.W;
+                    }
+                    midpoint.X /= navmesh.m_faces[debugUIFaceIndex].m_numEdges;
+                    midpoint.Y /= navmesh.m_faces[debugUIFaceIndex].m_numEdges;
+                    midpoint.Z /= navmesh.m_faces[debugUIFaceIndex].m_numEdges;
+                    midpoint.W /= navmesh.m_faces[debugUIFaceIndex].m_numEdges;
+
+                    r.Transform.Position = new OpenTK.Vector3(midpoint.X + Origin.X, midpoint.Y + Origin.Y, midpoint.Z + Origin.Z) * GLContext.PreviewScale;
+                    r.Transform.UpdateMatrix(true);
+
+                    GLContext.ActiveContext.Scene.AddRenderObject(r);
+
+                    GLContext.ActiveContext.Camera.TargetPosition = r.Transform.Position;
+                }
+                ImGui.Separator();
+                ImGui.Text("Find Edge By Index:");
+                ImGui.InputInt("Index##debugNavmeshFindEdgeByIndex", ref debugUIEdgeIndex);
+                if (ImGui.Button("Go!##debugNavmeshFindEdgeByIndexGo"))
+                {
+                    TransformableObject r = new TransformableObject(RootNode);
+                    var midpoint = (navmesh.m_vertices[navmesh.m_edges[debugUIEdgeIndex].m_a] + navmesh.m_vertices[navmesh.m_edges[debugUIEdgeIndex].m_b]) / 2;
+                    r.Transform.Position = new OpenTK.Vector3(midpoint.X + Origin.X, midpoint.Y + Origin.Y, midpoint.Z + Origin.Z) * GLContext.PreviewScale;
+                    r.Transform.UpdateMatrix(true);
+
+                    GLContext.ActiveContext.Scene.AddRenderObject(r);
+
+                    GLContext.ActiveContext.Camera.TargetPosition = r.Transform.Position;
+                }
+                ImGui.Separator();
+                ImGui.Text("Find Vertex By Index:");
+                ImGui.InputInt("Index##debugNavmeshFindVertexByIndex", ref debugUIVertexIndex);
+                if (ImGui.Button("Go!##debugNavmeshFindVertexByIndexGo"))
+                {
+                    TransformableObject r = new TransformableObject(RootNode);
+                    var pos = navmesh.m_vertices[debugUIVertexIndex];
+                    r.Transform.Position = new OpenTK.Vector3(pos.X + Origin.X, pos.Y + Origin.Y, pos.Z + Origin.Z) * GLContext.PreviewScale;
+                    r.Transform.UpdateMatrix(true);
+
+                    GLContext.ActiveContext.Scene.AddRenderObject(r);
+
+                    GLContext.ActiveContext.Camera.TargetPosition = r.Transform.Position;
+                }
+                ImGui.Separator();
+                int streamingSetIndex = 0;
+                foreach (var streamingSet in navmesh.m_streamingSets)
+                {
+                    if (ImGui.TreeNode($"streamingSetDebug_{streamingSetIndex}"))
+                    {
+                        ImGui.Text($"Streaming Set {streamingSetIndex}");
+
+                        int meshConnectionIndex = 0;
+                        foreach (var meshConnection in streamingSet.m_meshConnections)
+                        {
+                            if (ImGui.TreeNode($"streamingSetDebug_{streamingSetIndex} meshConnection_{meshConnectionIndex}"))
+                            {
+                                ImGui.Text($"Mesh Connection {meshConnectionIndex}");
+
+                                ImGui.Text($"Face Index: {meshConnection.m_faceIndex}");
+                                ImGui.Text($"Edge Index: {meshConnection.m_edgeIndex}");
+                                ImGui.Text($"Opposite Face Index: {meshConnection.m_oppositeFaceIndex}");
+                                ImGui.Text($"Opposite Edge Index: {meshConnection.m_oppositeEdgeIndex}");
+
+                                ImGui.Separator();
+
+                                ImGui.Text("Here for convenience:");
+                                ImGui.Text($"Opposite UID: {streamingSet.m_oppositeUid.ToString("X")}");
+
+                                ImGui.TreePop();
+                            }
+                            meshConnectionIndex++;
+                        }
+                        ImGui.TreePop();
+                    }
+
+                    streamingSetIndex++;
+                }
             };
 
             Renders.Add(nmrender);

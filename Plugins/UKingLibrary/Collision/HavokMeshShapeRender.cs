@@ -158,6 +158,49 @@ namespace UKingLibrary
 
         public void LoadNavmesh(hkaiNavMesh navmesh, Vector3 origin = default)
         {
+            for (int i = 0; i < navmesh.m_vertices.Count; i++)
+            {
+                break;
+                TransformableObject r = new TransformableObject(UINode);
+                var pos = navmesh.m_vertices[i];
+                r.Transform.Position = new OpenTK.Vector3(pos.X * GLContext.PreviewScale + origin.X, pos.Y * GLContext.PreviewScale + origin.Y, pos.Z * GLContext.PreviewScale + origin.Z);
+                r.Transform.UpdateMatrix(true); ;
+                GLContext.ActiveContext.Scene.AddRenderObject(r);
+            }
+            for (int i = 0; i < navmesh.m_edges.Count; i++)
+            {
+                break;
+                if (navmesh.m_edges[i].m_oppositeFace == 0xFFFFFFFF)
+                {
+                    TransformableObject r = new TransformableObject(UINode);
+                    var midpoint = (navmesh.m_vertices[navmesh.m_edges[i].m_a] + navmesh.m_vertices[navmesh.m_edges[i].m_b]) / 2;
+                    r.Transform.Position = new OpenTK.Vector3(midpoint.X * GLContext.PreviewScale + origin.X, midpoint.Y * GLContext.PreviewScale + origin.Y, midpoint.Z * GLContext.PreviewScale + origin.Z);
+                    r.Transform.UpdateMatrix(true);;
+                    GLContext.ActiveContext.Scene.AddRenderObject(r);
+                    continue;
+                    var a = navmesh.m_vertices[navmesh.m_edges[i].m_a];
+                    a.Y += 10f;
+                    navmesh.m_vertices[navmesh.m_edges[i].m_a] = a;
+
+                    var b = navmesh.m_vertices[navmesh.m_edges[i].m_b];
+                    b.Y += 10f;
+                    navmesh.m_vertices[navmesh.m_edges[i].m_b] = b;
+                }
+            }
+            foreach (hkaiStreamingSet ss in navmesh.m_streamingSets)
+            {
+                break;
+                foreach (hkaiStreamingSetNavMeshConnection meshConnection in ss.m_meshConnections)
+                {
+                    TransformableObject r = new TransformableObject(UINode);
+                    var midpoint = (navmesh.m_vertices[navmesh.m_edges[meshConnection.m_edgeIndex].m_a] + navmesh.m_vertices[navmesh.m_edges[meshConnection.m_edgeIndex].m_b]) / 2;
+                    r.Transform.Position = new OpenTK.Vector3(midpoint.X * GLContext.PreviewScale + origin.X, midpoint.Y * GLContext.PreviewScale + origin.Y, midpoint.Z * GLContext.PreviewScale + origin.Z);
+                    r.Transform.UpdateMatrix(true);
+
+                    GLContext.ActiveContext.Scene.AddRenderObject(r);
+                }
+            }
+
             List<int> indices = new List<int>(navmesh.m_vertices.Count); // Setting capacity just as rough estimate.
             foreach (hkaiNavMeshFace face in navmesh.m_faces)
             {
