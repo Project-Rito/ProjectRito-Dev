@@ -173,15 +173,21 @@ namespace UKingLibrary
                         packPaths.Add(file);
 
             foreach (var packPath in packPaths)
-                if (Path.GetFileName(packPath).StartsWith("Dungeon"))
+                if (Path.GetFileName(packPath).StartsWith("Dungeon") || Path.GetFileName(packPath).Equals("RemainsElectric.pack") || Path.GetFileName(packPath).Equals("RemainsFire.pack") || Path.GetFileName(packPath).Equals("RemainsWater.pack") || Path.GetFileName(packPath).Equals("RemainsWind.pack"))
                     loadDungeonMenuItem.MenuItems.Add(new MenuItemModel(Path.GetFileNameWithoutExtension(packPath), (object sender, EventArgs args) => 
                     {
                         MenuItemModel item = (MenuItemModel)sender;
 
                         if (item.IsChecked)
+                        {
                             LoadDungeon(Path.GetFileName(packPath), File.OpenRead(packPath));
+                            EditorConfig.OpenDungeons.Add(Path.GetFileName(packPath));
+                        }
                         else
+                        {
                             UnloadDungeon(Path.GetFileName(packPath));
+                            EditorConfig.OpenDungeons.Remove(Path.GetFileName(packPath));
+                        }
                     })
                     {
                         CanCheck = true
@@ -223,8 +229,6 @@ namespace UKingLibrary
             {
                 loader = (DungeonMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).FolderChildren[fileName].Tag);
             }
-
-            EditorConfig.OpenDungeons.Add(fileName);
 
             loader.Load(fileName, stream, this);
             stream.Close();

@@ -288,7 +288,7 @@ namespace UKingLibrary
             if (DungeonData.SarcData.Files.TryGetValue($"NavMesh/CDungeon/{DungeonName}/{DungeonName}.shknm2", out data))
                 return new MemoryStream(Toolbox.Core.IO.YAZ0.Decompress(data));
 
-            if (DungeonData.SarcData.Files.TryGetValue($"Physics/MainFieldDungeon/{DungeonName}/{DungeonName}.shknm2", out data))
+            if (DungeonData.SarcData.Files.TryGetValue($"NavMesh/MainFieldDungeon/{DungeonName}/{DungeonName}.shknm2", out data))
                 return new MemoryStream(Toolbox.Core.IO.YAZ0.Decompress(data));
             return null;
         }
