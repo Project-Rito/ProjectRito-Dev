@@ -49,7 +49,9 @@ namespace UKingLibrary
 
         public static void Build()
         {
-            hkRootLevelContainer root;
+            hkaiNavMeshBuilder.Configure(UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig);
+
+            hkRootLevelContainer root = new hkRootLevelContainer();
 
             foreach (var navmeshLoader in ActiveLoader.Navmesh)
             {
@@ -58,9 +60,9 @@ namespace UKingLibrary
 
                 if (ActiveLoader is FieldMapLoader)
                 {
-                    min = navmeshLoader.Origin;
+                    min = navmeshLoader.Origin - new Vector3(50);
                     min.Y = float.MinValue;
-                    max = navmeshLoader.Origin + new Vector3(250);
+                    max = navmeshLoader.Origin + new Vector3(250) + new Vector3(50);
                     max.Y = float.MaxValue;
                 }
                 else
@@ -71,10 +73,20 @@ namespace UKingLibrary
 
                 DrawingHelper.VerticesIndices<Vector3> mergedMesh = GetMergedMesh(navmeshLoader.Origin, min, max, 0f);
 
+                hkaiNavMeshBuilder.AddGeometry(mergedMesh.Vertices.Select(v => new System.Numerics.Vector3(v.X, v.Y, v.Z)).ToList(), mergedMesh.Indices, new System.Numerics.Vector3(navmeshLoader.Origin.X, navmeshLoader.Origin.Y, navmeshLoader.Origin.Z));
+
+                hkaiNavMeshBuilder.Merge();
+
                 root = hkaiNavMeshBuilder.BuildRoot(UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig, mergedMesh.Vertices.Select(v => new System.Numerics.Vector3(v.X, v.Y, v.Z)).ToList(), mergedMesh.Indices);
 
-                navmeshLoader.Root = root;
+                //navmeshLoader.Root = root;
+                navmeshLoader.IsVisible = false;
+                navmeshLoader.RootNode.IsChecked = false;
             }
+            ActiveLoader.Navmesh[0].Root = root;
+            ActiveLoader.Navmesh[0].Origin = Vector3.Zero;
+
+            hkaiNavMeshBuilder.ClearGeometry();
 
             // Streamable adjacent indices:
             // 0: -x -z
@@ -103,7 +115,7 @@ namespace UKingLibrary
                     }
                 }
                 */
-
+                return;
                 foreach (var navmeshLoader in ActiveLoader.Navmesh)
                 {
                     MapNavmeshLoader[] streamables =

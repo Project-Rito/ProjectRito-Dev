@@ -42,9 +42,12 @@ namespace UKingLibrary
                 // We'll just do this...
                 //ClearStreamingSets();
                 //((hkaiDirectedGraphExplicitCost)root.m_namedVariants[1].m_variant).m_streamingSets = ((hkaiDirectedGraphExplicitCost)Root.m_namedVariants[1].m_variant).m_streamingSets;
-                value.m_namedVariants[0].m_name = _root.m_namedVariants[0].m_name;
-                value.m_namedVariants[1].m_name = _root.m_namedVariants[1].m_name;
-                value.m_namedVariants[2].m_name = _root.m_namedVariants[2].m_name;
+                if ((value.m_namedVariants != null && value.m_namedVariants.Count == 3) && (_root.m_namedVariants != null && _root.m_namedVariants.Count == 3))
+                {
+                    value.m_namedVariants[0].m_name = _root.m_namedVariants[0].m_name;
+                    value.m_namedVariants[1].m_name = _root.m_namedVariants[1].m_name;
+                    value.m_namedVariants[2].m_name = _root.m_namedVariants[2].m_name;
+                }
 
                 _root = value;
                 //Root.m_namedVariants[0] = root.m_namedVariants[0];
@@ -157,7 +160,7 @@ namespace UKingLibrary
 
         private void UpdateRenders()
         {
-            if (Root.m_namedVariants.Count == 0)
+            if (Root.m_namedVariants == null || Root.m_namedVariants.Count == 0)
                 return;
 
             RemoveRenders();

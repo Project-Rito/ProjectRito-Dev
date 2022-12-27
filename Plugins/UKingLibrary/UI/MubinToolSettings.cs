@@ -156,6 +156,11 @@ namespace UKingLibrary
                 }
             }
 
+            if (ImGui.CollapsingHeader(TranslationSource.GetText("EXTRA_DEBUG_STUFF")))
+            {
+                ImGui.DragFloat("Havok shape opacity", ref HavokMeshShapeRender.COLLISIONSHAPE_DEBUG_OPACITY);
+            }
+
             if (refreshScene)
                 GLContext.ActiveContext.UpdateViewport = true;
         }

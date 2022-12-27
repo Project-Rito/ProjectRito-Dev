@@ -21,6 +21,8 @@ namespace UKingLibrary
         private BoundingNode _boundingNode;
         public override BoundingNode BoundingNode => _boundingNode;
 
+
+        public static float COLLISIONSHAPE_DEBUG_OPACITY = 0.5f;
         private const bool COLLISIONSHAPE_DEBUG = false;
 
         public HavokMeshShapeRender(NodeBase parent) : base(parent)
@@ -46,6 +48,7 @@ namespace UKingLibrary
                 GL.Enable(EnableCap.Blend);
                 GL.Enable(EnableCap.PolygonOffsetFill);
                 GL.PolygonOffset(-4f, 1f);
+                shader.SetFloat("u_Opacity", COLLISIONSHAPE_DEBUG_OPACITY);
                 ShapeMesh.Draw(context);
                 GL.Disable(EnableCap.PolygonOffsetFill);
                 GL.Disable(EnableCap.CullFace);
