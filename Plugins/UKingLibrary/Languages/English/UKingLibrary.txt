@@ -25,6 +25,8 @@ DEBUG_SECTIONS - Debug Sections
 AREAS_SELECT_BY_BORDERS - Areas Select By Borders
 AREA_OPACITY - Area Opacity
 
+NAVMESH_TOOLS - NavMesh Tools (Only works in shrines as of now)
+
 CACHE_BAKED_COLLISION - Cache Baked Collision
 BAKE_COLLISION - Bake Collision
 PROCESSING - Processing

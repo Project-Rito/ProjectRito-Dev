@@ -76,8 +76,8 @@ namespace GLFrameworkEngine
             get { return rotationEuler; }
             set
             {
-                rotationEuler = value;
                 RotationMatrix = Matrix3Extension.FromEulerAngles(value);
+                rotationEuler = RotationMatrix.ExtractEulerAngles();
             }
         }
 
@@ -92,8 +92,8 @@ namespace GLFrameworkEngine
             get { return rotationEuler * STMath.Rad2Deg; }
             set
             {
-                rotationEuler = value * STMath.Deg2Rad;
-                RotationMatrix = Matrix3Extension.FromEulerAngles(rotationEuler);
+                RotationMatrix = Matrix3Extension.FromEulerAngles(value * STMath.Deg2Rad);
+                rotationEuler = RotationMatrix.ExtractEulerAngles();
                 NotifyPropertyChanged("RotationEulerDegrees");
             }
         }

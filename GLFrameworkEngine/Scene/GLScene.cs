@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using Toolbox.Core.ViewModels;
+using NETExtensions.Collections.Concurrent;
 
 namespace GLFrameworkEngine
 {
@@ -29,7 +30,7 @@ namespace GLFrameworkEngine
         /// <summary>
         /// The object list drawn in the scene.
         /// </summary>
-        public List<IDrawable> Objects = new List<IDrawable>();
+        public LockingList<IDrawable> Objects = new LockingList<IDrawable>();
 
         /// <summary>
         /// Used to keep track of what objects can be grouped into a single draw call.

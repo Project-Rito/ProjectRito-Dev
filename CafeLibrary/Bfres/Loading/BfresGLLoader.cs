@@ -44,9 +44,15 @@ namespace CafeLibrary.Rendering
                         vaoAtt.Offset = offset;
 
                         if (att.Name.Contains("_i"))
-                            vaoAtt.Type = VertexAttribPointerType.Int;
+                        {
+                            vaoAtt.IntType = VertexAttribIntegerType.Int;
+                            vaoAtt.IsFloat = false;
+                        }
                         else
-                            vaoAtt.Type = VertexAttribPointerType.Float;
+                        {
+                            vaoAtt.FloatType = VertexAttribPointerType.Float;
+                            vaoAtt.IsFloat = true;
+                        }
 
                         attributes.Add(vaoAtt);
 
@@ -143,7 +149,9 @@ namespace CafeLibrary.Rendering
         {
             public string name;
             public string vertexAttributeName;
-            public VertexAttribPointerType Type;
+            public VertexAttribPointerType FloatType;
+            public VertexAttribIntegerType IntType;
+            public bool IsFloat;
             public int ElementCount;
 
             public int Offset;
@@ -180,15 +188,39 @@ namespace CafeLibrary.Rendering
 
             private int FormatSize()
             {
-                switch (Type)
+                if (IsFloat)
                 {
-                    case VertexAttribPointerType.Float: return sizeof(float);
-                    case VertexAttribPointerType.Byte: return sizeof(byte);
-                    case VertexAttribPointerType.Double: return sizeof(double);
-                    case VertexAttribPointerType.Int: return sizeof(int);
-                    case VertexAttribPointerType.Short: return sizeof(short);
-                    case VertexAttribPointerType.UnsignedShort: return sizeof(ushort);
-                    default: return 0;
+                    switch (FloatType)
+                    {
+                        case VertexAttribPointerType.Byte:
+                        case VertexAttribPointerType.UnsignedByte:
+                            return 1;
+                        case VertexAttribPointerType.HalfFloat:
+                        case VertexAttribPointerType.Short:
+                            return 2;
+                        case VertexAttribPointerType.Float:
+                        case VertexAttribPointerType.Int:
+                        case VertexAttribPointerType.UnsignedInt:
+                            return 4;
+                        default:
+                            throw new Exception($"Could not set format stride. Format not supported! {FloatType}");
+                    }
+                }
+                else
+                {
+                    switch (IntType)
+                    {
+                        case VertexAttribIntegerType.Byte:
+                        case VertexAttribIntegerType.UnsignedByte:
+                            return 1;
+                        case VertexAttribIntegerType.Short:
+                            return 2;
+                        case VertexAttribIntegerType.Int:
+                        case VertexAttribIntegerType.UnsignedInt:
+                            return 4;
+                        default:
+                            throw new Exception($"Could not set format stride. Format not supported! {IntType}");
+                    }
                 }
             }
         }

@@ -180,7 +180,7 @@ namespace CafeLibrary.Rendering
                 customvao.AddAttribute(
                     attributeToLocation[att.name],
                     att.ElementCount,
-                    att.Type,
+                    att.FloatType,
                     false,
                     strideTotal,
                     att.Offset);
@@ -202,7 +202,7 @@ namespace CafeLibrary.Rendering
                 customvao.AddAttribute(
                     attributeToUniform[att.name],
                     att.ElementCount,
-                    att.Type,
+                    att.FloatType,
                     false,
                     strideTotal,
                     att.Offset);
@@ -219,10 +219,19 @@ namespace CafeLibrary.Rendering
             for (int i = 0; i < Attributes.Count; i++)
             {
                 var att = Attributes[i];
-                vao.AddAttribute(
+                if (att.IsFloat)
+                    vao.AddAttribute(
                     att.UniformName,
                     att.ElementCount,
-                    att.Type,
+                    att.FloatType,
+                    false,
+                    strideTotal,
+                    att.Offset);
+                else
+                    vao.AddAttribute(
+                    att.UniformName,
+                    att.ElementCount,
+                    att.IntType,
                     false,
                     strideTotal,
                     att.Offset);

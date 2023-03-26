@@ -8,6 +8,7 @@ using CafeLibrary;
 using GLFrameworkEngine;
 using MapStudio.UI;
 using UKingLibrary.Rendering;
+using NETExtensions.Linq;
 
 namespace UKingLibrary
 {
@@ -59,17 +60,17 @@ namespace UKingLibrary
         /// <summary>
         /// The rendered terrrain meshes in the scene.
         /// </summary>
-        public List<TerrainRender> TerrainMeshes = new List<TerrainRender>();
+        public List<TerrainRender> TerrainRenders = new List<TerrainRender>();
 
         /// <summary>
         /// The rendered water meshes in the scene
         /// </summary>
-        public List<WaterRender> WaterMeshes = new List<WaterRender>();
+        public List<WaterRender> WaterRenders = new List<WaterRender>();
 
         /// <summary>
         /// The rendered grass meshes in the scene
         /// </summary>
-        public List<GrassRender> GrassMeshes = new List<GrassRender>();
+        public List<GrassRender> GrassRenders = new List<GrassRender>();
 
         /// <summary>
         /// Loads the terrain table.
@@ -275,7 +276,7 @@ namespace UKingLibrary
             //Create a terrain mesh for rendering
             var meshRender = new TerrainRender();
             meshRender.LoadTerrainData(heightBuffer, materialData, tileSectionScale);
-            TerrainMeshes.Add(meshRender);
+            TerrainRenders.Add(meshRender);
             //Scale and place the title in the correct place
             meshRender.Transform.Position = new Vector3(
                 tile.PositionX * SECTION_WIDTH * TILE_TO_SECTION_SCALE, 
@@ -305,7 +306,7 @@ namespace UKingLibrary
             //Create a terrain mesh for rendering
             var meshRender = new WaterRender();
             meshRender.LoadWaterData(heightBuffer, tileSectionScale);
-            WaterMeshes.Add(meshRender);
+            WaterRenders.Add(meshRender);
             //Scale and place the title in the correct place
             meshRender.Transform.Position = new Vector3(
                 tile.PositionX * SECTION_WIDTH * TILE_TO_SECTION_SCALE,
@@ -337,7 +338,7 @@ namespace UKingLibrary
             //Create a terrain mesh for rendering
             var meshRender = new GrassRender();
             meshRender.LoadGrassData(grassHeightBuffer, terrHeightBuffer, tileSectionScale);
-            GrassMeshes.Add(meshRender);
+            GrassRenders.Add(meshRender);
             //Scale and place the title in the correct place
             meshRender.Transform.Position = new Vector3(
                 tile.PositionX * SECTION_WIDTH * TILE_TO_SECTION_SCALE,
@@ -363,24 +364,24 @@ namespace UKingLibrary
 
         public void Dispose()
         {
-            foreach (var mesh in TerrainMeshes)
+            foreach (var mesh in TerrainRenders)
             {
                 GLFrameworkEngine.GLContext.ActiveContext.Scene.RemoveRenderObject(mesh);
                 mesh?.Dispose();
             }
-            TerrainMeshes.Clear();
-            foreach (var mesh in WaterMeshes)
+            TerrainRenders.Clear();
+            foreach (var mesh in WaterRenders)
             {
                 GLFrameworkEngine.GLContext.ActiveContext.Scene.RemoveRenderObject(mesh);
                 mesh?.Dispose();
             }
-            WaterMeshes.Clear();
-            foreach (var mesh in GrassMeshes)
+            WaterRenders.Clear();
+            foreach (var mesh in GrassRenders)
             {
                 GLFrameworkEngine.GLContext.ActiveContext.Scene.RemoveRenderObject(mesh);
                 mesh?.Dispose();
             }
-            GrassMeshes.Clear();
+            GrassRenders.Clear();
         }
     }
 }

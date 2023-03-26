@@ -30,5 +30,10 @@ namespace GLFrameworkEngine
                     MathF.Floor(value.Z / snap) * snap);
             return value;
         }
+
+        public static System.Numerics.Vector3 GetNumeric(this Vector3 value)
+        {
+            return new System.Numerics.Vector3(value.X, value.Y, value.Z);
+        }
     }
 }

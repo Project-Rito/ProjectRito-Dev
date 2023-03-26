@@ -46,16 +46,16 @@ namespace GLFrameworkEngine
                 if (delta != Vector2.Zero)
                 {
                     SelectionBox = new SelectionBox();
-                    SelectionBox.StartSelection(context, MouseEventInfo.X, MouseEventInfo.Y);
+                    SelectionBox.StartObjectSelection(context, MouseEventInfo.X, MouseEventInfo.Y);
                 }
             }
 
             //Apply selection
             if (MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
-                SelectionCircle?.Apply(context, MouseEventInfo.X, MouseEventInfo.Y, true);
+                SelectionCircle?.ApplyObjectSelection(context, MouseEventInfo.X, MouseEventInfo.Y, true);
             //Apply deselection
             if (MouseEventInfo.MiddleButton == OpenTK.Input.ButtonState.Pressed)
-                SelectionCircle?.Apply(context, MouseEventInfo.X, MouseEventInfo.Y, false);
+                SelectionCircle?.ApplyObjectSelection(context, MouseEventInfo.X, MouseEventInfo.Y, false);
         }
 
         private Vector2 previousMouseDown;
@@ -67,10 +67,10 @@ namespace GLFrameworkEngine
 
             //Start deselection
             if (MouseEventInfo.MiddleButton == OpenTK.Input.ButtonState.Pressed)
-                SelectionBox?.StartDeselection(context, MouseEventInfo.X, MouseEventInfo.Y);
+                SelectionBox?.StartObjectDeselection(context, MouseEventInfo.X, MouseEventInfo.Y);
             //Start selection
             if (MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Pressed)
-                SelectionBox?.StartSelection(context, MouseEventInfo.X, MouseEventInfo.Y);
+                SelectionBox?.StartObjectSelection(context, MouseEventInfo.X, MouseEventInfo.Y);
 
             //Disable selection tools
             if (MouseEventInfo.RightButton == OpenTK.Input.ButtonState.Pressed)
@@ -87,7 +87,7 @@ namespace GLFrameworkEngine
             //Apply then disable selection tools
             if (MouseEventInfo.LeftButton == OpenTK.Input.ButtonState.Released)
             {
-                SelectionBox?.Apply(context, MouseEventInfo.X, MouseEventInfo.Y);
+                SelectionBox?.ApplyObjectSelection(context, MouseEventInfo.X, MouseEventInfo.Y);
             }
             SelectionBox = null;
         }

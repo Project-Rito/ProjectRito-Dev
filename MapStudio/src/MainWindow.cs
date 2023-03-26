@@ -903,6 +903,41 @@ namespace MapStudio
             Workspace.ActiveWorkspace?.OnKeyDown(InputState.CreateKeyState(), e.IsRepeat);
         }
 
+        protected override void OnKeyUp(KeyboardKeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+
+            Workspace.ActiveWorkspace?.OnKeyUp(InputState.CreateKeyState());
+        }
+
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseDown(e);
+
+            Workspace.ActiveWorkspace?.OnMouseDown();
+        }
+
+        protected override void OnMouseUp(MouseButtonEventArgs e)
+        {
+            base.OnMouseUp(e);
+
+            Workspace.ActiveWorkspace?.OnMouseUp();
+        }
+
+        protected override void OnMouseMove(MouseMoveEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            Workspace.ActiveWorkspace?.OnMouseMove();
+        }
+
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnMouseWheel(e);
+
+            Workspace.ActiveWorkspace?.OnMouseWheel();
+        }
+
         protected override void OnFocusedChanged(EventArgs e)
         {
             base.OnFocusedChanged(e);

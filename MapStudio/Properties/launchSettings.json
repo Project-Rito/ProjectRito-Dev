@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MapStudio": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

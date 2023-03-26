@@ -50,10 +50,24 @@ namespace UKingLibrary
         public List<MapCollisionLoader> BakedCollision { get; set; } = new List<MapCollisionLoader>();
 
         /// <summary>
-        /// All navmesh for the field. Included here for convenience,
-        /// but references are also present in MapNavmeshLoader.RootNode.Tag.
+        /// All "officially" loaded navmesh for the field. Does not include navmesh loaded for streaming set purposes.
         /// </summary>
         public List<MapNavmeshLoader> Navmesh { get; set; } = new List<MapNavmeshLoader>();
+
+        /// <summary>
+        /// Extra navmesh for the scene loaded for streaming set purposes.
+        /// </summary>
+        public List<MapNavmeshLoader> StreamableNavmesh { get; set; } = new List<MapNavmeshLoader>();
+
+        /// <summary>
+        /// All navmesh. Included for convenience.
+        /// </summary>
+        public List<MapNavmeshLoader> AllNavmesh { get { return Navmesh.Concat(StreamableNavmesh).ToList(); } }
+
+        /// <summary>
+        /// Tools to edit navmesh for the field.
+        /// </summary>
+        public MapNavmeshEditor NavmeshEditor { get; set; }
 
         /// <summary>
         /// The terrain for this field
@@ -77,31 +91,38 @@ namespace UKingLibrary
         {
             get
             {
-                return RootNode.FolderChildren.Select(x => new FieldSectionInfo(x.Key)).ToList();
+                return RootNode.NamedChildren.Select(x => new FieldSectionInfo(x.Key)).ToList();
             }
         }
 
-        public FieldMapLoader(string fieldName, UKingEditor editor)
+        public FieldMapLoader(string fieldName, UKingEditor parentEditor)
         {
-            ParentEditor = editor;
+            ParentEditor = parentEditor;
+
             RootNode.Header = fieldName;
             RootNode.Tag = this;
+            InitFieldFolder();
+
             Scene.Init();
 
             Terrain.LoadTerrainTable(fieldName);
+
+            NavmeshEditor = new MapNavmeshEditor(this);
         }
 
-        public MapData LoadMuunt(string fileName, Stream stream)
+        public MapData LoadMuunt(string filePath, Stream stream)
         {
+            string fileName = Path.GetFileName(filePath);
+
             ProcessLoading.Instance.Update(0, 100, "Loading map files");
 
             ApplyPreviewScale();
             GlobalData.LoadActorDatabase();
             ParentEditor.LoadAssetList();
 
-            MapData mapData = new MapData(stream, this, fileName);
+            MapData mapData = new MapData(stream, this, filePath);
             InitSectionFolder(GetSectionName(fileName));
-            ((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Muunt"].AddChild(mapData.RootNode);
+            ((NodeFolder)RootNode.NamedChildren[GetSectionName(fileName)]).NamedChildren["Muunt"].AddChild(mapData.RootNode);
             MapData.Add(mapData);
 
             return mapData;
@@ -109,14 +130,14 @@ namespace UKingLibrary
 
         public void UnloadMuunt(string fileName)
         {
-            if (!RootNode.FolderChildren.ContainsKey(GetSectionName(fileName)))
+            if (!RootNode.NamedChildren.ContainsKey(GetSectionName(fileName)))
                 return;
-            if (!((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren.ContainsKey("Muunt"))
+            if (!((NodeFolder)RootNode.NamedChildren[GetSectionName(fileName)]).NamedChildren.ContainsKey("Muunt"))
                 return;
 
-            MapData mapData = (MapData)((NodeFolder)((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Muunt"]).FolderChildren[fileName].Tag;
+            MapData mapData = (MapData)((NodeFolder)((NodeFolder)RootNode.NamedChildren[GetSectionName(fileName)]).NamedChildren["Muunt"]).NamedChildren[fileName].Tag;
             mapData.Unload();
-            ((NodeFolder)((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Muunt"]).RemoveChild(fileName);
+            ((NodeFolder)((NodeFolder)RootNode.NamedChildren[GetSectionName(fileName)]).NamedChildren["Muunt"]).RemoveChild(fileName);
         }
 
         public void LoadTerrain(string fieldName, FieldSectionInfo sectionInfo, int lodLevel = 8)
@@ -133,63 +154,80 @@ namespace UKingLibrary
 
         public void LoadBakedCollision(string fileName, Stream stream)
         {
-            if (RootNode.FolderChildren.ContainsKey(GetSectionName(fileName)))
-                if (((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Collision"].Children.Any(x => x.Header == fileName))
+            if (RootNode.NamedChildren.ContainsKey(GetSectionName(fileName)))
+                if (((NodeFolder)RootNode.NamedChildren[GetSectionName(fileName)]).NamedChildren["Collision"].Children.Any(x => x.Header == fileName))
                     return;
 
             MapCollisionLoader loader = new MapCollisionLoader();
             loader.Load(stream, fileName, Scene);
 
             InitSectionFolder(GetSectionName(fileName));
-            ((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Collision"].AddChild(loader.RootNode);
+            ((NodeFolder)RootNode.NamedChildren[GetSectionName(fileName)]).NamedChildren["Collision"].AddChild(loader.RootNode);
             BakedCollision.Add(loader);
         }
 
         public void UnloadBakedCollision(string fileName)
         {
-            if (!RootNode.FolderChildren.ContainsKey(GetSectionName(fileName)))
+            if (!RootNode.NamedChildren.ContainsKey(GetSectionName(fileName)))
                 return;
-            if (!((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Collision"].Children.Any(x => x.Header == fileName))
+            if (!((NodeFolder)RootNode.NamedChildren[GetSectionName(fileName)]).NamedChildren["Collision"].Children.Any(x => x.Header == fileName))
                 return;
 
             foreach (MapCollisionLoader collision in BakedCollision)
                 collision.Unload();
 
             BakedCollision.RemoveAll(x => x.RootNode.Header == fileName);
-            ((NodeFolder)((NodeFolder)RootNode.FolderChildren[GetSectionName(fileName)]).FolderChildren["Collision"]).RemoveChild(fileName);
+            ((NodeFolder)((NodeFolder)RootNode.NamedChildren[GetSectionName(fileName)]).NamedChildren["Collision"]).RemoveChild(fileName);
         }
 
         public void LoadNavmesh(string fileName, Stream stream, Vector3 origin)
         {
-            string sectionName = new FieldSectionInfo(origin).Name;
-
-            if (RootNode.FolderChildren.ContainsKey(sectionName))
-                if (((NodeFolder)RootNode.FolderChildren[sectionName]).FolderChildren["NavMesh"].Children.Any(x => x.Header == fileName))
-                    return;
+            if (RootNode.FolderChildren["NavMesh"].Children.Any(x => x.Header == fileName))
+            {
+                // We can promote streamable navmesh if it exists.
+                MapNavmeshLoader existingLoader = (MapNavmeshLoader)RootNode.FolderChildren["NavMesh"].Children.First(x => x.Header == fileName).Tag;
+                if (StreamableNavmesh.Contains(existingLoader)) {
+                    StreamableNavmesh.Remove(existingLoader);
+                    Navmesh.Add(existingLoader);
+                }
+                return;
+            }
 
             MapNavmeshLoader loader = new MapNavmeshLoader();
             loader.Load(stream, fileName, origin, Scene);
 
-            InitSectionFolder(sectionName);
-            ((NodeFolder)RootNode.FolderChildren[sectionName]).FolderChildren["NavMesh"].AddChild(loader.RootNode);
+            RootNode.FolderChildren["NavMesh"].AddChild(loader.RootNode);
             Navmesh.Add(loader);
         }
 
+        public void LoadStreamableNavmesh(string fileName, Stream stream, Vector3 origin)
+        {
+            if (RootNode.FolderChildren["NavMesh"].Children.Any(x => x.Header == fileName))
+                return;
+
+            MapNavmeshLoader loader = new MapNavmeshLoader();
+            loader.Load(stream, fileName, origin, Scene);
+
+            RootNode.FolderChildren["NavMesh"].AddChild(loader.RootNode);
+            StreamableNavmesh.Add(loader);
+        }
+
+        /// <summary>
+        /// Unloads all navmesh, streamable or not.
+        /// </summary>
         public void UnloadNavmesh(string fileName, Vector3 origin)
         {
-            string sectionName = new FieldSectionInfo(origin).Name;
-
-            if (!RootNode.FolderChildren.ContainsKey(sectionName))
+            if (!RootNode.FolderChildren["NavMesh"].Children.Any(x => x.Header == fileName))
                 return;
 
-            if (!((NodeFolder)RootNode.FolderChildren[sectionName]).FolderChildren["NavMesh"].Children.Any(x => x.Header == fileName))
-                return;
-
-            foreach (MapNavmeshLoader navmesh in Navmesh)
+            foreach (MapNavmeshLoader navmesh in Navmesh.Where(x => x.RootNode.Header == fileName))
+                navmesh.Unload();
+            foreach (MapNavmeshLoader navmesh in StreamableNavmesh.Where(x => x.RootNode.Header == fileName))
                 navmesh.Unload();
 
             Navmesh.RemoveAll(x => x.RootNode.Header == fileName);
-            ((NodeFolder)((NodeFolder)RootNode.FolderChildren[sectionName]).FolderChildren["NavMesh"]).RemoveChild(fileName);
+            StreamableNavmesh.RemoveAll(x => x.RootNode.Header == fileName);
+            RootNode.FolderChildren["NavMesh"].RemoveChild(fileName);
         }
 
         public void AddBakedCollisionShape(uint hashId, string muuntFileName, BakedCollisionShapeCacheable info, System.Numerics.Vector3 translation, System.Numerics.Quaternion rotation, System.Numerics.Vector3 scale)
@@ -197,7 +235,7 @@ namespace UKingLibrary
             FieldSectionInfo section = new FieldSectionInfo(muuntFileName);
             int quadIndex = section.GetQuadIndex(translation);
 
-            ((MapCollisionLoader)((NodeFolder)RootNode.FolderChildren[GetSectionName(muuntFileName)]).FolderChildren["Collision"].Children[quadIndex].Tag).AddShape(info, hashId, translation, rotation, scale);
+            BakedCollision.First(x => x.RootNode.Parent.Parent.Header == GetSectionName(muuntFileName)).AddShape(info, hashId, translation, rotation, scale);
         }
 
         public void RemoveBakedCollisionShape(uint hashId)
@@ -234,10 +272,10 @@ namespace UKingLibrary
 
         public FieldSectionInfo GetBakedCollisionShapeSection(uint hashId)
         {
-            foreach (string sectionName in RootNode.FolderChildren.Keys)
+            foreach (MapCollisionLoader bakedCollision in BakedCollision)
             {
-                if (((NodeFolder)RootNode.FolderChildren[sectionName]).FolderChildren["Collision"].Children.Any(x => ((MapCollisionLoader)x.Tag).ShapeExists(hashId)))
-                    return new FieldSectionInfo(sectionName);
+                if (bakedCollision.ShapeExists(hashId))
+                    return new FieldSectionInfo(bakedCollision.RootNode.Parent.Parent.Header);
             }
 
             return null;
@@ -253,10 +291,18 @@ namespace UKingLibrary
             return null;
         }
 
+        private void InitFieldFolder()
+        {
+            RootNode.NamedChildren = new Dictionary<string, NodeBase>
+            {
+                { "NavMesh", new NodeFolder("NavMesh") }
+            };
+        }
+
         private void InitSectionFolder(string sectionName)
         {
             RootNode.TryAddChild(new NodeFolder(sectionName) {
-                FolderChildren = new Dictionary<string, NodeBase> 
+                NamedChildren = new Dictionary<string, NodeBase> 
                 { 
                     { "Muunt", new NodeFolder("Muunt") }, 
                     { "Collision", new NodeFolder("Collision") },
@@ -303,42 +349,52 @@ namespace UKingLibrary
             }
             Scene.DeletedObjects.RemoveAll(x => x.UINode.Tag is MapObject);
 
-            foreach (NodeFolder sectionFolder in RootNode.Children)
+            // Muunt saving
+            foreach (MapData mapData in MapData)
             {
-                // Muunt saving
-                foreach (NodeBase file in sectionFolder.FolderChildren["Muunt"].Children)
-                {
-                    string fileName = file.Header;
-                    MapData mapData = (MapData)file.Tag;
+                string fileName = mapData.RootNode.Header;
 
-                    MemoryStream saveStream = new MemoryStream(); // Might not actually need this in a memorystream here, pretty sure it will automatically do that. Have to look at compression formats though.
-                    mapData.Save(saveStream);
+                MemoryStream saveStream = new MemoryStream(); // Might not actually need this in a memorystream here, pretty sure it will automatically do that. Have to look at compression formats though.
+                mapData.Save(saveStream);
 
-                    Directory.CreateDirectory(Path.Join(savePath, $"aoc/0010/Map/{RootNode.Header}/{GetSectionName(fileName)}"));
-                    FileStream fileStream = File.Open(Path.Join(savePath, $"aoc/0010/Map/{RootNode.Header}/{GetSectionName(fileName)}/{fileName}"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
+                Directory.CreateDirectory(Path.Join(savePath, $"aoc/0010/Map/{RootNode.Header}/{GetSectionName(fileName)}"));
+                FileStream fileStream = File.Open(Path.Join(savePath, $"aoc/0010/Map/{RootNode.Header}/{GetSectionName(fileName)}/{fileName}"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
 
-                    saveStream.WriteTo(fileStream);
+                saveStream.WriteTo(fileStream);
 
-                    fileStream.SetLength(fileStream.Position);
-                    fileStream.Flush();
-                    fileStream.Close();
-                }
+                fileStream.SetLength(fileStream.Position);
+                fileStream.Flush();
+                fileStream.Close();
+            }
 
-                // Baked collision saving
-                foreach (NodeBase file in sectionFolder.FolderChildren["Collision"].Children)
-                {
-                    string fileName = file.Header;
-                    MapCollisionLoader loader = (MapCollisionLoader)file.Tag;
+            // Baked collision saving
+            foreach (MapCollisionLoader bakedCollision in BakedCollision)
+            {
+                string fileName = bakedCollision.RootNode.Header;
 
-                    Directory.CreateDirectory(Path.Join(savePath, $"content/Physics/StaticCompound/{RootNode.Header}/"));
-                    FileStream fileStream = File.Open(Path.Join(savePath, $"content/Physics/StaticCompound/{RootNode.Header}/{fileName}"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
+                Directory.CreateDirectory(Path.Join(savePath, $"content/Physics/StaticCompound/{RootNode.Header}/"));
+                FileStream fileStream = File.Open(Path.Join(savePath, $"content/Physics/StaticCompound/{RootNode.Header}/{fileName}"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
 
-                    loader.Save(fileStream);
+                bakedCollision.Save(fileStream);
 
-                    fileStream.SetLength(fileStream.Position);
-                    fileStream.Flush();
-                    fileStream.Close();
-                }
+                fileStream.SetLength(fileStream.Position);
+                fileStream.Flush();
+                fileStream.Close();
+            }
+
+            // Navmesh saving
+            foreach (MapNavmeshLoader navmesh in AllNavmesh)
+            {
+                string fileName = navmesh.RootNode.Header;
+
+                Directory.CreateDirectory(Path.Join(savePath, $"content/NavMesh/{RootNode.Header}/"));
+                FileStream fileStream = File.Open(Path.Join(savePath, $"content/NavMesh/{RootNode.Header}/{fileName}"), FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write);
+
+                navmesh.Save(fileStream);
+
+                fileStream.SetLength(fileStream.Position);
+                fileStream.Flush();
+                fileStream.Close();
             }
         }
 
@@ -382,10 +438,41 @@ namespace UKingLibrary
             GLFrameworkEngine.GLContext.PreviewScale = PreviewScale;
         }
 
+        public virtual void OnKeyDown(KeyEventInfo e)
+        {
+            NavmeshEditor.OnKeyDown(e);
+        }
+
+        public virtual void OnKeyUp(KeyEventInfo e)
+        {
+            NavmeshEditor.OnKeyUp(e);
+        }
+
+        public virtual void OnMouseDown()
+        {
+            NavmeshEditor.OnMouseDown();
+        }
+
+        public virtual void OnMouseUp()
+        {
+            NavmeshEditor.OnMouseUp();
+        }
+
+        public virtual void OnMouseMove()
+        {
+            NavmeshEditor.OnMouseMove();
+        }
+
+        public virtual void OnMouseWheel()
+        {
+            NavmeshEditor.OnMouseWheel();
+        }
+
         public void Dispose()
         {
             foreach (MapData mapData in MapData)
                 mapData.Dispose();
+            NavmeshEditor?.Dispose();
         }
     }
 }

@@ -71,10 +71,19 @@ namespace Toolbox.Core
 
                 loadedLibs.Add(name);
 
-                AssemblyName an = AssemblyName.GetAssemblyName(dllFile);
+                AssemblyName an;
+                try
+                {
+                    an = AssemblyName.GetAssemblyName(dllFile);
+                }
+                catch
+                {
+                    continue;
+                }
+
                 Assembly assembly = Assembly.Load(an);
                 assemblies.Add(assembly);
-            }
+                }
 
             foreach (Assembly assembly in assemblies)
             {

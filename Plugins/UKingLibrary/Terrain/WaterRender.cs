@@ -27,10 +27,12 @@ namespace UKingLibrary.Rendering
         static GLTexture2DArray WaterTexture_Emm;
         static GLTexture2DArray WaterTexture_Nrm;
 
-        static int[] IndexBuffer;
+        public static int[] Indices;
 
         public bool EnableFrustumCulling => true;
         public bool InFrustum { get; set; } = true;
+
+        public WaterVertex[] Vertices;
 
         BoundingNode Bounding = new BoundingNode();
 
@@ -53,13 +55,13 @@ namespace UKingLibrary.Rendering
             //Load all attribute data.
             var positionData = GetWaterVertices(heightBuffer);
             var texCoords = GetTexCoords();
-            //Normals calculation
+            // Get actual positions
             Vector3[] positions = new Vector3[positionData.Length];
             for (int i = 0; i < positionData.Length; i++)
                 positions[i] = positionData[i].Translate;
             //Fixed index buffer. It can be kept static as all terrain tiles use the same index layout.
-            if (IndexBuffer == null)
-                IndexBuffer = GetIndexBuffer();
+            if (Indices == null)
+                Indices = GetIndexBuffer();
 
             // Apply X and Z scaling
             for (int i = 0; i < positions.Length; i++)
@@ -69,7 +71,7 @@ namespace UKingLibrary.Rendering
             }
 
             //Normals calculation
-            var normals = DrawingHelper.CalculateNormals(positions.ToList(), IndexBuffer.ToList());
+            var normals = DrawingHelper.CalculateNormals(positions.ToList(), Indices.ToList());
             //Tangents calculation
             var tangents = GetTangents(positions);
             
@@ -83,6 +85,8 @@ namespace UKingLibrary.Rendering
                     Normal = normals[i],
                     TangentWorld = tangents[i],
                     TexCoords = texCoords[i],
+                    XAxisFlowRate = positionData[i].XAxisFlowRate,
+                    ZAxisFlowRate = positionData[i].ZAxisFlowRate,
                     MaterialIndex = (uint)positionData[i].MaterialIndex,
                     DebugHighlight = (
                     i % MAP_TILE_LENGTH == 0 ||
@@ -97,7 +101,8 @@ namespace UKingLibrary.Rendering
             Bounding.Radius = (Bounding.Box.Max - Bounding.Box.Min).Length;
 
             //Finish loading the terrain mesh
-            WaterMesh = new RenderMesh<WaterVertex>(vertices, IndexBuffer, PrimitiveType.Triangles);
+            WaterMesh = new RenderMesh<WaterVertex>(vertices, Indices, PrimitiveType.Triangles);
+            Vertices = vertices;
             LoadWaterTextures();
         }
 
@@ -144,8 +149,8 @@ namespace UKingLibrary.Rendering
                         {
                             Translate = new Vector3(x / (float)INDEX_COUNT_SIDE - 0.5f, heightValue, normY - 0.5f),
                             MaterialIndex = materialIndex,
-                            XAxisFlowRate = xAxisFlowRate,
-                            ZAxisFlowRate = zAxisFlowRate
+                            XAxisFlowRate = ((xAxisFlowRate / ushort.MaxValue) * 2) - 1,
+                            ZAxisFlowRate = ((zAxisFlowRate / ushort.MaxValue) * 2) - 1
                         };
 
                         vertices[vertexIndex++] = vertexData;
@@ -158,8 +163,8 @@ namespace UKingLibrary.Rendering
         public class WaterVertexData
         {
             public Vector3 Translate;
-            public ushort XAxisFlowRate;
-            public ushort ZAxisFlowRate;
+            public float XAxisFlowRate;
+            public float ZAxisFlowRate;
             public byte MaterialIndex;
         }
 
@@ -332,16 +337,24 @@ namespace UKingLibrary.Rendering
             [RenderAttribute("vTexCoord", VertexAttribPointerType.Float, 40)]
             public Vector2 TexCoords;
 
-            [RenderAttribute("vDebugHighlight", VertexAttribPointerType.Float, 48)]
+            [RenderAttribute("vXAxisFlowRate", VertexAttribPointerType.Float, 48)]
+            public float XAxisFlowRate;
+
+            [RenderAttribute("vZAxisFlowRate", VertexAttribPointerType.Float, 52)]
+            public float ZAxisFlowRate;
+
+            [RenderAttribute("vDebugHighlight", VertexAttribPointerType.Float, 56)]
             public Vector3 DebugHighlight;
 
-            public WaterVertex(Vector3 position, Vector3 normal, Vector3 tangentWorld, uint materialIndex, Vector2 texCoords, Vector3 debugHighlight)
+            public WaterVertex(Vector3 position, Vector3 normal, Vector3 tangentWorld, uint materialIndex, Vector2 texCoords, float xAxisFlowRate, float zAxisFlowRate, Vector3 debugHighlight)
             {
                 Normal = normal;
                 TangentWorld = tangentWorld;
                 Position = position;
                 MaterialIndex = materialIndex;
                 TexCoords = texCoords;
+                XAxisFlowRate = xAxisFlowRate;
+                ZAxisFlowRate = zAxisFlowRate;
                 DebugHighlight = debugHighlight;
             }
         }

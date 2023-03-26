@@ -34,18 +34,20 @@ namespace UKingLibrary
 
         public MapData() { }
 
-        public MapData(Stream stream, IMapLoader parentLoader, string fileName) {
-            Load(stream, parentLoader, fileName);
+        public MapData(Stream stream, IMapLoader parentLoader, string filePath) {
+            Load(stream, parentLoader, filePath);
         }
 
-        public void Load(Stream stream, IMapLoader parentLoader, string fileName) {
-            FileSettings = STFileLoader.TryDecompressFile(stream, fileName);
+        public void Load(Stream stream, IMapLoader parentLoader, string filePath) {
+            FileSettings = STFileLoader.TryDecompressFile(stream, filePath);
 
-            Load(BymlFile.FromBinary(FileSettings.Stream), parentLoader, fileName);
+            Load(BymlFile.FromBinary(FileSettings.Stream), parentLoader, filePath);
         }
 
-        public void Load(BymlFile byaml, IMapLoader parentLoader, string fileName)
+        public void Load(BymlFile byaml, IMapLoader parentLoader, string filePath)
         {
+            string fileName = Path.GetFileName(filePath);
+
             Byaml = byaml;
 
             Dictionary<string, NodeBase> nodeFolders = new Dictionary<string, NodeBase>();
@@ -155,7 +157,7 @@ namespace UKingLibrary
             }
 
             //Load all the outliner nodes into the editor
-            ObjectFolder.FolderChildren = nodeFolders;
+            ObjectFolder.NamedChildren = nodeFolders;
 
             // Set the camera position to the map pos
             if (byaml.RootNode.Hash.ContainsKey("LocationPosX") && byaml.RootNode.Hash.ContainsKey("LocationPosZ"))
@@ -193,7 +195,7 @@ namespace UKingLibrary
 
         public NodeBase AddObject(MapObject obj, IMapLoader parentLoader)
         {
-            Dictionary<string, NodeBase> nodeFolders = ObjectFolder.FolderChildren;
+            Dictionary<string, NodeBase> nodeFolders = ObjectFolder.NamedChildren;
 
             string profile = obj.ActorInfo.ContainsKey("profile") ? (string)obj.ActorInfo["profile"] : null;
 
@@ -218,7 +220,7 @@ namespace UKingLibrary
                 parent = nodeFolders["Unknown"];
             }
             parent.AddChild(obj.Render.UINode);
-            ObjectFolder.FolderChildren = nodeFolders;
+            ObjectFolder.NamedChildren = nodeFolders;
 
             parentLoader.ParentEditor.Workspace.ScrollToSelectedNode(obj.Render.UINode);
             return parent;

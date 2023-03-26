@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <OutputPath>bin</OutputPath>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
@@ -43,9 +43,11 @@
     <ProjectReference Include="..\..\Toolbox.Core\Toolbox.Core.csproj">
       <Private>false</Private>
     </ProjectReference>
+    <ProjectReference Include="..\..\HKX2Builders\HKX2Builders\HKX2Builders.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Emgu.CV.runtime.windows.cuda" Version="4.4.0.4099" />
     <PackageReference Include="Syroot.BinaryData" Version="5.2.2" />
     <PackageReference Include="Syroot.Maths" Version="1.5.3" />
   </ItemGroup>
@@ -64,14 +66,6 @@
     </Reference>
     <Reference Include="BfshaLibrary">
       <HintPath>..\..\MapStudio\Lib\BfshaLibrary.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="HKX2">
-      <HintPath>..\..\MapStudio\Lib\HKX2.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="HKX2Builders">
-      <HintPath>..\..\MapStudio\Lib\HKX2Builders.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
@@ -93,12 +87,18 @@
 
   <ItemGroup>
     <None Update="Languages\English\UKingLibrary.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Shaders\HavokShape.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Shaders\HavokShape.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Shaders\NavmeshPaint.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Shaders\NavmeshPaint.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Shaders\Terrain.frag">

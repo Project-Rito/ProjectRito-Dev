@@ -12,13 +12,17 @@ using HKX2Builders.Extensions;
 
 namespace UKingLibrary
 {
-    public class HavokMeshShapeRender : EditableObject, IColorPickable, IPositionRenderable
+    public class HavokMeshShapeRender : EditableObject, IColorPickable
     {
-        RenderMesh<HavokMeshShapeVertex> ShapeMesh;
+        private RenderMesh<HavokMeshShapeVertex> ShapeMesh;
+        public HavokMeshShapeVertex[] Vertices;
+        public int[] Indices;
 
         private BoundingNode _boundingNode;
         public override BoundingNode BoundingNode => _boundingNode;
 
+
+        public static float COLLISIONSHAPE_DEBUG_OPACITY = 0.5f;
         private const bool COLLISIONSHAPE_DEBUG = false;
 
         public HavokMeshShapeRender(NodeBase parent) : base(parent)
@@ -44,6 +48,7 @@ namespace UKingLibrary
                 GL.Enable(EnableCap.Blend);
                 GL.Enable(EnableCap.PolygonOffsetFill);
                 GL.PolygonOffset(-4f, 1f);
+                shader.SetFloat("u_Opacity", COLLISIONSHAPE_DEBUG_OPACITY);
                 ShapeMesh.Draw(context);
                 GL.Disable(EnableCap.PolygonOffsetFill);
                 GL.Disable(EnableCap.CullFace);
@@ -74,10 +79,15 @@ namespace UKingLibrary
             GL.Disable(EnableCap.CullFace);
         }
 
-        public void DrawPositionColor(GLContext context)
+        public void DrawForNavmeshPaint(GLContext context, MapNavmeshEditor.NavmeshEditFilter editFilter, int shapeIndex, int resX, int resY)
         {
-            var shader = GlobalShaders.GetShader("POSITION");
+            var shader = GlobalShaders.GetShader("NAVMESH_PAINT");
             context.CurrentShader = shader;
+
+            shader.SetInt("u_shapeIndex", shapeIndex);
+            shader.SetVector2("u_resolution", new Vector2(resX, resY));
+
+            shader.SetFloat("u_filterAngleMax", editFilter.AngleMax);
 
             shader.SetTransform(GLConstants.ModelMatrix, this.Transform);
 
@@ -94,16 +104,6 @@ namespace UKingLibrary
         {
             // Obtain mesh data
             MeshContainer mesh = shape.ToMesh();
-
-            // Get vertices in a good format for this
-            HavokMeshShapeVertex[] vertices = new HavokMeshShapeVertex[mesh.Vertices.Count];
-            for (int i = 0; i < mesh.Vertices.Count; i++)
-            {
-                vertices[i] = new HavokMeshShapeVertex()
-                {
-                    Position = new Vector3(mesh.Vertices[i].X, mesh.Vertices[i].Y, mesh.Vertices[i].Z) * GLContext.PreviewScale
-                };
-            }
 
             // Get indices in a good format for this.
             // We're also gonna triangulate our quad data while we're at it:
@@ -135,26 +135,80 @@ namespace UKingLibrary
                     indices.RemoveRange(i - 2, 3);
             }
 
+            DrawingHelper.VerticesIndices<Vector3> splitVertexMesh = DrawingHelper.SplitVertices(mesh.Vertices.Select(x => new Vector3(x.X, x.Y, x.Z)).ToArray(), indices.ToArray());
+            indices = splitVertexMesh.Indices;
+
+            // Get vertices in a good format for this
+            HavokMeshShapeVertex[] vertices = splitVertexMesh.Vertices.Select(v => new HavokMeshShapeVertex
+            {
+                Position = new Vector3(v.X, v.Y, v.Z) * GLContext.PreviewScale
+            }).ToArray();
+
             // Set misc data
             var normals = DrawingHelper.CalculateNormals(vertices.Select(x => x.Position).ToList(), indices.ToList());
             for (int i = 0; i < vertices.Count(); i++)
             {
                 vertices[i].Normal = normals[i];
                 vertices[i].VertexColor = new Vector4(0, 0.5f, 1, 0.5f);
+                vertices[i].VertexIndex = (float)i;
             }
 
 
             ShapeMesh = new RenderMesh<HavokMeshShapeVertex>(vertices, indices.ToArray(), OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
+            Vertices = vertices;
+            Indices = indices.ToArray();
         }
 
-        public void LoadNavmesh(hkaiNavMesh navmesh)
+        public void LoadNavmesh(hkaiNavMesh navmesh, Vector3 origin = default)
         {
-            HavokMeshShapeVertex[] vertices = navmesh.m_vertices.Select(v => new HavokMeshShapeVertex
+            for (int i = 0; i < navmesh.m_vertices.Count; i++)
             {
-                Position = new Vector3(v.X, v.Y, v.Z) * GLContext.PreviewScale
-            }).ToArray();
+                break;
+                TransformableObject r = new TransformableObject(UINode);
+                var pos = navmesh.m_vertices[i];
+                r.Transform.Position = new OpenTK.Vector3((pos.X + origin.X) * GLContext.PreviewScale, (pos.Y + origin.Y) * GLContext.PreviewScale, (pos.Z + origin.Z) * GLContext.PreviewScale);
+                r.Transform.UpdateMatrix(true); ;
+                GLContext.ActiveContext.Scene.AddRenderObject(r);
+            }
+            for (int i = 0; i < navmesh.m_edges.Count; i++)
+            {
+                break;
+                if (navmesh.m_edges[i].m_oppositeFace == 0xFFFFFFFF)
+                {
+                    TransformableObject r = new TransformableObject(UINode);
+                    var midpoint = (navmesh.m_vertices[navmesh.m_edges[i].m_a] + navmesh.m_vertices[navmesh.m_edges[i].m_b]) / 2;
+                    r.Transform.Position = new OpenTK.Vector3((midpoint.X + origin.X) * GLContext.PreviewScale, (midpoint.Y + origin.Y) * GLContext.PreviewScale, (midpoint.Z + origin.Z) * GLContext.PreviewScale);
+                    r.Transform.UpdateMatrix(true);
+                    GLContext.ActiveContext.Scene.AddRenderObject(r);
+                    continue;
+                    var a = navmesh.m_vertices[navmesh.m_edges[i].m_a];
+                    a.Y += 10f;
+                    navmesh.m_vertices[navmesh.m_edges[i].m_a] = a;
 
-            List<int> indices = new List<int>(vertices.Length); // Setting capacity just as rough estimate.
+                    var b = navmesh.m_vertices[navmesh.m_edges[i].m_b];
+                    b.Y += 10f;
+                    navmesh.m_vertices[navmesh.m_edges[i].m_b] = b;
+                }
+            }
+            foreach (hkaiStreamingSet ss in navmesh.m_streamingSets)
+            {
+                int num = 0;
+                foreach (hkaiStreamingSetNavMeshConnection meshConnection in ss.m_meshConnections)
+                {
+                    break;
+                    TransformableObject r = new TransformableObject(UINode);
+                    var midpoint = (navmesh.m_vertices[navmesh.m_edges[meshConnection.m_edgeIndex].m_a] + navmesh.m_vertices[navmesh.m_edges[meshConnection.m_edgeIndex].m_b]) / 2;
+                    r.Transform.Position = new OpenTK.Vector3((midpoint.X + origin.X) * GLContext.PreviewScale, (midpoint.Y + origin.Y) * GLContext.PreviewScale, (midpoint.Z + origin.Z) * GLContext.PreviewScale);
+                    r.Transform.UpdateMatrix(true);
+
+                    GLContext.ActiveContext.Scene.AddRenderObject(r);
+                    num++;
+                    //if (num > 30)
+                    //    break;
+                }
+            }
+
+            List<int> indices = new List<int>(navmesh.m_vertices.Count); // Setting capacity just as rough estimate.
             foreach (hkaiNavMeshFace face in navmesh.m_faces)
             {
                 if (face.m_numEdges == 3)
@@ -187,14 +241,65 @@ namespace UKingLibrary
                 indices.AddRange(DrawingHelper.TriangulateEarClip(faceVertices.Select(x=>x.Item1).ToArray()).Select(x => faceVertices[x].Item2));
             }
 
+            DrawingHelper.VerticesIndices<Vector3> splitVertexMesh = DrawingHelper.SplitVertices(navmesh.m_vertices.Select(x => new Vector3(x.X, x.Y, x.Z)).ToArray(), indices.ToArray());
+            indices = splitVertexMesh.Indices;
+
+            HavokMeshShapeVertex[] vertices = splitVertexMesh.Vertices.Select(v => new HavokMeshShapeVertex
+            {
+                Position = new Vector3(v.X, v.Y, v.Z) * GLContext.PreviewScale
+            }).ToArray();
+
             Vector3[] normals = DrawingHelper.CalculateNormals(vertices.Select(x => x.Position).ToList(), indices);
             for (int i = 0; i < vertices.Count(); i++)
             {
-                vertices[i].Normal = new Vector3(0, 1, 0);
+                vertices[i].Normal = normals[i];
                 vertices[i].VertexColor = new Vector4(0, 1f, 0.5f, 0.5f);
+                vertices[i].VertexIndex = (float)i;
             }
 
             ShapeMesh = new RenderMesh<HavokMeshShapeVertex>(vertices, indices.ToArray(), OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
+            Vertices = vertices;
+            Indices = indices.ToArray();
+
+            Vector3 bMin = (new Vector3(navmesh.m_aabb.m_min.X, navmesh.m_aabb.m_min.Y, navmesh.m_aabb.m_min.Z) + origin) * GLContext.PreviewScale;
+            Vector3 bMax = (new Vector3(navmesh.m_aabb.m_max.X, navmesh.m_aabb.m_max.Y, navmesh.m_aabb.m_max.Z) + origin) * GLContext.PreviewScale;
+            SetBounding(new BoundingNode(bMin, bMax));
+        }
+
+        public void LoadVerticesIndices(DrawingHelper.VerticesIndices<Vector3> vi, Vector3 origin = default)
+        {
+            HavokMeshShapeVertex[] vertices = vi.Vertices.Select(v => new HavokMeshShapeVertex
+            {
+                Position = (new Vector3(v.X, v.Y, v.Z) + origin) * GLContext.PreviewScale
+            }).ToArray();
+
+            Vector3[] normals = DrawingHelper.CalculateNormals(vertices.Select(x => x.Position).ToList(), vi.Indices);
+            for (int i = 0; i < vertices.Count(); i++)
+            {
+                vertices[i].Normal = normals[i];
+                vertices[i].VertexColor = new Vector4(0, 1f, 0.5f, 0.5f);
+                vertices[i].VertexIndex = (float)i;
+            }
+
+            ShapeMesh = new RenderMesh<HavokMeshShapeVertex>(vertices, vi.Indices.ToArray(), OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
+            Vertices = vertices;
+            Indices = vi.Indices.ToArray();
+
+            Vector3 min = new Vector3(float.MaxValue);
+            Vector3 max = new Vector3(float.MinValue);
+            for (int i = 0; i < vertices.Count(); i++)
+            {
+                if (vertices[i].Position.X < min.X &&
+                    vertices[i].Position.Y < min.Y &&
+                    vertices[i].Position.Z < min.Z)
+                    min = vertices[i].Position;
+                if (vertices[i].Position.X > max.X &&
+                    vertices[i].Position.Y > max.Y &&
+                    vertices[i].Position.Z > max.Z)
+                    max = vertices[i].Position;
+            }
+
+            SetBounding(new BoundingNode(min, max));
         }
 
         public void SetBounding(BoundingNode boundingNode)
@@ -204,14 +309,17 @@ namespace UKingLibrary
 
         public struct HavokMeshShapeVertex
         {
-            [RenderAttribute("vPosition", VertexAttribPointerType.Float, 0)]
+            [RenderAttribute("vPosition", VertexAttribPointerType.Float)]
             public Vector3 Position;
 
-            [RenderAttribute("vNormalWorld", VertexAttribPointerType.Float, 12)]
+            [RenderAttribute("vNormalWorld", VertexAttribPointerType.Float)]
             public Vector3 Normal;
 
-            [RenderAttribute("vVertexColor", VertexAttribPointerType.Float, 24)]
+            [RenderAttribute("vVertexColor", VertexAttribPointerType.Float)]
             public Vector4 VertexColor;
+
+            [RenderAttribute("vVertexIndex", VertexAttribPointerType.Float)]
+            public float VertexIndex;
         }
     }
 }

@@ -67,15 +67,18 @@ namespace UKingLibrary
 
                         foreach (BymlFile muunt in section.Value)
                         {
-                            foreach (IDictionary<string, BymlNode> obj in muunt.RootNode.Hash["Objs"].Array.Select(x => x.Hash))
+                            if (muunt.RootNode.Hash["Objs"].Array != null)
                             {
-                                if (!actorShapes.ContainsKey(obj["UnitConfigName"].String))
+                                foreach (IDictionary<string, BymlNode> obj in muunt.RootNode.Hash["Objs"].Array.Select(x => x.Hash))
                                 {
-                                    foreach (MapCollisionLoader collisionLoader in collisionLoaders)
+                                    if (!actorShapes.ContainsKey(obj["UnitConfigName"].String))
                                     {
-                                        BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(obj["HashId"].UInt);
-                                        if (infos != null)
-                                            actorShapes.TryAdd(obj["UnitConfigName"].String, infos);
+                                        foreach (MapCollisionLoader collisionLoader in collisionLoaders)
+                                        {
+                                            BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(obj["HashId"].UInt);
+                                            if (infos != null)
+                                                actorShapes.TryAdd(obj["UnitConfigName"].String, infos);
+                                        }
                                     }
                                 }
                             }
@@ -153,11 +156,14 @@ namespace UKingLibrary
 
                         BymlFile muunt = BymlFile.FromBinary(muuntSettings.Stream);
 
-                        foreach (IDictionary<string, BymlNode> obj in muunt.RootNode.Hash["Objs"].Array.Select(x => x.Hash))
+                        if (muunt.RootNode.Hash["Objs"].Array != null)
                         {
-                            BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(obj["HashId"].UInt);
-                            if (infos != null)
-                                actorShapes.TryAdd(obj["UnitConfigName"].String, infos);
+                            foreach (IDictionary<string, BymlNode> obj in muunt.RootNode.Hash["Objs"].Array.Select(x => x.Hash))
+                            {
+                                BakedCollisionShapeCacheable[] infos = collisionLoader.GetCacheables(obj["HashId"].UInt);
+                                if (infos != null)
+                                    actorShapes.TryAdd(obj["UnitConfigName"].String, infos);
+                            }
                         }
                     }
                 }
