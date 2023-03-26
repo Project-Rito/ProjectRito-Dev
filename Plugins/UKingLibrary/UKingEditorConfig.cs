@@ -19,6 +19,6 @@ namespace UKingLibrary
         public Dictionary<string, List<string>> OpenMapUnits = new Dictionary<string, List<string>>();
         public List<string> OpenDungeons = new List<string>();
 
-        public hkaiNavMeshBuilder.Config NavmeshConfig = hkaiNavMeshBuilder.Config.Default();
+        public NavmeshBuilderConfig NavmeshConfig = NavmeshBuilderConfig.Default();
     }
 }

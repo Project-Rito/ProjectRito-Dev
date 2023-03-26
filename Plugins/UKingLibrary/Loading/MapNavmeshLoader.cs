@@ -39,6 +39,7 @@ namespace UKingLibrary
             }
             set
             {
+                /*
                 // We'll just do this...
                 //ClearStreamingSets();
                 //((hkaiDirectedGraphExplicitCost)root.m_namedVariants[1].m_variant).m_streamingSets = ((hkaiDirectedGraphExplicitCost)Root.m_namedVariants[1].m_variant).m_streamingSets;
@@ -48,6 +49,7 @@ namespace UKingLibrary
                     value.m_namedVariants[1].m_name = _root.m_namedVariants[1].m_name;
                     value.m_namedVariants[2].m_name = _root.m_namedVariants[2].m_name;
                 }
+                */
 
                 _root = value;
                 //Root.m_namedVariants[0] = root.m_namedVariants[0];
@@ -166,7 +168,7 @@ namespace UKingLibrary
             RemoveRenders();
 
             HavokMeshShapeRender nmrender = new HavokMeshShapeRender(RootNode);
-            nmrender.LoadNavmesh((hkaiNavMesh)Root.m_namedVariants[0].m_variant, Origin * GLContext.PreviewScale);
+            nmrender.LoadNavmesh((hkaiNavMesh)Root.m_namedVariants[0].m_variant, Origin);
 
             nmrender.Transform.Position = Origin * GLContext.PreviewScale;
             nmrender.Transform.Rotation = OpenTK.Quaternion.Identity;

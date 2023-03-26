@@ -166,7 +166,7 @@ namespace UKingLibrary
                 break;
                 TransformableObject r = new TransformableObject(UINode);
                 var pos = navmesh.m_vertices[i];
-                r.Transform.Position = new OpenTK.Vector3(pos.X * GLContext.PreviewScale + origin.X, pos.Y * GLContext.PreviewScale + origin.Y, pos.Z * GLContext.PreviewScale + origin.Z);
+                r.Transform.Position = new OpenTK.Vector3((pos.X + origin.X) * GLContext.PreviewScale, (pos.Y + origin.Y) * GLContext.PreviewScale, (pos.Z + origin.Z) * GLContext.PreviewScale);
                 r.Transform.UpdateMatrix(true); ;
                 GLContext.ActiveContext.Scene.AddRenderObject(r);
             }
@@ -177,8 +177,8 @@ namespace UKingLibrary
                 {
                     TransformableObject r = new TransformableObject(UINode);
                     var midpoint = (navmesh.m_vertices[navmesh.m_edges[i].m_a] + navmesh.m_vertices[navmesh.m_edges[i].m_b]) / 2;
-                    r.Transform.Position = new OpenTK.Vector3(midpoint.X * GLContext.PreviewScale + origin.X, midpoint.Y * GLContext.PreviewScale + origin.Y, midpoint.Z * GLContext.PreviewScale + origin.Z);
-                    r.Transform.UpdateMatrix(true);;
+                    r.Transform.Position = new OpenTK.Vector3((midpoint.X + origin.X) * GLContext.PreviewScale, (midpoint.Y + origin.Y) * GLContext.PreviewScale, (midpoint.Z + origin.Z) * GLContext.PreviewScale);
+                    r.Transform.UpdateMatrix(true);
                     GLContext.ActiveContext.Scene.AddRenderObject(r);
                     continue;
                     var a = navmesh.m_vertices[navmesh.m_edges[i].m_a];
@@ -192,15 +192,19 @@ namespace UKingLibrary
             }
             foreach (hkaiStreamingSet ss in navmesh.m_streamingSets)
             {
-                break;
+                int num = 0;
                 foreach (hkaiStreamingSetNavMeshConnection meshConnection in ss.m_meshConnections)
                 {
+                    break;
                     TransformableObject r = new TransformableObject(UINode);
                     var midpoint = (navmesh.m_vertices[navmesh.m_edges[meshConnection.m_edgeIndex].m_a] + navmesh.m_vertices[navmesh.m_edges[meshConnection.m_edgeIndex].m_b]) / 2;
-                    r.Transform.Position = new OpenTK.Vector3(midpoint.X * GLContext.PreviewScale + origin.X, midpoint.Y * GLContext.PreviewScale + origin.Y, midpoint.Z * GLContext.PreviewScale + origin.Z);
+                    r.Transform.Position = new OpenTK.Vector3((midpoint.X + origin.X) * GLContext.PreviewScale, (midpoint.Y + origin.Y) * GLContext.PreviewScale, (midpoint.Z + origin.Z) * GLContext.PreviewScale);
                     r.Transform.UpdateMatrix(true);
 
                     GLContext.ActiveContext.Scene.AddRenderObject(r);
+                    num++;
+                    //if (num > 30)
+                    //    break;
                 }
             }
 
@@ -257,9 +261,45 @@ namespace UKingLibrary
             Vertices = vertices;
             Indices = indices.ToArray();
 
-            Vector3 bMin = new Vector3(navmesh.m_aabb.m_min.X, navmesh.m_aabb.m_min.Y, navmesh.m_aabb.m_min.Z) * GLContext.PreviewScale + origin;
-            Vector3 bMax = new Vector3(navmesh.m_aabb.m_max.X, navmesh.m_aabb.m_max.Y, navmesh.m_aabb.m_max.Z) * GLContext.PreviewScale + origin;
+            Vector3 bMin = (new Vector3(navmesh.m_aabb.m_min.X, navmesh.m_aabb.m_min.Y, navmesh.m_aabb.m_min.Z) + origin) * GLContext.PreviewScale;
+            Vector3 bMax = (new Vector3(navmesh.m_aabb.m_max.X, navmesh.m_aabb.m_max.Y, navmesh.m_aabb.m_max.Z) + origin) * GLContext.PreviewScale;
             SetBounding(new BoundingNode(bMin, bMax));
+        }
+
+        public void LoadVerticesIndices(DrawingHelper.VerticesIndices<Vector3> vi, Vector3 origin = default)
+        {
+            HavokMeshShapeVertex[] vertices = vi.Vertices.Select(v => new HavokMeshShapeVertex
+            {
+                Position = (new Vector3(v.X, v.Y, v.Z) + origin) * GLContext.PreviewScale
+            }).ToArray();
+
+            Vector3[] normals = DrawingHelper.CalculateNormals(vertices.Select(x => x.Position).ToList(), vi.Indices);
+            for (int i = 0; i < vertices.Count(); i++)
+            {
+                vertices[i].Normal = normals[i];
+                vertices[i].VertexColor = new Vector4(0, 1f, 0.5f, 0.5f);
+                vertices[i].VertexIndex = (float)i;
+            }
+
+            ShapeMesh = new RenderMesh<HavokMeshShapeVertex>(vertices, vi.Indices.ToArray(), OpenTK.Graphics.OpenGL.PrimitiveType.Triangles);
+            Vertices = vertices;
+            Indices = vi.Indices.ToArray();
+
+            Vector3 min = new Vector3(float.MaxValue);
+            Vector3 max = new Vector3(float.MinValue);
+            for (int i = 0; i < vertices.Count(); i++)
+            {
+                if (vertices[i].Position.X < min.X &&
+                    vertices[i].Position.Y < min.Y &&
+                    vertices[i].Position.Z < min.Z)
+                    min = vertices[i].Position;
+                if (vertices[i].Position.X > max.X &&
+                    vertices[i].Position.Y > max.Y &&
+                    vertices[i].Position.Z > max.Z)
+                    max = vertices[i].Position;
+            }
+
+            SetBounding(new BoundingNode(min, max));
         }
 
         public void SetBounding(BoundingNode boundingNode)

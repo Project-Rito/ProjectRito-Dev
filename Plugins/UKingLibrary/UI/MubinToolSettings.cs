@@ -77,6 +77,8 @@ namespace UKingLibrary
                 ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_CLIMB"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableClimb, 0.001f, 10f);
                 ImGui.SliderFloat(TranslationSource.GetText("WALKABLE_RADIUS"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.WalkableRadius, 0.001f, 10f);
                 ImGui.SliderInt(TranslationSource.GetText("MIN_REGION_AREA"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.MinRegionArea, 1, 256);
+                ImGui.SliderFloat(TranslationSource.GetText("DETAIL_SAMPLE_DIST"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.DetailSampleDist, 0.001f, 10f);
+                ImGui.SliderFloat(TranslationSource.GetText("DETAIL_SAMPLE_MAX_ERROR"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.DetailSampleMaxError, 0.001f, 10f);
 
                 ImGui.SliderFloat(TranslationSource.GetText("COST_Y_SCALE"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.CostYScale, 0f, 10f);
                 ImGui.SliderInt(TranslationSource.GetText("KMEANS_CLUSTERING_K"), ref UKingEditor.ActiveUkingEditor.EditorConfig.NavmeshConfig.KMeansClusteringK, 1, 100);
