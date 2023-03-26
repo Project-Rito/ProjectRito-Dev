@@ -245,7 +245,7 @@ namespace UKingLibrary
                 loader = (DungeonMapLoader)(((NodeFolder)ContentFolder.FolderChildren["Dungeon"]).NamedChildren[fileName].Tag);
             }
 
-            loader.Load(fileName, stream, this);
+            loader.Load(fileName, stream);
             stream.Close();
 
             MakeLoaderActive(loader);
