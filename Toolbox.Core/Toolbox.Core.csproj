@@ -65,6 +65,9 @@
     <PackageReference Include="Syroot.Maths" Version="1.5.3" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="IONET">
+      <HintPath>lib\IONET.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK">
       <HintPath>..\MapStudio\Lib\OpenTK.dll</HintPath>
     </Reference>

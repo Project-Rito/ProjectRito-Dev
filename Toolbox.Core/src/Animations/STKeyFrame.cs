@@ -23,6 +23,10 @@ namespace Toolbox.Core.Animations
         /// </summary>
         public virtual float Slope { get; set; }
 
+        //UI elements
+
+        public bool IsSelected = false;
+
         public STKeyFrame() { }
 
         public STKeyFrame(int frame, float value)
@@ -36,6 +40,11 @@ namespace Toolbox.Core.Animations
             Frame = frame;
             Value = value;
         }
+
+        public virtual STKeyFrame Clone()
+        {
+            return new STKeyFrame(Frame, Value);
+        }
     }
 
     /// <summary>
@@ -44,6 +53,8 @@ namespace Toolbox.Core.Animations
     /// </summary>
     public class STLinearKeyFrame : STKeyFrame
     {
+        public bool StepDelta = false;
+
         /// <summary>
         /// The delta of linear key value.
         /// </summary>
@@ -51,7 +62,7 @@ namespace Toolbox.Core.Animations
 
         public STLinearKeyFrame() { }
 
-        public STLinearKeyFrame(int frame, float value, float delta)
+        public STLinearKeyFrame(int frame, float value, float delta = 0)
         {
             Frame = frame;
             Value = value;
@@ -128,5 +139,15 @@ namespace Toolbox.Core.Animations
     {
         public virtual float TangentIn { get; set; }
         public virtual float TangentOut { get; set; }
+
+        public STHermiteKeyFrame() { }
+
+        public STHermiteKeyFrame(int frame, float value, float tangentIn, float tangentOut)
+        {
+            Frame = frame;
+            Value = value;
+            TangentIn = tangentIn;
+            TangentOut = tangentOut;
+        }
     }
 }

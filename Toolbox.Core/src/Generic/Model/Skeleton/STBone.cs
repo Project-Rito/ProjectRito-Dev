@@ -21,7 +21,7 @@ namespace Toolbox.Core
         /// </summary>
         public bool UseSegmentScaleCompensate { get; set; }
 
-        private STSkeleton Skeleton;
+        public STSkeleton Skeleton;
 
         private Matrix4 transform;
 
@@ -56,27 +56,46 @@ namespace Toolbox.Core
         /// </summary>
         public Vector3 Scale { get; set; }
 
+        private Matrix3 RotationMatrix = Matrix3.Identity;
+
         /// <summary>
         /// Gets or sets the rotation of the bone in world space.
         /// </summary>
-        public Quaternion Rotation { get; set; }
+        public Quaternion Rotation
+        {
+            get { return RotationMatrix.ExtractRotation(); }
+            set
+            {
+                RotationMatrix = Matrix3.CreateFromQuaternion(value);
+                rotationEuler = RotationMatrix.ExtractEulerAngles();
+            }
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="Rotation"/> using euler method. 
         /// </summary>
         public Vector3 EulerRotation 
         {
-            get { return  STMath.ToEulerAngles(Rotation); }
-            set { Rotation = STMath.FromEulerAngles(value); }
+            get { return rotationEuler; }
+            set
+            {
+                rotationEuler = value;
+                RotationMatrix = Matrix3Extension.FromEulerAngles(value);
+            }
         }
+
+        private Vector3 rotationEuler;
 
         /// <summary>
         /// Gets or sets the <see cref="Rotation"/> using euler method. 
         /// </summary>
         public Vector3 EulerRotationDegrees
         {
-            get { return STMath.ToEulerAngles(Rotation) * STMath.Rad2Deg; }
-            set { Rotation = STMath.FromEulerAngles(value * STMath.Deg2Rad); }
+            get { return rotationEuler * STMath.Rad2Deg; }
+            set {
+                rotationEuler = value * STMath.Deg2Rad;
+                RotationMatrix = Matrix3Extension.FromEulerAngles(rotationEuler);
+            }
         }
 
         public EventHandler TransformUpdated;
@@ -165,7 +184,7 @@ namespace Toolbox.Core
         public virtual Matrix4 GetTransform()
         {
             return Matrix4.CreateScale(Scale) *
-                   Matrix4.CreateFromQuaternion(Rotation) *
+                   new Matrix4(RotationMatrix) *
                    Matrix4.CreateTranslation(Position);
         }
     }

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Threading;
 using System.Diagnostics;
 using System.IO;
 
@@ -19,7 +19,7 @@ namespace Toolbox.Core.IO
         /// <param name="FileName">The name of the file</param>
         /// <param name="Alignment">The Alignment used for compression. Used for Yaz0 compression type. </param>
         /// <returns></returns>
-        public static SaveLog SaveFileFormat(IFileFormat fileFormat, string filePath)
+        public static SaveLog SaveFileFormat(IFileFormat fileFormat, string filePath, EventHandler onCompress = null)
         {
             SaveLog log = new SaveLog();
             Stopwatch stopWatch = new Stopwatch();
@@ -38,7 +38,7 @@ namespace Toolbox.Core.IO
                     fileFormat.Save(fileStream);
                     if (fileFormat.FileInfo.Compression != null)
                     {
-                       // Stream comp = CompressFile(File.OpenRead(tempPath), fileFormat);
+                        // Stream comp = CompressFile(File.OpenRead(tempPath), fileFormat);
                         //fileStream.CopyTo(comp);
                     }
 
@@ -56,19 +56,29 @@ namespace Toolbox.Core.IO
             }
             else if (fileFormat.FileInfo.Compression != null)
             {
+                onCompress?.Invoke(fileFormat, EventArgs.Empty);
+
                 MemoryStream mem = new MemoryStream();
                 fileFormat.Save(mem);
-                mem = new MemoryStream(mem.ToArray());
-                var finalStream = CompressFile(mem, fileFormat);
-               // File.WriteAllBytes(fileName, finalStream.ToArray());
+                if (fileFormat.FileInfo.Compression is Yaz0)
+                {
+                    File.WriteAllBytes(filePath, YAZ0.Compress(mem.ToArray(), Runtime.Yaz0CompressionLevel, (uint)((Yaz0)fileFormat.FileInfo.Compression).Alignment));
+                }
+                else
+                {
+                    mem = new MemoryStream(mem.ToArray());
+                    var finalStream = CompressFile(mem, fileFormat);
 
-                using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite)) {
-                    finalStream.CopyTo(fileStream);
+                    using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                    {
+                        finalStream.CopyTo(fileStream);
+                    }
                 }
             }
             else
             {
-                using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite)) {
+                using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                {
                     fileFormat.Save(fileStream);
                 }
             }
@@ -78,6 +88,43 @@ namespace Toolbox.Core.IO
             log.SaveTime = string.Format("{0:D2}:{1:D2}:{2:D2}", ts.Minutes, ts.Seconds, ts.Milliseconds);
 
             return log;
+        }
+
+        public static void SaveFileBackground(IFileFormat fileFormat, string fileName, Action onCompress = null, Action onCompleted = null)
+        {
+            Thread Thread = new Thread((ThreadStart)(() =>
+            {
+                SaveFileThread(fileFormat, fileName, onCompress, onCompleted);
+            }));
+            Thread.Start();
+        }
+        private static void SaveFileThread(IFileFormat fileFormat, string fileName, Action onCompress = null, Action onCompleted = null)
+        {
+            MemoryStream mem = new MemoryStream();
+            fileFormat.Save(mem);
+
+            onCompress?.Invoke();
+            if (fileFormat.FileInfo.Compression is Yaz0)
+            {
+                File.WriteAllBytes(fileName, YAZ0.Compress(mem.ToArray(), Runtime.Yaz0CompressionLevel, (uint)((Yaz0)fileFormat.FileInfo.Compression).Alignment));
+            }
+            else if (fileFormat.FileInfo.Compression != null)
+            {
+                mem = new MemoryStream(mem.ToArray());
+                var finalStream = CompressFile(mem, fileFormat);
+
+                using (var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite)) {
+                    finalStream.CopyTo(fileStream);
+                }
+            }
+            else
+            {
+                using (var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                {
+                    fileFormat.Save(fileStream);
+                }
+            }
+            onCompleted?.Invoke();
         }
 
         /// <summary>

@@ -7,7 +7,7 @@ using Toolbox.Core.Collada;
 
 namespace Toolbox.Core
 {
-    public class DaeFile : ObjectTreeNode, IFileFormat, IModelFormat
+    public class DaeFile : ObjectTreeNode, IModelFormat
     {
         public bool CanSave { get; set; } = false;
 

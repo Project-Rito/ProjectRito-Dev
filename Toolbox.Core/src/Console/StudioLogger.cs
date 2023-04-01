@@ -38,18 +38,15 @@ namespace Toolbox.Core
         public static EventHandler OnProgressUpdated;
 
         public static string GetLog() {
-            UpdateLog(Outputs, ref OutputLog, ref OutputLogLength);
-            return OutputLog;
+            return GetLog(Outputs);
         }
 
         public static string GetErrorLog() {
-            UpdateLog(Errors, ref ErrorLog, ref ErrorLogLength);
-            return ErrorLog;
+            return GetLog(Errors);
         }
 
         public static string GetWarningLog() {
-            UpdateLog(Warnings, ref WarningLog, ref WarningLogLength);
-            return WarningLog;
+            return GetLog(Warnings);
         }
 
         public static string GetLine() {
@@ -63,16 +60,12 @@ namespace Toolbox.Core
             OnLoggerUpdated?.Invoke("", EventArgs.Empty);
         }
 
-        static void UpdateLog(List<Entry> entries, ref string log, ref int logCount)
-        {
-            if (entries.Count > logCount)
-            {
-                for (int i = logCount; i < entries.Count; i++)
+        static string GetLog(List<Entry> entries)
                 {
-                    log += entries[i].Text + "\n";
-                    logCount++;
-                }
-            }
+            string output = "";
+            for (int i = 0; i < entries.Count; i++)
+                output += entries[i].Text + "\n";
+            return output;
         }
 
         /// <summary>

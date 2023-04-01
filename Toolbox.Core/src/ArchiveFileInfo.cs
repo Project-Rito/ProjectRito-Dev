@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
 using Toolbox.Core.IO;
+using System.Numerics;
 
 namespace Toolbox.Core
 {
@@ -21,6 +22,16 @@ namespace Toolbox.Core
         /// Determines wether to open the file format automatically
         /// </summary>
         public bool OpenFileFormatOnLoad { get; set; } = false;
+
+        /// <summary>
+        /// The icon used by the gui.
+        /// </summary>
+        public string Icon = "";
+
+        /// <summary>
+        /// The icon color used by the gui.
+        /// </summary>
+        public Vector4 IconColor = Vector4.One;
 
         protected Stream _stream;
 

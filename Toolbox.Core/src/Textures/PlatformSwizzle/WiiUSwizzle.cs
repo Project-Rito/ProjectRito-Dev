@@ -29,6 +29,11 @@ namespace Toolbox.Core.Imaging
             return OutputFormat.ToString();
         }
 
+        public void UpdateFormat(TexFormat format) {
+            Format = FormatList.FirstOrDefault(x => x.Value == format).Key;
+            OutputFormat = format;
+        }
+
         public WiiUSwizzle(GX2.GX2SurfaceFormat format)
         {
             Format = format;
@@ -57,15 +62,15 @@ namespace Toolbox.Core.Imaging
             Pitch = 0;
         }
 
-        public byte[] DecodeImage(STGenericTexture texture, byte[] data, uint width, uint height, int array, int mip) {
+        public byte[] DecodeImage(byte[] data, uint width, uint height, uint arrayCount, uint mipCount, int array, int mip) {
 
             uint bpp = TextureFormatHelper.GetBytesPerPixel(OutputFormat);
 
             GX2.GX2Surface surf = new GX2.GX2Surface();
             surf.bpp = bpp;
-            surf.height = texture.Height;
-            surf.width = texture.Width;
-            surf.depth = texture.ArrayCount;
+            surf.height = height;
+            surf.width = width;
+            surf.depth = arrayCount;
             surf.alignment = Alignment;
             surf.aa = (uint)AAMode;
             surf.dim = (uint)SurfaceDimension;
@@ -75,15 +80,15 @@ namespace Toolbox.Core.Imaging
             surf.data = data;
             surf.mipData = MipData != null ? MipData : data;
             surf.mipOffset = MipOffsets != null ? MipOffsets : new uint[0];
-            surf.numMips = texture.MipCount;
-            surf.numArray = texture.ArrayCount;
+            surf.numMips = mipCount;
+            surf.numArray = arrayCount;
             surf.tileMode = (uint)TileMode;
             surf.swizzle = Swizzle;
 
             return GX2.Decode(surf, array, mip);
         }
 
-        public byte[] EncodeImage(STGenericTexture texture, byte[] data, uint width, uint height, int array, int mip) {
+        public byte[] EncodeImage(byte[] data, uint width, uint height, uint arrayCount, uint mipCount, int array, int mip) {
             //Swizzle and create surface
             var NewSurface = GX2.CreateGx2Texture(data, "",
                 (uint)TileMode,
@@ -94,7 +99,7 @@ namespace Toolbox.Core.Imaging
                 (uint)Format,
                 (uint)Swizzle,
                 (uint)SurfaceDimension,
-                (uint)texture.MipCount
+                (uint)mipCount
                 );
 
             MipData = NewSurface.mipData;

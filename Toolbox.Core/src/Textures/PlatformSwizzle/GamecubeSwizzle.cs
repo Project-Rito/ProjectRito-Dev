@@ -41,11 +41,11 @@ namespace Toolbox.Core.Imaging
             PaletteFormat = paletteFormat;
         }
 
-        public byte[] DecodeImage(STGenericTexture texture, byte[] data, uint width, uint height, int array, int mip) {
+        public byte[] DecodeImage(byte[] data, uint width, uint height, uint arrayCount, uint mipCount, int array, int mip) {
             return Decode_Gamecube.DecodeData(data, PaletteData, width, height, Format, PaletteFormat);
         }
 
-        public byte[] EncodeImage(STGenericTexture texture, byte[] data, uint width, uint height, int array, int mip) {
+        public byte[] EncodeImage(byte[] data, uint width, uint height, uint arrayCount, uint mipCount, int array, int mip) {
             var encoded = Decode_Gamecube.EncodeData(data, Format, PaletteFormat, (int)width, (int)height );
             PaletteData = encoded.Item2;
             return encoded.Item1;

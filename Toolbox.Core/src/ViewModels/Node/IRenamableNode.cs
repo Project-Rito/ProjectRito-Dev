@@ -8,7 +8,6 @@ namespace Toolbox.Core
 {
     public interface IRenamableNode
     {
-        string GetRenameText();
         void Renamed(string text);
     }
 }

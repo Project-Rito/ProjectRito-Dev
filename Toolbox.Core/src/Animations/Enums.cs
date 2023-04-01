@@ -30,5 +30,9 @@ namespace Toolbox.Core.Animations
         Mirror,
         ///<summary>Stays at the very last frame when the current frame is higher that the end frame.</summary>
         Clamp,
+        /// <summary>
+        /// 
+        /// </summary>
+        Cumulative,
     }
 }

@@ -65,27 +65,25 @@ namespace Toolbox.Core.Switch
             return MipMapSizes;
         }
 
-        public static byte[] GetImageData(STGenericTexture texture, Span<byte> ImageData, int ArrayLevel, int MipLevel, int DepthLevel, int target = 1, bool LinearTileMode = false)
+        public static byte[] GetImageData(TexFormat format, uint width, uint height, uint arrayCount, uint mipCount,
+            Span<byte> ImageData, int ArrayLevel, int MipLevel, int DepthLevel, int target = 1, bool LinearTileMode = false)
         {
-            var format = texture.Platform.OutputFormat;
-            uint blkHeight = texture.GetBlockHeight();
-            uint blkDepth = texture.GetBlockDepth();
-            uint blockHeight = TegraX1Swizzle.GetBlockHeight(TegraX1Swizzle.DIV_ROUND_UP(texture.Height, blkHeight));
+            uint blkHeight = TextureFormatHelper.GetBlockHeight(format);
+            uint blkDepth = TextureFormatHelper.GetBlockDepth(format);
+            uint blockHeight = TegraX1Swizzle.GetBlockHeight(TegraX1Swizzle.DIV_ROUND_UP(height, blkHeight));
             uint BlockHeightLog2 = (uint)Convert.ToString(blockHeight, 2).Length - 1;
 
-            return GetImageData(texture, ImageData, ArrayLevel, MipLevel, DepthLevel, BlockHeightLog2, target, LinearTileMode);
+            return GetImageData(format, width, height, arrayCount, mipCount, 1, ImageData, ArrayLevel, MipLevel, DepthLevel, BlockHeightLog2, target, LinearTileMode);
         }
 
-        public static byte[] GetImageData(STGenericTexture texture, Span<byte> ImageData, int ArrayLevel, int MipLevel, int DepthLevel, uint BlockHeightLog2, int target = 1, bool LinearTileMode = false)
+        public static byte[] GetImageData(TexFormat format, uint texwidth, uint texheight, uint arrayCount, uint mipCount, uint texdepth, Span<byte> ImageData,
+            int ArrayLevel, int MipLevel, int DepthLevel, uint BlockHeightLog2, int target = 1, bool LinearTileMode = false)
         {
-            var format = texture.Platform.OutputFormat;
             uint bpp = TextureFormatHelper.GetBytesPerPixel(format);
-            uint blkWidth = texture.GetBlockWidth();
-            uint blkHeight = texture.GetBlockHeight();
-            uint blkDepth = texture.GetBlockDepth();
-            uint blockHeight = TegraX1Swizzle.GetBlockHeight(TegraX1Swizzle.DIV_ROUND_UP(texture.Height, blkHeight));
-
-            Console.WriteLine($"format {format} {bpp} {blkWidth} {blkHeight} blockHeight {blockHeight} BlockHeightLog2 {BlockHeightLog2} ImageData {ImageData.Length}");
+            uint blkWidth = TextureFormatHelper.GetBlockWidth(format);
+            uint blkHeight = TextureFormatHelper.GetBlockHeight(format);
+            uint blkDepth = TextureFormatHelper.GetBlockDepth(format);
+            uint blockHeight = TegraX1Swizzle.GetBlockHeight(TegraX1Swizzle.DIV_ROUND_UP(texheight, blkHeight));
 
             uint Pitch = 0;
             uint DataAlignment = 512;
@@ -93,26 +91,26 @@ namespace Toolbox.Core.Switch
             if (LinearTileMode)
                 TileMode = 1;
             uint numDepth = 1;
-            if (texture.Depth > 1)
-                numDepth = texture.Depth;
+            if (texdepth > 1)
+                numDepth = texdepth;
 
             int linesPerBlockHeight = (1 << (int)BlockHeightLog2) * 8;
 
             uint ArrayOffset = 0;
             for (int depthLevel = 0; depthLevel < numDepth; depthLevel++)
             {
-                for (int arrayLevel = 0; arrayLevel < texture.ArrayCount; arrayLevel++)
+                for (int arrayLevel = 0; arrayLevel < arrayCount; arrayLevel++)
                 {
                     uint SurfaceSize = 0;
                     int blockHeightShift = 0;
 
                     List<uint> MipOffsets = new List<uint>();
 
-                    for (int mipLevel = 0; mipLevel < texture.MipCount; mipLevel++)
+                    for (int mipLevel = 0; mipLevel < mipCount; mipLevel++)
                     {
-                        uint width = (uint)Math.Max(1, texture.Width >> mipLevel);
-                        uint height = (uint)Math.Max(1, texture.Height >> mipLevel);
-                        uint depth = (uint)Math.Max(1, texture.Depth >> mipLevel);
+                        uint width = (uint)Math.Max(1, texwidth >> mipLevel);
+                        uint height = (uint)Math.Max(1, texheight >> mipLevel);
+                        uint depth = (uint)Math.Max(1, texdepth >> mipLevel);
 
                         uint size = TegraX1Swizzle.DIV_ROUND_UP(width, blkWidth) * TegraX1Swizzle.DIV_ROUND_UP(height, blkHeight) * bpp;
 
@@ -131,7 +129,7 @@ namespace Toolbox.Core.Switch
                         MipOffsets.Add(SurfaceSize);
 
                         //Get the first mip offset and current one and the total image size
-                        int msize = (int)((MipOffsets[0] + ImageData.Length - MipOffsets[mipLevel]) / texture.ArrayCount);
+                        int msize = (int)((MipOffsets[0] + ImageData.Length - MipOffsets[mipLevel]) / arrayCount);
 
                         var data_ = ImageData.Slice((int)(ArrayOffset + MipOffsets[mipLevel]), msize);
 
@@ -151,13 +149,12 @@ namespace Toolbox.Core.Switch
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine($"Failed to swizzle texture {texture.Name}!");
                             Console.WriteLine(e);
 
                             return new byte[0];
                         }
                     }
-                    ArrayOffset += (uint)(ImageData.Length / texture.ArrayCount);
+                    ArrayOffset += (uint)(ImageData.Length / arrayCount);
                 }
             }
             return new byte[0];

@@ -14,11 +14,13 @@ namespace Toolbox.Core.Animations
         /// <summary>
         /// The name of the track displayed in the timeline
         /// </summary>
+        [BindGUI("Name")]
         public string Name { get; set; }
 
         /// <summary>
         /// The interpolation type used to interpoalte key frames.
         /// </summary>
+        [BindGUI("InterpolationType")]
         public STInterpoaltionType InterpolationType { get; set; }
 
         public STLoopMode WrapMode { get; set; } = STLoopMode.Clamp;
@@ -33,13 +35,37 @@ namespace Toolbox.Core.Animations
         /// </summary>
         public bool HasKeys => KeyFrames.Count > 0;
 
+        public EventHandler OnKeyInserted;
+
         public virtual int ChannelIndex { get; set; }
 
         public STAnimationTrack() { }
 
+        public STAnimationTrack(string name) {
+            Name = name;
+        }
+
         public STAnimationTrack(STInterpoaltionType interpolation)
         {
             InterpolationType = interpolation;
+        }
+
+        public void Resize(float frameCount, float minFrame, float maxFrame)
+        {
+            float ratio = (float)frameCount / (float)maxFrame;
+            foreach (var key in this.KeyFrames)
+            {
+                int newFrame = (int)((float)key.Frame * ratio + 0.5f);
+                float frameRatio = newFrame == 0 ? 0 : (float)key.Frame / (float)newFrame;
+
+                key.Frame = key.Frame <= minFrame ? key.Frame : newFrame;
+                if (key is STHermiteKeyFrame)
+                {
+                    var hermiteKey = key as STHermiteKeyFrame;
+                    hermiteKey.TangentIn *= float.IsNaN(frameRatio) ? 1 : frameRatio;
+                    hermiteKey.TangentOut *= float.IsNaN(frameRatio) ? 1 : frameRatio;
+                }
+            }
         }
 
         public void RemoveKey(float frame)
@@ -57,6 +83,8 @@ namespace Toolbox.Core.Animations
 
             KeyFrames.Add(keyFrame);
             KeyFrames = KeyFrames.OrderBy(x => x.Frame).ToList();
+
+            OnKeyInserted?.Invoke(keyFrame, EventArgs.Empty);
         }
 
         /// <summary>
@@ -68,6 +96,28 @@ namespace Toolbox.Core.Animations
         {
             var matches = KeyFrames.Where(p => p.Frame == frame);
             return matches != null && matches.Count() > 0;
+        }
+
+        /// <summary>
+        /// Optimizes the key frames in the animation track by removing unecessary keys.
+        /// </summary>
+        public void OptimizeKeyFrames()
+        {
+            List<STKeyFrame> keysToRemove = new List<STKeyFrame>();
+            for (int i = 0; i < KeyFrames.Count; i++)
+            {
+                if (i != 0)
+                {
+                    //Remove duplicate values if they return the same from the previous key.
+                    var previous = KeyFrames[i - 1];
+                    if (previous.Value == KeyFrames[i].Value)
+                        keysToRemove.Add(previous);
+                }
+            }
+            foreach (var key in keysToRemove)
+                KeyFrames.Remove(key);
+
+            keysToRemove.Clear();
         }
 
         /// <summary>
@@ -98,6 +148,9 @@ namespace Toolbox.Core.Animations
         private float GetWrapFrame(float frame)
         {
             var lastFrame = KeyFrames.Last().Frame;
+            if (frame < 0 || lastFrame < 0)
+                return frame;
+
             if (WrapMode == STLoopMode.Clamp)
             {
                 if (frame > lastFrame)
@@ -106,6 +159,12 @@ namespace Toolbox.Core.Animations
                     return frame;
             }
             else if (WrapMode == STLoopMode.Repeat)
+            {
+                while (frame > lastFrame)
+                    frame -= lastFrame;
+                return frame;
+            }
+            else if (WrapMode == STLoopMode.Cumulative)
             {
                 while (frame > lastFrame)
                     frame -= lastFrame;
@@ -151,101 +210,111 @@ namespace Toolbox.Core.Animations
                 if (keyFrame.Frame <= Frame) LK = keyFrame;
                 if (keyFrame.Frame >= Frame && keyFrame.Frame < RK.Frame) RK = keyFrame;
             }
+            if (LK == RK)
+                return LK.Value;
 
-            if (LK.Frame != RK.Frame)
+            return GetInterpolatedValue(Frame, LK, RK);
+        }
+
+        private float GetInterpolatedValue(float Frame, STKeyFrame LK, STKeyFrame RK)
+        {
+            float FrameDiff = Frame - LK.Frame;
+            float Weight = FrameDiff / (RK.Frame - LK.Frame);
+            if (LK is STLinearKeyFrame)
             {
-                float FrameDiff = Frame - LK.Frame;
-                float Weight = FrameDiff / (RK.Frame - LK.Frame);
-                if (LK is STLinearKeyFrame)
-                    Weight = ((STLinearKeyFrame)LK).Delta;
+                //Get the right value from the linear delta value
+                float rightValue = LK.Value + ((STLinearKeyFrame)LK).Delta;
+                return InterpolationHelper.Lerp(LK.Value, rightValue, Weight);
+            }
 
-                if (LK is STBezierKeyFrame)
-                {
-                    var p0 = LK.Value;
-                    var p1 = ((STBezierKeyFrame)LK).SlopeOut;
-                    var p2 = ((STBezierKeyFrame)RK).SlopeIn;
-                    var p3 = RK.Value;
-                    return InterpolationHelper.BezierInterpolate(Frame,
-                        LK.Frame, RK.Frame,
-                        p1, p2,
-                        p0, p3);
-                }
+            if (LK is STBezierKeyFrame)
+            {
+                var p0 = LK.Value;
+                var p1 = ((STBezierKeyFrame)LK).SlopeOut;
+                var p2 = ((STBezierKeyFrame)RK).SlopeIn;
+                var p3 = RK.Value;
+                return InterpolationHelper.BezierInterpolate(Frame,
+                    LK.Frame, RK.Frame,
+                    p1, p2,
+                    p0, p3);
+            }
 
-                switch (InterpolationType)
-                {
-                    case STInterpoaltionType.Constant: return LK.Value;
-                    case STInterpoaltionType.Step: return LK.Value;
-                    case STInterpoaltionType.Linear: return InterpolationHelper.Lerp(LK.Value, RK.Value, Weight);
-                    case STInterpoaltionType.Bezier:
+            switch (InterpolationType)
+            {
+                case STInterpoaltionType.Constant: return LK.Value;
+                case STInterpoaltionType.Step: return LK.Value; 
+                case STInterpoaltionType.Linear: return InterpolationHelper.Lerp(LK.Value, RK.Value, Weight);
+                case STInterpoaltionType.Bezier:
+                    {
+                        float length = RK.Frame - LK.Frame;
+                        if (LK is STBezierKeyFrame)
                         {
-                            float length = RK.Frame - LK.Frame;
-                            if (LK is STBezierKeyFrame)
-                            {
-                                var p0 = LK.Value;
-                                var p1 = ((STBezierKeyFrame)LK).SlopeOut;
-                                var p2 = ((STBezierKeyFrame)RK).SlopeIn;
-                                var p3 = RK.Value;
-                                return InterpolationHelper.BezierInterpolate(Frame,
-                                    LK.Frame, RK.Frame,
-                                    p1, p2,
-                                    p0, p3);
-                            }
-
-                            //Default to no control point usage for this key
+                            var p0 = LK.Value;
+                            var p1 = ((STBezierKeyFrame)LK).SlopeOut;
+                            var p2 = ((STBezierKeyFrame)RK).SlopeIn;
+                            var p3 = RK.Value;
                             return InterpolationHelper.BezierInterpolate(Frame,
-                                LK.Frame, RK.Frame, 0, 0, LK.Value, RK.Value);
-                        }
-                    case STInterpoaltionType.Hermite:
-
-                        if (LK is STHermiteCubicKeyFrame)
-                        {
-                            if (!(RK is STHermiteCubicKeyFrame))
-                            {
-                                RK = new STHermiteCubicKeyFrame() { Value = RK.Value };
-                            }
-
-                            STHermiteCubicKeyFrame hermiteKeyLK = (STHermiteCubicKeyFrame)LK;
-                            STHermiteCubicKeyFrame hermiteKeyRK = (STHermiteCubicKeyFrame)RK;
-
-                            return InterpolationHelper.CubicHermiteInterpolate(Frame,
-                                 hermiteKeyLK.Frame,
-                                 hermiteKeyRK.Frame,
-                                 hermiteKeyLK.Value,
-                                 hermiteKeyLK.Coef1,
-                                 hermiteKeyLK.Coef2,
-                                 hermiteKeyLK.Coef3);
+                                LK.Frame, RK.Frame,
+                                p1, p2,
+                                p0, p3);
                         }
 
-                        if (LK is STHermiteKeyFrame)
+                        //Default to no control point usage for this key
+                        return InterpolationHelper.BezierInterpolate(Frame,
+                            LK.Frame, RK.Frame, 0, 0, LK.Value, RK.Value);
+                    }
+                case STInterpoaltionType.Hermite:
+
+                    if (LK is STHermiteCubicKeyFrame)
+                    {
+                        if (!(RK is STHermiteCubicKeyFrame))
                         {
-                            if (!(RK is STHermiteKeyFrame))
-                            {
-                                RK = new STHermiteKeyFrame() { Value = RK.Value };
-                            }
+                            RK = new STHermiteCubicKeyFrame() { Value = RK.Value };
+                        }
 
-                            STHermiteKeyFrame hermiteKeyLK = (STHermiteKeyFrame)LK;
-                            STHermiteKeyFrame hermiteKeyRK = (STHermiteKeyFrame)RK;
+                        STHermiteCubicKeyFrame hermiteKeyLK = (STHermiteCubicKeyFrame)LK;
+                        STHermiteCubicKeyFrame hermiteKeyRK = (STHermiteCubicKeyFrame)RK;
 
-                            float length = RK.Frame - LK.Frame;
-
-                            return InterpolationHelper.HermiteInterpolate(Frame,
+                        return InterpolationHelper.CubicHermiteInterpolate(Frame,
                              hermiteKeyLK.Frame,
                              hermiteKeyRK.Frame,
                              hermiteKeyLK.Value,
-                             hermiteKeyRK.Value,
-                             hermiteKeyLK.TangentOut * length,
-                             hermiteKeyRK.TangentIn * length);
+                             hermiteKeyLK.Coef1,
+                             hermiteKeyLK.Coef2,
+                             hermiteKeyLK.Coef3);
+                    }
+                    if (LK is STHermiteKeyFrame)
+                    {
+                        if (!(RK is STHermiteKeyFrame))
+                        {
+                            RK = new STHermiteKeyFrame() { Value = RK.Value };
                         }
 
-                        return InterpolationHelper.Herp(
-                            LK.Value, RK.Value,
-                            LK.Slope, RK.Slope,
-                            FrameDiff,
-                            Weight);
-                }
-            }
+                        STHermiteKeyFrame hermiteKeyLK = (STHermiteKeyFrame)LK;
+                        STHermiteKeyFrame hermiteKeyRK = (STHermiteKeyFrame)RK;
 
+                        float length = RK.Frame - LK.Frame;
+
+                        return InterpolationHelper.HermiteInterpolate(Frame,
+                         hermiteKeyLK.Frame,
+                         hermiteKeyRK.Frame,
+                         hermiteKeyLK.Value,
+                         hermiteKeyRK.Value,
+                         hermiteKeyLK.TangentOut * length,
+                         hermiteKeyRK.TangentIn * length);
+                    }
+                   return InterpolationHelper.Herp(
+                        LK.Value, RK.Value,
+                        LK.Slope, RK.Slope,
+                        FrameDiff,
+                        Weight);
+            }
             return LK.Value;
+        }
+
+        public override string ToString()
+        {
+            return $"{this.Name}_{KeyFrames.Count}";
         }
     }
 }

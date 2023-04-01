@@ -20,20 +20,21 @@ namespace Toolbox.Core.Imaging
             OutputFormat = format;
         }
 
-        public byte[] DecodeImage(STGenericTexture texture, byte[] data, uint width, uint height, int array, int mip) {
-            var formatSize = texture.GetBytesPerPixel();
+        public byte[] DecodeImage(byte[] data, uint width, uint height, uint arrayCount, uint mipCount, int array, int mip) {
+            var formatSize = TextureFormatHelper.GetBytesPerPixel(OutputFormat);
+
             uint offset = 0;
-            for (byte d = 0; d < texture.Depth; ++d)
+            for (byte d = 0; d < 1; ++d)
             {
-                for (byte i = 0; i < texture.ArrayCount; ++i)
+                for (byte i = 0; i < arrayCount; ++i)
                 {
-                    for (int j = 0; j < texture.MipCount; ++j)
+                    for (int j = 0; j < mipCount; ++j)
                     {
-                        uint MipWidth = (uint)Math.Max(1, texture.Width >> j);
-                        uint MipHeight = (uint)Math.Max(1, texture.Height >> j);
+                        uint MipWidth = (uint)Math.Max(1, width >> j);
+                        uint MipHeight = (uint)Math.Max(1, height >> j);
 
                         uint size = (MipWidth * MipHeight); //Total pixels
-                        if (texture.IsBCNCompressed())
+                        if (TextureFormatHelper.IsBCNCompressed(OutputFormat))
                         {
                             size = ((MipWidth + 3) >> 2) * ((MipHeight + 3) >> 2) * formatSize;
                             if (size < formatSize)
@@ -54,7 +55,7 @@ namespace Toolbox.Core.Imaging
             return data;
         }
 
-        public byte[] EncodeImage(STGenericTexture texture, byte[] data, uint width, uint height, int array, int mip) {
+        public byte[] EncodeImage(byte[] data, uint width, uint height, uint arrayCount, uint mipCount, int array, int mip) {
             return null;
         }
     }

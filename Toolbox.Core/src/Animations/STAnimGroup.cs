@@ -41,6 +41,15 @@ namespace Toolbox.Core.Animations
             return Name;
         }
 
+        public void Resize(float frameCount, float previousCount)
+        {
+            foreach (var group in SubAnimGroups)
+                group.Resize(frameCount, previousCount);
+
+            foreach (var track in GetTracks())
+                track.Resize(frameCount, 0, previousCount);
+        }
+
         public Quaternion InterpolateLinearRotation(float frame, float frame1, float frame2, 
             Quaternion q1, Quaternion q2)
         {

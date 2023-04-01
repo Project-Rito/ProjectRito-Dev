@@ -16,7 +16,7 @@ namespace Toolbox.Core
 
         public virtual string Name { get; set; }
 
-        public bool IsSRGB { get; set; }
+        public bool IsSRGB => Platform.OutputFormat.ToString().Contains("SRGB");
 
         public EventHandler DisplayPropertiesChanged = null;
 
@@ -266,7 +266,7 @@ namespace Toolbox.Core
             dds.MainHeader.PitchOrLinearSize = (uint)surfaces[0].mipmaps[0].Length;
 
             bool isCubeMap = ArrayCount == 6;
-            if (surfaces.Count > 1) //Use DX10 format for array surfaces as it can do custom amounts
+            if (surfaces.Count > 1 || IsSRGB) //Use DX10 format for SRGB and array surfaces as it can do custom amounts
                 dds.SetFlags(Platform.OutputFormat, true, isCubeMap);
             else
                 dds.SetFlags(Platform.OutputFormat, false, isCubeMap);
@@ -309,7 +309,7 @@ namespace Toolbox.Core
             byte[] data = GetImageData(ArrayLevel, MipLevel, DepthLevel);
 
             //Deswizzle the image data by the platform being used
-            data = Platform.DecodeImage(this, data, width, height, ArrayLevel, MipLevel);
+            data = Platform.DecodeImage(data, Width, Height, ArrayCount, MipCount, ArrayLevel, MipLevel);
                 
             //Decompress the compressed/encoded data if not RGBA
             if (Platform.OutputFormat != TexFormat.RGBA8_UNORM)
@@ -336,7 +336,7 @@ namespace Toolbox.Core
             byte[] data = GetImageData(ArrayLevel, MipLevel, DepthLevel);
 
             //Deswizzle the image data by the platform being used
-            data = Platform.DecodeImage(this, data, width, height, ArrayLevel, MipLevel);
+            data = Platform.DecodeImage(data, Width, Height, ArrayCount, MipCount, ArrayLevel, MipLevel);
 
             //Decompress the compressed/encoded data if not RGBA
             if (Platform.OutputFormat != TexFormat.RGBA8_UNORM)
@@ -353,7 +353,7 @@ namespace Toolbox.Core
             byte[] data = GetImageData(ArrayLevel, MipLevel, DepthLevel);
             if (!IsBCNCompressed() && !Parameters.DontSwapRG)
                 data = ImageUtility.ConvertBgraToRgba(data);
-            return Platform.DecodeImage(this, data, width, height, ArrayLevel, MipLevel);
+            return Platform.DecodeImage(data, Width, Height, ArrayCount, MipCount, ArrayLevel, MipLevel);
         }
 
         public static byte[] DecodeBlock(byte[] data, uint width, uint height, TexFormat format) {

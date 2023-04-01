@@ -5,10 +5,11 @@ using Syroot.NintenTools.NSW.Bntx;
 using Syroot.NintenTools.NSW.Bntx.GFX;
 using Toolbox.Core;
 using Toolbox.Core.Imaging;
+using MapStudio.UI;
 
 namespace CafeLibrary.Rendering
 {
-    public class BntxTexture : STGenericTexture
+    public class BntxTexture : STGenericTexture, IDragDropNode, IRenamableNode
     {
         /// <summary>
         /// The parent BNTX binary container used to store the texture.
@@ -20,41 +21,90 @@ namespace CafeLibrary.Rendering
         /// </summary>
         public Texture Texture;
 
+        public override TexFormat[] SupportedFormats => new TexFormat[]
+{
+            TexFormat.RGBA8_UNORM,
+            TexFormat.RGBA8_SRGB,
+            TexFormat.BC1_UNORM,
+            TexFormat.BC1_SRGB,
+            TexFormat.BC2_UNORM,
+            TexFormat.BC2_SRGB,
+            TexFormat.BC3_UNORM,
+            TexFormat.BC3_SRGB,
+            TexFormat.BC4_UNORM,
+            TexFormat.BC4_SNORM,
+            TexFormat.BC5_UNORM,
+            TexFormat.BC5_SNORM,
+            TexFormat.BC6H_UF16,
+            TexFormat.BC6H_SF16,
+            TexFormat.BC7_UNORM,
+            TexFormat.BC7_SRGB,
+        };
+
+        public void Renamed(string text)
+        {
+            Texture.Name = text;
+        }
+
+        public BntxTexture() { }
+
+        public BntxTexture(string filePath)
+        {
+            BntxFile = new BntxFile(filePath);
+            Texture = BntxFile.Textures[0];
+            ReloadImage();
+        }
+
         public BntxTexture(BntxFile bntx, Texture tex)
         {
             Texture = tex;
             BntxFile = bntx;
+            ReloadImage();
+        }
 
-            Name = tex.Name;
-            Width = tex.Width;
-            Height = tex.Height;
-            MipCount = tex.MipCount;
-            ArrayCount = tex.ArrayLength;
-            DisplayProperties = tex;
-            Platform = new SwitchSwizzle(FormatList[tex.Format])
+        public void ReloadImage()
+        {
+            Name = Texture.Name;
+            Width = Texture.Width;
+            Height = Texture.Height;
+            MipCount = Texture.MipCount;
+            ArrayCount = Texture.ArrayLength;
+            DisplayProperties = Texture;
+            Platform = new SwitchSwizzle(FormatList[Texture.Format])
             {
-                BlockHeightLog2 = (uint)tex.BlockHeightLog2,
+                BlockHeightLog2 = (uint)Texture.BlockHeightLog2,
                 Target = BntxFile.PlatformTarget != "NX  " ? 0 : 1,
             };
 
-            RedChannel = SetChannel(tex.ChannelRed);
-            GreenChannel = SetChannel(tex.ChannelGreen);
-            BlueChannel = SetChannel(tex.ChannelBlue);
-            AlphaChannel = SetChannel(tex.ChannelAlpha);
-            if (Texture.Format.ToString().Contains("SRGB"))
-                IsSRGB = true;
+            RedChannel = SetChannel(Texture.ChannelRed);
+            GreenChannel = SetChannel(Texture.ChannelGreen);
+            BlueChannel = SetChannel(Texture.ChannelBlue);
+            AlphaChannel = SetChannel(Texture.ChannelAlpha);
 
-            if (tex.SurfaceDim == SurfaceDim.Dim2DArray)
+            if (Texture.SurfaceDim == SurfaceDim.Dim2DArray)
+                SurfaceType = STSurfaceType.Texture2D_Array;
+
+            if (Name.EndsWith("_st1"))
                 SurfaceType = STSurfaceType.Texture2D_Array;
         }
 
-        public override byte[] GetImageData(int ArrayLevel = 0, int MipLevel = 0, int DepthLevel = 0) {
+        public void UpdateChannelSelectors()
+        {
+            Texture.ChannelRed = GetChannel(RedChannel);
+            Texture.ChannelGreen = GetChannel(GreenChannel);
+            Texture.ChannelBlue = GetChannel(BlueChannel);
+            Texture.ChannelAlpha = GetChannel(AlphaChannel);
+        }
+
+        public override byte[] GetImageData(int ArrayLevel = 0, int MipLevel = 0, int DepthLevel = 0)
+        {
 
             //Update the channels in the event the user may have adjusted them in the properties
             RedChannel = SetChannel(Texture.ChannelRed);
             GreenChannel = SetChannel(Texture.ChannelGreen);
             BlueChannel = SetChannel(Texture.ChannelBlue);
             AlphaChannel = SetChannel(Texture.ChannelAlpha);
+
             return Texture.TextureData[ArrayLevel][MipLevel];
         }
 
@@ -66,6 +116,16 @@ namespace CafeLibrary.Rendering
             else if (channelType == ChannelType.Alpha) return STChannelType.Alpha;
             else if (channelType == ChannelType.Zero) return STChannelType.Zero;
             else return STChannelType.One;
+        }
+
+        private ChannelType GetChannel(STChannelType channelType)
+        {
+            if (channelType == STChannelType.Red) return ChannelType.Red;
+            if (channelType == STChannelType.Green) return ChannelType.Green;
+            if (channelType == STChannelType.Blue) return ChannelType.Blue;
+            if (channelType == STChannelType.Alpha) return ChannelType.Alpha;
+            if (channelType == STChannelType.Zero) return ChannelType.Zero;
+            else return ChannelType.One;
         }
 
         public override void SetImageData(List<byte[]> imageData, uint width, uint height, int arrayLevel = 0)

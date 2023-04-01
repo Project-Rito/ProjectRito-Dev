@@ -87,7 +87,7 @@ namespace Toolbox.Core
         /// Gets a list of materials used by all the polygon groups.
         /// </summary>
         /// <returns></returns>
-        public List<STGenericMaterial> GetMaterials()
+        public virtual List<STGenericMaterial> GetMaterials()
         {
             List<STGenericMaterial> materials = new List<STGenericMaterial>();
             foreach (var group in PolygonGroups)
@@ -203,6 +203,8 @@ namespace Toolbox.Core
             {
                 if (v.Colors.Length > channel)
                     v.Colors[channel] = intColor;
+                if (channel == 0 && v.Colors.Length == 0)
+                    v.Colors = new Vector4[1] { intColor };
             }
         }
 
@@ -370,7 +372,8 @@ namespace Toolbox.Core
                 return;
 
             if (Vertices.Any(x => x.TexCoords?.Length <= uvSet)) {
-                throw new Exception($"Invalid UV set {uvSet} given for calculating tangents.");
+                return;
+              //  throw new Exception($"Invalid UV set {uvSet} given for calculating tangents.");
             }
 
             Vector3[] tanArray = new Vector3[Vertices.Count];

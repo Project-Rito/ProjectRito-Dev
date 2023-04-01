@@ -115,77 +115,24 @@ namespace Toolbox.Core
 
             Console.WriteLine($"Increment {Increment} Input {Input.Length} {Width} {Height} {picaFormat}");
 
-            int stride = Width;
+            int IOffs = 0;
 
-            int IOffset = 0;
             for (int TY = 0; TY < Height; TY += 8)
             {
                 for (int TX = 0; TX < Width; TX += 8)
                 {
                     for (int Px = 0; Px < 64; Px++)
                     {
-                        int X = Morton7(Px);
-                        int Y = Morton7(Px >> 1);
-                        int OOffet = ((TY + Y) * stride + TX + X) * 4;
-                        if (OOffet + 4 >= Output.Length)
-                            break;
+                        int X = SwizzleLUT[Px] & 7;
+                        int Y = (SwizzleLUT[Px] - X) >> 3;
 
-                        DecodeFormat(Output, Input, OOffet, IOffset, picaFormat);
-                        IOffset += Increment;
+                        int OOffs = (TX + X + ((Height - 1 - (TY + Y)) * Width)) * 4;
+
+                        DecodeFormat(Output, Input, OOffs, IOffs, picaFormat);
+                        IOffs += Increment;
                     }
                 }
             }
-
-            int tile_width = (int)Math.Ceiling(Width / 8.0f);
-            int tile_height = (int)Math.Ceiling(Height / 8.0f);
-
-            stride = Width;
-            IOffset = 0;
-            for (int TY = 0; TY < tile_width; TY += 8) {
-                for (int TX = 0; TX < tile_height; TX += 8) {
-                    for (int x = 0; x < 2; x++) {
-                        for (int y = 0; y < 2; y++) {
-                            for (int x2 = 0; x2 < 2; x2++)
-                            {
-                                for (int y2 = 0; y2 < 2; y2++)
-                                {
-                                    for (int x3 = 0; x3< 2; x3++)
-                                    {
-                                        for (int y3 = 0; y3 < 2; y3++)
-                                        {
-                                            var pixel_x = (x3 + (x2 * 2) + (x * 4) + (TX * 8));
-                                            var pixel_y = (y3 + (y2 * 2) + (y * 4) + (TY * 8));
-
-                                            if (pixel_y >= Height || pixel_y >= Height)
-                                                continue;
-                                            // same for the x and the input data width
-                                            if (pixel_x >= Width || pixel_x >= Width)
-                                                continue;
-
-
-
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    for (int Px = 0; Px < 64; Px++)
-                    {
-                        int X = Morton7(Px);
-                        int Y = Morton7(Px >> 1);
-                        int OOffet = ((TY + Y) * stride + TX + X) * 4;
-                        if (OOffet + 4 >= Output.Length)
-                            break;
-
-                        DecodeFormat(Output, Input, OOffet, IOffset, picaFormat);
-                        IOffset += Increment;
-                    }
-                }
-            }
-
-
             if (settings.Orientation == Orientation.Transpose)
                 return Output;
             else

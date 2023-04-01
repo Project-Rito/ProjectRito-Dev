@@ -53,6 +53,8 @@ namespace Toolbox.Core.Animations
         /// </summary>
         public bool CanPlay { get; set; } = true;
 
+        public bool IsEdited { get; set; } = false;
+
         /// <summary>
         /// A list of groups that store the animation data.
         /// </summary>
@@ -70,6 +72,15 @@ namespace Toolbox.Core.Animations
         public virtual void NextFrame() {
             if (Frame < StartFrame || Frame > FrameCount) return;
         }
+
+        public void Resize(float frameCount)
+        {
+            foreach (var group in this.AnimGroups)
+                group.Resize(frameCount, this.FrameCount);
+
+            this.FrameCount = frameCount;
+        }
+
 
         /// <summary>
         /// Resets the animation group values

@@ -181,7 +181,7 @@ namespace Toolbox.Core.Imaging
                     graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
                 }
             }
-
+            image.Dispose();
             return destImage;
         }
 

@@ -28,31 +28,31 @@ namespace Toolbox.Core.Animations
 
         public STBoneAnimGroup()
         {
-            TranslateX = new STAnimationTrack();
-            TranslateY = new STAnimationTrack();
-            TranslateZ = new STAnimationTrack();
-            RotateX = new STAnimationTrack();
-            RotateY = new STAnimationTrack();
-            RotateZ = new STAnimationTrack();
-            RotateW = new STAnimationTrack();
-            ScaleX = new STAnimationTrack();
-            ScaleY = new STAnimationTrack();
-            ScaleZ = new STAnimationTrack();   
+            TranslateX = new STAnimationTrack("TranslateX");
+            TranslateY = new STAnimationTrack("TranslateY");
+            TranslateZ = new STAnimationTrack("TranslateZ");
+            RotateX = new STAnimationTrack("RotateX");
+            RotateY = new STAnimationTrack("RotateY");
+            RotateZ = new STAnimationTrack("RotateZ");
+            RotateW = new STAnimationTrack("RotateW");
+            ScaleX = new STAnimationTrack("ScaleX");
+            ScaleY = new STAnimationTrack("ScaleY");
+            ScaleZ = new STAnimationTrack("ScaleZ");
         }
 
         public override List<STAnimationTrack> GetTracks()
         {
             List<STAnimationTrack> tracks = new List<STAnimationTrack>();
-            tracks.Add(TranslateX);
-            tracks.Add(TranslateY);
-            tracks.Add(TranslateZ);
+            tracks.Add(ScaleX);
+            tracks.Add(ScaleY);
+            tracks.Add(ScaleZ);
             tracks.Add(RotateX);
             tracks.Add(RotateY);
             tracks.Add(RotateZ);
             tracks.Add(RotateW);
-            tracks.Add(ScaleX);
-            tracks.Add(ScaleY);
-            tracks.Add(ScaleZ);
+            tracks.Add(TranslateX);
+            tracks.Add(TranslateY);
+            tracks.Add(TranslateZ);
             return tracks;
         }
     }

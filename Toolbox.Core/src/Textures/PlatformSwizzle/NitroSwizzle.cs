@@ -22,11 +22,11 @@ namespace Toolbox.Core.Imaging
             Format = format;
         }
 
-        public byte[] DecodeImage(STGenericTexture texture, byte[] data, uint width, uint height, int array, int mip) {
+        public byte[] DecodeImage(byte[] data, uint width, uint height, uint arrayCount, uint mipCount, int array, int mip) {
             return Nitro.NitroTex.DecodeTexture((int)width, (int)height, Format, data, PaletteData, isColor0);
         }
 
-        public byte[] EncodeImage(STGenericTexture texture, byte[] data, uint width, uint height, int array, int mip) {
+        public byte[] EncodeImage(byte[] data, uint width, uint height, uint arrayCount, uint mipCount, int array, int mip) {
             return null;
         }
     }

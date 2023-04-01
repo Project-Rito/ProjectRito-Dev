@@ -31,7 +31,7 @@ namespace Toolbox.Core.Imaging
             return OutputFormat.ToString();
         }
 
-        public byte[] DecodeImage(STGenericTexture texture, byte[] data, uint width, uint height, int array, int mip) {
+        public byte[] DecodeImage(byte[] data, uint width, uint height, uint arrayCount, uint mipCount, int array, int mip) {
 
             if (data.Length == 0)
                 throw new Exception("Data is empty! Failed to swizzle image!");
@@ -39,19 +39,19 @@ namespace Toolbox.Core.Imaging
             if (BlockHeightLog2 == 0)
             {
                 uint blkHeight = TextureFormatHelper.GetBlockHeight(OutputFormat);
-                uint blockHeight = TegraX1Swizzle.GetBlockHeight(TegraX1Swizzle.DIV_ROUND_UP(texture.Height, blkHeight));
+                uint blockHeight = TegraX1Swizzle.GetBlockHeight(TegraX1Swizzle.DIV_ROUND_UP(height, blkHeight));
                 BlockHeightLog2 = (uint)Convert.ToString(blockHeight, 2).Length ;
 
                 if (OutputFormat != TexFormat.ASTC_8x5_UNORM)
                     BlockHeightLog2 -= 1;
             }
 
-            return TegraX1Swizzle.GetImageData(texture, data, array, mip, 0, BlockHeightLog2, Target, LinearMode);
+            return TegraX1Swizzle.GetImageData(OutputFormat, width, height, arrayCount, mipCount, 1, data, array, mip, 0, BlockHeightLog2, Target, LinearMode);
         }
 
-        public byte[] EncodeImage(STGenericTexture texture, byte[] data, uint width, uint height, int array, int mip) {
+        public byte[] EncodeImage(byte[] data, uint width, uint height, uint arrayCount, uint mipCount, int array, int mip) {
             uint imageOffset = 0;
-            List<byte[]> mipmaps = SwizzleSurfaceMipMaps(data, texture.Width, texture.Height, texture.Depth, texture.MipCount, ref imageOffset);
+            List<byte[]> mipmaps = SwizzleSurfaceMipMaps(data, width, height, arrayCount, mipCount, ref imageOffset);
             //Combine mip map data
             return ByteUtils.CombineArray(mipmaps.ToArray());
         }

@@ -7,10 +7,11 @@ using Toolbox.Core.WiiU;
 using Nintendo.Bfres.WiiU;
 using Nintendo.Bfres;
 using Nintendo.Bfres.GX2;
+using MapStudio.UI;
 
 namespace CafeLibrary.Rendering
 {
-    public class FtexTexture : STGenericTexture
+    public class FtexTexture : STGenericTexture, IDragDropNode, IRenamableNode
     {
         /// <summary>
         /// The texture section used in the bfres.
@@ -22,13 +23,37 @@ namespace CafeLibrary.Rendering
         /// </summary>
         public BfresFile ParentFile { get; set; }
 
-        public FtexTexture(BfresFile resFile, Texture texture) : base() {
+        public override TexFormat[] SupportedFormats => new TexFormat[]
+        {
+            TexFormat.RGBA8_UNORM,
+            TexFormat.RGBA8_SRGB,
+            TexFormat.BC1_UNORM,
+            TexFormat.BC1_SRGB,
+            TexFormat.BC2_UNORM,
+            TexFormat.BC2_SRGB,
+            TexFormat.BC3_UNORM,
+            TexFormat.BC3_SRGB,
+            TexFormat.BC4_UNORM,
+            TexFormat.BC4_SNORM,
+            TexFormat.BC5_UNORM,
+            TexFormat.BC5_SNORM,
+        };
+
+        public void Renamed(string text)
+        {
+            Texture.Name = text;
+        }
+
+        public FtexTexture() { }
+
+        public FtexTexture(BfresFile resFile, Texture texture) : base()
+        {
             ParentFile = resFile;
             Texture = texture;
             ReloadImage();
         }
 
-        private void ReloadImage()
+        public void ReloadImage()
         {
             Name = Texture.Name;
             Width = Texture.Width;
@@ -40,6 +65,15 @@ namespace CafeLibrary.Rendering
             GreenChannel = SetChannel(Texture.CompSelG);
             BlueChannel = SetChannel(Texture.CompSelB);
             AlphaChannel = SetChannel(Texture.CompSelA);
+            DisplayProperties = Texture;
+
+            this.DisplayPropertiesChanged += delegate
+            {
+                RedChannel = SetChannel(Texture.CompSelR);
+                GreenChannel = SetChannel(Texture.CompSelG);
+                BlueChannel = SetChannel(Texture.CompSelB);
+                AlphaChannel = SetChannel(Texture.CompSelA);
+            };
 
             Platform = new WiiUSwizzle((GX2.GX2SurfaceFormat)Texture.Format)
             {
@@ -53,14 +87,21 @@ namespace CafeLibrary.Rendering
                 MipData = Texture.MipData,
                 Pitch = Texture.Pitch,
             };
-            if (Texture.Format.ToString().Contains("SRGB"))
-                IsSRGB = true;
 
             if (Texture.Dim == GX2SurfaceDim.Dim2DArray)
-                SurfaceType = STSurfaceType.Texture2D_Array;
+               SurfaceType = STSurfaceType.Texture2D_Array;
         }
 
-        public override byte[] GetImageData(int ArrayLevel = 0, int MipLevel = 0, int DepthLevel = 0) {
+        public void UpdateChannelSelectors()
+        {
+            Texture.CompSelR = GetChannel(RedChannel);
+            Texture.CompSelG = GetChannel(GreenChannel);
+            Texture.CompSelB = GetChannel(BlueChannel);
+            Texture.CompSelA = GetChannel(AlphaChannel);
+        }
+
+        public override byte[] GetImageData(int ArrayLevel = 0, int MipLevel = 0, int DepthLevel = 0)
+        {
             return Texture.Data;
         }
 
@@ -77,6 +118,16 @@ namespace CafeLibrary.Rendering
             else if (channelType == GX2CompSel.ChannelA) return STChannelType.Alpha;
             else if (channelType == GX2CompSel.Always0) return STChannelType.Zero;
             else return STChannelType.One;
+        }
+
+        private GX2CompSel GetChannel(STChannelType channelType)
+        {
+            if (channelType == STChannelType.Red) return GX2CompSel.ChannelR;
+            if (channelType == STChannelType.Green) return GX2CompSel.ChannelG;
+            if (channelType == STChannelType.Blue) return GX2CompSel.ChannelB;
+            if (channelType == STChannelType.Alpha) return GX2CompSel.ChannelA;
+            if (channelType == STChannelType.Zero) return GX2CompSel.Always0;
+            else return GX2CompSel.Always1;
         }
     }
 }

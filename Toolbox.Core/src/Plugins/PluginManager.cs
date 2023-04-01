@@ -27,7 +27,7 @@ namespace Toolbox.Core
 
             //GUI based
             public List<IFileEditor> FileEditors = new List<IFileEditor>();
-            public List<IFileIconLoader> FileIconLoaders = new List<IFileIconLoader>();
+            public List<INewFileMenu> NewFileMenus = new List<INewFileMenu>();
 
             //Texture decoding
             public List<ITextureDecoder> TextureDecoders = new List<ITextureDecoder>();
@@ -46,6 +46,9 @@ namespace Toolbox.Core
            // PluginList.Add(mainLibrary);
 
             string path = Path.Combine(Runtime.ExecutableDir, "Plugins");
+            //Case sensitive checks incase the output path is slightly named differently
+            if (Directory.Exists(Path.Combine(Runtime.ExecutableDir, "plugins")))
+                path = Path.Combine(Runtime.ExecutableDir, "plugins");
 
             List<string> dllFileNames = new List<string>();
             dllFileNames.Add(Path.Combine(Runtime.ExecutableDir, "Toolbox.Core.dll"));
@@ -137,7 +140,6 @@ namespace Toolbox.Core
                             AddTypeList(plugin.CompressionFormats, type);
                             AddTypeList(plugin.FileEditors, type);
                             AddTypeList(plugin.TextureDecoders, type);
-                            AddTypeList(plugin.FileIconLoaders, type);
                             AddTypeList(plugin.ExportableTextures, type);
                             AddTypeList(plugin.ImportableTextures, type);
                         }

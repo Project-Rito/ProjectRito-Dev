@@ -4,3 +4,6 @@
 [submodule "HKX2Builders"]
 	path = HKX2Builders
 	url = https://github.com/Project-Rito/HKX2Builders.git
+[submodule "Toolbox.Core"]
+	path = Toolbox.Core
+	url = https://github.com/Project-Rito/Toolbox.Core.git

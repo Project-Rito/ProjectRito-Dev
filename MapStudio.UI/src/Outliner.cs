@@ -587,7 +587,7 @@ namespace MapStudio.UI
                                 //Name edit executed. Setup data for renaming.
                                 isNameEditing = true;
                                 renameNode = node;
-                                renameText = ((IRenamableNode)node.Tag).GetRenameText();
+                                renameText = node.Header;
                                 //Reset the time
                                 renameClickTime = 0;
                             }

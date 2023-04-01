@@ -17,7 +17,7 @@ namespace Toolbox.Core
         }
 
         public FileFilter(string extension, string info) {
-            Extension = extension;
+            Extension = extension.Replace("*", "");
             Description = info;
         }
 

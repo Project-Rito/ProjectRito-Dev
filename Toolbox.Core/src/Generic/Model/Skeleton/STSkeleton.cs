@@ -25,7 +25,7 @@ namespace Toolbox.Core
         /// <summary>
         /// Determines if the skeleton is currently visible in the scene.
         /// </summary>
-        public bool Visible { get; set; }
+        public bool Visible { get; set; } = true;
 
         /// <summary>
         /// The scaling of the bones when they are displayed.
@@ -123,7 +123,7 @@ namespace Toolbox.Core
                 Matrix4.CreateTranslation(bone.AnimationController.Position);
 
             if ((bone.UseSegmentScaleCompensate ||
-                           bone.AnimationController.UseSegmentScaleCompensate) && bone.Parent != null)
+                 bone.AnimationController.UseSegmentScaleCompensate) && bone.Parent != null)
             {
                 transform *= Matrix4.CreateScale(
                          1f / ((STBone)bone.Parent).AnimationController.Scale.X,
