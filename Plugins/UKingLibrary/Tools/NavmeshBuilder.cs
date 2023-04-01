@@ -79,7 +79,7 @@ namespace UKingLibrary
                 //GLContext.ActiveContext.Scene?.AddRenderObject(mergedMeshDebugRender);
                 
 
-                if (!hkaiNavMeshBuilder.BuildTileForMesh(mergedMesh.Vertices.Select(v => new System.Numerics.Vector3(v.X, v.Y, v.Z)).ToList(), mergedMesh.Indices, (int)(navmeshLoader.Origin.X / TILE_WIDTH), (int)(navmeshLoader.Origin.Z / TILE_WIDTH), new System.Numerics.Vector3(navmeshLoader.Origin.X, navmeshLoader.Origin.Y, navmeshLoader.Origin.Z)))
+                if (!hkaiNavMeshBuilder.BuildTileForMesh(mergedMesh.Vertices.Select(v => new System.Numerics.Vector3(v.X, v.Y, v.Z)).ToList(), mergedMesh.Indices, (int)(navmeshLoader.Origin.X / TILE_WIDTH), (int)(navmeshLoader.Origin.Z / TILE_WIDTH), new System.Numerics.Vector3(navmeshLoader.Origin.X, navmeshLoader.Origin.Y, navmeshLoader.Origin.Z), ActiveLoader is FieldMapLoader))
                     Console.WriteLine("Navmesh build failure!");
             }
 
@@ -180,11 +180,10 @@ namespace UKingLibrary
 
             foreach (var collisionLoader in ActiveLoader.BakedCollision)
             {
-                continue;
                 var boundingBox = new BoundingBox(sampleMin * GLContext.PreviewScale, sampleMax * GLContext.PreviewScale);
                 foreach (var render in collisionLoader.ShapeRenders)
                 {
-                    if (!render.BoundingNode.Box.IsOverlapping(boundingBox))
+                    if (!(render.BoundingNode.Box.IsOverlapping(boundingBox) || boundingBox.IsInside(render.BoundingNode.Box)))
                         continue;
 
                     Matrix4 renderTransform = render.Transform.TransformMatrix;

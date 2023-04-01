@@ -203,7 +203,7 @@ namespace GLFrameworkEngine
         }
 
         /// <summary>
-        /// Checks if a bounding box is partially inside this bounding box.
+        /// Checks if a bounding box is (exclusively) partially inside this bounding box.
         /// </summary>
         public bool IsOverlapping(BoundingBox bounding)
         {

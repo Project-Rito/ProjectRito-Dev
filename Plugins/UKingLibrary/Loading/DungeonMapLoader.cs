@@ -287,7 +287,8 @@ namespace UKingLibrary
 
             if (DungeonData.SarcData.Files.TryGetValue($"Physics/StaticCompound/MainFieldDungeon/{DungeonName}.shksc", out data))
                 return new MemoryStream(Toolbox.Core.IO.YAZ0.Decompress(data));
-            return null;
+
+            return new FileStream("Presets/Collision/Breath of the Wild.hksc", FileMode.Open);
         }
 
         private Stream GetNavmesh()
@@ -298,7 +299,8 @@ namespace UKingLibrary
 
             if (DungeonData.SarcData.Files.TryGetValue($"NavMesh/MainFieldDungeon/{DungeonName}/{DungeonName}.shknm2", out data))
                 return new MemoryStream(Toolbox.Core.IO.YAZ0.Decompress(data));
-            return null;
+
+            return new FileStream("Presets/NavMesh/Breath of the Wild.hknm2", FileMode.Open);
         }
 
         private byte[] TryDecompress(byte[] data) // Why aren't we using this yet? For stuff we save we wanna run into an error trying to open it if we're not gonna save it the same way.
