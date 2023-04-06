@@ -23,7 +23,7 @@ namespace MapStudio.UI
         public bool IsFocused = false;
 
         public List<MenuItemModel> ContextMenu = new List<MenuItemModel>();
-        public static MenuItemModel NewItemContextMenu = new MenuItemModel("ADD_NEW");
+        public MenuItemModel NewItemContextMenu = new MenuItemModel("ADD_NEW");
         public List<MenuItemModel> FilterMenuItems = new List<MenuItemModel>();
 
         public List<NodeBase> Nodes = new List<NodeBase>();
