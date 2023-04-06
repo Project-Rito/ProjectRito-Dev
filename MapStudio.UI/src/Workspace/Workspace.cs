@@ -20,6 +20,7 @@ namespace MapStudio.UI
     public class Workspace : DockWindow, IDisposable
     {
         public static Workspace ActiveWorkspace { get; set; }
+        public static Action OnNewProject;
 
         public bool UpdateDockLayout = true;
 
@@ -291,6 +292,7 @@ namespace MapStudio.UI
             Name = TranslationSource.GetText("NEW_PROJECT");
             Resources = new ProjectResources();
             LoadProjectResources();
+            OnNewProject.Invoke();
         }
 
         /// <summary>
@@ -308,6 +310,7 @@ namespace MapStudio.UI
         public static void UpdateActive(Workspace workspace)
         {
             ActiveWorkspace = workspace;
+            workspace.ViewportWindow.SetActive();
             //Update error logger on switch
             workspace.PrintErrors();
             //Update the system instance.

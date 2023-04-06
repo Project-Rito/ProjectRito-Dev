@@ -160,7 +160,7 @@ namespace UKingLibrary
                 DungeonRender = new BfresRender(GetModel(), $"DgnMrgPrt_{DungeonName}.sbfres", null);
 
                 var dungeonTextures = GetTexture();
-                if (dungeonTextures != null)
+                if (DungeonRender.Textures.Count == 0 && dungeonTextures != null) // The texture count check in case its cached. There's probably a better way.
                     BfresLoader.GetTextures(new MemoryStream(YAZ0.Decompress(dungeonTextures.ReadAllBytes()))).ToList().ForEach(x => DungeonRender.Textures.Add(x.Key, x.Value)); // Merge pack textures
                 else
                     StudioLogger.WriteWarning("Couldn't find textures for dungeon model!");

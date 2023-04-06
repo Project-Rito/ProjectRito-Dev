@@ -25,7 +25,9 @@ namespace UKingLibrary
 
             if (FirstLoad)
             {
-                Outliner.NewItemContextMenu.MenuItems.Add(new MenuItemModel("UKingEditor", () => { CreateNewUKingEditor(); }));
+                Workspace.OnNewProject += () => {
+                    CreateNewUKingEditor();
+                };
             }
             FirstLoad = false;
 

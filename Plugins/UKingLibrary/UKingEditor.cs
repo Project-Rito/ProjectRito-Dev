@@ -144,7 +144,7 @@ namespace UKingLibrary
 
         private void SetupContextMenus()
         {
-            Root.ContextMenus.Clear();
+            Outliner.NewItemContextMenu.MenuItems.Clear();
 
             MenuItemModel loadSectionMenuItem = new MenuItemModel(TranslationSource.GetText("LOAD_SECTION"));
             
@@ -168,7 +168,7 @@ namespace UKingLibrary
                 });
             }
 
-            Root.ContextMenus.Add(loadSectionMenuItem);
+            Outliner.NewItemContextMenu.MenuItems.Add(loadSectionMenuItem);
 
             MenuItemModel loadDungeonMenuItem = new MenuItemModel(TranslationSource.GetText("LOAD_DUNGEON"));
 
@@ -207,9 +207,9 @@ namespace UKingLibrary
                     {
                         CanCheck = true
                     });
-            
 
-            Root.ContextMenus.Add(loadDungeonMenuItem);
+
+            Outliner.NewItemContextMenu.MenuItems.Add(loadDungeonMenuItem);
         }
 
         public void LoadAssetList()
