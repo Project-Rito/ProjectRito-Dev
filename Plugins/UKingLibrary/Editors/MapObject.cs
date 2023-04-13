@@ -814,7 +814,10 @@ namespace UKingLibrary
                             }
                         }
                         else
-                            break; // We couldn't find the model
+                        {
+                            if (i != 0) // Sometimes these numbers skip straight to "-01"
+                                break; // We couldn't find the model
+                        }
                     }
                 }
                 if (!(render is BfresRender))
