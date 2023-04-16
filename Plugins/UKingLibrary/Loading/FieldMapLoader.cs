@@ -235,7 +235,7 @@ namespace UKingLibrary
             FieldSectionInfo section = new FieldSectionInfo(muuntFileName);
             int quadIndex = section.GetQuadIndex(translation);
 
-            BakedCollision.First(x => x.RootNode.Parent.Parent.Header == GetSectionName(muuntFileName)).AddShape(info, hashId, translation, rotation, scale);
+            BakedCollision.First(x => x.RootNode.Header.StartsWith($"{GetSectionName(muuntFileName)}-{quadIndex}")).AddShape(info, hashId, translation, rotation, scale);
         }
 
         public void RemoveBakedCollisionShape(uint hashId)

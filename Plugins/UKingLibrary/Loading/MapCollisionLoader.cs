@@ -719,7 +719,7 @@ namespace UKingLibrary
             {
                 ShapeInfo shapeInfo = StaticCompound.m_ShapeInfo[i];
 
-                ShapeInfoShapeInstancePairing shapeInstancePairing = new ShapeInfoShapeInstancePairing() // Todo: Store system index and utilize when rebuilding or caching
+                ShapeInfoShapeInstancePairing shapeInstancePairing = new ShapeInfoShapeInstancePairing()
                 {
                     ShapeInfo = shapeInfo,
                     Instance = GetShapeInstanceByUserData((ulong)i),
