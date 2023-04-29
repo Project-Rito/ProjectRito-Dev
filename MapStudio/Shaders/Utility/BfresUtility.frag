@@ -20,14 +20,11 @@ struct VertexAttributes
 struct StandardSamplerInfo {
     int Enabled;
     int TexcoordIdx;
-    int _Padding0;
-    int _Padding1;
 };
 struct ArraySamplerInfo {
     int Enabled;
     int TexcoordIdx;
     float Index;
-    int _Padding0;
 };
 
 // Defined in Utility.frag.

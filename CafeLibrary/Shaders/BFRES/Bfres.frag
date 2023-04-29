@@ -1,6 +1,7 @@
 ﻿#version 330 core
 
 //#using BFRES_UTILITY
+#extension GL_NV_uniform_buffer_std430_layout : enable
 
 in vec3 v_PositionWorld;
 in vec2 v_TexCoord0;
@@ -71,17 +72,14 @@ layout(std140) uniform ub_MaterialParams {
 struct StandardSamplerInfo {
     int Enabled;
     int TexcoordIdx;
-    int _Padding0;
-    int _Padding1;
 };
 struct ArraySamplerInfo {
     int Enabled;
     int TexcoordIdx;
     float Index;
-    int _Padding0;
 };
 
-layout(std140) uniform ub_SamplerInfo {
+layout(std430) uniform ub_SamplerInfo {
     StandardSamplerInfo u_TextureAlbedo0_Info;
     StandardSamplerInfo u_TextureAlbedo1_Info;
     StandardSamplerInfo u_TextureAlbedo2_Info;
@@ -199,7 +197,7 @@ vec4 Blend_OneMinusSourceAlpha(vec4[4] colors);
 vec3 getWorldNormal(VertexAttributes vert) {
     vec4[4] colors;
 
-    if (u_TextureNormal0_Info.Enabled == 1 || (u_TextureNormal1_Info.Enabled == 0 && u_TextureNormal2_Info.Enabled == 0 && u_TextureNormal3_Info.Enabled == 0 && u_TextureArrTmc_Info.Enabled == 0)) {
+    if (u_TextureNormal0_Info.Enabled == 1) {
         vec4 tex = texture(u_TextureNormal0, GetTexcoord(u_TextureNormal0_Info, vert));
         colors[0] = tex;
     }
@@ -254,7 +252,7 @@ vec4 getDiffuse(VertexAttributes vert) {
 float getSpecMask(VertexAttributes vert) {
     vec4[4] colors;
 
-    if (u_TextureSpec0_Info.Enabled == 1 || (u_TextureSpec1_Info.Enabled == 0 && u_TextureSpec2_Info.Enabled == 0 && u_TextureSpec3_Info.Enabled == 0 && u_TextureArrTmc_Info.Enabled == 0)) {
+    if (u_TextureSpec0_Info.Enabled == 1) {
         vec4 tex = texture(u_TextureSpec0, GetTexcoord(u_TextureAlbedo0_Info, vert));
         colors[0] = tex;
     }

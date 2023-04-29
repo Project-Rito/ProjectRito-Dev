@@ -86,15 +86,16 @@ namespace GLFrameworkEngine
 
         public void RenderAlphaTest()
         {
+#if !RENDERDOC
             if (AlphaTest)
             {
                 GL.Enable(EnableCap.AlphaTest);
-#if !RENDERDOC
                 GL.AlphaFunc(AlphaFunction, AlphaValue);
-#endif
+
             }
             else
                 GL.Disable(EnableCap.AlphaTest);
+#endif
         }
 
         public void RenderBlendState()

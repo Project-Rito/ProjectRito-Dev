@@ -42,7 +42,7 @@ namespace MapStudio
                                 TranslationSource.GetText("RITO_EDITOR"),
                                 GameWindowFlags.Default,
                                 DisplayDevice.Default,
-                                3, 2, GraphicsContextFlags.Default)
+                                3, 2, GraphicsContextFlags.ForwardCompatible)
         {
             Title += $": {TranslationSource.GetText("OPENGL_VERSION")}: " + GL.GetString(StringName.Version);
 

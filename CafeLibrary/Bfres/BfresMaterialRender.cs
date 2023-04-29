@@ -426,8 +426,6 @@ namespace CafeLibrary.Rendering
                 {
                     writer.Write(Enabled);
                     writer.Write(TexcoordIdx);
-                    writer.Write(0); // Padding
-                    writer.Write(0); // Padding
                 }
             }
         }
@@ -445,7 +443,6 @@ namespace CafeLibrary.Rendering
                     writer.Write(Enabled);
                     writer.Write(TexcoordIdx);
                     writer.Write(Index);
-                    writer.Write(0); // Padding
                 }  
             }
         }
