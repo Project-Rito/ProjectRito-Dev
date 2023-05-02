@@ -113,6 +113,9 @@ namespace MapStudio.UI
 
             ImGui.NewFrame();
             _frameBegun = true;
+
+            // Global styling stuff
+            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 3);
         }
 
         public static void AddFontFromFileTTF(string filename,
