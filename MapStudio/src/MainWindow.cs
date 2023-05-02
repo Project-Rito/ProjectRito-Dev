@@ -72,6 +72,8 @@ namespace MapStudio
         {
             base.OnLoad(e);
 
+            
+
             _controller = new ImGuiController(Width, Height);
 
             //Disable the docking buttons
@@ -690,7 +692,7 @@ namespace MapStudio
                 float width = ImGui.GetWindowWidth();
                 float framerate = ImGui.GetIO().Framerate;
 
-                ImGui.SetCursorPosX(width - 100);
+                ImGui.SetCursorPosX(width - 6.25f * ImGui.GetFontSize());
                 ImGui.Text($"({framerate:0.#} FPS)");
                 ImGui.EndMainMenuBar();
             }

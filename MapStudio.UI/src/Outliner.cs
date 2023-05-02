@@ -178,7 +178,7 @@ namespace MapStudio.UI
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4());
 
-                if (ImGui.Button($"{IconManager.ADD_ICON}", new System.Numerics.Vector2(23)))
+                if (ImGui.Button($"{IconManager.ADD_ICON}", new System.Numerics.Vector2(1.4375f * ImGui.GetFontSize())))
                 {
                     ImGui.OpenPopup("addnew1");
                 }
@@ -193,7 +193,7 @@ namespace MapStudio.UI
                 }
 
 
-                if (ImGui.Button($"{IconManager.FILTER_ICON}", new System.Numerics.Vector2(23))) {
+                if (ImGui.Button($"{IconManager.FILTER_ICON}", new System.Numerics.Vector2(1.4375f * ImGui.GetFontSize()))) {
                     ImGui.OpenPopup("filter1");
                 }
                 if (ImGui.BeginPopup("filter1"))
@@ -205,12 +205,12 @@ namespace MapStudio.UI
                 }
                 ImGui.PopStyleColor();
 
-                ImGuiHelper.IncrementCursorPosX(11);
+                ImGuiHelper.IncrementCursorPosX(0.6875f * ImGui.GetFontSize());
 
                 if (ShowSearchBar)
                 {
                     ImGui.Text(IconManager.SEARCH_ICON.ToString());
-                    ImGuiHelper.IncrementCursorPosX(11);
+                    ImGuiHelper.IncrementCursorPosX(0.6875f * ImGui.GetFontSize());
 
                     var posX = ImGui.GetCursorPosX();
                     var width = ImGui.GetWindowWidth();
@@ -467,7 +467,7 @@ namespace MapStudio.UI
                 {
                     ImGui.SetItemAllowOverlap();
 
-                    ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(2, 2));
+                    ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0.125f * ImGui.GetFontSize()));
 
                     bool check = node.IsChecked;
 
@@ -492,20 +492,20 @@ namespace MapStudio.UI
                         int iconID = IconManager.GetTextureIcon(node.Icon);
 
                         ImGui.AlignTextToFramePadding();
-                        ImGui.Image((IntPtr)iconID, new System.Numerics.Vector2(22, 22));
+                        ImGui.Image((IntPtr)iconID, new System.Numerics.Vector2(1.375f * ImGui.GetFontSize()));
                         ImGui.SameLine();
                     }
                     else
                     {
                         if (node.HasCheckBox)
-                            ImGuiHelper.IncrementCursorPosX(5);
+                            ImGuiHelper.IncrementCursorPosX(0.3125f * ImGui.GetFontSize());
 
                         IconManager.DrawIcon(icon);
                         ImGui.SameLine();
                         if (icon == IconManager.BONE_ICON)
-                            ImGuiHelper.IncrementCursorPosX(5);
+                            ImGuiHelper.IncrementCursorPosX(0.3125f * ImGui.GetFontSize());
                         else
-                            ImGuiHelper.IncrementCursorPosX(3);
+                            ImGuiHelper.IncrementCursorPosX(0.1875f * ImGui.GetFontSize());
                     }
                 }
 

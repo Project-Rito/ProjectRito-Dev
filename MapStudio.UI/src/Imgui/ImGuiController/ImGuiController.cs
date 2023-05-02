@@ -53,6 +53,11 @@ namespace MapStudio.UI
             ImGui.SetCurrentContext(context);
             var io = ImGui.GetIO();
 
+            var graphics = System.Drawing.Graphics.FromHwnd(IntPtr.Zero);
+            var ppi = Math.Sqrt(graphics.DpiX * graphics.DpiX + graphics.DpiY * graphics.DpiY);
+
+            float fontSize = 0.11785113019f * (float)ppi; // Account for DPI. This will only be for the screen that the window is started on, though.
+
             //Load the main font file
             unsafe
             {
@@ -63,7 +68,7 @@ namespace MapStudio.UI
                 (*nativeConfig).RasterizerMultiply = 1f;
                 (*nativeConfig).GlyphOffset = new System.Numerics.Vector2(0);
 
-                io.Fonts.AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/Font.ttf", 16, nativeConfig);
+                io.Fonts.AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/Font.ttf", fontSize, nativeConfig);
             }
 
             //Merge icon fonts. Important that this goes after the main target font being used so it can be merged.
@@ -74,7 +79,6 @@ namespace MapStudio.UI
             };
             char min = Convert.ToChar(0xe000);
             char max = Convert.ToChar(0xe0fe);
-            float fontSize = 16.0f;
 
             AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/OpenFontIcons.ttf", fontSize, config, new[] { min, max, (char)0 });
             AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/fa-regular-400.ttf", fontSize, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });

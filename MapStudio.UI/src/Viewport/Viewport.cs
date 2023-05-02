@@ -96,7 +96,7 @@ namespace MapStudio.UI
             }
 
             ImGui.SetCursorPos(new System.Numerics.Vector2(pos.X, pos.Y - 45));
-            if (ImGui.BeginChild("viewport_child2", new System.Numerics.Vector2(viewportWidth, 22)))
+            if (ImGui.BeginChild("viewport_child2", new System.Numerics.Vector2(viewportWidth, 1.375f * ImGui.GetFontSize())))
             {
                 var color = ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBg];
                 var colorH = ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBgHovered];
@@ -112,7 +112,7 @@ namespace MapStudio.UI
                 ImGui.SameLine();
                 DrawEditorMenu();
 
-                ImGui.SetCursorPos(new System.Numerics.Vector2(viewportWidth - 150, 0));
+                ImGui.SetCursorPos(new System.Numerics.Vector2(viewportWidth - (9.375f * ImGui.GetFontSize()), 0));
                 DrawGizmoMenu();
 
                 ImGui.PopStyleColor(2);
@@ -124,7 +124,7 @@ namespace MapStudio.UI
             ImGui.PushStyleColor(ImGuiCol.ChildBg, new System.Numerics.Vector4(fcolor.X, fcolor.Y, fcolor.Z, 0.58f));
 
             ImGui.SetCursorPos(new System.Numerics.Vector2(pos.X, pos.Y));
-            if (ImGui.BeginChild("viewport_child3", new System.Numerics.Vector2(24, PathToolMenuBarItems.Count * 28)))
+            if (ImGui.BeginChild("viewport_child3", new System.Numerics.Vector2(1.5f * ImGui.GetFontSize(), PathToolMenuBarItems.Count * (1.75f * ImGui.GetFontSize()))))
             {
                 DrawViewportIconMenu(PathToolMenuBarItems, true);
                 ImGui.EndChild();
@@ -160,7 +160,7 @@ namespace MapStudio.UI
         {
             string text = $"{TranslationSource.GetText("SHADING")} : [{TranslationSource.GetText(DebugShaderRender.DebugRendering.ToString())}]";
 
-            ImGui.PushItemWidth(150);
+            ImGui.PushItemWidth(9.375f * ImGui.GetFontSize());
             ImguiCustomWidgets.ComboScrollable($"##debugShading", text, ref DebugShaderRender.DebugRendering, () =>
                 {
                     GLContext.ActiveContext.UpdateViewport = true;
@@ -174,7 +174,7 @@ namespace MapStudio.UI
             var settings = Pipeline._context.TransformTools.TransformSettings;
             var mode = settings.TransformMode;
 
-            ImGui.PushItemWidth(150);
+            ImGui.PushItemWidth(9.375f * ImGui.GetFontSize());
 
             ImguiCustomWidgets.ComboScrollable($"##transformSpace",
                 $"{TranslationSource.GetText("MODE")} : [{settings.TransformMode}]", ref mode, () =>
@@ -193,7 +193,7 @@ namespace MapStudio.UI
 
             string text = $"{TranslationSource.GetText("EDITORS")} : [{TranslationSource.GetText(activeEditor)}]";
 
-            ImGui.PushItemWidth(150);
+            ImGui.PushItemWidth(9.375f * ImGui.GetFontSize());
             ImguiCustomWidgets.ComboScrollable<string>($"##editorMenu", text, ref activeEditor,
                 editorList, () =>
                 {
@@ -212,9 +212,8 @@ namespace MapStudio.UI
 
             string mode = Pipeline._context.Camera.IsOrthographic ? "Ortho" : "Persp";
 
-            var size = new System.Numerics.Vector2(120, 22);
             ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetStyle().Colors[(int)ImGuiCol.FrameBg]);
-            if (ImGui.Button($"{TranslationSource.GetText("CAMERA")} : [{mode}]", size))
+            if (ImGui.Button($"{TranslationSource.GetText("CAMERA")} : [{mode}]"))
             {
                 ImGui.OpenPopup("cameraMenu");
             }
@@ -321,30 +320,32 @@ namespace MapStudio.UI
 
         private List<MenuItemModel> SetupPathToolIconMenu()
         {
-            List<MenuItemModel> menus = new List<MenuItemModel>();
-            menus.Add(new MenuItemModel($"{IconManager.PATH_MOVE}", () =>
+            List<MenuItemModel> menus = new List<MenuItemModel>
             {
-                RenderablePath.EditToolMode = RenderablePath.ToolMode.Transform;
-                ReloadMenus();
-            }, "TRANSFORM_PATH", RenderablePath.EditToolMode == RenderablePath.ToolMode.Transform));
-            menus.Add(new MenuItemModel($"{IconManager.PATH_CONNECT}", () =>
-            {
-                RenderablePath.EditToolMode = RenderablePath.ToolMode.Connection;
-                RenderablePath.ConnectAuto = false;
+                new MenuItemModel($"{IconManager.PATH_MOVE}", () =>
+                {
+                    RenderablePath.EditToolMode = RenderablePath.ToolMode.Transform;
+                    ReloadMenus();
+                }, "TRANSFORM_PATH", RenderablePath.EditToolMode == RenderablePath.ToolMode.Transform),
+                new MenuItemModel($"{IconManager.PATH_CONNECT}", () =>
+                {
+                    RenderablePath.EditToolMode = RenderablePath.ToolMode.Connection;
+                    RenderablePath.ConnectAuto = false;
 
-                ReloadMenus();
-            }, "CONNECT_PATH", !RenderablePath.ConnectAuto  && RenderablePath.EditToolMode == RenderablePath.ToolMode.Connection));
-            menus.Add(new MenuItemModel($"{IconManager.PATH_CONNECT_AUTO}", () =>
-            {
-                RenderablePath.EditToolMode = RenderablePath.ToolMode.Connection;
-                RenderablePath.ConnectAuto = true;
-                ReloadMenus();
-            }, "CONNECT_PATH_AUTO", RenderablePath.ConnectAuto && RenderablePath.EditToolMode == RenderablePath.ToolMode.Connection));
-            menus.Add(new MenuItemModel($"{IconManager.ERASER}", () =>
-            {
-                RenderablePath.EditToolMode = RenderablePath.ToolMode.Erase;
-                ReloadMenus();
-            }, "ERASE_PATH", RenderablePath.EditToolMode == RenderablePath.ToolMode.Erase));
+                    ReloadMenus();
+                }, "CONNECT_PATH", !RenderablePath.ConnectAuto && RenderablePath.EditToolMode == RenderablePath.ToolMode.Connection),
+                new MenuItemModel($"{IconManager.PATH_CONNECT_AUTO}", () =>
+                {
+                    RenderablePath.EditToolMode = RenderablePath.ToolMode.Connection;
+                    RenderablePath.ConnectAuto = true;
+                    ReloadMenus();
+                }, "CONNECT_PATH_AUTO", RenderablePath.ConnectAuto && RenderablePath.EditToolMode == RenderablePath.ToolMode.Connection),
+                new MenuItemModel($"{IconManager.ERASER}", () =>
+                {
+                    RenderablePath.EditToolMode = RenderablePath.ToolMode.Erase;
+                    ReloadMenus();
+                }, "ERASE_PATH", RenderablePath.EditToolMode == RenderablePath.ToolMode.Erase)
+            };
             return menus;
         }
 
@@ -409,7 +410,7 @@ namespace MapStudio.UI
         {
             var h = ImGui.GetWindowHeight();
             if (vertical)
-                h = 23;
+                h = 1.4375f * ImGui.GetFontSize();
 
             var menuSize = new System.Numerics.Vector2(h, h);
 
