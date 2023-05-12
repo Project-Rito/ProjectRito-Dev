@@ -11,7 +11,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout
@@ -26,7 +26,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet publish --no-restore -c Release -r win-x64
+      run: dotnet publish --no-restore -c Release|x64
     - name: Upload build results
       uses: actions/upload-artifact@v2
       with:
