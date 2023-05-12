@@ -1,29 +1,36 @@
-name: Build
+name: .NET
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    branches: [ main ]
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest]
-        dotnet-version: [6.0.100-preview.3.21202.5]
+
+    runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v2
-      
-    - name: Setup .NET Core
+      with:
+        submodules: recursive
+        token: ${{secrets.PULL_PRIVATE_REPOS}}
+    - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}
-        include-prerelease: true
-        
+        dotnet-version: 6.0.x
     - name: Restore dependencies
       run: dotnet restore
-      
     - name: Build
-      run: dotnet build --configuration Release --runtime linux-x64,windows-x64
-      
+      run: dotnet publish --no-restore -c Release -r win-x64
+    - name: Upload build results
+      uses: actions/upload-artifact@v2
+      with:
+        name: build
+        path: /home/runner/work/ProjectRito-Dev/ProjectRito-Dev/MapStudio/bin
     - name: Test
-      run: dotnet test --no-build --verbosity normal --configuration Release
+      run: dotnet test --no-build --verbosity normal
