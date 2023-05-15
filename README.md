@@ -20,5 +20,6 @@ cd [some folder you want rito to be in]
 git clone https://github.com/Project-Rito/ProjectRito-Dev
 cd ./ProjectRito-Dev
 git submodule update --init --recursive
-dotnet run ./MapStudio/MapStudio.csproj --arch x64
+dotnet build -c Debug /p:Platform=x64
 ```
+The binary will be in ``MapStudio/bin/x64/Debug/net5.0``.
