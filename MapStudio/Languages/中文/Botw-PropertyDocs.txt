@@ -1,0 +1,3 @@
+PROPERTY_DOCS DropTable :
+What this actor will drop on death.
+:

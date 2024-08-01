@@ -1,0 +1,55 @@
+﻿# Comments use # and will be ignored.
+# Label    - Translated Text
+
+RITO_EDITOR - 星托计划
+
+SHOW_VISIBLE_ACTORS - 显示可见演员
+SHOW_INVISIBLE_ACTORS - 显示不可见演员
+SHOW_MAP_MODEL - 显示地形
+SHOW_ACTOR_LINKS - 显示演员链接
+SHOW_COLLISION_SHAPES - 显示碰撞
+SHOW_NAVMESH_SHAPES - 显示导航网格
+
+OBJ - Obj
+PARAMETERS - 参数
+ACTOR_NAME - Actor Name
+INCOMING_LINKS - Incoming Links
+OUTGOING_LINKS - Outgoing Links
+
+OBJECTS - 对象
+RAIL_PATHS - 轨道路径
+TERRAIN - 地形
+FIELD_NAME - 字段名称
+MAX_DETAIL - 最大细节
+DEBUG_SECTIONS - 调试部分
+AREAS_SELECT_BY_BORDERS - 按边框选择的区域
+AREA_OPACITY - 区域不透明度
+
+NAVMESH_TOOLS - NavMesh工具（目前仅适用于神殿）
+
+CACHE_BAKED_COLLISION - 缓存烘焙碰撞
+BAKE_COLLISION - 烘焙碰撞
+PROCESSING - 处理
+
+COLLISION_TOOLS - 碰撞工具
+BAKED_COLLISION_CACHED - 缓存烘焙碰撞
+
+ONLYONE_TOOLS - OnlyOne Tools
+REMOVE_ONLYONE - 仅删除一个
+ONLYONE_REMOVER_NOTICE :
+不对当前正在编辑的文件执行操作。
+应与加载的项目一起使用。
+:
+
+BOTW_GAME_PATH - 游戏本体目录
+BOTW_UPDATE_PATH - 游戏更新目录
+BOTW_DLC_PATH - 游戏DLC目录
+MOD_PATHS - 模组目录
+
+LOAD_SECTION - 加载区块
+LOAD_DUNGEON - 加载地牢
+
+ACTOR_DOCUMENTATION - 演员文档
+INSTANCE_DOCUMENTATION - 实例文档
+NO_ACTOR_DOCUMENTATION_FOUND - 未找到演员文档。
+UPDATE_ACTORDOCS - 更新演员文档

@@ -1,0 +1,15 @@
+ACTOR_DOCS Item_Fruit_A :
+An apple. Can be attached to trees with a BAndSCs link.
+
+BasicSig Behaviour:
+Apples will drop when receiving a BasicSig.
+:
+
+ACTOR_DOCS Enemy_Moriblin_Senior - A moblin. Has basic enemy parameters. # Comments can be put on empty lines or after single-line entries
+
+ACTOR_DOCS LinkTagOr :
+Logical OR operator.
+
+BasicSig Behaviour:
+Emits a BasicSig if receving a BasicSig from anything.
+:

@@ -1,0 +1,265 @@
+﻿# Comments use # and will be ignored.
+# Label    - Translated Text
+
+# Program
+RITO_EDITOR - 星托计划
+OPENGL_VERSION - OpenGL Version
+
+# Themes
+THEME - 主题
+DARK_THEME - 黑暗主题
+LIGHT_THEME - 浅色主题
+DARK_BLUE_THEME - 深蓝色主题
+
+# Common
+NAME - 名称
+PREVIEW - 预览
+VALUE - 数值
+EDIT - 编辑
+ADD - 添加
+ADD_NEW - 添加新的
+CREATE - 创造
+REMOVE - 消除
+HINT - Hint
+OK - Ok
+CANCEL - 取消
+PRESET - 预设
+TYPE - 类型
+SAVE - 保存
+COLOR - 颜色
+RESET - 重置
+SCALE - 规模
+TRANSLATE - 移动
+ROTATE - 旋转
+RECTANGLE_SCALE - 矩形比例尺
+TRANSFORM - 转换
+PROPERTIES - 特性
+SEARCH - 搜索
+DISTANCE - 距离
+UNKNOWN - 未知
+PIVOT - Pivot
+CONTROL_POINT - 控制点
+WORKSPACES - 工作空间
+EDITORS - 编辑器
+EDITOR - 编辑
+IMPORT - 导入
+EXPORT - 导出
+LOADING - 加载
+SAVING - 保存
+NONE - None
+COPY - 复制
+PASTE - 粘贴
+MODELS - 模型
+TEXTURES - 纹理
+ANIMATIONS - 动画
+PLUGINS - 插件
+TOOLS - 工具
+SCREENSHOT - 截屏
+SELECT - 选择
+DESELECT - 取消选择
+UNDO - 撤销
+REDO - 重做
+PLAY - Play
+STOP - 停止
+POINT - 指向
+CONTROL_POINTS - 控制点
+CURSOR3D - 3D 光标
+DEBUG - Debug
+WINDOWS - 窗口
+DISPLAY_RADIUS - 显示半径
+DRAW_FILLED - 绘制填充
+VISUALS - 视觉效果
+GROUPS - Groups
+GROUP - Group
+POINTS - Points
+POINT - Point
+GROUP_SELECTED - 已选择组
+SOLID - Solid
+LINKS - 链接
+SELECT_ALL - 全选
+DESELECT_ALL - 取消全选
+NEW_PROJECT - 新项目
+
+SHOW_VISIBLE_ACTORS - 显示可见演员
+SHOW_INVISIBLE_ACTORS - 显示隐形演员
+SHOW_MAP_MODEL - 显示地图模型
+SHOW_ACTOR_LINKS - 显示演员链接
+
+OBJ - Obj
+INCOMING_LINKS - Incoming Links
+OUTGOING_LINKS - Outgoing Links
+
+# Tool Tips
+
+EYE_DROPPER_TOOL - 在查看器中拾取要链接到的对象.
+
+
+# Menu
+
+MENU_FILE - 文件
+MENU_NEW - 新建
+MENU_OPEN - 打开
+MENU_RECENT - 近期
+MENU_SAVE_EDITOR - 保存编辑
+MENU_SAVE_EDITOR_AS - 保存编辑到
+MENU_CANCEL - Cancel
+MENU_OPEN_PROJECT - 打开项目
+MENU_RECENT_PROJECTS - 近期项目
+MENU_SAVE_PROJECT - 保存项目
+MENU_SAVE_PROJECT_AS - 保存项目到
+MENU_RENAME_PROJECT - 重命名项目
+MENU_CLEAR_WORKSPACE - 清除工作区
+MENU_EXIT - 退出
+MENU_HELP - Help
+
+MENU_GAME_CONFIG - 游戏配置
+MENU_SETTINGS - 设置
+
+STYLE_EDITOR - 风格编辑器
+STAT_VIEWER - 统计查看器
+
+FILTER - 筛选
+SHOW_ALL - 显示所有
+HIDE_ALL - 隐藏所有
+
+LANGUAGE - 语言
+
+PROJECT_NAME - 项目名称
+PROJECT_SAVE_DIRECTORY - 项目保存目录
+
+CLICK_TO_SELECT - 单击选择
+
+# Dock Windows
+
+OUTLINER - 结构
+PROPERTIES - 参数
+VIEWPORT - 视窗
+CONSOLE - 控制台
+ASSETS - 素材
+STATS - Stats
+
+# Console Window
+
+ERRORS - 错误
+WARNINGS - 警告
+MESSAGES - 信息
+
+CHECK_ERRORS - 检查错误
+
+ERROR_FILE_UNSUPPORTED - 文件不支持 {0}.
+ERROR_CREATE_DIRECTORY - 无法创建目录 {0}.
+
+LOADING_FILE - 加载文件 {0}
+SAVED_FILE - 已保存文件 {0}
+NOTHING_SAVED - 什么都没有保存！
+
+# Asset Window
+
+FACE_CAMERA_AT_SPAWN - 生成时的面部摄像头
+
+# Viewport Menu
+
+VIEW - View
+BACKGROUND - 背景
+DISPLAY - 显示
+COLOR_TOP - Color Top
+COLOR_BOTTOM - Color Bottom
+GRID_COUNT - Grid Count
+GRID_SIZE - Grid Size
+POINT_SIZE - Point Size
+
+GIZMO_SETTING - 小工具设置
+SNAP_SCALE - 捕捉比例
+SNAP_ROTATION - 快速旋转
+SNAP_TRANSLATION - 快速移动
+
+SCALE_LOCAL - 局部缩放
+ROTATE_LOCAL - 旋转局部
+
+GRID - 网格
+BONES - 骨骼
+
+COLLISION_DISPLAY - 碰撞显示
+COLLISION_OVERLAY - 碰撞叠加
+WIREFRAME - 线框
+WIREFRAME_OVERLAY - 线框叠加
+BOUNDING_BOXES - 边界框
+ENABLE_BLOOM - 启用 Bloom
+ENABLE_FOG - 启用雾
+
+SHADOWS - 阴影
+SHADING - 渲染
+CULLING - 剔除
+
+NEW_OBJECT_LOCATION - 新对象位置
+
+CREATE_NEW_WORKSPACE - 文件加载创建新工作区
+
+CAMERA - 视角
+DIRECTION - 方向
+MODE - 模式
+ORTHOGRAPHIC - 正交
+LOCK_ROTATION - 锁定旋转
+FOV_(DEGREES) - Fov (度数)
+ZFAR - Z 远
+ZNEAR - Z 近
+ZOOM_SPEED - 变焦速度
+PAN_SPEED - 平移速度
+KEY_MOVE_SPEED - 按键移动速度
+PROJECTION - 投影
+
+RESET_ANIMATIONS - 重置动画
+RESET_TRANSFORM - 重置变换
+
+DROP_TO_COLLISION - 放置碰撞
+
+# Camera Mode
+FLY_AROUND - Fly Around
+INSPECT - 检查
+
+# Camera Direction
+ANY - Any
+TOP - 顶部
+BOTTOM - 底部
+FRONT - 正面
+BACK - 反面
+LEFT - 左边
+RIGHT - Right
+
+# Shading Menu
+
+DEFAULT - 默认
+NORMAL - 普通的
+LIGHTING - 灯光
+DIFFUSE - 扩散
+VERTEX_COLORS - 顶点颜色
+UVCOORDS - UV坐标
+UVTESTPATTERN - UV测试模式
+WEIGHTS - 重量
+TANGENTS - 切线
+BITANGENTS - 双切线
+COLOR_PICKING - 颜色选择
+SPECULAR - 镜面反射
+
+# Debug Stats
+
+CAMERA_INFO - 相机信息
+CULLING_INFO - 块剔除信息
+DRAW_CALLS - 绘制调用
+DRAW_TRIANGLES - 绘制三角形
+SHADOW_DRAW_CALLS - 阴影绘制调用
+
+# Stats Panel
+DRAW_CALL_NUM - Num 绘图调用数:
+DRAW_TRI_NUM - Num 绘图三角形数:
+FX_DRAW_CALL_NUM - Num Effect 绘制调用数:
+FX_INST_NUM - Num Effect 数量:
+FX_TRI_NUM - Num Effect 数量:
+SK_ANIM_NUM - Num 骨骼动画数量:
+MAT_ANIM_NUM - Num 材质动画数:
+CAM_POS_X - 摄像机位置X:
+CAM_POS_Y - 摄像机位置Y:
+CAM_POS_Z - 摄像机位置Z:
+
+# 素材
+Favorites - 收藏夹
