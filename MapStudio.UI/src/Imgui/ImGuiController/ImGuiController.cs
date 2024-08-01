@@ -79,7 +79,25 @@ namespace MapStudio.UI
             };
             char min = Convert.ToChar(0xe000);
             char max = Convert.ToChar(0xe0fe);
-
+            var chinese_font_width = $"{Runtime.ExecutableDir}/Lib/Fonts/chinese_font_width.txt";
+            try
+            {
+                if (File.Exists(chinese_font_width))
+                {
+                    var data = File.ReadAllText(chinese_font_width);
+                    data = data.Trim();
+                    config.GlyphMinAdvanceX = float.Parse(data);
+                }
+                else
+                {
+                    config.GlyphMinAdvanceX = 30;
+                }
+            }
+            catch
+            {
+                config.GlyphMinAdvanceX = 30;
+            }
+            AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/msyh.ttf", fontSize, config, io.Fonts.GetGlyphRangesChineseFull());
             AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/OpenFontIcons.ttf", fontSize, config, new[] { min, max, (char)0 });
             AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/fa-regular-400.ttf", fontSize, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
             AddFontFromFileTTF($"{Runtime.ExecutableDir}/Lib/Fonts/fa-solid-900.ttf", fontSize, config, new[] { (char)0xe005, (char)0xf8ff, (char)0 });
